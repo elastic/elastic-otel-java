@@ -1,0 +1,14 @@
+# Gradle #
+#########
+!**/gradle/wrapper/*
+.gradle
+**/build/
+examples/**/build/
+
+# Intellij Idea #
+#################
+.idea
+*.iml
+*.ipr
+*.iws
+out/
