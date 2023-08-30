@@ -1,6 +1,7 @@
 package com.example.javaagent.elasticpoc;
 
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.ContextStorage;
 import io.opentelemetry.context.Scope;
@@ -30,11 +31,11 @@ public class ElasticContextStorage implements ContextStorage {
             return delegate.attach(toAttach);
         }
 
-        profiler.onSpanContextAttach(span);
+        SpanContext previous = profiler.onSpanContextAttach(span.getSpanContext());
         Scope delegatedScope = delegate.attach(toAttach);
         return () -> {
             delegatedScope.close();
-            profiler.onSpanContextClose(span);
+            profiler.onSpanContextClose(previous);
         };
     }
 

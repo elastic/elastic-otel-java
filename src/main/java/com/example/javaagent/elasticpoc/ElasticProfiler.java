@@ -17,6 +17,9 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.data.StatusData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class ElasticProfiler {
 
     private final ConcurrentHashMap<SpanContext, List<Long>> spanSamples;
+    private final ConcurrentHashMap<SpanContext, List<StackTraceElement[]>> spanStackTraces;
     private final ConcurrentHashMap<Long, SpanContext> currentSpans;
 
     private final ScheduledExecutorService samplerExecutor;
@@ -40,6 +44,7 @@ public class ElasticProfiler {
     public ElasticProfiler() {
         spanSamples = new ConcurrentHashMap<>();
         currentSpans = new ConcurrentHashMap<>();
+        spanStackTraces = new ConcurrentHashMap<>();
 
         samplerExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread thread = new Thread(r);
@@ -47,15 +52,30 @@ public class ElasticProfiler {
             return thread;
         });
 
+        ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+
         samplerExecutor.scheduleAtFixedRate(() -> {
             for (Map.Entry<Long, SpanContext> entry : currentSpans.entrySet()) {
                 SpanContext spanContext = entry.getValue();
+                System.out.printf("sampling span %s on thread %d%n", spanContext.getSpanId(), entry.getKey());
+
+                ThreadInfo threadInfo = threadMXBean.getThreadInfo(entry.getKey(), 50);
+
                 spanSamples.compute(spanContext, (s, sampleTimestamps) -> {
                     if (sampleTimestamps == null) {
                         sampleTimestamps = new ArrayList<>();
                     }
                     sampleTimestamps.add(clock.now());
                     return sampleTimestamps;
+                });
+
+                // wip: trying to do the same with actual stack traces
+                spanStackTraces.compute(spanContext, (s, stackTraces) -> {
+                    if (stackTraces == null) {
+                        stackTraces = new ArrayList<>();
+                    }
+                    stackTraces.add(threadInfo.getStackTrace());
+                    return stackTraces;
                 });
             }
             // increment counters
@@ -66,38 +86,39 @@ public class ElasticProfiler {
         this.exporter = exporter;
     }
 
-    public void onSpanContextAttach(Span span) {
-        // not used for now
+    public SpanContext onSpanContextAttach(SpanContext spanContext) {
+        // store the active span on attach
+        long id = Thread.currentThread().getId();
+        SpanContext previous = currentSpans.put(id, spanContext);
+        if (previous == null) {
+            previous = SpanContext.getInvalid();
+        }
+        return previous;
     }
 
-    public void onSpanContextClose(Span span) {
-        // not used for now
-        //
-        // the issue here with context activation wrapping is that we don't capture the span end properly, thus it's
-        // harder to accurately measure the sampled spans timings
+    public void onSpanContextClose(SpanContext previousSpanContext) {
+        long id = Thread.currentThread().getId();
+        if (previousSpanContext.isValid()) {
+            // restore previous span context
+            currentSpans.put(id, previousSpanContext);
+        } else {
+            // no previous span context to restore
+            currentSpans.remove(id);
+        }
     }
 
     public void onSpanStart(Context parentContext, ReadWriteSpan span) {
         Span parentSpan = Span.fromContext(parentContext);
-        SpanContext parentSpanContext = span.getSpanContext();
+        SpanContext parentSpanContext = parentSpan.getSpanContext();
         if (parentSpanContext.isValid()) {
             // starting a span over an existing one
             // we can flush the samples that might have been captured on the parent span
             spanifySamples(parentSpanContext);
         }
-        long id = Thread.currentThread().getId();
-        currentSpans.put(id, span.getSpanContext());
+
     }
 
     public void onSpanEnd(ReadableSpan span) {
-        SpanContext parentSpanContext = span.getParentSpanContext();
-        long id = Thread.currentThread().getId();
-        if (parentSpanContext.isValid()) {
-            currentSpans.put(id, parentSpanContext);
-        } else {
-            currentSpans.remove(id);
-        }
-
         spanifySamples(span.getSpanContext());
     }
 
@@ -115,6 +136,9 @@ public class ElasticProfiler {
     }
 
     private void spanifySamples(SpanContext spanContext) {
+        // wip: for now just discard stack traces
+        spanStackTraces.remove(spanContext);
+
         List<Long> samples = spanSamples.remove(spanContext);
         if (samples == null || samples.size() < 2) {
             return;
@@ -196,6 +220,7 @@ public class ElasticProfiler {
             }
 
             @Override
+            @SuppressWarnings("deprecation")
             public InstrumentationLibraryInfo getInstrumentationLibraryInfo() {
                 return InstrumentationLibraryInfo.empty();
             }
