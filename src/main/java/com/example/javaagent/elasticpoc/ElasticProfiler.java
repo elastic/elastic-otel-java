@@ -20,19 +20,17 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class ElasticProfiler {
 
-    private final ConcurrentHashMap<SpanContext, List<Long>> spanSamples;
-    private final ConcurrentHashMap<SpanContext, List<StackTraceElement[]>> spanStackTraces;
+    public static final int MAX_STACK_DEPTH = 50;
+    private final ConcurrentHashMap<SpanContext, Samples> samplesMap;
     private final ConcurrentHashMap<Long, SpanContext> currentSpans;
 
     private final ScheduledExecutorService samplerExecutor;
@@ -40,11 +38,54 @@ public class ElasticProfiler {
     private final Clock clock = Clock.getDefault();
     private SpanExporter exporter;
 
+    private static class Sample {
+        final long timestamp;
+        final long threadId;
+        final long sequenceId;
+        final StackTraceElement[] stackTrace;
+
+        Sample(long threadId, long timestamp, long sequenceId, StackTraceElement[] stackTrace) {
+            this.threadId = threadId;
+            this.timestamp = timestamp;
+            this.sequenceId = sequenceId;
+            this.stackTrace = stackTrace;
+        }
+    }
+
+    private static class Samples {
+        private SpanContext spanContext;
+        private List<Sample> samples;
+
+        Samples(SpanContext spanContext) {
+            this.spanContext = spanContext;
+            this.samples = new ArrayList<>();
+        }
+
+        void add(Sample sample) {
+            samples.add(sample);
+        }
+
+        int size() {
+            return samples.size();
+        }
+
+        long start() {
+            return samples.isEmpty() ? -1L : samples.get(0).timestamp;
+        }
+
+        long end() {
+            return samples.isEmpty() ? -1L : samples.get(samples.size() - 1).timestamp;
+        }
+
+        public long getTimestamp(int index) {
+            return samples.get(index).timestamp;
+        }
+    }
+
 
     public ElasticProfiler() {
-        spanSamples = new ConcurrentHashMap<>();
         currentSpans = new ConcurrentHashMap<>();
-        spanStackTraces = new ConcurrentHashMap<>();
+        samplesMap = new ConcurrentHashMap<>();
 
         samplerExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread thread = new Thread(r);
@@ -54,28 +95,23 @@ public class ElasticProfiler {
 
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 
+        AtomicLong sequenceId = new AtomicLong();
+
         samplerExecutor.scheduleAtFixedRate(() -> {
+            long id = sequenceId.getAndIncrement();
             for (Map.Entry<Long, SpanContext> entry : currentSpans.entrySet()) {
                 SpanContext spanContext = entry.getValue();
-                System.out.printf("sampling span %s on thread %d%n", spanContext.getSpanId(), entry.getKey());
+                Long threadId = entry.getKey();
+                System.out.printf("sampling %d span %s on thread %d%n", id, spanContext.getSpanId(), threadId);
 
-                ThreadInfo threadInfo = threadMXBean.getThreadInfo(entry.getKey(), 50);
+                ThreadInfo threadInfo = threadMXBean.getThreadInfo(threadId, MAX_STACK_DEPTH);
 
-                spanSamples.compute(spanContext, (s, sampleTimestamps) -> {
-                    if (sampleTimestamps == null) {
-                        sampleTimestamps = new ArrayList<>();
+                samplesMap.compute(spanContext, (s, samples) -> {
+                    if (samples == null) {
+                        samples = new Samples(spanContext);
                     }
-                    sampleTimestamps.add(clock.now());
-                    return sampleTimestamps;
-                });
-
-                // wip: trying to do the same with actual stack traces
-                spanStackTraces.compute(spanContext, (s, stackTraces) -> {
-                    if (stackTraces == null) {
-                        stackTraces = new ArrayList<>();
-                    }
-                    stackTraces.add(threadInfo.getStackTrace());
-                    return stackTraces;
+                    samples.add(new Sample(threadId, clock.now(), id, threadInfo.getStackTrace()));
+                    return samples;
                 });
             }
             // increment counters
@@ -113,17 +149,17 @@ public class ElasticProfiler {
         if (parentSpanContext.isValid()) {
             // starting a span over an existing one
             // we can flush the samples that might have been captured on the parent span
-            spanifySamples(parentSpanContext);
+            spanifySamples((ReadableSpan) parentSpan);
         }
 
     }
 
     public void onSpanEnd(ReadableSpan span) {
-        spanifySamples(span.getSpanContext());
+        spanifySamples(span);
     }
 
     public void shutdown() {
-        spanSamples.clear();
+        samplesMap.clear();
         currentSpans.clear();
         samplerExecutor.shutdown();
         try {
@@ -135,101 +171,163 @@ public class ElasticProfiler {
         }
     }
 
-    private void spanifySamples(SpanContext spanContext) {
-        // wip: for now just discard stack traces
-        spanStackTraces.remove(spanContext);
-
-        List<Long> samples = spanSamples.remove(spanContext);
-        if (samples == null || samples.size() < 2) {
+    void spanifySamples(Resource resource, Samples samples) {
+        if (samples.size() < 2) {
             return;
         }
 
-        long start = samples.get(0);
-        long end = samples.get(samples.size() - 1);
-        String spanId = IdGenerator.random().generateSpanId();
+        int i = 0;
+        while (i < samples.size()) {
 
-        exporter.export(Collections.singletonList(new SpanData() {
-            @Override
-            public String getName() {
-                return String.format("inferred (%s)", samples.size());
+            // find a contiguous set of samples
+            int j = i + 1;
+            long sequenceId = samples.samples.get(i).sequenceId + 1;
+            StackTraceElement[] firstStackTrace = samples.samples.get(i).stackTrace;
+            while (j < samples.size()
+                    // samples must be contiguous
+                    && samples.samples.get(j).sequenceId == sequenceId
+                    // and have the same stack trace
+                    && Arrays.deepEquals(firstStackTrace, samples.samples.get(j).stackTrace)) {
+                sequenceId++;
+                j++;
+            }
+            int size = j - i;
+
+            if (size >= 2) {
+                Sample firstSample = samples.samples.get(i);
+                Sample lastSample = samples.samples.get(j - 1);
+                String spanId = IdGenerator.random().generateSpanId();
+
+                String methodName = topMethodName(firstSample.stackTrace);
+                String spanName = String.format("inferred (%s) - %s", samples.size(), methodName);
+                exporter.export(Collections.singletonList(new InferredSpanData(
+                        spanName,
+                        spanId,
+                        samples.spanContext,
+                        resource,
+                        firstSample.timestamp,
+                        lastSample.timestamp)));
             }
 
-            @Override
-            public SpanKind getKind() {
-                return SpanKind.INTERNAL;
-            }
+            i += size;
+        }
 
-            @Override
-            public SpanContext getSpanContext() {
-                return SpanContext.create(spanContext.getTraceId(), spanId, spanContext.getTraceFlags(), spanContext.getTraceState());
-            }
+    }
 
-            @Override
-            public SpanContext getParentSpanContext() {
-                return spanContext;
-            }
+    private static String topMethodName(StackTraceElement[] stackTrace) {
+        return String.format("%s#%s", stackTrace[0].getClassName(), stackTrace[0].getMethodName());
+    }
 
-            @Override
-            public StatusData getStatus() {
-                return StatusData.ok();
-            }
+    private void spanifySamples(ReadableSpan span) {
+        SpanContext spanContext = span.getSpanContext();
 
-            @Override
-            public long getStartEpochNanos() {
-                return start;
-            }
+        Samples samples = samplesMap.remove(spanContext);
+        if (samples == null) {
+            return;
+        }
 
-            @Override
-            public Attributes getAttributes() {
-                return Attributes.empty();
-            }
+        spanifySamples(span.toSpanData().getResource(), samples);
+    }
 
-            @Override
-            public List<EventData> getEvents() {
-                return Collections.emptyList();
-            }
+    private static class InferredSpanData implements SpanData {
 
-            @Override
-            public List<LinkData> getLinks() {
-                return Collections.emptyList();
-            }
+        private final String name;
+        private final String spanId;
 
-            @Override
-            public long getEndEpochNanos() {
-                return end;
-            }
+        private final SpanContext spanContext;
+        private final long start;
+        private final long end;
+        private final Resource resource;
 
-            @Override
-            public boolean hasEnded() {
-                return true;
-            }
+        public InferredSpanData(String name, String spanId, SpanContext spanContext, Resource resource, long start, long end) {
+            this.name = name;
+            this.spanId = spanId;
+            this.spanContext = spanContext;
+            this.resource = resource;
+            this.start = start;
+            this.end = end;
+        }
 
-            @Override
-            public int getTotalRecordedEvents() {
-                return 0;
-            }
+        @Override
+        public String getName() {
+            return name;
+        }
 
-            @Override
-            public int getTotalRecordedLinks() {
-                return 0;
-            }
+        @Override
+        public SpanKind getKind() {
+            return SpanKind.INTERNAL;
+        }
 
-            @Override
-            public int getTotalAttributeCount() {
-                return 0;
-            }
+        @Override
+        public SpanContext getSpanContext() {
+            return SpanContext.create(spanContext.getTraceId(), spanId, spanContext.getTraceFlags(), spanContext.getTraceState());
+        }
 
-            @Override
-            @SuppressWarnings("deprecation")
-            public InstrumentationLibraryInfo getInstrumentationLibraryInfo() {
-                return InstrumentationLibraryInfo.empty();
-            }
+        @Override
+        public SpanContext getParentSpanContext() {
+            return spanContext;
+        }
 
-            @Override
-            public Resource getResource() {
-                return Resource.empty();
-            }
-        }));
+        @Override
+        public StatusData getStatus() {
+            return StatusData.ok();
+        }
+
+        @Override
+        public long getStartEpochNanos() {
+            return start;
+        }
+
+        @Override
+        public Attributes getAttributes() {
+            return Attributes.empty();
+        }
+
+        @Override
+        public List<EventData> getEvents() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public List<LinkData> getLinks() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public long getEndEpochNanos() {
+            return end;
+        }
+
+        @Override
+        public boolean hasEnded() {
+            return true;
+        }
+
+        @Override
+        public int getTotalRecordedEvents() {
+            return 0;
+        }
+
+        @Override
+        public int getTotalRecordedLinks() {
+            return 0;
+        }
+
+        @Override
+        public int getTotalAttributeCount() {
+            return 0;
+        }
+
+        @Override
+        @SuppressWarnings("deprecation")
+        public InstrumentationLibraryInfo getInstrumentationLibraryInfo() {
+            return InstrumentationLibraryInfo.empty();
+        }
+
+        @Override
+        public Resource getResource() {
+            return resource;
+        }
     }
 
 
