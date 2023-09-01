@@ -1,7 +1,10 @@
 package com.example.javaagent.elasticpoc;
 
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
@@ -29,6 +32,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class ElasticProfiler {
 
+    public static final ElasticProfiler INSTANCE = new ElasticProfiler();
+
     public static final int MAX_STACK_DEPTH = 50;
     private final ConcurrentHashMap<SpanContext, Samples> samplesMap;
     private final ConcurrentHashMap<Long, SpanContext> currentSpans;
@@ -37,6 +42,15 @@ public class ElasticProfiler {
 
     private final Clock clock = Clock.getDefault();
     private SpanExporter exporter;
+
+    private LongCounter samples;
+    private LongCounter inferredSpansCounter;
+
+    public void registerOpenTelemetry(OpenTelemetry openTelemetry) {
+        Meter meter = openTelemetry.getMeter("elastic.profiler");
+        samples = meter.counterBuilder("inferred_spans_samples").build();
+        inferredSpansCounter = meter.counterBuilder("inferred_spans").build();
+    }
 
     private static class Sample {
         final long timestamp;
@@ -111,6 +125,7 @@ public class ElasticProfiler {
                         samples = new Samples(spanContext);
                     }
                     samples.add(new Sample(threadId, clock.now(), id, threadInfo.getStackTrace()));
+                    this.samples.add(1);
                     return samples;
                 });
             }
@@ -144,13 +159,7 @@ public class ElasticProfiler {
     }
 
     public void onSpanStart(Context parentContext, ReadWriteSpan span) {
-        Span parentSpan = Span.fromContext(parentContext);
-        SpanContext parentSpanContext = parentSpan.getSpanContext();
-        if (parentSpanContext.isValid()) {
-            // starting a span over an existing one
-            // we can flush the samples that might have been captured on the parent span
-            spanifySamples((ReadableSpan) parentSpan);
-        }
+//        System.out.println("span start");
 
     }
 
@@ -199,14 +208,16 @@ public class ElasticProfiler {
                 String spanId = IdGenerator.random().generateSpanId();
 
                 String methodName = topMethodName(firstSample.stackTrace);
-                String spanName = String.format("inferred (%s) - %s", samples.size(), methodName);
                 exporter.export(Collections.singletonList(new InferredSpanData(
-                        spanName,
+                        samples.size(),
+                        methodName,
                         spanId,
                         samples.spanContext,
                         resource,
                         firstSample.timestamp,
                         lastSample.timestamp)));
+
+                inferredSpansCounter.add(1);
             }
 
             i += size;
@@ -229,6 +240,8 @@ public class ElasticProfiler {
         spanifySamples(span.toSpanData().getResource(), samples);
     }
 
+    private static AttributeKey<Long> SAMPLES_KEY = AttributeKey.longKey("profiling.samples");
+
     private static class InferredSpanData implements SpanData {
 
         private final String name;
@@ -239,8 +252,11 @@ public class ElasticProfiler {
         private final long end;
         private final Resource resource;
 
-        public InferredSpanData(String name, String spanId, SpanContext spanContext, Resource resource, long start, long end) {
-            this.name = name;
+        private final int samples;
+
+        public InferredSpanData(int samples,String methodName, String spanId, SpanContext spanContext, Resource resource, long start, long end) {
+            this.samples = samples;
+            this.name = String.format("inferred (%s) - %s", samples, methodName);
             this.spanId = spanId;
             this.spanContext = spanContext;
             this.resource = resource;
@@ -280,7 +296,7 @@ public class ElasticProfiler {
 
         @Override
         public Attributes getAttributes() {
-            return Attributes.empty();
+            return Attributes.of(SAMPLES_KEY, (long) samples);
         }
 
         @Override

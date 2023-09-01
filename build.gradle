@@ -77,6 +77,10 @@ dependencies {
   compileOnly("io.opentelemetry.instrumentation:opentelemetry-instrumentation-api")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-extension-api")
 
+  // needs to be added in order to allow access to AgentListener interface
+  // this is currently required because autoconfigure is currently not exposed to the extension API.
+  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+
   //Provides @AutoService annotation that makes registration of our SPI implementations much easier
   compileOnly deps.autoservice
   annotationProcessor deps.autoservice

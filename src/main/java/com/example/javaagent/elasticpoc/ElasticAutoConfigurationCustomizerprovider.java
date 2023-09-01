@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import io.opentelemetry.context.ContextStorage;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
+import io.opentelemetry.sdk.metrics.export.MetricExporter;
 
 import java.util.Collections;
 
@@ -12,19 +13,21 @@ public class ElasticAutoConfigurationCustomizerprovider implements AutoConfigura
 
     @Override
     public void customize(AutoConfigurationCustomizer autoConfiguration) {
-        ElasticProfiler profiler = new ElasticProfiler();
+
         autoConfiguration.addTracerProviderCustomizer((sdkTracerProviderBuilder, configProperties) ->
                         // span processor registration
-                        sdkTracerProviderBuilder.addSpanProcessor(new ElasticSpanProcessor(profiler)))
+                        sdkTracerProviderBuilder.addSpanProcessor(new ElasticSpanProcessor(ElasticProfiler.INSTANCE)))
                 .addPropertiesCustomizer(configProperties -> {
                     // Wrap context storage when configuration is loaded,
                     // configuration customization is used as an init hook but does not actually alters it.
-                    ContextStorage.addWrapper(contextStorage -> new ElasticContextStorage(contextStorage, profiler));
+                    ContextStorage.addWrapper(contextStorage -> new ElasticContextStorage(contextStorage, ElasticProfiler.INSTANCE));
                     return Collections.emptyMap();
                 }).addSpanExporterCustomizer((spanExporter, configProperties) -> {
                     // reuse the existing exporter for inferred spans
-                    profiler.registerExporter(spanExporter);
+                    ElasticProfiler.INSTANCE.registerExporter(spanExporter);
                     return spanExporter;
                 });
+
+
     }
 }
