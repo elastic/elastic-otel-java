@@ -9,14 +9,17 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 public class ElasticSpanProcessor implements SpanProcessor {
 
     private final ElasticProfiler profiler;
+    private final BreakdownMetrics breakdownMetrics;
 
-    public ElasticSpanProcessor(ElasticProfiler profiler) {
+    public ElasticSpanProcessor(ElasticProfiler profiler, BreakdownMetrics breakdownMetrics) {
         this.profiler = profiler;
+        this.breakdownMetrics = breakdownMetrics;
     }
 
     @Override
     public void onStart(Context parentContext, ReadWriteSpan span) {
         profiler.onSpanStart(parentContext, span);
+        breakdownMetrics.onSpanStart(parentContext, span);
     }
 
     @Override
@@ -27,6 +30,8 @@ public class ElasticSpanProcessor implements SpanProcessor {
     @Override
     public void onEnd(ReadableSpan span) {
         profiler.onSpanEnd(span);
+        breakdownMetrics.onSpanEnd(span);
+
     }
 
     @Override
