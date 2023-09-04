@@ -8,13 +8,12 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
-import io.opentelemetry.instrumentation.annotations.WithSpan;
 
 public class App {
 
     private static final Tracer tracer = GlobalOpenTelemetry.get().getTracerProvider().tracerBuilder("app").build();
     public static final String BREAKDOWN_KEY = "elastic_breakdown";
-    
+
     public static void main(String[] args) {
         new App()
                 .scenario1()
@@ -23,26 +22,22 @@ public class App {
                 .scenario4();
     }
 
-    @WithSpan
     public App scenario1() {
         createSpan(10, sleepBody(5));
         return this;
     }
 
-    @WithSpan
     public App scenario2() {
         createRecursiveSpans(20, 7, 1, 1);
         return this;
     }
 
-    @WithSpan
-    public App scenario3(){
+    public App scenario3() {
         createRecursiveSpans(30, 7, 1, 0);
         createRecursiveSpans(35, 7, 0, 1);
         return this;
     }
 
-    @WithSpan
     public App scenario4() {
         // create span on current thread
         // delegate the span context execution on other threads
@@ -74,7 +69,7 @@ public class App {
     }
 
     private static void executeInAnotherThread(TaskWithContext taskWithContext, Context spanContext, boolean endSpan) {
-        Thread t = new Thread(()-> {
+        Thread t = new Thread(() -> {
             taskWithContext.run(spanContext, endSpan);
         });
         t.start();

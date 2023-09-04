@@ -254,7 +254,7 @@ public class ElasticProfiler {
 
         private final int samples;
 
-        public InferredSpanData(int samples,String methodName, String spanId, SpanContext spanContext, Resource resource, long start, long end) {
+        public InferredSpanData(int samples, String methodName, String spanId, SpanContext spanContext, Resource resource, long start, long end) {
             this.samples = samples;
             this.name = String.format("inferred (%s) - %s", samples, methodName);
             this.spanId = spanId;
