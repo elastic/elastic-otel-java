@@ -15,7 +15,7 @@ public class ElasticAutoConfigurationCustomizerprovider implements AutoConfigura
 
         autoConfiguration.addTracerProviderCustomizer((sdkTracerProviderBuilder, configProperties) ->
                         // span processor registration
-                        sdkTracerProviderBuilder.addSpanProcessor(new ElasticSpanProcessor(ElasticProfiler.INSTANCE, BreakdownMetrics.INSTANCE)))
+                        sdkTracerProviderBuilder.addSpanProcessor(new ElasticSpanProcessor(ElasticProfiler.INSTANCE, ElasticBreakdownMetrics.INSTANCE)))
                 .addPropertiesCustomizer(configProperties -> {
                     // Wrap context storage when configuration is loaded,
                     // configuration customization is used as an init hook but does not actually alters it.

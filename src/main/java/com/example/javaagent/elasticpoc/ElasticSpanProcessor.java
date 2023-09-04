@@ -9,9 +9,9 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 public class ElasticSpanProcessor implements SpanProcessor {
 
     private final ElasticProfiler profiler;
-    private final BreakdownMetrics breakdownMetrics;
+    private final ElasticBreakdownMetrics breakdownMetrics;
 
-    public ElasticSpanProcessor(ElasticProfiler profiler, BreakdownMetrics breakdownMetrics) {
+    public ElasticSpanProcessor(ElasticProfiler profiler, ElasticBreakdownMetrics breakdownMetrics) {
         this.profiler = profiler;
         this.breakdownMetrics = breakdownMetrics;
     }

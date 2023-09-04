@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class ElasticProfiler {
 
+
     public static final ElasticProfiler INSTANCE = new ElasticProfiler();
 
     public static final int MAX_STACK_DEPTH = 50;
@@ -240,10 +241,9 @@ public class ElasticProfiler {
         spanifySamples(span.toSpanData().getResource(), samples);
     }
 
-    private static AttributeKey<Long> SAMPLES_KEY = AttributeKey.longKey("profiling.samples");
-
     private static class InferredSpanData implements SpanData {
 
+        private static final AttributeKey<Long> SAMPLES_KEY = AttributeKey.longKey("profiling.samples");
         private final String name;
         private final String spanId;
 

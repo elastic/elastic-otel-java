@@ -18,7 +18,7 @@ public class ElasticAgentListener implements AgentListener {
         OpenTelemetry openTelemetry = GlobalOpenTelemetry.get();
 
         ElasticProfiler.INSTANCE.registerOpenTelemetry(openTelemetry);
-        BreakdownMetrics.INSTANCE.registerOpenTelemetry(openTelemetry);
+        ElasticBreakdownMetrics.INSTANCE.registerOpenTelemetry(openTelemetry);
 
     }
 }
