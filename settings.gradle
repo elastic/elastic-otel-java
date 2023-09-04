@@ -8,4 +8,5 @@ pluginManagement {
   }
 }
 
-rootProject.name = 'opentelemetry-java-instrumentation-extension-demo'
+rootProject.name = 'otel-java-instrumentation'
+include("extension")

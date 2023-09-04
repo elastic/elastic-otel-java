@@ -17,7 +17,7 @@ plugins {
   id "io.opentelemetry.instrumentation.muzzle-check" version "1.30.0-alpha-SNAPSHOT"
 }
 
-group 'io.opentelemetry.example'
+group 'co.elastic.otel'
 version '1.0'
 
 ext {
