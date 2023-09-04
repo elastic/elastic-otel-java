@@ -1,4 +1,4 @@
-package com.example.javaagent.elasticpoc;
+package co.elastic.otel;
 
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;

@@ -1,4 +1,4 @@
-package com.example.javaagent.elasticpoc;
+package co.elastic.otel;
 
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.SpanData;

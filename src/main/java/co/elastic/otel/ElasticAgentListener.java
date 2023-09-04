@@ -1,4 +1,4 @@
-package com.example.javaagent.elasticpoc;
+package co.elastic.otel;
 
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.GlobalOpenTelemetry;
