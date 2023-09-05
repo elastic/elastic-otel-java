@@ -84,17 +84,6 @@ public class ElasticProfiler {
             return samples.size();
         }
 
-        long start() {
-            return samples.isEmpty() ? -1L : samples.get(0).timestamp;
-        }
-
-        long end() {
-            return samples.isEmpty() ? -1L : samples.get(samples.size() - 1).timestamp;
-        }
-
-        public long getTimestamp(int index) {
-            return samples.get(index).timestamp;
-        }
     }
 
 
@@ -160,7 +149,6 @@ public class ElasticProfiler {
     }
 
     public void onSpanStart(Context parentContext, ReadWriteSpan span) {
-//        System.out.println("span start");
 
     }
 
