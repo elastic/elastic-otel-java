@@ -31,11 +31,12 @@ public class ElasticContextStorage implements ContextStorage {
             return delegate.attach(toAttach);
         }
 
-        SpanContext previous = profiler.onSpanContextAttach(span.getSpanContext());
+        SpanContext spanContext = span.getSpanContext();
+        SpanContext profilerPrevious = profiler.onSpanContextAttach(spanContext);
         Scope delegatedScope = delegate.attach(toAttach);
         return () -> {
             delegatedScope.close();
-            profiler.onSpanContextClose(previous);
+            profiler.onSpanContextClose(profilerPrevious); // profiler has to restore previously active, if any.
         };
     }
 
