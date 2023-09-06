@@ -17,7 +17,7 @@ public class ElasticBreakdownMetrics {
     private final ConcurrentHashMap<SpanContext, SpanContext> localRootSpans;
 
     // for local root spans, map span context to our own sidecar object
-    private final ConcurrentHashMap<SpanContext, TransactionData> localRootSpanData;
+    private final ConcurrentHashMap<SpanContext, BreakdownMetricsData> localRootSpanData;
 
     public static final ElasticBreakdownMetrics INSTANCE = new ElasticBreakdownMetrics();
 
@@ -42,7 +42,7 @@ public class ElasticBreakdownMetrics {
 
             System.out.printf("starting a local root span%s%n", localRootSpanContext.getSpanId());
             localRootSpans.put(localRootSpanContext, localRootSpanContext);
-            localRootSpanData.put(localRootSpanContext, new TransactionData());
+            localRootSpanData.put(localRootSpanContext, new BreakdownMetricsData());
         } else {
             // the current span is a child (or grand-child) of the local root span
             // we can attempt to capture the "local root span" stored in context (if there is any)
@@ -56,7 +56,7 @@ public class ElasticBreakdownMetrics {
             }
             System.out.printf("start of child span %s, root = %s%n", spanContext.getSpanId(), localRootSpanContext.getSpanId());
             if (localRootSpanContext.isValid()) {
-                TransactionData transactionData = localRootSpanData.get(localRootSpanContext);
+                BreakdownMetricsData breakdownData = localRootSpanData.get(localRootSpanContext);
             }
         }
 
@@ -71,14 +71,14 @@ public class ElasticBreakdownMetrics {
         if (isRootSpanParent(span.getParentSpanContext())) {
             System.out.printf("end of local root span %s%n", spanContext.getSpanId());
             localRootSpans.remove(spanContext);
-            TransactionData transactionData = localRootSpanData.remove(spanContext);
-            if(transactionData == null) {
+            BreakdownMetricsData breakdownData = localRootSpanData.remove(spanContext);
+            if(breakdownData == null) {
                 throw new IllegalStateException("local root data has already beeen removed");
             }
         } else {
             System.out.printf("end of child span %s, root = %s%n", spanContext.getSpanId(), localRootSpanContext.getSpanId());
             if (localRootSpanContext.isValid()) {
-                TransactionData transactionData = localRootSpanData.get(localRootSpanContext);
+                BreakdownMetricsData breakdownData = localRootSpanData.get(localRootSpanContext);
             }
             localRootSpans.remove(spanContext);
         }
@@ -94,13 +94,13 @@ public class ElasticBreakdownMetrics {
         return !parentSpanContext.isValid() || parentSpanContext.isRemote();
     }
 
-    private static class TransactionData {
+    private static class BreakdownMetricsData {
         // transaction self time
         private final AtomicInteger activeChildren;
         private long childStartEpoch;
         private long childDuration;
 
-        public TransactionData() {
+        public BreakdownMetricsData() {
             this.activeChildren = new AtomicInteger();
         }
 
