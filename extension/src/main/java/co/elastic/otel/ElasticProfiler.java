@@ -32,9 +32,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class ElasticProfiler {
 
-
-    public static final ElasticProfiler INSTANCE = new ElasticProfiler();
-
     public static final int MAX_STACK_DEPTH = 50;
     private final ConcurrentHashMap<SpanContext, Samples> samplesMap;
     private final ConcurrentHashMap<Long, SpanContext> currentSpans;

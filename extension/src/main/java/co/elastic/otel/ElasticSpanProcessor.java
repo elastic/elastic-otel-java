@@ -31,7 +31,6 @@ public class ElasticSpanProcessor implements SpanProcessor {
     public void onEnd(ReadableSpan span) {
         profiler.onSpanEnd(span);
         breakdownMetrics.onSpanEnd(span);
-
     }
 
     @Override
