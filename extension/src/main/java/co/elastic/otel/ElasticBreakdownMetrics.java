@@ -6,7 +6,7 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.instrumentation.api.instrumenter.LocalRootSpan;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
-import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.sdk.trace.SdkSpanAccessor;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,6 +20,7 @@ public class ElasticBreakdownMetrics {
     private final ConcurrentHashMap<SpanContext, BreakdownMetricsData> localRootSpanData;
 
     public static final ElasticBreakdownMetrics INSTANCE = new ElasticBreakdownMetrics();
+    private OpenTelemetry openTelemetry;
 
     public ElasticBreakdownMetrics() {
         localRootSpanData = new ConcurrentHashMap<>();
@@ -27,7 +28,7 @@ public class ElasticBreakdownMetrics {
     }
 
     public void registerOpenTelemetry(OpenTelemetry openTelemetry) {
-
+        this.openTelemetry = openTelemetry;
     }
 
     public void onSpanStart(Context parentContext, ReadWriteSpan span) {
@@ -57,6 +58,7 @@ public class ElasticBreakdownMetrics {
             System.out.printf("start of child span %s, root = %s%n", spanContext.getSpanId(), localRootSpanContext.getSpanId());
             if (localRootSpanContext.isValid()) {
                 BreakdownMetricsData breakdownData = localRootSpanData.get(localRootSpanContext);
+                breakdownData.startChild(SdkSpanAccessor.getStartEpochNanos(span));
             }
         }
 
@@ -72,13 +74,17 @@ public class ElasticBreakdownMetrics {
             System.out.printf("end of local root span %s%n", spanContext.getSpanId());
             localRootSpans.remove(spanContext);
             BreakdownMetricsData breakdownData = localRootSpanData.remove(spanContext);
-            if(breakdownData == null) {
-                throw new IllegalStateException("local root data has already beeen removed");
+            if (breakdownData == null) {
+                throw new IllegalStateException("local root data has already been removed");
             }
         } else {
             System.out.printf("end of child span %s, root = %s%n", spanContext.getSpanId(), localRootSpanContext.getSpanId());
             if (localRootSpanContext.isValid()) {
                 BreakdownMetricsData breakdownData = localRootSpanData.get(localRootSpanContext);
+                if (breakdownData != null) {
+                    // because span is ended, the 'span latency' returns the span end timestamp
+                    breakdownData.endChild(span.getLatencyNanos());
+                }
             }
             localRootSpans.remove(spanContext);
         }
@@ -94,10 +100,17 @@ public class ElasticBreakdownMetrics {
         return !parentSpanContext.isValid() || parentSpanContext.isRemote();
     }
 
+    // TODO: 06/09/2023 make this data thread-safe for reliable accounting
     private static class BreakdownMetricsData {
         // transaction self time
         private final AtomicInteger activeChildren;
+
+        private long rootSpanStartEpoch;
+
+        // timestamp of the 1st child start
         private long childStartEpoch;
+
+        // duration for which there was a child span execution
         private long childDuration;
 
         public BreakdownMetricsData() {
@@ -105,16 +118,23 @@ public class ElasticBreakdownMetrics {
         }
 
         public void startChild(long startEpochNanos) {
-            if (activeChildren.incrementAndGet() == 1) {
+            int count = activeChildren.incrementAndGet();
+            if (count == 1) {
                 childStartEpoch = startEpochNanos;
             }
+            System.out.printf("start child span, count = %d%n", count);
         }
 
-        public void endChild(SpanData span) {
-            if (activeChildren.decrementAndGet() == 0) {
-                childDuration += span.getEndEpochNanos() - childStartEpoch;
+        public void endChild(long endEpochNanos) {
+            int count = activeChildren.decrementAndGet();
+            if (count == 0) {
+                childDuration += endEpochNanos - childStartEpoch;
             }
+            System.out.printf("end child span, count = %d%n", count);
+        }
 
+        public long getRootSpanSelfTime() {
+            return -1L;
         }
     }
 
