@@ -19,7 +19,7 @@ public class ElasticSpanExporter implements SpanExporter {
 
     private ConcurrentHashMap<SpanContext, Long> selfTimeStorage;
 
-    private static final AttributeKey<Long> key = AttributeKey.longKey("elastic.span.self_time");
+    private static final AttributeKey<Long> SELF_TIME_ATTRIBUTE = AttributeKey.longKey("elastic.span.self_time");
 
     public ElasticSpanExporter(SpanExporter delegate) {
         this.delegate = delegate;
@@ -45,7 +45,7 @@ public class ElasticSpanExporter implements SpanExporter {
                 toSend.add(new DelegatingSpanData(span) {
                     @Override
                     public Attributes getAttributes() {
-                        return span.getAttributes().toBuilder().put(key, selfTime).build();
+                        return span.getAttributes().toBuilder().put(SELF_TIME_ATTRIBUTE, selfTime).build();
                     }
                 });
             }
