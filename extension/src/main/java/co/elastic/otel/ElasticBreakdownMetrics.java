@@ -85,7 +85,7 @@ public class ElasticBreakdownMetrics {
             }
             // TODO: we still have to convert to span data to get the end timestamp
             long selfTime = breakdownData.endLocalRootSpan(span.toSpanData().getEndEpochNanos());
-            if(spanExporter != null) {
+            if (spanExporter != null) {
                 spanExporter.reportSelfTime(spanContext, selfTime);
             }
         } else {
@@ -115,18 +115,18 @@ public class ElasticBreakdownMetrics {
         this.spanExporter = spanExporter;
     }
 
-    // TODO: 06/09/2023 make this data thread-safe for reliable accounting
     private static class BreakdownMetricsData {
+
         public static final Clock clock = Clock.getDefault();
-        // transaction self time
+
         private final AtomicInteger activeChildren;
 
-        private long startEpochNanos;
+        private final long startEpochNanos;
 
         // timestamp of the 1st child start
         private long childStartEpoch;
 
-        // duration for which there was a child span execution
+        // duration for which there was at least child span executing
         private long childDuration;
 
         public BreakdownMetricsData(long startEpochNanos) {
@@ -135,18 +135,24 @@ public class ElasticBreakdownMetrics {
         }
 
         public void startChild(long startEpochNanos) {
-            int count = activeChildren.incrementAndGet();
-            if (count == 1) {
-                childStartEpoch = startEpochNanos;
+            int count;
+            synchronized (this) {
+                count = activeChildren.incrementAndGet();
+                if (count == 1) {
+                    childStartEpoch = startEpochNanos;
+                }
             }
             System.out.printf("start child span, count = %d%n", count);
         }
 
         public void endChild(long endEpochNanos) {
-            int count = activeChildren.decrementAndGet();
-            if (count == 0) {
-                childDuration += (endEpochNanos - childStartEpoch);
-                childStartEpoch = -1L;
+            int count;
+            synchronized (this) {
+                count = activeChildren.decrementAndGet();
+                if (count == 0) {
+                    childDuration += (endEpochNanos - childStartEpoch);
+                    childStartEpoch = -1L;
+                }
             }
             System.out.printf("end child span, count = %d%n", count);
         }
@@ -156,8 +162,10 @@ public class ElasticBreakdownMetrics {
          * @return span self time
          */
         public long endLocalRootSpan(long endEpochNanos) {
-            if (childStartEpoch > 0) {
-                childDuration += (clock.now() - childStartEpoch);
+            synchronized (this) {
+                if (childStartEpoch > 0) {
+                    childDuration += (clock.now() - childStartEpoch);
+                }
             }
             return endEpochNanos - startEpochNanos - childDuration;
         }
