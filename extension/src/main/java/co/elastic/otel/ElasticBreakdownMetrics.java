@@ -83,7 +83,8 @@ public class ElasticBreakdownMetrics {
             if (breakdownData == null) {
                 throw new IllegalStateException("local root data has already been removed");
             }
-            long selfTime = breakdownData.endLocalRootSpan(span.getLatencyNanos());
+            // TODO: we still have to convert to span data to get the end timestamp
+            long selfTime = breakdownData.endLocalRootSpan(span.toSpanData().getEndEpochNanos());
             if(spanExporter != null) {
                 spanExporter.reportSelfTime(spanContext, selfTime);
             }
@@ -92,8 +93,8 @@ public class ElasticBreakdownMetrics {
             if (localRootSpanContext.isValid()) {
                 BreakdownMetricsData breakdownData = localRootSpanData.get(localRootSpanContext);
                 if (breakdownData != null) {
-                    // because span is ended, the 'span latency' returns the span end timestamp
-                    breakdownData.endChild(span.getLatencyNanos());
+                    // TODO: we still have to convert to span data to get the end timestamp
+                    breakdownData.endChild(span.toSpanData().getEndEpochNanos());
                 }
             }
             localRootSpans.remove(spanContext);
@@ -144,7 +145,7 @@ public class ElasticBreakdownMetrics {
         public void endChild(long endEpochNanos) {
             int count = activeChildren.decrementAndGet();
             if (count == 0) {
-                childDuration += endEpochNanos - childStartEpoch;
+                childDuration += (endEpochNanos - childStartEpoch);
                 childStartEpoch = -1L;
             }
             System.out.printf("end child span, count = %d%n", count);
