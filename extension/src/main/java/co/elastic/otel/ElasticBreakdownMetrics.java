@@ -2,7 +2,10 @@ package co.elastic.otel;
 
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.common.AttributeType;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.common.Clock;
@@ -10,13 +13,17 @@ import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.data.SpanData;
 
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ElasticBreakdownMetrics {
 
     private static final AttributeKey<String> LOCAL_ROOT_ATTRIBUTE = AttributeKey.stringKey("elastic.span.local_root");
     private static final AttributeKey<Boolean> IS_LOCAL_ROOT_ATTRIBUTE = AttributeKey.booleanKey("elastic.span.is_local_root");
+    public static final AttributeKey<String> ELASTIC_SPAN_TYPE_ATTRIBUTE = AttributeKey.stringKey("elastic.span.type");
+    public static final AttributeKey<String> ELASTIC_SPAN_SUBTYPE_ATTRIBUTE = AttributeKey.stringKey("elastic.span.subtype");
 
     // map span context to local root span context (one entry per in-flight span)
     private final ConcurrentHashMap<SpanContext, SpanContext> localRootSpans;
@@ -24,11 +31,8 @@ public class ElasticBreakdownMetrics {
     // map span context to their respective child duration timer
     private final ConcurrentHashMap<SpanContext, ChildDuration> spanChildDuration;
 
-    private final ConcurrentHashMap<SpanContext,BreakdownMetrics> breakdownMetrics;
-
-
-    private OpenTelemetry openTelemetry;
     private ElasticSpanExporter spanExporter;
+    private LongCounter spanBreakdownCounter;
 
     public ElasticBreakdownMetrics() {
         spanChildDuration = new ConcurrentHashMap<>();
@@ -36,7 +40,8 @@ public class ElasticBreakdownMetrics {
     }
 
     public void registerOpenTelemetry(OpenTelemetry openTelemetry) {
-        this.openTelemetry = openTelemetry;
+        Meter meter = openTelemetry.getMeterProvider().meterBuilder("elastic.span_breakdown").build();
+        spanBreakdownCounter = meter.counterBuilder("elastic.span_breakdown").build();
     }
 
     public void onSpanStart(Context parentContext, ReadWriteSpan span) {
@@ -76,7 +81,7 @@ public class ElasticBreakdownMetrics {
 
             System.out.printf("start of child span %s, parent = %s, root = %s%n",
                     spanContext.getSpanId(),
-                    span.getParentSpanContext(),
+                    span.getParentSpanContext().getSpanId(),
                     localRootSpanContext.getSpanId());
         }
 
@@ -98,13 +103,11 @@ public class ElasticBreakdownMetrics {
 
         // children duration for current span
         ChildDuration childrenDuration = spanChildDuration.remove(spanContext);
-        if (childrenDuration == null) {
-            throw new IllegalStateException("local root data has already been removed");
-        }
+        Objects.requireNonNull(childrenDuration, "missing children duration");
 
         // update children duration for direct parent
         ChildDuration parentChildDuration = spanChildDuration.get(span.getParentSpanContext());
-        if(parentChildDuration != null) {
+        if (parentChildDuration != null) {
             // parent might be already terminated
             parentChildDuration.endChild(spanData.getEndEpochNanos());
         }
@@ -118,21 +121,37 @@ public class ElasticBreakdownMetrics {
         }
 
         if (isRootSpanParent(span.getParentSpanContext())) {
-            // TODO : send the breakdown metrics for the local root span
             System.out.printf("end of local root span %s%n", spanContext.getSpanId());
+
+            // TODO: we don't have the local root span type and name here, we might need to store it for per transaction breakdown
+            spanBreakdownCounter.add(selfTime, buildCounterAttributes(spanData.getAttributes()));
         } else {
             System.out.printf("end of child span %s, root = %s%n", spanContext.getSpanId(), localRootSpanContext.getSpanId());
-            if (localRootSpanContext.isValid()) {
-                ChildDuration breakdownData = spanChildDuration.get(localRootSpanContext);
-                if (breakdownData != null) {
-                    // local root span might have already ended
-                    breakdownData.endChild(spanData.getEndEpochNanos());
-                }
-            }
+            spanBreakdownCounter.add(selfTime, buildCounterAttributes(spanData.getAttributes()));
         }
         localRootSpans.remove(spanContext);
     }
 
+    private static Attributes buildCounterAttributes(Attributes attributes) {
+
+        AtomicReference<String> type = new AtomicReference<>("app");
+        AtomicReference<String> subType = new AtomicReference<>("internal");
+        attributes.forEach((k, v) -> {
+            String key = k.getKey();
+            if (AttributeType.STRING.equals(k.getType())) {
+                int index = key.indexOf(".system");
+                if (index > 0) {
+                    type.set(key.substring(0, index));
+                    subType.set(v.toString());
+                }
+            }
+        });
+
+        return Attributes.of(
+                ELASTIC_SPAN_TYPE_ATTRIBUTE, type.get(),
+                ELASTIC_SPAN_SUBTYPE_ATTRIBUTE, subType.get()
+        );
+    }
 
     private SpanContext lookupLocalRootSpan(SpanContext spanContext) {
         SpanContext localRoot = localRootSpans.get(spanContext);
@@ -203,10 +222,5 @@ public class ElasticBreakdownMetrics {
             return endEpochNanos - startEpochNanos - childDuration;
         }
     }
-
-    private static class BreakdownMetrics {
-        
-    }
-
 
 }
