@@ -4,9 +4,7 @@ import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.AttributeType;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.LongGaugeBuilder;
-import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.api.metrics.ObservableLongMeasurement;
+import io.opentelemetry.api.metrics.*;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.common.Clock;
@@ -29,9 +27,8 @@ public class ElasticBreakdownMetrics {
     private final ConcurrentHashMap<SpanContext, SpanContextData> elasticSpanData;
 
     private ElasticSpanExporter spanExporter;
-    private LongGaugeBuilder spanBreakdownMetric;
 
-    private ObservableLongMeasurement spanBreakdownObserver;
+    private Meter meter;
 
     // sidecar object we store for every span
     private class SpanContextData {
@@ -52,9 +49,7 @@ public class ElasticBreakdownMetrics {
     }
 
     public void registerOpenTelemetry(OpenTelemetry openTelemetry) {
-        Meter meter = openTelemetry.getMeterProvider().meterBuilder("elastic.span_breakdown").build();
-        spanBreakdownMetric = meter.gaugeBuilder("elastic.span_breakdown").ofLongs();
-        spanBreakdownObserver = spanBreakdownMetric.buildObserver();
+        meter = openTelemetry.getMeterProvider().meterBuilder("elastic.span_breakdown").build();
     }
 
     public void onSpanStart(Context parentContext, ReadWriteSpan span) {
@@ -136,16 +131,22 @@ public class ElasticBreakdownMetrics {
             // TODO: we don't have the local root span type and name here, we might need to store it for per transaction breakdown
 
             // report for current span
-            spanBreakdownObserver.record(selfTime, buildCounterAttributes(spanData.getAttributes()));
+            Attributes metricAttributes = buildCounterAttributes(spanData.getAttributes());
+            System.out.printf("%s %d %s%n", span.getSpanContext().getSpanId(), selfTime, metricAttributes);
+            meter.counterBuilder("elastic.span_breakdown").build().add(selfTime, metricAttributes);
+            // even when using a brand new counter instance still creates a sum
+            // maybe reporting a complete histogram here would be a relevant option as the need is to get an overview of the time breakdown.
 
-            // TODO report for every child span, which must have been stored
-
+            // TODO report for every child span, which must have been stored (for now we only report it when they end, but I'm not sure if that's an issue)
 
         } else {
             System.out.printf("end of child span %s, root = %s%n", spanContext.getSpanId(), localRootSpanContext.getSpanId());
-            spanBreakdownObserver.record(selfTime, buildCounterAttributes(spanData.getAttributes()));
+
+            Attributes metricAttributes = buildCounterAttributes(spanData.getAttributes());
+            System.out.printf("%s %d %s%n", span.getSpanContext().getSpanId(), selfTime, metricAttributes);
+            meter.counterBuilder("elastic.span_breakdown").build().add(selfTime, metricAttributes);
         }
-        this.elasticSpanData.remove(spanContext);
+        elasticSpanData.remove(spanContext);
     }
 
     private static Attributes buildCounterAttributes(Attributes attributes) {
