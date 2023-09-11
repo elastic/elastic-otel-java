@@ -28,7 +28,7 @@ public class ElasticBreakdownMetrics {
 
     private ElasticSpanExporter spanExporter;
 
-    private Meter meter;
+    private LongCounter breakDownCounter;
 
     // sidecar object we store for every span
     private class SpanContextData {
@@ -49,7 +49,8 @@ public class ElasticBreakdownMetrics {
     }
 
     public void registerOpenTelemetry(OpenTelemetry openTelemetry) {
-        meter = openTelemetry.getMeterProvider().meterBuilder("elastic.span_breakdown").build();
+        Meter meter = openTelemetry.getMeterProvider().meterBuilder("elastic.span_breakdown").build();
+        breakDownCounter = meter.counterBuilder("elastic.span_breakdown").build();
     }
 
     public void onSpanStart(Context parentContext, ReadWriteSpan span) {
@@ -94,7 +95,6 @@ public class ElasticBreakdownMetrics {
         // attributes of the parent span, only its span context or the write-only Span
         span.setAttribute(IS_LOCAL_ROOT_ATTRIBUTE, localRootSpanContext == spanContext);
         span.setAttribute(LOCAL_ROOT_ATTRIBUTE, localRootSpanContext.getSpanId());
-
     }
 
     public void onSpanEnd(ReadableSpan span) {
@@ -133,9 +133,7 @@ public class ElasticBreakdownMetrics {
             // report for current span
             Attributes metricAttributes = buildCounterAttributes(spanData.getAttributes());
             System.out.printf("%s %d %s%n", span.getSpanContext().getSpanId(), selfTime, metricAttributes);
-            meter.counterBuilder("elastic.span_breakdown").build().add(selfTime, metricAttributes);
-            // even when using a brand new counter instance still creates a sum
-            // maybe reporting a complete histogram here would be a relevant option as the need is to get an overview of the time breakdown.
+            breakDownCounter.add(selfTime, metricAttributes);
 
             // TODO report for every child span, which must have been stored (for now we only report it when they end, but I'm not sure if that's an issue)
 
@@ -144,7 +142,7 @@ public class ElasticBreakdownMetrics {
 
             Attributes metricAttributes = buildCounterAttributes(spanData.getAttributes());
             System.out.printf("%s %d %s%n", span.getSpanContext().getSpanId(), selfTime, metricAttributes);
-            meter.counterBuilder("elastic.span_breakdown").build().add(selfTime, metricAttributes);
+            breakDownCounter.add(selfTime, metricAttributes);
         }
         elasticSpanData.remove(spanContext);
     }

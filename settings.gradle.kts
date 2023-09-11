@@ -8,6 +8,6 @@ pluginManagement {
   }
 }
 
-rootProject.name = "otel-java-instrumentation"
+rootProject.name = "elastic-otel-java"
 include("extension")
 include("test-app")
