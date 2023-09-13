@@ -23,7 +23,8 @@ public class ElasticAutoConfigurationCustomizerprovider implements AutoConfigura
                     return Collections.emptyMap();
                 }).addSpanExporterCustomizer((spanExporter, configProperties) ->
                         // wrap the original span exporter
-                        ElasticExtension.INSTANCE.wrapSpanExporter(spanExporter));
+                        ElasticExtension.INSTANCE.wrapSpanExporter(spanExporter))
+                .addMetricExporterCustomizer((exporter, config) -> new ElasticMetricExporter(exporter));
 
 
     }

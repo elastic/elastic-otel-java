@@ -1,6 +1,5 @@
 package co.elastic.otel;
 
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.sdk.common.CompletableResultCode;
@@ -17,35 +16,37 @@ public class ElasticSpanExporter implements SpanExporter {
 
     private final SpanExporter delegate;
 
-    private ConcurrentHashMap<SpanContext, Long> selfTimeStorage;
-
-    private static final AttributeKey<Long> SELF_TIME_ATTRIBUTE = AttributeKey.longKey("elastic.span.self_time");
+    private ConcurrentHashMap<SpanContext, ElasticBreakdownMetrics.SpanContextData> storage;
 
     public ElasticSpanExporter(SpanExporter delegate) {
         this.delegate = delegate;
-        this.selfTimeStorage = new ConcurrentHashMap<>();
+        this.storage = new ConcurrentHashMap<>();
     }
 
     @Override
     public CompletableResultCode export(Collection<SpanData> spans) {
         // shortcut in the rare case where no filtering is required
-        if (selfTimeStorage.isEmpty()) {
+        if (storage.isEmpty()) {
             delegate.export(spans);
         }
 
         List<SpanData> toSend = new ArrayList<>(spans.size());
         for (SpanData span : spans) {
             SpanContext spanContext = span.getSpanContext();
-            Long selfTime = selfTimeStorage.remove(spanContext);
-            if (selfTime == null) {
+            ElasticBreakdownMetrics.SpanContextData data = storage.remove(spanContext);
+            if (data == null) {
                 toSend.add(span);
             } else {
                 long duration = span.getEndEpochNanos() - span.getStartEpochNanos();
-                System.out.printf("span with self time %s total = %d, self = %d %n", span.getSpanId(), duration, selfTime);
+                System.out.printf("span with self time %s total = %d, self = %d %n", span.getSpanId(), duration, data.getSelfTime());
                 toSend.add(new DelegatingSpanData(span) {
                     @Override
                     public Attributes getAttributes() {
-                        return span.getAttributes().toBuilder().put(SELF_TIME_ATTRIBUTE, selfTime).build();
+                        return span.getAttributes().toBuilder()
+                                .put(ElasticAttributes.SELF_TIME_ATTRIBUTE, data.getSelfTime())
+                                .put(ElasticAttributes.LOCAL_ROOT_NAME, data.getLocalRootSpanName())
+                                .put(ElasticAttributes.LOCAL_ROOT_TYPE, data.getLocalRootSpanType())
+                                .build();
                     }
                 });
             }
@@ -54,13 +55,13 @@ public class ElasticSpanExporter implements SpanExporter {
         return delegate.export(toSend);
     }
 
-    public void reportSelfTime(SpanContext spanContext, long value) {
-        this.selfTimeStorage.put(spanContext, value);
+    public void report(SpanContext spanContext, ElasticBreakdownMetrics.SpanContextData data) {
+        this.storage.put(spanContext, data);
     }
 
     @Override
     public CompletableResultCode flush() {
-        selfTimeStorage.clear();
+        storage.clear();
         return delegate.flush();
     }
 
