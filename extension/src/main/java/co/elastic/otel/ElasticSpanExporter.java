@@ -44,8 +44,6 @@ public class ElasticSpanExporter implements SpanExporter {
                     public Attributes getAttributes() {
                         return span.getAttributes().toBuilder()
                                 .put(ElasticAttributes.SELF_TIME_ATTRIBUTE, data.getSelfTime())
-                                .put(ElasticAttributes.LOCAL_ROOT_NAME, data.getLocalRootSpanName())
-                                .put(ElasticAttributes.LOCAL_ROOT_TYPE, data.getLocalRootSpanType())
                                 .build();
                     }
                 });
