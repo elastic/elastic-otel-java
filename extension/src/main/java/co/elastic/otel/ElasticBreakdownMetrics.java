@@ -174,7 +174,11 @@ public class ElasticBreakdownMetrics {
     }
 
     private static AttributesBuilder buildCounterAttributes(Attributes spanAttributes) {
-        AttributesBuilder builder = Attributes.builder();
+        AttributesBuilder builder = Attributes.builder()
+                // default to app/internal unless other span attributes
+                .put(ElasticAttributes.ELASTIC_SPAN_TYPE, "app")
+                .put(ElasticAttributes.ELASTIC_SPAN_SUBTYPE, "internal");
+
         spanAttributes.forEach((k, v) -> {
             String key = k.getKey();
             if (AttributeType.STRING.equals(k.getType())) {
