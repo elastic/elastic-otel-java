@@ -9,5 +9,7 @@ pluginManagement {
 }
 
 rootProject.name = "elastic-otel-java"
+
 include("extension")
+include("bootstrap")
 include("test-app")
