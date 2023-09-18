@@ -14,6 +14,7 @@ include("agent")
 include("bootstrap")
 include("custom")
 include("instrumentation")
+include("smoke-tests")
 
 
 //include("extension")

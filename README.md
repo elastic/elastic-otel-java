@@ -74,4 +74,5 @@ if(ctx.numeric_labels != null && ctx.numeric_labels.elastic_span_self_time != nu
 - `bootstrap`: for classes that are injected into bootstrap CL (currently empty)
 - `custom`: distribution specific features
 - `instrumentation`: distribution specific instrumentations (currently empty)
+- `smoke-tests`: smoke tests
 
