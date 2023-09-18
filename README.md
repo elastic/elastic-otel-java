@@ -68,3 +68,10 @@ if(ctx.numeric_labels != null && ctx.numeric_labels.elastic_span_self_time != nu
 }
 ```
 
+## Project structure
+
+- `agent`: packaged java agent
+- `bootstrap`: for classes that are injected into bootstrap CL (currently empty)
+- `custom`: distribution specific features
+- `instrumentation`: distribution specific instrumentations (currently empty)
+
