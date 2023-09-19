@@ -37,6 +37,6 @@ jobs:
       - name: Agent artifact
         uses: actions/upload-artifact@v3
         with:
-          name: elastic-apm-agent
+          name: elastic-otel-javaagent
           path: |
             ./agent/build/libs/elastic-otel-javaagent-*.jar
