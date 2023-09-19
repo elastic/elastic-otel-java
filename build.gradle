@@ -1,5 +1,4 @@
-// TODO : change group to 'co.elastic.apm' ?
-group 'io.opentelemetry.example'
+group 'co.elastic.apm'
 version '0.0.1-SNAPSHOT'
 
 subprojects {
