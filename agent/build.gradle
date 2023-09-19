@@ -31,8 +31,8 @@ dependencies {
 
   javaagentLibs(project(":custom"))
 
-  // TODO: find a way to add all instrumentation sub-projects, or add one custom instrumentation so we have something to include here
-//  javaagentLibs(project(":instrumentation:servlet-3"))
+  // This is where we should add custom instrumentations
+  // javaagentLibs(project(":instrumentation:servlet-3"))
 
   upstreamAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:${versions.opentelemetryJavaagent}")
 }
