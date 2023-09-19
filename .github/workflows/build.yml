@@ -21,7 +21,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@
+        uses: actions/checkout@v4
 
       - name: Gradle JDK
         uses: actions/setup-java@v3
