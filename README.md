@@ -8,7 +8,8 @@ This project is the Elastic distribution of OpenTelemetry Java agent.
 
 ## Build
 
-Execute `gradle assemble`, the agent binary will be in `./agent/build/libs/`
+Execute `gradle assemble`, the agent binary will be in `./agent/build/libs/elastic-otel-javaagent-${VERSION}.jar`
+where `${VERSION}` is the current project version.
 
 ### Project structure
 
