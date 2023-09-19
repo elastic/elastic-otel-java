@@ -1,0 +1,17 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+
+    # validate gradle wrapper binary https://github.com/gradle/wrapper-validation-action
+    gradle-wrapper-validation:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - uses: gradle/wrapper-validation-action@v1.1.0
