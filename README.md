@@ -1,26 +1,29 @@
-# Elastic OpenTelemetry agent
+# Disclamer
 
-This is currently implemented as an agent extension, created from the example provided in [opentelemetry-java-instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/examples/extension).
+This is currently a work-in-progress project.
+
+# Elastic OpenTelemetry Java agent
+
+This project is the Elastic distribution of OpenTelemetry Java agent.
 
 ## Build
 
-- extension jar: run `./gradlew build`, extension jar file will be in `build/libs/`.
-- extended agent (with embedded extension): run `./gradlew extendedAgent`, extended agent will be in `build/libs/`.
+Execute `gradle assemble`, the agent binary will be in `./agent/build/libs/`
+
+### Project structure
+
+- `agent`: packaged java agent
+- `bootstrap`: for classes that are injected into bootstrap CL (currently empty)
+- `custom`: distribution specific code
+- `instrumentation`: distribution specific instrumentations (currently empty)
+- `smoke-tests`: smoke tests
 
 ## Run
 
-- extension jar:
+Use the `-javaagent:` JVM argument with the path to agent jar.
 
   ```bash
-  java -javaagent:path/to/opentelemetry-javaagent.jar \
-  -Dotel.javaagent.extensions=build/libs/extension-1.0-all.jar
-  -jar myapp.jar
-     ```
-
-- extended agent:
-
-  ```bash
-  java -javaagent:build/lib/opentelemetry-javaagent.jar \
+  java -javaagent:/path/to/agent.jar \
   -jar myapp.jar
      ```
 
@@ -35,6 +38,7 @@ PUT _ingest/pipeline/metrics-apm.app@custom
       "script": {
         "lang": "painless",
         "source": """
+
 if(ctx.span == null){
   ctx.span = [:];
 }
@@ -61,6 +65,7 @@ if(ctx.numeric_labels != null && ctx.numeric_labels.elastic_span_self_time != nu
   def sum = [ 'us': value];
   ctx.span.self_time =  [ 'count': 0, 'sum': sum];
 }
+
         """
       }
     }
@@ -68,11 +73,5 @@ if(ctx.numeric_labels != null && ctx.numeric_labels.elastic_span_self_time != nu
 }
 ```
 
-## Project structure
 
-- `agent`: packaged java agent
-- `bootstrap`: for classes that are injected into bootstrap CL (currently empty)
-- `custom`: distribution specific features
-- `instrumentation`: distribution specific instrumentations (currently empty)
-- `smoke-tests`: smoke tests
 
