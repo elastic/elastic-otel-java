@@ -15,9 +15,6 @@ include("bootstrap")
 include("custom")
 include("instrumentation")
 include("smoke-tests")
-include("testing")
-
-
-//include("extension")
+include("testing:agent-for-testing")
 
 //include("test-app")
