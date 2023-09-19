@@ -6,7 +6,7 @@ subprojects {
   version = rootProject.version
 
   apply plugin: "java"
-//  apply plugin: "com.diffplug.spotless"
+  apply plugin: "com.diffplug.spotless"
 
   ext {
     versions = [
@@ -37,13 +37,13 @@ subprojects {
     }
   }
 
-//  spotless {
-//    java {
-//      googleJavaFormat()
-//      licenseHeaderFile(rootProject.file("../../buildscripts/spotless.license.java"), "(package|import|public)")
-//      target("src/**/*.java")
-//    }
-//  }
+  spotless {
+    java {
+      googleJavaFormat()
+      licenseHeaderFile(rootProject.file("buildscripts/spotless.license.java"), "(package|import|public)")
+      target("src/**/*.java")
+    }
+  }
 
   dependencies {
     implementation(platform("io.opentelemetry:opentelemetry-bom:${versions.opentelemetrySdk}"))
