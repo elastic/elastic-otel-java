@@ -19,14 +19,24 @@ jobs:
   assemble:
     runs-on: ubuntu-latest
     steps:
+
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@
+
       - name: Gradle JDK
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 17
+
       - name: Gradle assemble
         uses: gradle/gradle-build-action@v2
         with:
           arguments: assemble
+
+      - name: Agent artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: elastic-apm-agent
+          path: |
+            ./agent/build/libs/elastic-otel-javaagent-*.jar
