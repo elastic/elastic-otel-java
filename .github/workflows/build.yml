@@ -15,3 +15,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: gradle/wrapper-validation-action@v1.1.0
+
+  assemble:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Gradle JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Gradle assemble
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: assemble
