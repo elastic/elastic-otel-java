@@ -54,10 +54,6 @@ public class ElasticSpanExporter implements SpanExporter {
       if (data == null) {
         toSend.add(span);
       } else {
-        long duration = span.getEndEpochNanos() - span.getStartEpochNanos();
-        System.out.printf(
-            "span with self time %s total = %d, self = %d %n",
-            span.getSpanId(), duration, data.getSelfTime());
         toSend.add(
             new DelegatingSpanData(span) {
               @Override

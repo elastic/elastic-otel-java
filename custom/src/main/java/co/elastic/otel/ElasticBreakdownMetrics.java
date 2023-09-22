@@ -108,7 +108,6 @@ public class ElasticBreakdownMetrics {
       // the span is a local root span
       localRootSpanContext = spanContext;
 
-      System.out.printf("starting a local root span%s%n", localRootSpanContext.getSpanId());
       elasticSpanData.put(spanContext, new SpanContextData(span, spanStart));
 
     } else {
@@ -185,16 +184,6 @@ public class ElasticBreakdownMetrics {
     if (spanExporter != null) {
       spanContextData.setSelfTime(selfTime);
       spanExporter.report(spanContext, spanContextData);
-    }
-
-    if (isRootSpanParent(span.getParentSpanContext())) {
-      System.out.printf("end of local root span %s%n", spanContext.getSpanId());
-    } else {
-      SpanContext localRootSpanContext =
-          localRoot == null ? SpanContext.getInvalid() : localRoot.getSpanContext();
-      System.out.printf(
-          "end of child span %s, root = %s%n",
-          spanContext.getSpanId(), localRootSpanContext.getSpanId());
     }
 
     breakDownCounter.add(selfTime, metricAttributes.build());
@@ -275,7 +264,6 @@ public class ElasticBreakdownMetrics {
           childStartEpoch = -1L;
         }
       }
-      System.out.printf("end child span, count = %d%n", count);
     }
 
     /**
