@@ -36,9 +36,12 @@ dependencies {
   // This is where we should add custom instrumentations
   // javaagentLibs(project(":instrumentation:servlet-3"))
 
+  // cloud resource providers
   javaagentLibs("io.opentelemetry.contrib:opentelemetry-aws-resources:${versions.opentelemetryContrib}");
   javaagentLibs("com.google.cloud.opentelemetry:detector-resources:${versions.gcpResourceDetector}")
 
+  // contrib resource providers
+  javaagentLibs("io.opentelemetry.contrib:opentelemetry-resource-providers:${versions.opentelemetryContrib}")
 
   upstreamAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:${versions.opentelemetryJavaagent}")
 }
