@@ -36,6 +36,8 @@ dependencies {
   // This is where we should add custom instrumentations
   // javaagentLibs(project(":instrumentation:servlet-3"))
 
+  javaagentLibs("io.opentelemetry.contrib:opentelemetry-aws-resources:${versions.opentelemetryContrib}");
+
   upstreamAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:${versions.opentelemetryJavaagent}")
 }
 
