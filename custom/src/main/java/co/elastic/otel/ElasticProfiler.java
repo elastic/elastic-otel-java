@@ -121,8 +121,6 @@ public class ElasticProfiler {
           for (Map.Entry<Long, SpanContext> entry : currentSpans.entrySet()) {
             SpanContext spanContext = entry.getValue();
             Long threadId = entry.getKey();
-            System.out.printf(
-                "sampling %d span %s on thread %d%n", id, spanContext.getSpanId(), threadId);
 
             ThreadInfo threadInfo = threadMXBean.getThreadInfo(threadId, MAX_STACK_DEPTH);
 
