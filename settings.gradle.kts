@@ -18,6 +18,7 @@ include("bootstrap")
 include("custom")
 include("instrumentation")
 include("smoke-tests")
+include("smoke-tests:test-app")
 include("testing:agent-for-testing")
 
 //include("test-app")
