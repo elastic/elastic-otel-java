@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController("/profiling")
-public class ProfilingTestController {
+public class ProfilingController {
 
     private static final Tracer tracer = GlobalOpenTelemetry.get().getTracerProvider().tracerBuilder("test-profiling").build();
     @GetMapping("/scenario/{id}")
