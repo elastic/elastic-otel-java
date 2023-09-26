@@ -2,10 +2,9 @@
 plugins {
     java
 
-    id("org.springframework.boot") version "2.7.15" // TODO : store spring boot version in a single location
+    id("org.springframework.boot") version "2.7.15"
     id("io.spring.dependency-management") version "1.1.3"
 }
-// TODO : package as a single jar
 
 dependencies {
 
