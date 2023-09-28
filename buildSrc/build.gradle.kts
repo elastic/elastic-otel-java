@@ -11,8 +11,10 @@ repositories {
 }
 
 dependencies {
-    implementation("com.diffplug.spotless:spotless-plugin-gradle:6.20.0")
+    implementation("com.diffplug.spotless:spotless-plugin-gradle:6.21.0")
     implementation("com.github.johnrengelman:shadow:8.1.1")
-    // provides muzzle gradle plugin
-    implementation("io.opentelemetry.instrumentation:gradle-plugins:1.30.0-alpha-SNAPSHOT")
+    // TODO : for now we have to disable it because it transitively imports an older apache httpclient
+    // that makes the transitive one from jib fail see https://github.com/elastic/elastic-otel-java/issues/9 for details
+    // implementation("io.opentelemetry.instrumentation:gradle-plugins:1.30.0-alpha-SNAPSHOT")
 }
+

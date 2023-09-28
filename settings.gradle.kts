@@ -7,7 +7,10 @@ pluginManagement {
     }
   }
   plugins {
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    // define versions but do not apply the plugins unless explicitly added to sub-projects.
+    id("com.github.johnrengelman.shadow") version "8.1.1" apply false
+    id("com.google.cloud.tools.jib") version "3.4.0" apply false
+    id("com.diffplug.spotless") version "6.21.0" apply false
   }
 }
 
@@ -20,5 +23,3 @@ include("instrumentation")
 include("smoke-tests")
 include("smoke-tests:test-app")
 include("testing:agent-for-testing")
-
-//include("test-app")
