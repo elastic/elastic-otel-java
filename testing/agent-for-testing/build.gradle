@@ -30,7 +30,7 @@ configurations {
 dependencies {
   bootstrapLibs(project(":bootstrap"))
   // and finally include everything from otel agent for testing
-  upstreamAgent("io.opentelemetry.javaagent:opentelemetry-agent-for-testing:${versions.opentelemetryJavaagentAlpha}")
+  upstreamAgent("io.opentelemetry.javaagent:opentelemetry-agent-for-testing:"+libraries.versions.opentelemetryJavaagentAlpha.get().toString())
 }
 
 CopySpec isolateClasses(Iterable<File> jars) {
