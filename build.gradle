@@ -5,7 +5,7 @@ subprojects {
   version = rootProject.version
 
   apply plugin: "java"
-  apply plugin: gradlePlugins.plugins.spotless.get().getPluginId()
+  apply plugin: "com.diffplug.spotless"
 
   ext {
     deps = [
