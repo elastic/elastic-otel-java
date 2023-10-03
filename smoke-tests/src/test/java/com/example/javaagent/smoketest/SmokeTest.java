@@ -82,10 +82,13 @@ abstract class SmokeTest {
             .withCopyFileToContainer(
                 MountableFile.forHostPath(agentPath), "/opentelemetry-javaagent.jar")
             .withEnv("JAVA_TOOL_OPTIONS", "-javaagent:/opentelemetry-javaagent.jar")
+                // batch span processor: very small batch size for testing
             .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
+                // batch span processor: very short delay for testing
             .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
-            .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage,demo")
-            .withEnv(extraEnv)
+            .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
+                .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://backend:8080")
+                .withEnv(extraEnv)
                 // we have to use an explicit HTTP application wait because the internal one can't execute as there is no bash nor shell
             .waitingFor(Wait.forHttp("/"));
     target.start();
@@ -206,7 +209,6 @@ abstract class SmokeTest {
         break;
       }
       previousSize = content.length();
-      System.out.printf("Current content size %d%n", previousSize);
       TimeUnit.MILLISECONDS.sleep(500);
     }
 

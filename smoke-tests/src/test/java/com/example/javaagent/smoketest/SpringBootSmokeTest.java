@@ -36,6 +36,10 @@ class SpringBootSmokeTest extends SmokeTest {
 
   private static GenericContainer<?> target;
 
+  private static String getBaseUrl() {
+    return String.format("http://localhost:%d/", target.getMappedPort(8080));
+  }
+
   @BeforeAll
   public static void start() {
     target = startTarget(IMAGE);
@@ -55,8 +59,8 @@ class SpringBootSmokeTest extends SmokeTest {
     }
 
     Collection<ExportTraceServiceRequest> traces = waitForTraces();
+    Assertions.assertEquals(1, traces.size());
 
-    Assertions.assertFalse(traces.isEmpty());
 
     //    Assertions.assertNotNull(response.header("X-server-id"));
     //    Assertions.assertEquals(1, response.headers("X-server-id").size());
@@ -72,7 +76,4 @@ class SpringBootSmokeTest extends SmokeTest {
 
   }
 
-  private String getBaseUrl() {
-    return String.format("http://localhost:%d/", target.getMappedPort(8080));
-  }
 }
