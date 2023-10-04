@@ -12,6 +12,8 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-api")
 
   testImplementation("ch.qos.logback:logback-classic:1.4.11")
+
+  testImplementation("org.assertj:assertj-core:3.24.2")
 }
 
 tasks.test {

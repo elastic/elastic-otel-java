@@ -52,7 +52,7 @@ abstract class SmokeTest {
   protected static OkHttpClient client = OkHttpUtils.client();
 
   private static final Network network = Network.newNetwork();
-  protected static final String agentPath =
+  private static final String agentPath =
       System.getProperty("io.opentelemetry.smoketest.agent.shadowJar.path");
 
   // keep track of all target containers in case they aren't properly stopped
@@ -170,7 +170,7 @@ abstract class SmokeTest {
         .flatMap(it -> it.getSpansList().stream());
   }
 
-  protected Collection<ExportTraceServiceRequest> waitForTraces()
+  protected List<ExportTraceServiceRequest> waitForTraces()
       throws IOException, InterruptedException {
     String content = waitForContent();
 

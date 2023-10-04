@@ -21,6 +21,11 @@ package com.example.javaagent.smoketest;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import io.opentelemetry.proto.trace.v1.Span;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.junit.jupiter.api.AfterAll;
@@ -28,6 +33,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 class SpringBootSmokeTest extends SmokeTest {
 
@@ -51,15 +59,28 @@ class SpringBootSmokeTest extends SmokeTest {
   }
 
   @Test
-  public void springBootSmokeTestOnJDK() throws IOException, InterruptedException {
-    Request request = new Request.Builder().url(getBaseUrl()).get().build();
+  public void urlBaseCheck() throws IOException, InterruptedException {
 
-    try (Response response = client.newCall(request).execute()) {
-      Assertions.assertEquals(response.body().string(), "hello");
-    }
+    doRequest(getBaseUrl(), r -> {
+      assertThat(r.code()).isEqualTo(200);
+      assertThat(r.body()).isNotNull();
+      assertThat(r.body().string()).isEqualTo("hello");
+    });
 
-    Collection<ExportTraceServiceRequest> traces = waitForTraces();
-    Assertions.assertEquals(1, traces.size());
+    List<ExportTraceServiceRequest> traces = waitForTraces();
+    List<Span> spans = getSpans(traces).collect(Collectors.toList());
+    assertThat(spans)
+            .extracting("name", "kind", "spanId")
+            .containsOnly(
+                    tuple("GET /", "SPAN_KIND_SERVER", ""),
+                    tuple("HelloController.hello", "SPAN_KIND_INTERNAL", "")
+            )
+            .hasSize(2); // TODO : investigate why we have 2x the number of expected spans
+
+
+//    spans.stream().filter(s->s.getName().e
+
+
 
 
     //    Assertions.assertNotNull(response.header("X-server-id"));
@@ -74,6 +95,26 @@ class SpringBootSmokeTest extends SmokeTest {
     //        0, countResourcesByValue(traces, "telemetry.auto.version", currentAgentVersion));
     //    Assertions.assertNotEquals(0, countResourcesByValue(traces, "custom.resource", "demo"));
 
+  }
+
+  public Stream<Span> getSpans(List<ExportTraceServiceRequest> traces) {
+    return traces.stream()
+            .flatMap(it -> it.getResourceSpansList().stream())
+            .flatMap(it -> it.getScopeSpansList().stream())
+            .flatMap(it -> it.getSpansList().stream());
+  }
+
+  private void doRequest(String url, IOConsumer<Response> responseHandler) throws IOException{
+    Request request = new Request.Builder().url(url).get().build();
+
+    try (Response response = client.newCall(request).execute()) {
+      responseHandler.accept(response);
+    }
+  }
+
+  @FunctionalInterface
+  private interface IOConsumer<T> {
+    void accept(T t) throws IOException;
   }
 
 }
