@@ -19,13 +19,15 @@
 package co.elastic.otel.test;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController("/")
-public class HelloController {
+@RestController
+@RequestMapping("/health")
+public class HealthController {
 
   @GetMapping
-  public String hello() {
-    return "hello";
+  public String healthcheck() {
+    return "Alive!";
   }
 }

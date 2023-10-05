@@ -24,18 +24,12 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.trace.v1.Span;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.ResponseBody;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
@@ -43,6 +37,13 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.MountableFile;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 abstract class SmokeTest {
   private static final Logger logger = LoggerFactory.getLogger(SmokeTest.class);
@@ -56,7 +57,7 @@ abstract class SmokeTest {
       System.getProperty("io.opentelemetry.smoketest.agent.shadowJar.path");
 
   // keep track of all target containers in case they aren't properly stopped
-  private static List<GenericContainer<?>> targetContainers = new ArrayList<>();
+  private static final List<GenericContainer<?>> targetContainers = new ArrayList<>();
 
   private static GenericContainer<?> backend;
 
@@ -89,9 +90,9 @@ abstract class SmokeTest {
             .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
                 .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://backend:8080")
                 .withEnv(extraEnv)
-                // we have to use an explicit HTTP application wait because the internal one can't execute as there is no bash nor shell
-            .waitingFor(Wait.forHttp("/"));
-    target.start();
+            .waitingFor(Wait.forHttp("/health").forPort(8080));
+
+    Objects.requireNonNull(target).start();
 
     targetContainers.add(target);
 
@@ -102,8 +103,15 @@ abstract class SmokeTest {
     return startTarget(image, Collections.emptyMap());
   }
 
-  @AfterEach
-  void afterEach() throws IOException {
+  @BeforeEach
+  void beforeEach() throws IOException, InterruptedException {
+    // because traces reporting is asynchronous we need to wait for the healthcheck traces to be reported and only then
+    // flush before the test, otherwise the first test will see the healthcheck trace captured.
+    waitForTraces();
+    clearBackend();
+  }
+
+  protected static void clearBackend() throws IOException {
     client
         .newCall(
             new Request.Builder()

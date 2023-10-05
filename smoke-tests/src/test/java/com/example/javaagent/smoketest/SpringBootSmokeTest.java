@@ -25,13 +25,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.trace.v1.Span;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.testcontainers.containers.GenericContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,8 +42,11 @@ class SpringBootSmokeTest extends SmokeTest {
 
   private static GenericContainer<?> target;
 
-  private static String getBaseUrl() {
-    return String.format("http://localhost:%d/", target.getMappedPort(8080));
+  private static String getUrl(String path) {
+    if (!path.startsWith("/")) {
+      throw new IllegalArgumentException("path must start with '/'");
+    }
+    return String.format("http://localhost:%d%s", target.getMappedPort(8080), path);
   }
 
   @BeforeAll
@@ -55,27 +56,28 @@ class SpringBootSmokeTest extends SmokeTest {
 
   @AfterAll
   public static void end() {
-    target.stop();
+    if (target != null) {
+      target.stop();
+    }
   }
 
   @Test
   public void urlBaseCheck() throws IOException, InterruptedException {
-
-    doRequest(getBaseUrl(), r -> {
+    doRequest(getUrl("/health"), r -> {
       assertThat(r.code()).isEqualTo(200);
       assertThat(r.body()).isNotNull();
-      assertThat(r.body().string()).isEqualTo("hello");
+      assertThat(r.body().string()).isEqualTo("Alive!");
     });
 
     List<ExportTraceServiceRequest> traces = waitForTraces();
     List<Span> spans = getSpans(traces).collect(Collectors.toList());
     assertThat(spans)
-            .extracting("name", "kind", "spanId")
+            .extracting("name", "kind")
             .containsOnly(
-                    tuple("GET /", "SPAN_KIND_SERVER", ""),
-                    tuple("HelloController.hello", "SPAN_KIND_INTERNAL", "")
+                    tuple("GET /health", Span.SpanKind.SPAN_KIND_SERVER),
+                    tuple("HealthController.bornToBe", Span.SpanKind.SPAN_KIND_INTERNAL)
             )
-            .hasSize(2); // TODO : investigate why we have 2x the number of expected spans
+            .hasSize(2);
 
 
 //    spans.stream().filter(s->s.getName().e
