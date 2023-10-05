@@ -28,6 +28,7 @@ dependencyResolutionManagement {
             plugin("shadow", "com.github.johnrengelman.shadow").versionRef("shadow")
             plugin("jib", "com.google.cloud.tools.jib").versionRef("jib")
             plugin("spotless", "com.diffplug.spotless").versionRef("spotless")
+            plugin("taskinfo", "org.barfuin.gradle.taskinfo").version("2.1.0")
         }
 
         create("libraries") {

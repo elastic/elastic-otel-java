@@ -1,9 +1,8 @@
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 plugins {
     alias(gradlePlugins.plugins.shadow)
     alias(gradlePlugins.plugins.jib)
+    alias(gradlePlugins.plugins.taskinfo)
 }
 
 dependencies {

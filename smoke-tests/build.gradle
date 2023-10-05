@@ -1,6 +1,7 @@
 // TODO : convert to kotlin for consistency
 plugins {
   id "java"
+  alias gradlePlugins.plugins.taskinfo
 }
 
 dependencies {
