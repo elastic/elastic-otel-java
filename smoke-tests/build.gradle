@@ -21,9 +21,10 @@ tasks.test {
 
   testLogging.showStandardStreams = true
 
-  // ensure test application docker images are available locally
-  dependsOn(":smoke-tests:test-app:jibDockerBuild")
+  // ensure test application docker image is available locally with 'latest' tag
+  dependsOn(":smoke-tests:test-app:assemble")
 
+  // depends on packaged agent output file
   def agentShadowTask = project(":agent").tasks.shadowJar
   dependsOn(agentShadowTask)
   inputs.files(layout.files(agentShadowTask))

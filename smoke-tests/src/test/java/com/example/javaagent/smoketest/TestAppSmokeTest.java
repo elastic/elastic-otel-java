@@ -20,12 +20,10 @@ package com.example.javaagent.smoketest;
 
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.trace.v1.Span;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -35,8 +33,9 @@ import org.testcontainers.containers.GenericContainer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-class SpringBootSmokeTest extends SmokeTest {
+class TestAppSmokeTest extends SmokeTest {
 
+  // TODO : find a way to rebuild the app when needed
   private static final String IMAGE =
       "docker.elastic.co/open-telemetry/elastic-otel-java/smoke-test/test-app:latest";
 
@@ -62,7 +61,7 @@ class SpringBootSmokeTest extends SmokeTest {
   }
 
   @Test
-  public void urlBaseCheck() throws IOException, InterruptedException {
+  public void healthcheck() throws IOException, InterruptedException {
     doRequest(getUrl("/health"), r -> {
       assertThat(r.code()).isEqualTo(200);
       assertThat(r.body()).isNotNull();
@@ -75,13 +74,9 @@ class SpringBootSmokeTest extends SmokeTest {
             .extracting("name", "kind")
             .containsOnly(
                     tuple("GET /health", Span.SpanKind.SPAN_KIND_SERVER),
-                    tuple("HealthController.bornToBe", Span.SpanKind.SPAN_KIND_INTERNAL)
+                    tuple("HealthController.healthcheck", Span.SpanKind.SPAN_KIND_INTERNAL)
             )
             .hasSize(2);
-
-
-//    spans.stream().filter(s->s.getName().e
-
 
 
 

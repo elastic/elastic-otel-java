@@ -29,11 +29,9 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-// TODO not sure about the "time-based" tag strategy as it's quite hard to refer to it in the tests
-// maybe we could find a way to inject the commit ID of the last change, hence ensuring that it's the one we expect.
-// using '<short-commit-hash>' or '<short-commit-hash>-dirty'
-val tag = findProperty("tag")
-    ?: DateTimeFormatter.ofPattern("yyyyMMdd.HHmmSS").format(LocalDateTime.now())
+// using the 'latest' label by default
+// TODO: use release version tag when doing a release
+val tag = findProperty("tag") ?: "latest"
 
 jib {
     from.image = "gcr.io/distroless/java17-debian11:debug"
@@ -44,8 +42,16 @@ jib {
 
 tasks {
 
+    // can we set the 'jib' task output to be the list of files that are used as 'input' of the jib task ?
+
     // javadoc not required
     javadoc {
         isEnabled = false
     }
+
+    // build docker image with 'assemble'
+    assemble {
+        dependsOn(jibDockerBuild)
+    }
+
 }
