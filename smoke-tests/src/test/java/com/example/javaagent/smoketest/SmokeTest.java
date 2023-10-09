@@ -49,6 +49,9 @@ abstract class SmokeTest {
   private static final Logger logger = LoggerFactory.getLogger(SmokeTest.class);
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final int TARGET_DEBUG_PORT = 5005;
+  private static final int BACKEND_DEBUG_PORT = 5006;
+  private static final String JAVAAGENT_JAR_PATH = "/opentelemetry-javaagent.jar";
 
   protected static OkHttpClient client = OkHttpUtils.client();
 
@@ -62,6 +65,7 @@ abstract class SmokeTest {
   private static GenericContainer<?> backend;
 
   @BeforeAll
+  @SuppressWarnings("resource")
   static void setupSpec() {
     backend =
         new GenericContainer<>(
@@ -71,18 +75,26 @@ abstract class SmokeTest {
             .withNetwork(network)
             .withNetworkAliases("backend")
             .withLogConsumer(new Slf4jLogConsumer(logger));
+
+    if (JavaExecutable.isDebuggingAndListeningDebuggerStarted(BACKEND_DEBUG_PORT, "backend")) {
+      backend.withEnv("JAVA_TOOL_OPTIONS", JavaExecutable.jvmDebugArgument("remote-localhost", BACKEND_DEBUG_PORT));
+      backend = addDockerDebugHost(backend);
+    }
+
     backend.start();
   }
 
   protected static GenericContainer<?> startTarget(String image, Map<String, String> extraEnv) {
+
+    @SuppressWarnings("resource")
     GenericContainer<?> target =
         new GenericContainer<>(image)
             .withExposedPorts(8080)
             .withNetwork(network)
             .withLogConsumer(new Slf4jLogConsumer(logger))
             .withCopyFileToContainer(
-                MountableFile.forHostPath(agentPath), "/opentelemetry-javaagent.jar")
-            .withEnv("JAVA_TOOL_OPTIONS", "-javaagent:/opentelemetry-javaagent.jar")
+                MountableFile.forHostPath(agentPath), JAVAAGENT_JAR_PATH)
+
                 // batch span processor: very small batch size for testing
             .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
                 // batch span processor: very short delay for testing
@@ -92,10 +104,26 @@ abstract class SmokeTest {
                 .withEnv(extraEnv)
             .waitingFor(Wait.forHttp("/health").forPort(8080));
 
+    StringBuilder jvmArgs = new StringBuilder();
+
+    if (JavaExecutable.isDebuggingAndListeningDebuggerStarted(TARGET_DEBUG_PORT, "target")) {
+      target = addDockerDebugHost(target);
+      jvmArgs.append(JavaExecutable.jvmDebugArgument("remote-localhost", TARGET_DEBUG_PORT)).append(" ");
+    }
+    jvmArgs.append(JavaExecutable.jvmAgentArgument(JAVAAGENT_JAR_PATH));
+    target.withEnv("JAVA_TOOL_OPTIONS", jvmArgs.toString());
+
     Objects.requireNonNull(target).start();
 
     targetContainers.add(target);
 
+    return target;
+  }
+
+  private static GenericContainer<?> addDockerDebugHost(GenericContainer<?> target) {
+    // make the docker host IP available for remote debug
+    // the 'host-gateway' is automatically translated by docker for all OSes
+    target = target.withExtraHost("remote-localhost", "host-gateway");
     return target;
   }
 
