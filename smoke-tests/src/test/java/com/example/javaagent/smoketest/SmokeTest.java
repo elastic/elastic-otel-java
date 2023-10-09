@@ -76,7 +76,7 @@ abstract class SmokeTest {
             .withNetworkAliases("backend")
             .withLogConsumer(new Slf4jLogConsumer(logger));
 
-    if (JavaExecutable.isDebuggingAndListeningDebuggerStarted(BACKEND_DEBUG_PORT, "backend")) {
+    if (JavaExecutable.isDebugging() && JavaExecutable.isListeningDebuggerStarted(BACKEND_DEBUG_PORT, "backend")) {
       backend.withEnv("JAVA_TOOL_OPTIONS", JavaExecutable.jvmDebugArgument("remote-localhost", BACKEND_DEBUG_PORT));
       backend = addDockerDebugHost(backend);
     }
@@ -88,28 +88,35 @@ abstract class SmokeTest {
 
     @SuppressWarnings("resource")
     GenericContainer<?> target =
-        new GenericContainer<>(image)
-            .withExposedPorts(8080)
-            .withNetwork(network)
-            .withLogConsumer(new Slf4jLogConsumer(logger))
-            .withCopyFileToContainer(
-                MountableFile.forHostPath(agentPath), JAVAAGENT_JAR_PATH)
+            new GenericContainer<>(image)
+                    .withExposedPorts(8080)
+                    .withNetwork(network)
+                    .withLogConsumer(new Slf4jLogConsumer(logger))
+                    .withCopyFileToContainer(
+                            MountableFile.forHostPath(agentPath), JAVAAGENT_JAR_PATH)
 
-                // batch span processor: very small batch size for testing
-            .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
-                // batch span processor: very short delay for testing
-            .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
-            .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
-                .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://backend:8080")
-                .withEnv(extraEnv)
-            .waitingFor(Wait.forHttp("/health").forPort(8080));
+                    // batch span processor: very small batch size for testing
+                    .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
+                    // batch span processor: very short delay for testing
+                    .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
+                    .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
+                    .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://backend:8080")
+                    .withEnv(extraEnv)
+                    .waitingFor(Wait.forHttp("/health").forPort(8080));
 
     StringBuilder jvmArgs = new StringBuilder();
 
-    if (JavaExecutable.isDebuggingAndListeningDebuggerStarted(TARGET_DEBUG_PORT, "target")) {
-      target = addDockerDebugHost(target);
-      jvmArgs.append(JavaExecutable.jvmDebugArgument("remote-localhost", TARGET_DEBUG_PORT)).append(" ");
+    if (JavaExecutable.isDebugging()) {
+      // when debugging, automatically use verbose debug logging
+      target.withEnv("OTEL_JAVAAGENT_DEBUG", "true");
+
+      if (JavaExecutable.isListeningDebuggerStarted(TARGET_DEBUG_PORT, "target")) {
+        target = addDockerDebugHost(target);
+        jvmArgs.append(JavaExecutable.jvmDebugArgument("remote-localhost", TARGET_DEBUG_PORT)).append(" ");
+      }
+
     }
+
     jvmArgs.append(JavaExecutable.jvmAgentArgument(JAVAAGENT_JAR_PATH));
     target.withEnv("JAVA_TOOL_OPTIONS", jvmArgs.toString());
 

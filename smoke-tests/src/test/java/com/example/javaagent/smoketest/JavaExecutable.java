@@ -53,7 +53,7 @@ public class JavaExecutable {
     /**
      * @return {@literal true} when the current JVM is being debugged (with `-agentlib:...` parameter).
      */
-    private static boolean isDebugging() {
+    public static boolean isDebugging() {
         // test if the test code is currently being debugged
         List<String> jvmArgs = ManagementFactory.getRuntimeMXBean().getInputArguments();
         for (String jvmArg : jvmArgs) {
@@ -88,11 +88,7 @@ public class JavaExecutable {
         return "-javaagent:" + path;
     }
 
-    public static boolean isDebuggingAndListeningDebuggerStarted(int port, String description){
-        if(!isDebugging()){
-            // current JVM has not been started with debugger options
-            return false;
-        }
+    public static boolean isListeningDebuggerStarted(int port, String description){
 
         if(probeListeningDebugger(port)){
             log.info("listening debugger detected on port {}, remote debugging in the {} container is enabled", port, description);
