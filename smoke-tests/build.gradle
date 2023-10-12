@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-  testImplementation("org.testcontainers:testcontainers:1.19.0")
+  testImplementation("org.testcontainers:testcontainers:1.19.1")
   testImplementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
   testImplementation("com.google.protobuf:protobuf-java-util:3.24.2")
   testImplementation("com.squareup.okhttp3:okhttp:4.11.0")
@@ -19,11 +19,14 @@ tasks.test {
 
   testLogging.showStandardStreams = true
 
-  def shadowTask = project(":agent").tasks.shadowJar
-  dependsOn(shadowTask)
-  inputs.files(layout.files(shadowTask))
+  // ensure test application docker images are available locally
+  dependsOn(":smoke-tests:test-app:jibDockerBuild")
+
+  def agentShadowTask = project(":agent").tasks.shadowJar
+  dependsOn(agentShadowTask)
+  inputs.files(layout.files(agentShadowTask))
 
   doFirst {
-    jvmArgs("-Dio.opentelemetry.smoketest.agent.shadowJar.path=${shadowTask.archiveFile.get()}")
+    jvmArgs("-Dio.opentelemetry.smoketest.agent.shadowJar.path=${agentShadowTask.archiveFile.get()}")
   }
 }

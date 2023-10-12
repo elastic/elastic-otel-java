@@ -8,24 +8,10 @@ subprojects {
   apply plugin: "com.diffplug.spotless"
 
   ext {
-    versions = [
-      // this line is managed by .github/scripts/update-sdk-version.sh
-      opentelemetrySdk           : "1.29.0",
-
-      // these lines are managed by .github/scripts/update-version.sh
-      opentelemetryJavaagent      : "1.30.0-SNAPSHOT",
-      opentelemetryJavaagentAlpha : "1.30.0-alpha-SNAPSHOT",
-      opentelemetryContrib        : "1.29.0-alpha",
-      gcpResourceDetector         : "0.25.2-alpha",
-
-      autoservice                : "1.1.1",
-      junit                      : "5.10.0"
-    ]
-
     deps = [
       autoservice: [
-        "com.google.auto.service:auto-service:${versions.autoservice}",
-        "com.google.auto.service:auto-service-annotations:${versions.autoservice}",
+        "com.google.auto.service:auto-service:"+libraries.versions.autoservice.get(),
+        "com.google.auto.service:auto-service-annotations:"+libraries.versions.autoservice.get(),
       ]
     ]
   }
@@ -47,16 +33,17 @@ subprojects {
   }
 
   dependencies {
-    implementation(platform("io.opentelemetry:opentelemetry-bom:${versions.opentelemetrySdk}"))
+
+    implementation(platform("io.opentelemetry:opentelemetry-bom:"+libraries.versions.opentelemetrySdk.get().toString()))
 
     // these serve as a test of the instrumentation boms
-    implementation(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:${versions.opentelemetryJavaagent}"))
-    implementation(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${versions.opentelemetryJavaagentAlpha}"))
+    implementation(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:"+libraries.versions.opentelemetryJavaagent.get().toString()))
+    implementation(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:"+libraries.versions.opentelemetryJavaagentAlpha.get().toString()))
 
     testImplementation("org.mockito:mockito-core:5.5.0")
-    testImplementation(enforcedPlatform("org.junit:junit-bom:${versions.junit}"))
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${versions.junit}")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${versions.junit}")
+
+    testImplementation(enforcedPlatform("org.junit:junit-bom:"+libraries.versions.junit.get().toString()))
+    testImplementation("org.junit.jupiter:junit-jupiter")
   }
 
   tasks {

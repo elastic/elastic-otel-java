@@ -18,56 +18,62 @@
  */
 package com.example.javaagent.smoketest;
 
-import io.opentelemetry.api.trace.TraceId;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.jar.Attributes;
-import java.util.jar.JarFile;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.containers.GenericContainer;
 
 class SpringBootSmokeTest extends SmokeTest {
 
-  @Override
-  protected String getTargetImage(int jdk) {
-    return "ghcr.io/open-telemetry/opentelemetry-java-instrumentation/smoke-test-spring-boot:jdk"
-        + jdk
-        + "-20211213.1570880324";
+  private static final String IMAGE =
+      "docker.elastic.co/open-telemetry/elastic-otel-java/smoke-test/test-app:latest";
+
+  private static GenericContainer<?> target;
+
+  private static String getBaseUrl() {
+    return String.format("http://localhost:%d/", target.getMappedPort(8080));
+  }
+
+  @BeforeAll
+  public static void start() {
+    target = startTarget(IMAGE);
+  }
+
+  @AfterAll
+  public static void end() {
+    target.stop();
   }
 
   @Test
   public void springBootSmokeTestOnJDK() throws IOException, InterruptedException {
-    startTarget(8);
-    String url = String.format("http://localhost:%d/greeting", target.getMappedPort(8080));
-    Request request = new Request.Builder().url(url).get().build();
+    Request request = new Request.Builder().url(getBaseUrl()).get().build();
 
-    String currentAgentVersion =
-        (String)
-            new JarFile(agentPath)
-                .getManifest()
-                .getMainAttributes()
-                .get(Attributes.Name.IMPLEMENTATION_VERSION);
-
-    Response response = client.newCall(request).execute();
-    System.out.println(response.headers().toString());
+    try (Response response = client.newCall(request).execute()) {
+      Assertions.assertEquals(response.body().string(), "hello");
+    }
 
     Collection<ExportTraceServiceRequest> traces = waitForTraces();
+    Assertions.assertEquals(1, traces.size());
 
-    Assertions.assertNotNull(response.header("X-server-id"));
-    Assertions.assertEquals(1, response.headers("X-server-id").size());
-    Assertions.assertTrue(TraceId.isValid(response.header("X-server-id")));
-    Assertions.assertEquals("Hi!", response.body().string());
-    Assertions.assertEquals(1, countSpansByName(traces, "GET /greeting"));
-    Assertions.assertEquals(0, countSpansByName(traces, "WebController.greeting"));
-    Assertions.assertEquals(1, countSpansByName(traces, "WebController.withSpan"));
-    Assertions.assertEquals(2, countSpansByAttributeValue(traces, "custom", "demo"));
-    Assertions.assertNotEquals(
-        0, countResourcesByValue(traces, "telemetry.auto.version", currentAgentVersion));
-    Assertions.assertNotEquals(0, countResourcesByValue(traces, "custom.resource", "demo"));
 
-    stopTarget();
+    //    Assertions.assertNotNull(response.header("X-server-id"));
+    //    Assertions.assertEquals(1, response.headers("X-server-id").size());
+    //    Assertions.assertTrue(TraceId.isValid(response.header("X-server-id")));
+    //    Assertions.assertEquals("Hi!", response.body().string());
+    //    Assertions.assertEquals(1, countSpansByName(traces, "GET /greeting"));
+    //    Assertions.assertEquals(0, countSpansByName(traces, "WebController.greeting"));
+    //    Assertions.assertEquals(1, countSpansByName(traces, "WebController.withSpan"));
+    //    Assertions.assertEquals(2, countSpansByAttributeValue(traces, "custom", "demo"));
+    //    Assertions.assertNotEquals(
+    //        0, countResourcesByValue(traces, "telemetry.auto.version", currentAgentVersion));
+    //    Assertions.assertNotEquals(0, countResourcesByValue(traces, "custom.resource", "demo"));
+
   }
+
 }

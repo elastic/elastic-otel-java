@@ -25,9 +25,7 @@ import com.google.protobuf.util.JsonFormat;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.trace.v1.Span;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -57,14 +55,10 @@ abstract class SmokeTest {
   protected static final String agentPath =
       System.getProperty("io.opentelemetry.smoketest.agent.shadowJar.path");
 
-  protected abstract String getTargetImage(int jdk);
+  // keep track of all target containers in case they aren't properly stopped
+  private static List<GenericContainer<?>> targetContainers = new ArrayList<>();
 
-  /** Subclasses can override this method to customise target application's environment */
-  protected Map<String, String> getExtraEnv() {
-    return Collections.emptyMap();
-  }
-
-  private static GenericContainer backend;
+  private static GenericContainer<?> backend;
 
   @BeforeAll
   static void setupSpec() {
@@ -79,26 +73,37 @@ abstract class SmokeTest {
     backend.start();
   }
 
-  protected GenericContainer target;
-
-  void startTarget(int jdk) {
-    target =
-        new GenericContainer<>(getTargetImage(jdk))
+  protected static GenericContainer<?> startTarget(String image, Map<String, String> extraEnv) {
+    GenericContainer<?> target =
+        new GenericContainer<>(image)
             .withExposedPorts(8080)
             .withNetwork(network)
             .withLogConsumer(new Slf4jLogConsumer(logger))
             .withCopyFileToContainer(
                 MountableFile.forHostPath(agentPath), "/opentelemetry-javaagent.jar")
             .withEnv("JAVA_TOOL_OPTIONS", "-javaagent:/opentelemetry-javaagent.jar")
+                // batch span processor: very small batch size for testing
             .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
+                // batch span processor: very short delay for testing
             .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
-            .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage,demo")
-            .withEnv(getExtraEnv());
+            .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
+                .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://backend:8080")
+                .withEnv(extraEnv)
+                // we have to use an explicit HTTP application wait because the internal one can't execute as there is no bash nor shell
+            .waitingFor(Wait.forHttp("/"));
     target.start();
+
+    targetContainers.add(target);
+
+    return target;
+  }
+
+  protected static GenericContainer<?> startTarget(String image) {
+    return startTarget(image, Collections.emptyMap());
   }
 
   @AfterEach
-  void cleanup() throws IOException {
+  void afterEach() throws IOException {
     client
         .newCall(
             new Request.Builder()
@@ -108,13 +113,24 @@ abstract class SmokeTest {
         .close();
   }
 
-  void stopTarget() {
-    target.stop();
+  @AfterAll
+  static void afterAll() {
+    backend.stop();
+
+    targetContainers.forEach(
+        c -> {
+          if (c.isRunning()) {
+            logger.warn(
+                "test container not properly terminated by test : {} {}",
+                c.getImage(),
+                c.getContainerId());
+            c.stop();
+          }
+        });
   }
 
-  @AfterAll
-  static void cleanupSpec() {
-    backend.stop();
+  protected String getAgentPath() {
+    return agentPath;
   }
 
   protected static int countResourcesByValue(
@@ -193,7 +209,6 @@ abstract class SmokeTest {
         break;
       }
       previousSize = content.length();
-      System.out.printf("Current content size %d%n", previousSize);
       TimeUnit.MILLISECONDS.sleep(500);
     }
 
