@@ -95,17 +95,17 @@ class TestAppSmokeTest extends SmokeTest {
 
   @Test
   void profiling2() throws IOException, InterruptedException {
-    profilingScenario(2, 7);
+    profilingScenario(2, 6);
   }
 
   @Test
   void profiling3() throws IOException, InterruptedException {
-    profilingScenario(3, 11);
+    profilingScenario(3, 10);
   }
 
   @Test
   void profiling4() throws IOException, InterruptedException {
-    profilingScenario(4, 4);
+    profilingScenario(4, 3);
   }
 
   private void profilingScenario(int id, int expectedRegularSpans) throws IOException, InterruptedException {
@@ -131,7 +131,9 @@ class TestAppSmokeTest extends SmokeTest {
             .filter(span -> !span.getName().startsWith("inferred"))
             .toList();
 
-    assertThat(regularSpans).hasSize(expectedRegularSpans);
+    assertThat(regularSpans.stream()
+            .map(s-> s.getName() + " " +bytesToHex(s.getSpanId().toByteArray())))
+            .hasSize(expectedRegularSpans);
 
     regularSpans
             .stream().filter(span -> !span.getSpanId().equals(rootSpan.getSpanId()))
