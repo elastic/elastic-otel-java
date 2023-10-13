@@ -1,3 +1,7 @@
+plugins {
+  id "idea"
+}
+
 group 'co.elastic.apm'
 version '0.0.1-SNAPSHOT'
 
