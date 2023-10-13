@@ -25,7 +25,11 @@ import com.google.protobuf.util.JsonFormat;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.trace.v1.Span;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -64,7 +68,7 @@ abstract class SmokeTest {
   static void setupSpec() {
     backend =
         new GenericContainer<>(
-                "ghcr.io/open-telemetry/opentelemetry-java-instrumentation/smoke-test-fake-backend:20221127.3559314891")
+            "ghcr.io/open-telemetry/opentelemetry-java-instrumentation/smoke-test-fake-backend:20221127.3559314891")
             .withExposedPorts(8080)
             .waitingFor(Wait.forHttp("/health").forPort(8080))
             .withNetwork(network)
@@ -82,14 +86,14 @@ abstract class SmokeTest {
             .withCopyFileToContainer(
                 MountableFile.forHostPath(agentPath), "/opentelemetry-javaagent.jar")
             .withEnv("JAVA_TOOL_OPTIONS", "-javaagent:/opentelemetry-javaagent.jar")
-                // batch span processor: very small batch size for testing
+            // batch span processor: very small batch size for testing
             .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
-                // batch span processor: very short delay for testing
+            // batch span processor: very short delay for testing
             .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
             .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
-                .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://backend:8080")
-                .withEnv(extraEnv)
-                // we have to use an explicit HTTP application wait because the internal one can't execute as there is no bash nor shell
+            .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://backend:8080")
+            .withEnv(extraEnv)
+            // we have to use an explicit HTTP application wait because the internal one can't execute as there is no bash nor shell
             .waitingFor(Wait.forHttp("/"));
     target.start();
 

@@ -21,6 +21,7 @@ package co.elastic.otel;
 import io.opentelemetry.context.ContextStorage;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
+
 import java.util.Collections;
 
 public class ElasticAutoConfigurationCustomizerprovider

@@ -18,8 +18,8 @@
  */
 package com.example.javaagent.smoketest;
 
-import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
+import java.util.concurrent.TimeUnit;
 
 public class OkHttpUtils {
 
