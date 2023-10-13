@@ -249,7 +249,7 @@ public class ElasticProfiler {
 
   private static class InferredSpanData implements SpanData {
 
-    private static final AttributeKey<Long> SAMPLES_KEY = AttributeKey.longKey("profiling.samples");
+    private static final AttributeKey<Long> SAMPLES_KEY = AttributeKey.longKey("elastic.span.inferred_samples");
     private final String name;
     private final String spanId;
 

@@ -2,6 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
   alias gradlePlugins.plugins.shadow
+  alias gradlePlugins.plugins.taskinfo
 }
 
 base.archivesName.set("elastic-otel-javaagent")
