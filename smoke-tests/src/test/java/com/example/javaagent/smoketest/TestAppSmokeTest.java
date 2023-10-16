@@ -83,7 +83,8 @@ class TestAppSmokeTest extends SmokeTest {
       assertThat(attributes).containsKeys(
               "elastic.span.is_local_root",
               "elastic.span.local_root.id",
-              "elastic.span.self_time");
+              "elastic.span.self_time",
+              "elastic.span.stacktrace");
     });
 
   }

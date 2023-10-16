@@ -24,10 +24,14 @@ import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 public class ElasticSpanProcessor implements SpanProcessor {
 
   private final ElasticProfiler profiler;
   private final ElasticBreakdownMetrics breakdownMetrics;
+  private ElasticSpanExporter spanExporter;
 
   public ElasticSpanProcessor(ElasticProfiler profiler, ElasticBreakdownMetrics breakdownMetrics) {
     this.profiler = profiler;
@@ -49,6 +53,9 @@ public class ElasticSpanProcessor implements SpanProcessor {
   public void onEnd(ReadableSpan span) {
     profiler.onSpanEnd(span);
     breakdownMetrics.onSpanEnd(span);
+
+
+    captureStackTrace(span);
   }
 
   @Override
@@ -60,5 +67,24 @@ public class ElasticSpanProcessor implements SpanProcessor {
   public CompletableResultCode shutdown() {
     profiler.shutdown();
     return CompletableResultCode.ofSuccess();
+  }
+
+  public void registerSpanExporter(ElasticSpanExporter spanExporter) {
+    this.spanExporter = spanExporter;
+  }
+
+  private void captureStackTrace(ReadableSpan span) {
+    if(spanExporter == null) {
+      return;
+    }
+    Throwable exception = new Throwable();
+    StringWriter stringWriter = new StringWriter();
+    try (PrintWriter printWriter = new PrintWriter(stringWriter)) {
+      exception.printStackTrace(printWriter);
+    }
+
+    // same text format as 'exception.stacktrace'
+    // TODO should we filter-out the calling code that is within the agent: at least onEnd + captureStackTrace will be included here
+    spanExporter.addAttribute(span.getSpanContext(),ElasticAttributes.SPAN_STACKTRACE, stringWriter.toString());
   }
 }

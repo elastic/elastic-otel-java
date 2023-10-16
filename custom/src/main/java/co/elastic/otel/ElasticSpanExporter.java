@@ -61,7 +61,9 @@ public class ElasticSpanExporter implements SpanExporter {
                 new DelegatingSpanData(span) {
                   @Override
                   public Attributes getAttributes() {
-                    return span.getAttributes().toBuilder().putAll(extraAttributes.build()).build();
+                    AttributesBuilder builder = span.getAttributes().toBuilder();
+                    builder.putAll(extraAttributes.build());
+                    return builder.build();
                   }
                 });
       }
