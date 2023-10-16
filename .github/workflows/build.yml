@@ -29,10 +29,10 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Gradle test
+      - name: Gradle build, test and verify
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: test
+          arguments: verify
 
       - name: Agent artifact
         uses: actions/upload-artifact@v3
