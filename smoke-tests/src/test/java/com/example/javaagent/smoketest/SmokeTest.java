@@ -38,8 +38,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.ResponseBody;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
@@ -48,23 +48,34 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.MountableFile;
 
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 abstract class SmokeTest {
   private static final Logger logger = LoggerFactory.getLogger(SmokeTest.class);
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final int TARGET_DEBUG_PORT = 5005;
+  private static final int BACKEND_DEBUG_PORT = 5006;
+  private static final String JAVAAGENT_JAR_PATH = "/opentelemetry-javaagent.jar";
 
   protected static OkHttpClient client = OkHttpUtils.client();
 
   private static final Network network = Network.newNetwork();
-  protected static final String agentPath =
+  private static final String agentPath =
       System.getProperty("io.opentelemetry.smoketest.agent.shadowJar.path");
 
   // keep track of all target containers in case they aren't properly stopped
-  private static List<GenericContainer<?>> targetContainers = new ArrayList<>();
+  private static final List<GenericContainer<?>> targetContainers = new ArrayList<>();
 
   private static GenericContainer<?> backend;
 
   @BeforeAll
+  @SuppressWarnings("resource")
   static void setupSpec() {
     backend =
         new GenericContainer<>(
@@ -74,31 +85,63 @@ abstract class SmokeTest {
             .withNetwork(network)
             .withNetworkAliases("backend")
             .withLogConsumer(new Slf4jLogConsumer(logger));
+
+    if (JavaExecutable.isDebugging() && JavaExecutable.isListeningDebuggerStarted(BACKEND_DEBUG_PORT, "backend")) {
+      backend.withEnv("JAVA_TOOL_OPTIONS", JavaExecutable.jvmDebugArgument("remote-localhost", BACKEND_DEBUG_PORT));
+      backend = addDockerDebugHost(backend);
+    }
+
     backend.start();
   }
 
   protected static GenericContainer<?> startTarget(String image, Map<String, String> extraEnv) {
+
+    @SuppressWarnings("resource")
     GenericContainer<?> target =
-        new GenericContainer<>(image)
-            .withExposedPorts(8080)
-            .withNetwork(network)
-            .withLogConsumer(new Slf4jLogConsumer(logger))
-            .withCopyFileToContainer(
-                MountableFile.forHostPath(agentPath), "/opentelemetry-javaagent.jar")
-            .withEnv("JAVA_TOOL_OPTIONS", "-javaagent:/opentelemetry-javaagent.jar")
-            // batch span processor: very small batch size for testing
-            .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
-            // batch span processor: very short delay for testing
-            .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
-            .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
-            .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://backend:8080")
-            .withEnv(extraEnv)
-            // we have to use an explicit HTTP application wait because the internal one can't execute as there is no bash nor shell
-            .waitingFor(Wait.forHttp("/"));
-    target.start();
+
+            new GenericContainer<>(image)
+                    .withExposedPorts(8080)
+                    .withNetwork(network)
+                    .withLogConsumer(new Slf4jLogConsumer(logger))
+                    .withCopyFileToContainer(
+                            MountableFile.forHostPath(agentPath), JAVAAGENT_JAR_PATH)
+
+                    // batch span processor: very small batch size for testing
+                    .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
+                    // batch span processor: very short delay for testing
+                    .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
+                    .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
+                    .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://backend:8080")
+                    .withEnv(extraEnv)
+                    .waitingFor(Wait.forHttp("/health").forPort(8080));
+
+    StringBuilder jvmArgs = new StringBuilder();
+
+    if (JavaExecutable.isDebugging()) {
+      // when debugging, automatically use verbose debug logging
+      target.withEnv("OTEL_JAVAAGENT_DEBUG", "true");
+
+      if (JavaExecutable.isListeningDebuggerStarted(TARGET_DEBUG_PORT, "target")) {
+        target = addDockerDebugHost(target);
+        jvmArgs.append(JavaExecutable.jvmDebugArgument("remote-localhost", TARGET_DEBUG_PORT)).append(" ");
+      }
+
+    }
+
+    jvmArgs.append(JavaExecutable.jvmAgentArgument(JAVAAGENT_JAR_PATH));
+    target.withEnv("JAVA_TOOL_OPTIONS", jvmArgs.toString());
+
+    Objects.requireNonNull(target).start();
 
     targetContainers.add(target);
 
+    return target;
+  }
+
+  private static GenericContainer<?> addDockerDebugHost(GenericContainer<?> target) {
+    // make the docker host IP available for remote debug
+    // the 'host-gateway' is automatically translated by docker for all OSes
+    target = target.withExtraHost("remote-localhost", "host-gateway");
     return target;
   }
 
@@ -106,8 +149,15 @@ abstract class SmokeTest {
     return startTarget(image, Collections.emptyMap());
   }
 
-  @AfterEach
-  void afterEach() throws IOException {
+  @BeforeEach
+  void beforeEach() throws IOException, InterruptedException {
+    // because traces reporting is asynchronous we need to wait for the healthcheck traces to be reported and only then
+    // flush before the test, otherwise the first test will see the healthcheck trace captured.
+    waitForTraces();
+    clearBackend();
+  }
+
+  protected static void clearBackend() throws IOException {
     client
         .newCall(
             new Request.Builder()
@@ -174,7 +224,7 @@ abstract class SmokeTest {
         .flatMap(it -> it.getSpansList().stream());
   }
 
-  protected Collection<ExportTraceServiceRequest> waitForTraces()
+  protected List<ExportTraceServiceRequest> waitForTraces()
       throws IOException, InterruptedException {
     String content = waitForContent();
 

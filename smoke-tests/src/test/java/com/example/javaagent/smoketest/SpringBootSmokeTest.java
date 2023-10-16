@@ -61,18 +61,6 @@ class SpringBootSmokeTest extends SmokeTest {
     Collection<ExportTraceServiceRequest> traces = waitForTraces();
     Assertions.assertEquals(1, traces.size());
 
-    //    Assertions.assertNotNull(response.header("X-server-id"));
-    //    Assertions.assertEquals(1, response.headers("X-server-id").size());
-    //    Assertions.assertTrue(TraceId.isValid(response.header("X-server-id")));
-    //    Assertions.assertEquals("Hi!", response.body().string());
-    //    Assertions.assertEquals(1, countSpansByName(traces, "GET /greeting"));
-    //    Assertions.assertEquals(0, countSpansByName(traces, "WebController.greeting"));
-    //    Assertions.assertEquals(1, countSpansByName(traces, "WebController.withSpan"));
-    //    Assertions.assertEquals(2, countSpansByAttributeValue(traces, "custom", "demo"));
-    //    Assertions.assertNotEquals(
-    //        0, countResourcesByValue(traces, "telemetry.auto.version", currentAgentVersion));
-    //    Assertions.assertNotEquals(0, countResourcesByValue(traces, "custom.resource", "demo"));
-
   }
 
 }

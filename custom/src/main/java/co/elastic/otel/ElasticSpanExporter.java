@@ -44,7 +44,7 @@ public class ElasticSpanExporter implements SpanExporter {
   public CompletableResultCode export(Collection<SpanData> spans) {
     // shortcut in the rare case where no filtering is required
     if (storage.isEmpty()) {
-      delegate.export(spans);
+      return delegate.export(spans);
     }
 
     List<SpanData> toSend = new ArrayList<>(spans.size());
