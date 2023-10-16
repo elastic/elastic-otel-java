@@ -18,6 +18,7 @@
  */
 package co.elastic.otel;
 
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.SpanContext;
@@ -35,7 +36,7 @@ public class ElasticSpanExporter implements SpanExporter {
 
   private final SpanExporter delegate;
 
-  private final ConcurrentHashMap<SpanContext, ArrayList<Function<AttributesBuilder, AttributesBuilder>>> attributes;
+  private final ConcurrentHashMap<SpanContext, AttributesBuilder> attributes;
 
   public ElasticSpanExporter(SpanExporter delegate) {
     this.delegate = delegate;
@@ -52,7 +53,7 @@ public class ElasticSpanExporter implements SpanExporter {
     List<SpanData> toSend = new ArrayList<>(spans.size());
     for (SpanData span : spans) {
       SpanContext spanContext = span.getSpanContext();
-      ArrayList<Function<AttributesBuilder, AttributesBuilder>> extraAttributes = attributes.remove(spanContext);
+      AttributesBuilder extraAttributes = attributes.remove(spanContext);
       if (extraAttributes == null) {
         toSend.add(span);
       } else {
@@ -60,11 +61,7 @@ public class ElasticSpanExporter implements SpanExporter {
                 new DelegatingSpanData(span) {
                   @Override
                   public Attributes getAttributes() {
-                    AttributesBuilder builder = span.getAttributes().toBuilder();
-                    for (Function<AttributesBuilder, AttributesBuilder> extraAttribute : extraAttributes) {
-                      extraAttribute.apply(builder);
-                    }
-                    return builder.build();
+                    return span.getAttributes().toBuilder().putAll(extraAttributes.build()).build();
                   }
                 });
       }
@@ -73,13 +70,13 @@ public class ElasticSpanExporter implements SpanExporter {
     return delegate.export(toSend);
   }
 
-  public void addAttributes(SpanContext spanContext, Function<AttributesBuilder, AttributesBuilder> builder) {
-    attributes.compute(spanContext, (k, list) -> {
-      if (list == null) {
-        list = new ArrayList<>();
+  public <T> void addAttribute(SpanContext spanContext, AttributeKey<T> key, T value) {
+    attributes.compute(spanContext, (k, builder) -> {
+      if (builder == null) {
+        builder = Attributes.builder();
       }
-      list.add(builder);
-      return list;
+      builder.put(key, value);
+      return builder;
     });
   }
 
