@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -47,13 +48,6 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.MountableFile;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 abstract class SmokeTest {
   private static final Logger logger = LoggerFactory.getLogger(SmokeTest.class);
@@ -86,8 +80,10 @@ abstract class SmokeTest {
             .withNetworkAliases("backend")
             .withLogConsumer(new Slf4jLogConsumer(logger));
 
-    if (JavaExecutable.isDebugging() && JavaExecutable.isListeningDebuggerStarted(BACKEND_DEBUG_PORT, "backend")) {
-      backend.withEnv("JAVA_TOOL_OPTIONS", JavaExecutable.jvmDebugArgument("remote-localhost", BACKEND_DEBUG_PORT));
+    if (JavaExecutable.isDebugging() && JavaExecutable.isListeningDebuggerStarted(
+        BACKEND_DEBUG_PORT, "backend")) {
+      backend.withEnv("JAVA_TOOL_OPTIONS",
+          JavaExecutable.jvmDebugArgument("remote-localhost", BACKEND_DEBUG_PORT));
       backend = addDockerDebugHost(backend);
     }
 
@@ -99,21 +95,21 @@ abstract class SmokeTest {
     @SuppressWarnings("resource")
     GenericContainer<?> target =
 
-            new GenericContainer<>(image)
-                    .withExposedPorts(8080)
-                    .withNetwork(network)
-                    .withLogConsumer(new Slf4jLogConsumer(logger))
-                    .withCopyFileToContainer(
-                            MountableFile.forHostPath(agentPath), JAVAAGENT_JAR_PATH)
+        new GenericContainer<>(image)
+            .withExposedPorts(8080)
+            .withNetwork(network)
+            .withLogConsumer(new Slf4jLogConsumer(logger))
+            .withCopyFileToContainer(
+                MountableFile.forHostPath(agentPath), JAVAAGENT_JAR_PATH)
 
-                    // batch span processor: very small batch size for testing
-                    .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
-                    // batch span processor: very short delay for testing
-                    .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
-                    .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
-                    .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://backend:8080")
-                    .withEnv(extraEnv)
-                    .waitingFor(Wait.forHttp("/health").forPort(8080));
+            // batch span processor: very small batch size for testing
+            .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
+            // batch span processor: very short delay for testing
+            .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
+            .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
+            .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://backend:8080")
+            .withEnv(extraEnv)
+            .waitingFor(Wait.forHttp("/health").forPort(8080));
 
     StringBuilder jvmArgs = new StringBuilder();
 
@@ -123,7 +119,8 @@ abstract class SmokeTest {
 
       if (JavaExecutable.isListeningDebuggerStarted(TARGET_DEBUG_PORT, "target")) {
         target = addDockerDebugHost(target);
-        jvmArgs.append(JavaExecutable.jvmDebugArgument("remote-localhost", TARGET_DEBUG_PORT)).append(" ");
+        jvmArgs.append(JavaExecutable.jvmDebugArgument("remote-localhost", TARGET_DEBUG_PORT))
+            .append(" ");
       }
 
     }

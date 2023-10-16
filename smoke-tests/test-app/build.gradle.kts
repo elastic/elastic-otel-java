@@ -1,4 +1,3 @@
-
 plugins {
   alias(gradlePlugins.plugins.shadow)
   alias(gradlePlugins.plugins.jib)
@@ -41,16 +40,16 @@ jib {
 
 tasks {
 
-    // can we set the 'jib' task output to be the list of files that are used as 'input' of the jib task ?
+  // can we set the 'jib' task output to be the list of files that are used as 'input' of the jib task ?
 
-    // javadoc not required
-    javadoc {
-        isEnabled = false
-    }
+  // javadoc not required
+  javadoc {
+    isEnabled = false
+  }
 
-    // build docker image with 'assemble'
-    assemble {
-        dependsOn(jibDockerBuild)
-    }
+  // build docker image with 'assemble'
+  assemble {
+    dependsOn(jibDockerBuild)
+  }
 
 }

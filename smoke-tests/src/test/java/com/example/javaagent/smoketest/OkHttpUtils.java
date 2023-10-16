@@ -18,14 +18,14 @@
  */
 package com.example.javaagent.smoketest;
 
-import okhttp3.OkHttpClient;
 import java.util.concurrent.TimeUnit;
+import okhttp3.OkHttpClient;
 
 public class OkHttpUtils {
 
   static OkHttpClient.Builder clientBuilder() {
     TimeUnit unit = TimeUnit.MINUTES;
-    int timeout = JavaExecutable.isDebugging() ? 10: 1;
+    int timeout = JavaExecutable.isDebugging() ? 10 : 1;
     return new OkHttpClient.Builder()
         .connectTimeout(timeout, unit)
         .writeTimeout(timeout, unit)
