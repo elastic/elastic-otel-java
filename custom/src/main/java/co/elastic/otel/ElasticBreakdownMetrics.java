@@ -176,7 +176,7 @@ public class ElasticBreakdownMetrics {
             // put measured metric as span attribute to allow using an ingest pipeline to alter
             // storage
             // ingest pipelines do not have access to _source and thus can't read the metric as-is.
-            .put(ElasticAttributes.SELF_TIME_ATTRIBUTE, selfTime);
+            .put(ElasticAttributes.SELF_TIME, selfTime);
 
     // unfortunately here we get a read-only span that has already been ended, thus even a cast to
     // ReadWriteSpan
@@ -194,8 +194,8 @@ public class ElasticBreakdownMetrics {
     AttributesBuilder builder =
         Attributes.builder()
             // default to app/internal unless other span attributes
-            .put(ElasticAttributes.ELASTIC_SPAN_TYPE, "app")
-            .put(ElasticAttributes.ELASTIC_SPAN_SUBTYPE, "internal");
+            .put(ElasticAttributes.SPAN_TYPE, "app")
+            .put(ElasticAttributes.SPAN_SUBTYPE, "internal");
 
     spanAttributes.forEach(
         (k, v) -> {
@@ -203,8 +203,8 @@ public class ElasticBreakdownMetrics {
           if (AttributeType.STRING.equals(k.getType())) {
             int index = key.indexOf(".system");
             if (index > 0) {
-              builder.put(ElasticAttributes.ELASTIC_SPAN_TYPE, key.substring(0, index));
-              builder.put(ElasticAttributes.ELASTIC_SPAN_SUBTYPE, v.toString());
+              builder.put(ElasticAttributes.SPAN_TYPE, key.substring(0, index));
+              builder.put(ElasticAttributes.SPAN_SUBTYPE, v.toString());
             }
           }
         });

@@ -59,7 +59,7 @@ public class ElasticSpanExporter implements SpanExporter {
               @Override
               public Attributes getAttributes() {
                 return span.getAttributes().toBuilder()
-                    .put(ElasticAttributes.SELF_TIME_ATTRIBUTE, data.getSelfTime())
+                    .put(ElasticAttributes.SELF_TIME, data.getSelfTime())
                     .build();
               }
             });
