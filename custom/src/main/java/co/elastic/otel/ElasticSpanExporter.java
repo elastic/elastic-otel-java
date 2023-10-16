@@ -19,6 +19,7 @@
 package co.elastic.otel;
 
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.DelegatingSpanData;
@@ -28,54 +29,63 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 public class ElasticSpanExporter implements SpanExporter {
 
   private final SpanExporter delegate;
 
-  private ConcurrentHashMap<SpanContext, ElasticBreakdownMetrics.SpanContextData> storage;
+  private final ConcurrentHashMap<SpanContext, ArrayList<Function<AttributesBuilder, AttributesBuilder>>> attributes;
 
   public ElasticSpanExporter(SpanExporter delegate) {
     this.delegate = delegate;
-    this.storage = new ConcurrentHashMap<>();
+    this.attributes = new ConcurrentHashMap<>();
   }
 
   @Override
   public CompletableResultCode export(Collection<SpanData> spans) {
     // shortcut in the rare case where no filtering is required
-    if (storage.isEmpty()) {
+    if (attributes.isEmpty()) {
       return delegate.export(spans);
     }
 
     List<SpanData> toSend = new ArrayList<>(spans.size());
     for (SpanData span : spans) {
       SpanContext spanContext = span.getSpanContext();
-      ElasticBreakdownMetrics.SpanContextData data = storage.remove(spanContext);
-      if (data == null) {
+      ArrayList<Function<AttributesBuilder, AttributesBuilder>> extraAttributes = attributes.remove(spanContext);
+      if (extraAttributes == null) {
         toSend.add(span);
       } else {
         toSend.add(
-            new DelegatingSpanData(span) {
-              @Override
-              public Attributes getAttributes() {
-                return span.getAttributes().toBuilder()
-                    .put(ElasticAttributes.SELF_TIME, data.getSelfTime())
-                    .build();
-              }
-            });
+                new DelegatingSpanData(span) {
+                  @Override
+                  public Attributes getAttributes() {
+                    AttributesBuilder builder = span.getAttributes().toBuilder();
+                    for (Function<AttributesBuilder, AttributesBuilder> extraAttribute : extraAttributes) {
+                      extraAttribute.apply(builder);
+                    }
+                    return builder.build();
+                  }
+                });
       }
     }
 
     return delegate.export(toSend);
   }
 
-  public void report(SpanContext spanContext, ElasticBreakdownMetrics.SpanContextData data) {
-    this.storage.put(spanContext, data);
+  public void addAttributes(SpanContext spanContext, Function<AttributesBuilder, AttributesBuilder> builder) {
+    attributes.compute(spanContext, (k, list) -> {
+      if (list == null) {
+        list = new ArrayList<>();
+      }
+      list.add(builder);
+      return list;
+    });
   }
 
   @Override
   public CompletableResultCode flush() {
-    storage.clear();
+    attributes.clear();
     return delegate.flush();
   }
 
