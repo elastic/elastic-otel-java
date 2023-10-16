@@ -18,24 +18,25 @@
  */
 package com.example.javaagent.smoketest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
+import io.opentelemetry.proto.common.v1.AnyValue;
+import io.opentelemetry.proto.common.v1.KeyValue;
+import io.opentelemetry.proto.trace.v1.Span;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import io.opentelemetry.proto.common.v1.AnyValue;
-import io.opentelemetry.proto.common.v1.KeyValue;
-import io.opentelemetry.proto.trace.v1.Span;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 class TestAppSmokeTest extends SmokeTest {
 
@@ -70,22 +71,21 @@ class TestAppSmokeTest extends SmokeTest {
     List<ExportTraceServiceRequest> traces = waitForTraces();
     List<Span> spans = getSpans(traces).collect(Collectors.toList());
     assertThat(spans)
-            .hasSize(2)
+        .hasSize(2)
+        .extracting("name", "kind")
+        .containsOnly(
+            tuple("GET /health", Span.SpanKind.SPAN_KIND_SERVER),
+            tuple("HealthController.healthcheck", Span.SpanKind.SPAN_KIND_INTERNAL));
 
-            .extracting("name", "kind")
-            .containsOnly(
-                    tuple("GET /health", Span.SpanKind.SPAN_KIND_SERVER),
-                    tuple("HealthController.healthcheck", Span.SpanKind.SPAN_KIND_INTERNAL)
-            );
-
-    spans.forEach(span -> {
-      Map<String, AnyValue> attributes = getAttributes(span);
-      assertThat(attributes).containsKeys(
-              "elastic.span.is_local_root",
-              "elastic.span.local_root.id",
-              "elastic.span.self_time");
-    });
-
+    spans.forEach(
+        span -> {
+          Map<String, AnyValue> attributes = getAttributes(span);
+          assertThat(attributes)
+              .containsKeys(
+                  "elastic.span.is_local_root",
+                  "elastic.span.local_root.id",
+                  "elastic.span.self_time");
+        });
   }
 
   @Test
@@ -108,39 +108,46 @@ class TestAppSmokeTest extends SmokeTest {
     profilingScenario(4, 3);
   }
 
-  private void profilingScenario(int id, int expectedRegularSpans) throws IOException, InterruptedException {
+  private void profilingScenario(int id, int expectedRegularSpans)
+      throws IOException, InterruptedException {
     List<Span> spans = profilingScenario(id);
-    Span rootSpan = spans.stream()
-            .filter(span->span.getKind().equals(Span.SpanKind.SPAN_KIND_SERVER))
-            .findFirst().orElseThrow();
+    Span rootSpan =
+        spans.stream()
+            .filter(span -> span.getKind().equals(Span.SpanKind.SPAN_KIND_SERVER))
+            .findFirst()
+            .orElseThrow();
 
     assertThat(getAttributes(rootSpan))
-            .containsEntry("elastic.span.is_local_root", attributeValue(true))
-            .containsEntry("elastic.span.local_root.id", attributeValue(bytesToHex(rootSpan.getSpanId().toByteArray())));
+        .containsEntry("elastic.span.is_local_root", attributeValue(true))
+        .containsEntry(
+            "elastic.span.local_root.id",
+            attributeValue(bytesToHex(rootSpan.getSpanId().toByteArray())));
 
-    List<Span> inferred = spans.stream()
-            .filter(span -> span.getName().startsWith("inferred"))
-            .toList();
+    List<Span> inferred =
+        spans.stream().filter(span -> span.getName().startsWith("inferred")).toList();
 
-    inferred.forEach(span -> {
-      assertThat(getAttributes(span))
-              .containsKey("elastic.span.inferred_samples");
-    });
+    inferred.forEach(
+        span -> {
+          assertThat(getAttributes(span)).containsKey("elastic.span.inferred_samples");
+        });
 
-    List<Span> regularSpans = spans.stream()
-            .filter(span -> !span.getName().startsWith("inferred"))
-            .toList();
+    List<Span> regularSpans =
+        spans.stream().filter(span -> !span.getName().startsWith("inferred")).toList();
 
-    assertThat(regularSpans.stream()
-            .map(s-> s.getName() + " " +bytesToHex(s.getSpanId().toByteArray())))
-            .hasSize(expectedRegularSpans);
+    assertThat(
+            regularSpans.stream()
+                .map(s -> s.getName() + " " + bytesToHex(s.getSpanId().toByteArray())))
+        .hasSize(expectedRegularSpans);
 
-    regularSpans
-            .stream().filter(span -> !span.getSpanId().equals(rootSpan.getSpanId()))
-            .forEach(span -> {
+    regularSpans.stream()
+        .filter(span -> !span.getSpanId().equals(rootSpan.getSpanId()))
+        .forEach(
+            span -> {
               assertThat(getAttributes(span))
-                      .containsEntry("elastic.span.is_local_root", attributeValue(false))
-                      .containsEntry("elastic.span.local_root.id", attributeValue(bytesToHex(rootSpan.getSpanId().toByteArray())));
+                  .containsEntry("elastic.span.is_local_root", attributeValue(false))
+                  .containsEntry(
+                      "elastic.span.local_root.id",
+                      attributeValue(bytesToHex(rootSpan.getSpanId().toByteArray())));
             });
   }
 
@@ -153,16 +160,16 @@ class TestAppSmokeTest extends SmokeTest {
   }
 
   private List<Span> profilingScenario(int id) throws IOException, InterruptedException {
-    doRequest(getUrl("/profiling/scenario/" + id), okResponseBody(String.format("scenario %d OK", id)));
+    doRequest(
+        getUrl("/profiling/scenario/" + id), okResponseBody(String.format("scenario %d OK", id)));
 
     List<ExportTraceServiceRequest> traces = waitForTraces();
     List<Span> spans = getSpans(traces).collect(Collectors.toList());
     assertThat(spans)
-            .extracting("name", "kind")
-            .contains(
-                    tuple("GET /profiling/scenario/{id}", Span.SpanKind.SPAN_KIND_SERVER),
-                    tuple("ProfilingController.scenario", Span.SpanKind.SPAN_KIND_INTERNAL)
-            );
+        .extracting("name", "kind")
+        .contains(
+            tuple("GET /profiling/scenario/{id}", Span.SpanKind.SPAN_KIND_SERVER),
+            tuple("ProfilingController.scenario", Span.SpanKind.SPAN_KIND_INTERNAL));
 
     return spans;
   }
@@ -175,23 +182,22 @@ class TestAppSmokeTest extends SmokeTest {
     };
   }
 
-  private static Map<String, AnyValue> getAttributes(Span span){
-    Map<String,AnyValue> attributes = new HashMap<>();
+  private static Map<String, AnyValue> getAttributes(Span span) {
+    Map<String, AnyValue> attributes = new HashMap<>();
     for (KeyValue kv : span.getAttributesList()) {
       attributes.put(kv.getKey(), kv.getValue());
     }
     return attributes;
   }
 
-
   public Stream<Span> getSpans(List<ExportTraceServiceRequest> traces) {
     return traces.stream()
-            .flatMap(it -> it.getResourceSpansList().stream())
-            .flatMap(it -> it.getScopeSpansList().stream())
-            .flatMap(it -> it.getSpansList().stream());
+        .flatMap(it -> it.getResourceSpansList().stream())
+        .flatMap(it -> it.getScopeSpansList().stream())
+        .flatMap(it -> it.getSpansList().stream());
   }
 
-  private void doRequest(String url, IOConsumer<Response> responseHandler) throws IOException{
+  private void doRequest(String url, IOConsumer<Response> responseHandler) throws IOException {
     Request request = new Request.Builder().url(url).get().build();
 
     try (Response response = client.newCall(request).execute()) {
@@ -204,7 +210,7 @@ class TestAppSmokeTest extends SmokeTest {
     void accept(T t) throws IOException;
   }
 
-  private static String bytesToHex(byte[] bytes){
+  private static String bytesToHex(byte[] bytes) {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < bytes.length; i++) {
       String part = Integer.toHexString((bytes[i] & 0xFF));
@@ -215,5 +221,4 @@ class TestAppSmokeTest extends SmokeTest {
     }
     return sb.toString();
   }
-
 }
