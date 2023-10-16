@@ -183,7 +183,8 @@ public class ElasticBreakdownMetrics {
     // does not allow us from adding extra span attributes
     if (spanExporter != null) {
       spanContextData.setSelfTime(selfTime);
-      spanExporter.addAttribute(spanContext, ElasticAttributes.SELF_TIME, spanContextData.getSelfTime());
+      spanExporter.addAttribute(
+          spanContext, ElasticAttributes.SELF_TIME, spanContextData.getSelfTime());
     }
 
     breakDownCounter.add(selfTime, metricAttributes.build());

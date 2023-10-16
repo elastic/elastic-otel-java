@@ -23,7 +23,6 @@ import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SpanProcessor;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -54,7 +53,6 @@ public class ElasticSpanProcessor implements SpanProcessor {
     profiler.onSpanEnd(span);
     breakdownMetrics.onSpanEnd(span);
 
-
     captureStackTrace(span);
   }
 
@@ -74,7 +72,7 @@ public class ElasticSpanProcessor implements SpanProcessor {
   }
 
   private void captureStackTrace(ReadableSpan span) {
-    if(spanExporter == null) {
+    if (spanExporter == null) {
       return;
     }
     Throwable exception = new Throwable();
@@ -84,7 +82,9 @@ public class ElasticSpanProcessor implements SpanProcessor {
     }
 
     // same text format as 'exception.stacktrace'
-    // TODO should we filter-out the calling code that is within the agent: at least onEnd + captureStackTrace will be included here
-    spanExporter.addAttribute(span.getSpanContext(),ElasticAttributes.SPAN_STACKTRACE, stringWriter.toString());
+    // TODO should we filter-out the calling code that is within the agent: at least onEnd +
+    // captureStackTrace will be included here
+    spanExporter.addAttribute(
+        span.getSpanContext(), ElasticAttributes.SPAN_STACKTRACE, stringWriter.toString());
   }
 }

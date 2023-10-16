@@ -1,3 +1,6 @@
+plugins {
+  id "idea"
+}
 
 group 'co.elastic.apm'
 version '0.0.1-SNAPSHOT'
@@ -12,10 +15,10 @@ subprojects {
 
   ext {
     deps = [
-      autoservice: [
-        "com.google.auto.service:auto-service:"+libraries.versions.autoservice.get(),
-        "com.google.auto.service:auto-service-annotations:"+libraries.versions.autoservice.get(),
-      ]
+        autoservice: [
+            "com.google.auto.service:auto-service:" + libraries.versions.autoservice.get(),
+            "com.google.auto.service:auto-service-annotations:" + libraries.versions.autoservice.get(),
+        ]
     ]
   }
 
@@ -37,15 +40,15 @@ subprojects {
 
   dependencies {
 
-    implementation(platform("io.opentelemetry:opentelemetry-bom:"+libraries.versions.opentelemetrySdk.get().toString()))
+    implementation(platform("io.opentelemetry:opentelemetry-bom:" + libraries.versions.opentelemetrySdk.get().toString()))
 
     // these serve as a test of the instrumentation boms
-    implementation(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:"+libraries.versions.opentelemetryJavaagent.get().toString()))
-    implementation(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:"+libraries.versions.opentelemetryJavaagentAlpha.get().toString()))
+    implementation(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:" + libraries.versions.opentelemetryJavaagent.get().toString()))
+    implementation(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:" + libraries.versions.opentelemetryJavaagentAlpha.get().toString()))
 
     testImplementation("org.mockito:mockito-core:5.5.0")
 
-    testImplementation(enforcedPlatform("org.junit:junit-bom:"+libraries.versions.junit.get().toString()))
+    testImplementation(enforcedPlatform("org.junit:junit-bom:" + libraries.versions.junit.get().toString()))
     testImplementation("org.junit.jupiter:junit-jupiter")
   }
 

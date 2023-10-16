@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 public class ElasticSpanExporter implements SpanExporter {
 
@@ -58,14 +57,14 @@ public class ElasticSpanExporter implements SpanExporter {
         toSend.add(span);
       } else {
         toSend.add(
-                new DelegatingSpanData(span) {
-                  @Override
-                  public Attributes getAttributes() {
-                    AttributesBuilder builder = span.getAttributes().toBuilder();
-                    builder.putAll(extraAttributes.build());
-                    return builder.build();
-                  }
-                });
+            new DelegatingSpanData(span) {
+              @Override
+              public Attributes getAttributes() {
+                AttributesBuilder builder = span.getAttributes().toBuilder();
+                builder.putAll(extraAttributes.build());
+                return builder.build();
+              }
+            });
       }
     }
 
@@ -73,13 +72,15 @@ public class ElasticSpanExporter implements SpanExporter {
   }
 
   public <T> void addAttribute(SpanContext spanContext, AttributeKey<T> key, T value) {
-    attributes.compute(spanContext, (k, builder) -> {
-      if (builder == null) {
-        builder = Attributes.builder();
-      }
-      builder.put(key, value);
-      return builder;
-    });
+    attributes.compute(
+        spanContext,
+        (k, builder) -> {
+          if (builder == null) {
+            builder = Attributes.builder();
+          }
+          builder.put(key, value);
+          return builder;
+        });
   }
 
   @Override
