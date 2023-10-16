@@ -32,9 +32,7 @@ public class JavaExecutable {
 
   private static final Logger log = LoggerFactory.getLogger(JavaExecutable.class);
 
-  private JavaExecutable() {
-
-  }
+  private JavaExecutable() {}
 
   /**
    * @return absolute path to current Java executable
@@ -50,7 +48,8 @@ public class JavaExecutable {
   }
 
   /**
-   * @return {@literal true} when the current JVM is being debugged (with `-agentlib:...` parameter).
+   * @return {@literal true} when the current JVM is being debugged (with `-agentlib:...`
+   *     parameter).
    */
   public static boolean isDebugging() {
     // test if the test code is currently being debugged
@@ -64,15 +63,21 @@ public class JavaExecutable {
   }
 
   private static boolean probeListeningDebugger(int port) {
-    // the most straightforward way to probe for an active debugger listening on port is to start another JVM
-    // with the debug options and check the process exit status. Trying to probe for open network port messes with
-    // the debugger and makes IDEA stop it. The only downside of this is that the debugger will first attach to this
+    // the most straightforward way to probe for an active debugger listening on port is to start
+    // another JVM
+    // with the debug options and check the process exit status. Trying to probe for open network
+    // port messes with
+    // the debugger and makes IDEA stop it. The only downside of this is that the debugger will
+    // first attach to this
     // probe JVM, then the one running in a docker container we are aiming to debug.
     try {
-      Process process = new ProcessBuilder()
-          .command(JavaExecutable.getBinaryPath().toString(), jvmDebugArgument("localhost", port),
-              "-version")
-          .start();
+      Process process =
+          new ProcessBuilder()
+              .command(
+                  JavaExecutable.getBinaryPath().toString(),
+                  jvmDebugArgument("localhost", port),
+                  "-version")
+              .start();
       process.waitFor(5, TimeUnit.SECONDS);
       return process.exitValue() == 0;
     } catch (InterruptedException | IOException e) {
@@ -81,8 +86,8 @@ public class JavaExecutable {
   }
 
   public static String jvmDebugArgument(String host, int port) {
-    return String.format("-agentlib:jdwp=transport=dt_socket,server=n,address=%s:%d,suspend=y",
-        host, port);
+    return String.format(
+        "-agentlib:jdwp=transport=dt_socket,server=n,address=%s:%d,suspend=y", host, port);
   }
 
   public static String jvmAgentArgument(String path) {
@@ -94,15 +99,15 @@ public class JavaExecutable {
     if (probeListeningDebugger(port)) {
       log.info(
           "listening debugger detected on port {}, remote debugging in the {} container is enabled",
-          port, description);
+          port,
+          description);
       return true;
     } else {
       log.info(
           "listening debugger not detected on port {}, remote debugging in the {} container is not enabled",
-          port, description);
+          port,
+          description);
       return false;
     }
-
   }
-
 }

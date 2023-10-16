@@ -73,16 +73,17 @@ abstract class SmokeTest {
   static void setupSpec() {
     backend =
         new GenericContainer<>(
-            "ghcr.io/open-telemetry/opentelemetry-java-instrumentation/smoke-test-fake-backend:20221127.3559314891")
+                "ghcr.io/open-telemetry/opentelemetry-java-instrumentation/smoke-test-fake-backend:20221127.3559314891")
             .withExposedPorts(8080)
             .waitingFor(Wait.forHttp("/health").forPort(8080))
             .withNetwork(network)
             .withNetworkAliases("backend")
             .withLogConsumer(new Slf4jLogConsumer(logger));
 
-    if (JavaExecutable.isDebugging() && JavaExecutable.isListeningDebuggerStarted(
-        BACKEND_DEBUG_PORT, "backend")) {
-      backend.withEnv("JAVA_TOOL_OPTIONS",
+    if (JavaExecutable.isDebugging()
+        && JavaExecutable.isListeningDebuggerStarted(BACKEND_DEBUG_PORT, "backend")) {
+      backend.withEnv(
+          "JAVA_TOOL_OPTIONS",
           JavaExecutable.jvmDebugArgument("remote-localhost", BACKEND_DEBUG_PORT));
       backend = addDockerDebugHost(backend);
     }
@@ -94,13 +95,11 @@ abstract class SmokeTest {
 
     @SuppressWarnings("resource")
     GenericContainer<?> target =
-
         new GenericContainer<>(image)
             .withExposedPorts(8080)
             .withNetwork(network)
             .withLogConsumer(new Slf4jLogConsumer(logger))
-            .withCopyFileToContainer(
-                MountableFile.forHostPath(agentPath), JAVAAGENT_JAR_PATH)
+            .withCopyFileToContainer(MountableFile.forHostPath(agentPath), JAVAAGENT_JAR_PATH)
 
             // batch span processor: very small batch size for testing
             .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
@@ -119,10 +118,10 @@ abstract class SmokeTest {
 
       if (JavaExecutable.isListeningDebuggerStarted(TARGET_DEBUG_PORT, "target")) {
         target = addDockerDebugHost(target);
-        jvmArgs.append(JavaExecutable.jvmDebugArgument("remote-localhost", TARGET_DEBUG_PORT))
+        jvmArgs
+            .append(JavaExecutable.jvmDebugArgument("remote-localhost", TARGET_DEBUG_PORT))
             .append(" ");
       }
-
     }
 
     jvmArgs.append(JavaExecutable.jvmAgentArgument(JAVAAGENT_JAR_PATH));
@@ -148,7 +147,8 @@ abstract class SmokeTest {
 
   @BeforeEach
   void beforeEach() throws IOException, InterruptedException {
-    // because traces reporting is asynchronous we need to wait for the healthcheck traces to be reported and only then
+    // because traces reporting is asynchronous we need to wait for the healthcheck traces to be
+    // reported and only then
     // flush before the test, otherwise the first test will see the healthcheck trace captured.
     waitForTraces();
     clearBackend();
