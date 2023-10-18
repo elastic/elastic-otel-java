@@ -27,7 +27,6 @@ import io.opentelemetry.proto.trace.v1.Span;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -91,12 +90,12 @@ abstract class SmokeTest {
     backend.start();
   }
 
-  protected static GenericContainer<?> startTarget(String image, Map<String, String> extraEnv) {
+  protected static GenericContainer<?> startContainer(String image, Map<String, String> extraEnv, Integer... ports) {
 
     @SuppressWarnings("resource")
     GenericContainer<?> target =
         new GenericContainer<>(image)
-            .withExposedPorts(8080)
+            .withExposedPorts(ports)
             .withNetwork(network)
             .withLogConsumer(new Slf4jLogConsumer(logger))
             .withCopyFileToContainer(MountableFile.forHostPath(agentPath), JAVAAGENT_JAR_PATH)
@@ -141,10 +140,6 @@ abstract class SmokeTest {
     return target;
   }
 
-  protected static GenericContainer<?> startTarget(String image) {
-    return startTarget(image, Collections.emptyMap());
-  }
-
   @BeforeEach
   void beforeEach() throws IOException, InterruptedException {
     // because traces reporting is asynchronous we need to wait for the healthcheck traces to be
@@ -178,6 +173,13 @@ abstract class SmokeTest {
             c.stop();
           }
         });
+  }
+
+  protected String getUrl(GenericContainer<?> target, String path, int port) {
+    if (!path.startsWith("/")) {
+      throw new IllegalArgumentException("path must start with '/'");
+    }
+    return String.format("http://localhost:%d%s", target.getMappedPort(port), path);
   }
 
   protected String getAgentPath() {

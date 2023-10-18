@@ -26,6 +26,7 @@ import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.trace.v1.Span;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,16 +46,13 @@ class TestAppSmokeTest extends SmokeTest {
 
   private static GenericContainer<?> target;
 
-  private static String getUrl(String path) {
-    if (!path.startsWith("/")) {
-      throw new IllegalArgumentException("path must start with '/'");
-    }
-    return String.format("http://localhost:%d%s", target.getMappedPort(8080), path);
+  private String getUrl(String path) {
+    return getUrl(target, path, 8080);
   }
 
   @BeforeAll
   public static void start() {
-    target = startTarget(IMAGE);
+    target = startContainer(IMAGE, Collections.emptyMap(), 8080);
   }
 
   @AfterAll

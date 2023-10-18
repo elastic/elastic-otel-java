@@ -34,7 +34,7 @@ dependencyResolutionManagement {
         create("libraries") {
             version("junit", "5.10.0")
 
-            version("opentelemetrySdk", "1.31.0")
+            version("opentelemetrySdk", "1.29.0")
             version("opentelemetryJavaagent", "1.30.0")
             version("opentelemetryJavaagentAlpha", "1.30.0-alpha")
             version("opentelemetryContribAlpha", "1.30.0-alpha")
