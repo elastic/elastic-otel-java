@@ -40,7 +40,11 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -249,7 +253,8 @@ public class ElasticProfiler {
 
   private static class InferredSpanData implements SpanData {
 
-    private static final AttributeKey<Long> SAMPLES_KEY = AttributeKey.longKey("profiling.samples");
+    private static final AttributeKey<Long> SAMPLES_KEY =
+        AttributeKey.longKey("elastic.span.inferred_samples");
     private final String name;
     private final String spanId;
 

@@ -25,9 +25,11 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController("/profiling")
+@RestController
+@RequestMapping("/profiling")
 public class ProfilingController {
 
   private static final Tracer tracer =

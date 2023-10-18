@@ -25,10 +25,11 @@ public class OkHttpUtils {
 
   static OkHttpClient.Builder clientBuilder() {
     TimeUnit unit = TimeUnit.MINUTES;
+    int timeout = JavaExecutable.isDebugging() ? 10 : 1;
     return new OkHttpClient.Builder()
-        .connectTimeout(1, unit)
-        .writeTimeout(1, unit)
-        .readTimeout(1, unit);
+        .connectTimeout(timeout, unit)
+        .writeTimeout(timeout, unit)
+        .readTimeout(timeout, unit);
   }
 
   public static OkHttpClient client() {
