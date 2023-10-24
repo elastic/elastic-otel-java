@@ -94,20 +94,22 @@ abstract class SmokeTest {
     backend.start();
   }
 
-  protected static GenericContainer<?> startContainer(String image, Function<GenericContainer<?>, GenericContainer<?>> customizeContainer) {
+  protected static GenericContainer<?> startContainer(
+      String image, Function<GenericContainer<?>, GenericContainer<?>> customizeContainer) {
 
     @SuppressWarnings("resource")
-    GenericContainer<?> target = new GenericContainer<>(image)
-        .withNetwork(network)
-        .withLogConsumer(new Slf4jLogConsumer(logger))
-        .withCopyFileToContainer(MountableFile.forHostPath(agentPath), JAVAAGENT_JAR_PATH)
+    GenericContainer<?> target =
+        new GenericContainer<>(image)
+            .withNetwork(network)
+            .withLogConsumer(new Slf4jLogConsumer(logger))
+            .withCopyFileToContainer(MountableFile.forHostPath(agentPath), JAVAAGENT_JAR_PATH)
 
-        // batch span processor: very small batch size for testing
-        .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
-        // batch span processor: very short delay for testing
-        .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
-        .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
-        .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://backend:8080");
+            // batch span processor: very small batch size for testing
+            .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
+            // batch span processor: very short delay for testing
+            .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
+            .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
+            .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://backend:8080");
 
     StringBuilder jvmArgs = new StringBuilder();
 
@@ -262,7 +264,7 @@ abstract class SmokeTest {
 
       try (ResponseBody body = client.newCall(request).execute().body()) {
         content = body.string();
-      } catch (IOException e){
+      } catch (IOException e) {
         throw new RuntimeException(e);
       }
 
@@ -287,7 +289,6 @@ abstract class SmokeTest {
   protected static AnyValue attributeValue(String value) {
     return AnyValue.newBuilder().setStringValue(value).build();
   }
-
 
   protected static Map<String, AnyValue> getAttributes(List<KeyValue> list) {
     Map<String, AnyValue> attributes = new HashMap<>();

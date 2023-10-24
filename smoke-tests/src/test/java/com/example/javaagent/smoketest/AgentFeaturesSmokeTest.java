@@ -41,6 +41,7 @@ class AgentFeaturesSmokeTest extends TestAppSmokeTest {
   public static void end() {
     stopApp();
   }
+
   @Test
   public void healthcheck() throws InterruptedException {
     doRequest(getUrl("/health"), okResponseBody("Alive!"));
@@ -104,7 +105,8 @@ class AgentFeaturesSmokeTest extends TestAppSmokeTest {
 
     inferred.forEach(
         span -> {
-          assertThat(getAttributes(span.getAttributesList())).containsKey("elastic.span.inferred_samples");
+          assertThat(getAttributes(span.getAttributesList()))
+              .containsKey("elastic.span.inferred_samples");
         });
 
     List<Span> regularSpans =
@@ -141,5 +143,4 @@ class AgentFeaturesSmokeTest extends TestAppSmokeTest {
 
     return spans;
   }
-
 }
