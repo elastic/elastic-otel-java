@@ -33,11 +33,7 @@ dependencies {
   bootstrapLibs(project(":bootstrap"))
 
   javaagentLibs(project(":custom"))
-  javaagentLibs(project(":resources")) {
-    attributes {
-        attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.SHADOWED))
-    }
-  }
+  javaagentLibs(project(":resources"))
 
   // This is where we should add custom instrumentations
   // javaagentLibs(project(":instrumentation:servlet-3"))
