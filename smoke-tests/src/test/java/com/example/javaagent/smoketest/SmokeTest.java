@@ -23,14 +23,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
+import io.opentelemetry.proto.common.v1.AnyValue;
+import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.trace.v1.Span;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -90,24 +94,20 @@ abstract class SmokeTest {
     backend.start();
   }
 
-  protected static GenericContainer<?> startContainer(String image, Map<String, String> extraEnv, Integer... ports) {
+  protected static GenericContainer<?> startContainer(String image, Function<GenericContainer<?>, GenericContainer<?>> customizeContainer) {
 
     @SuppressWarnings("resource")
-    GenericContainer<?> target =
-        new GenericContainer<>(image)
-            .withExposedPorts(ports)
-            .withNetwork(network)
-            .withLogConsumer(new Slf4jLogConsumer(logger))
-            .withCopyFileToContainer(MountableFile.forHostPath(agentPath), JAVAAGENT_JAR_PATH)
+    GenericContainer<?> target = new GenericContainer<>(image)
+        .withNetwork(network)
+        .withLogConsumer(new Slf4jLogConsumer(logger))
+        .withCopyFileToContainer(MountableFile.forHostPath(agentPath), JAVAAGENT_JAR_PATH)
 
-            // batch span processor: very small batch size for testing
-            .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
-            // batch span processor: very short delay for testing
-            .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
-            .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
-            .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://backend:8080")
-            .withEnv(extraEnv)
-            .waitingFor(Wait.forHttp("/health").forPort(8080));
+        // batch span processor: very small batch size for testing
+        .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
+        // batch span processor: very short delay for testing
+        .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
+        .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
+        .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://backend:8080");
 
     StringBuilder jvmArgs = new StringBuilder();
 
@@ -125,6 +125,8 @@ abstract class SmokeTest {
 
     jvmArgs.append(JavaExecutable.jvmAgentArgument(JAVAAGENT_JAR_PATH));
     target.withEnv("JAVA_TOOL_OPTIONS", jvmArgs.toString());
+
+    target = customizeContainer.apply(target);
 
     Objects.requireNonNull(target).start();
 
@@ -223,27 +225,31 @@ abstract class SmokeTest {
         .flatMap(it -> it.getSpansList().stream());
   }
 
-  protected List<ExportTraceServiceRequest> waitForTraces()
-      throws IOException, InterruptedException {
-    String content = waitForContent();
+  protected List<ExportTraceServiceRequest> waitForTraces() {
+    try {
+      String content = waitForContent();
 
-    return StreamSupport.stream(OBJECT_MAPPER.readTree(content).spliterator(), false)
-        .map(
-            it -> {
-              ExportTraceServiceRequest.Builder builder = ExportTraceServiceRequest.newBuilder();
-              // TODO(anuraaga): Register parser into object mapper to avoid de -> re ->
-              // deserialize.
-              try {
-                JsonFormat.parser().merge(OBJECT_MAPPER.writeValueAsString(it), builder);
-              } catch (InvalidProtocolBufferException | JsonProcessingException e) {
-                e.printStackTrace();
-              }
-              return builder.build();
-            })
-        .collect(Collectors.toList());
+      return StreamSupport.stream(OBJECT_MAPPER.readTree(content).spliterator(), false)
+          .map(
+              it -> {
+                ExportTraceServiceRequest.Builder builder = ExportTraceServiceRequest.newBuilder();
+                // TODO(anuraaga): Register parser into object mapper to avoid de -> re ->
+                // deserialize.
+                try {
+                  JsonFormat.parser().merge(OBJECT_MAPPER.writeValueAsString(it), builder);
+                } catch (InvalidProtocolBufferException | JsonProcessingException e) {
+                  e.printStackTrace();
+                }
+                return builder.build();
+              })
+          .collect(Collectors.toList());
+
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
-  private String waitForContent() throws IOException, InterruptedException {
+  private String waitForContent() {
     long previousSize = 0;
     long deadline = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(30);
     String content = "[]";
@@ -256,15 +262,57 @@ abstract class SmokeTest {
 
       try (ResponseBody body = client.newCall(request).execute().body()) {
         content = body.string();
+      } catch (IOException e){
+        throw new RuntimeException(e);
       }
 
       if (content.length() > 2 && content.length() == previousSize) {
         break;
       }
       previousSize = content.length();
-      TimeUnit.MILLISECONDS.sleep(500);
+      try {
+        TimeUnit.MILLISECONDS.sleep(500);
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
     }
 
     return content;
+  }
+
+  protected static AnyValue attributeValue(boolean value) {
+    return AnyValue.newBuilder().setBoolValue(value).build();
+  }
+
+  protected static AnyValue attributeValue(String value) {
+    return AnyValue.newBuilder().setStringValue(value).build();
+  }
+
+
+  protected static Map<String, AnyValue> getAttributes(List<KeyValue> list) {
+    Map<String, AnyValue> attributes = new HashMap<>();
+    for (KeyValue kv : list) {
+      attributes.put(kv.getKey(), kv.getValue());
+    }
+    return attributes;
+  }
+
+  protected Stream<Span> getSpans(List<ExportTraceServiceRequest> traces) {
+    return traces.stream()
+        .flatMap(it -> it.getResourceSpansList().stream())
+        .flatMap(it -> it.getScopeSpansList().stream())
+        .flatMap(it -> it.getSpansList().stream());
+  }
+
+  protected static String bytesToHex(byte[] bytes) {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < bytes.length; i++) {
+      String part = Integer.toHexString((bytes[i] & 0xFF));
+      if (part.length() < 2) {
+        sb.append('0');
+      }
+      sb.append(part);
+    }
+    return sb.toString();
   }
 }
