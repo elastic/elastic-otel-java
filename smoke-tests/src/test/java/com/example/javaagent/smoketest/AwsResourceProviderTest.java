@@ -22,9 +22,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockserver.model.HttpRequest.request;
 
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
+import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.trace.v1.ResourceSpans;
 import io.opentelemetry.semconv.ResourceAttributes;
 import java.util.List;
+import java.util.Map;
+import org.assertj.core.api.MapAssert;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -65,7 +68,7 @@ public class AwsResourceProviderTest extends TestAppSmokeTest {
   }
 
   @Test
-  void getAwsResources() {
+  void getEc2Resource() {
 
     mockEc2Metadata();
 
@@ -83,26 +86,27 @@ public class AwsResourceProviderTest extends TestAppSmokeTest {
           return container;
         });
 
+    testResourceProvider(attributes -> attributes
+        .containsEntry(ResourceAttributes.CONTAINER_ID.getKey(),
+            attributeValue(getContainerId()))
+        .containsEntry(ResourceAttributes.CLOUD_PLATFORM.getKey(),
+            attributeValue(ResourceAttributes.CloudPlatformValues.AWS_EC2))
+        .containsEntry(ResourceAttributes.CLOUD_AVAILABILITY_ZONE.getKey(),
+            attributeValue("us-west-2b")));
+  }
+
+  private void testResourceProvider (ResourceAttributesCheck check){
     doRequest(getUrl("/health"), okResponseBody("Alive!"));
 
     List<ExportTraceServiceRequest> traces = waitForTraces();
     traces.stream()
         .flatMap(t -> t.getResourceSpansList().stream())
         .map(ResourceSpans::getResource)
-        .forEach(
-            resource -> {
-              assertThat(getAttributes(resource.getAttributesList()))
-                  // provided by agent
-                  .containsEntry(
-                      ResourceAttributes.CONTAINER_ID.getKey(), attributeValue(getContainerId()))
-                  // provided by aws provider
-                  .containsEntry(
-                      ResourceAttributes.CLOUD_PLATFORM.getKey(),
-                      attributeValue(ResourceAttributes.CloudPlatformValues.AWS_EC2))
-                  // provided by aws provider response
-                  .containsEntry(
-                      ResourceAttributes.CLOUD_AVAILABILITY_ZONE.getKey(), attributeValue("us-west-2b"));
-            });
+        .forEach(resource -> check.verify(assertThat(getAttributes(resource.getAttributesList()))));
+  }
+
+  private interface ResourceAttributesCheck {
+    void verify(MapAssert<String, AnyValue> attributes);
   }
 
   private static void mockEc2Metadata() {

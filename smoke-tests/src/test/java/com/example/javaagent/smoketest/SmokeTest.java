@@ -27,6 +27,7 @@ import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.trace.v1.Span;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -50,6 +51,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.containers.wait.strategy.WaitStrategy;
 import org.testcontainers.utility.MountableFile;
 
 abstract class SmokeTest {
@@ -125,6 +127,8 @@ abstract class SmokeTest {
             .append(JavaExecutable.jvmDebugArgument("remote-localhost", TARGET_DEBUG_PORT))
             .append(" ");
       }
+      // Use very long startup delay when debugging as the remote JVM is likely stopped before the app has started
+      target.waitingFor(Wait.defaultWaitStrategy().withStartupTimeout(Duration.ofMinutes(10)));
     }
 
     jvmArgs.append(JavaExecutable.jvmAgentArgument(JAVAAGENT_JAR_PATH));
