@@ -21,6 +21,7 @@ package com.example.javaagent.smoketest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -35,19 +36,16 @@ public class TestAppSmokeTest extends SmokeTest {
   private static GenericContainer<?> target;
 
   protected static void startApp() {
-    startApp(Function.identity());
+    startApp((container) -> {
+    });
   }
 
-  public static void startApp(
-      Function<GenericContainer<?>, GenericContainer<?>> customizeContainer) {
-    target =
-        startContainer(
+  public static void startApp(Consumer<GenericContainer<?>> customizeContainer) {
+    target = startContainer(
             IMAGE,
-            container ->
-                customizeContainer.apply(
-                    container
-                        .withExposedPorts(8080)
-                        .waitingFor(Wait.forHttp("/health").forPort(8080))));
+            customizeContainer.andThen(container -> container
+                .withExposedPorts(8080)
+                .waitingFor(Wait.forHttp("/health").forPort(8080))));
   }
 
   protected static String getContainerId() {

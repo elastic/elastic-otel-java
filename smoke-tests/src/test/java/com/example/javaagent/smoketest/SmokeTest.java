@@ -101,7 +101,7 @@ abstract class SmokeTest {
   }
 
   protected static GenericContainer<?> startContainer(
-      String image, Function<GenericContainer<?>, GenericContainer<?>> customizeContainer) {
+      String image, Consumer<GenericContainer<?>> customizeContainer) {
 
     @SuppressWarnings("resource")
     GenericContainer<?> target =
@@ -136,7 +136,7 @@ abstract class SmokeTest {
     jvmArgs.append(JavaExecutable.jvmAgentArgument(JAVAAGENT_JAR_PATH));
     target.withEnv("JAVA_TOOL_OPTIONS", jvmArgs.toString());
 
-    target = customizeContainer.apply(target);
+    customizeContainer.accept(target);
 
     Objects.requireNonNull(target).start();
 
