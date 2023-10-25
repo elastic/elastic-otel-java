@@ -59,6 +59,8 @@ abstract class SmokeTest {
   private static final int TARGET_DEBUG_PORT = 5005;
   private static final int BACKEND_DEBUG_PORT = 5006;
   private static final String JAVAAGENT_JAR_PATH = "/opentelemetry-javaagent.jar";
+  protected static final String MOCK_SERVER_HOST = "mock-server";
+  protected static final int MOCK_SERVER_PORT = 1080;
 
   protected static OkHttpClient client = OkHttpUtils.client();
 
@@ -66,8 +68,8 @@ abstract class SmokeTest {
   private static final String agentPath =
       System.getProperty("io.opentelemetry.smoketest.agent.shadowJar.path");
 
-  // keep track of all target containers in case they aren't properly stopped
-  private static final List<GenericContainer<?>> targetContainers = new ArrayList<>();
+  // keep track of all started containers in case they aren't properly stopped
+  private static final List<GenericContainer<?>> startedContainers = new ArrayList<>();
 
   private static GenericContainer<?> backend;
 
@@ -132,7 +134,7 @@ abstract class SmokeTest {
 
     Objects.requireNonNull(target).start();
 
-    targetContainers.add(target);
+    startedContainers.add(target);
 
     return target;
   }
@@ -153,6 +155,30 @@ abstract class SmokeTest {
     clearBackend();
   }
 
+  protected static GenericContainer<?> startMockServer() {
+    @SuppressWarnings("resource")
+    GenericContainer<?> target =
+        new GenericContainer<>("mockserver/mockserver:5.15.0")
+            .withNetwork(network)
+            .withNetworkAliases(MOCK_SERVER_HOST)
+            .withLogConsumer(new Slf4jLogConsumer(logger))
+            .withExposedPorts(MOCK_SERVER_PORT)
+            .waitingFor(Wait.forListeningPorts(MOCK_SERVER_PORT));
+
+    // only use mock server verbose output when debugging
+    String logLevel = "WARN";
+    if (JavaExecutable.isDebugging()) {
+      logLevel = "INFO";
+    }
+    target.withEnv("JAVA_TOOL_OPTIONS", "-Dmockserver.logLevel=" + logLevel);
+
+    Objects.requireNonNull(target).start();
+
+    startedContainers.add(target);
+
+    return target;
+  }
+
   protected static void clearBackend() throws IOException {
     client
         .newCall(
@@ -167,7 +193,7 @@ abstract class SmokeTest {
   static void afterAll() {
     backend.stop();
 
-    targetContainers.forEach(
+    startedContainers.forEach(
         c -> {
           if (c.isRunning()) {
             logger.warn(

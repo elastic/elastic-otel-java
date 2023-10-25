@@ -17,6 +17,8 @@ dependencies {
   testImplementation("org.assertj:assertj-core:3.24.2")
 
   testImplementation("io.opentelemetry.semconv:opentelemetry-semconv")
+
+  testImplementation("org.mock-server:mockserver-client-java:5.15.0")
 }
 
 tasks.test {
