@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -51,7 +52,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.containers.wait.strategy.WaitStrategy;
 import org.testcontainers.utility.MountableFile;
 
 abstract class SmokeTest {
@@ -61,8 +61,10 @@ abstract class SmokeTest {
   private static final int TARGET_DEBUG_PORT = 5005;
   private static final int BACKEND_DEBUG_PORT = 5006;
   private static final String JAVAAGENT_JAR_PATH = "/opentelemetry-javaagent.jar";
+
   protected static final String MOCK_SERVER_HOST = "mock-server";
-  protected static final int MOCK_SERVER_PORT = 1080;
+  // map to HTTPS port for kubernetes, mock server will handle both http and https on the same port
+  protected static final int MOCK_SERVER_PORT = 443;
 
   protected static OkHttpClient client = OkHttpUtils.client();
 
@@ -160,13 +162,18 @@ abstract class SmokeTest {
   }
 
   protected static GenericContainer<?> startMockServer() {
+    return startMockServer((container) -> {
+    });
+  }
+  protected static GenericContainer<?> startMockServer(Consumer<GenericContainer<?>> customizeContainer) {
     @SuppressWarnings("resource")
     GenericContainer<?> target =
         new GenericContainer<>("mockserver/mockserver:5.15.0")
             .withNetwork(network)
-            .withNetworkAliases(MOCK_SERVER_HOST)
             .withLogConsumer(new Slf4jLogConsumer(logger))
+            .withNetworkAliases(MOCK_SERVER_HOST)
             .withExposedPorts(MOCK_SERVER_PORT)
+            .withEnv("SERVER_PORT", Integer.toString(MOCK_SERVER_PORT))
             .waitingFor(Wait.forListeningPorts(MOCK_SERVER_PORT));
 
     // only use mock server verbose output when debugging
@@ -175,6 +182,8 @@ abstract class SmokeTest {
       logLevel = "INFO";
     }
     target.withEnv("JAVA_TOOL_OPTIONS", "-Dmockserver.logLevel=" + logLevel);
+
+    customizeContainer.accept(target);
 
     Objects.requireNonNull(target).start();
 

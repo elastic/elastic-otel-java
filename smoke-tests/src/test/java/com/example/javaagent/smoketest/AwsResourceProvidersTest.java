@@ -19,14 +19,15 @@
 package com.example.javaagent.smoketest;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockserver.model.HttpRequest.request;
 
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.trace.v1.ResourceSpans;
 import io.opentelemetry.semconv.ResourceAttributes;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 import org.assertj.core.api.MapAssert;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -36,8 +37,11 @@ import org.mockserver.client.MockServerClient;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.utility.MountableFile;
 
-public class AwsResourceProviderTest extends TestAppSmokeTest {
+public class AwsResourceProvidersTest extends TestAppSmokeTest {
+
+  protected static final String MOCK_SERVER_HOST = "mock-server";
 
   private static GenericContainer<?> mockServer;
 
@@ -45,7 +49,10 @@ public class AwsResourceProviderTest extends TestAppSmokeTest {
 
   @BeforeAll
   public static void beforeAll() {
-    mockServer = startMockServer();
+    mockServer = startMockServer(container -> {
+      // adds an extra network name for aws k8s endpoint
+      container.withNetworkAliases("kubernetes.default.svc");
+    });
     mockServerClient = new MockServerClient("localhost",
         mockServer.getMappedPort(MOCK_SERVER_PORT));
   }
@@ -55,7 +62,7 @@ public class AwsResourceProviderTest extends TestAppSmokeTest {
     if (mockServer != null) {
       mockServer.stop();
     }
-    if(mockServerClient != null) {
+    if (mockServerClient != null) {
       mockServerClient.close();
     }
   }
@@ -68,7 +75,7 @@ public class AwsResourceProviderTest extends TestAppSmokeTest {
   }
 
   @Test
-  void getEc2Resource() {
+  void ec2() {
 
     mockEc2Metadata();
 
@@ -95,7 +102,64 @@ public class AwsResourceProviderTest extends TestAppSmokeTest {
             attributeValue("us-west-2b")));
   }
 
-  private void testResourceProvider (ResourceAttributesCheck check){
+  @Test
+  void beanstalk() throws IOException {
+
+    Path tempFile = Files.createTempFile("test", "beanstalk");
+    try {
+      Files.writeString(tempFile, """
+          {
+          "noise": "noise",
+          "deployment_id":4,
+          "version_label":"2",
+          "environment_name":"HttpSubscriber-env"
+          }
+          """);
+      startApp(container -> container
+          .withCopyFileToContainer(
+              MountableFile.forHostPath(tempFile),
+              "/var/elasticbeanstalk/xray/environment.conf"));
+
+      testResourceProvider(attributes -> attributes
+          .containsEntry(ResourceAttributes.CLOUD_PLATFORM.getKey(),
+              attributeValue(ResourceAttributes.CloudPlatformValues.AWS_ELASTIC_BEANSTALK))
+          .containsEntry(ResourceAttributes.SERVICE_VERSION.getKey(),
+              attributeValue("2"))
+      );
+    } finally {
+      Files.delete(tempFile);
+    }
+  }
+
+  @Test
+  void eks() throws IOException {
+    Path tokenFile = Files.createTempFile("test", "k8sToken");
+    Path certFile = Files.createTempFile("test", "k8sCert");
+    try {
+      Files.writeString(tokenFile, "token123");
+      Files.writeString(certFile, "truststore123"); // TODO: need to replace this with a real trust store
+
+      startApp(container -> container
+          .withCopyFileToContainer(MountableFile.forHostPath(tokenFile),
+              "/var/run/secrets/kubernetes.io/serviceaccount/token")
+          .withCopyFileToContainer(MountableFile.forHostPath(certFile),
+              "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")
+      );
+
+      testResourceProvider(attributes -> attributes
+          .containsEntry(ResourceAttributes.CLOUD_PLATFORM.getKey(),
+              attributeValue(ResourceAttributes.CloudPlatformValues.AWS_EKS))
+          .containsEntry(ResourceAttributes.K8S_CLUSTER_NAME.getKey(),
+              attributeValue("2")));
+
+    } finally {
+      Files.delete(tokenFile);
+      Files.delete(certFile);
+    }
+
+  }
+
+  private void testResourceProvider(ResourceAttributesCheck check) {
     doRequest(getUrl("/health"), okResponseBody("Alive!"));
 
     List<ExportTraceServiceRequest> traces = waitForTraces();

@@ -18,12 +18,12 @@
  */
 package co.elastic.otel.resources;
 
+import io.opentelemetry.contrib.aws.resource.BeanstalkResource;
 import io.opentelemetry.contrib.aws.resource.Ec2Resource;
+import io.opentelemetry.contrib.aws.resource.EksResource;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
-
-import io.opentelemetry.contrib.aws.resource.BeanstalkResourceProvider;
 
 public class ElasticResourceProvider implements ResourceProvider {
 
@@ -31,7 +31,9 @@ public class ElasticResourceProvider implements ResourceProvider {
   public Resource createResource(ConfigProperties config) {
     Resource resource = Resource.empty();
 
-    resource = resource.merge(Ec2Resource.get());
+    resource = resource.merge(Ec2Resource.get())
+        .merge(BeanstalkResource.get())
+        .merge(EksResource.get());
 
     return resource;
   }
