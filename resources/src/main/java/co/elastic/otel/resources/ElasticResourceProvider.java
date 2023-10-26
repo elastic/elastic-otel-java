@@ -20,7 +20,9 @@ package co.elastic.otel.resources;
 
 import io.opentelemetry.contrib.aws.resource.BeanstalkResource;
 import io.opentelemetry.contrib.aws.resource.Ec2Resource;
+import io.opentelemetry.contrib.aws.resource.EcsResource;
 import io.opentelemetry.contrib.aws.resource.EksResource;
+import io.opentelemetry.contrib.aws.resource.LambdaResource;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
@@ -31,9 +33,20 @@ public class ElasticResourceProvider implements ResourceProvider {
   public Resource createResource(ConfigProperties config) {
     Resource resource = Resource.empty();
 
-    resource = resource.merge(Ec2Resource.get())
+    // TODO : find a way to make the resource providers async, and then retrieve it
+    // maybe using a "magic value" for the config properties could be relevant here
+
+    resource = resource
+        // ec2 relies on http calls without pre-checks
+        .merge(Ec2Resource.get())
+        // beanstalk relies on json config file parsing
         .merge(BeanstalkResource.get())
-        .merge(EksResource.get());
+        // relies on https call without pre-checks + TLS setup (thus quite expensive)
+        .merge(EksResource.get())
+        // relies on http call with url provided through env var used as pre-check
+        .merge(EcsResource.get())
+        // relies on env variables only
+        .merge(LambdaResource.get());
 
     return resource;
   }
