@@ -160,6 +160,16 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
 
   }
 
+  @Test
+  void lambda() {
+    throw new RuntimeException("TODO");
+  }
+
+  @Test
+  void ecs() {
+    throw new RuntimeException("TODO");
+  }
+
   private void testResourceProvider(ResourceAttributesCheck check) {
     doRequest(getUrl("/health"), okResponseBody("Alive!"));
 
