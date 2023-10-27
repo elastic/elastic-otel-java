@@ -17,6 +17,7 @@ dependencies {
 
       // required to make the IDE compile our own resource provider, won't be included as dependency
       compileOnly("io.opentelemetry.contrib:opentelemetry-aws-resources:" + libraries.versions.opentelemetryContribAlpha.get())
+      compileOnly("io.opentelemetry.contrib:opentelemetry-resource-providers:" + libraries.versions.opentelemetryContribAlpha.get())
     }
   }
 

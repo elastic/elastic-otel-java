@@ -25,6 +25,7 @@ import com.google.protobuf.util.JsonFormat;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
+import io.opentelemetry.proto.trace.v1.ResourceSpans;
 import io.opentelemetry.proto.trace.v1.Span;
 import java.io.IOException;
 import java.time.Duration;
@@ -36,13 +37,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.assertj.core.api.MapAssert;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,6 +55,8 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.MountableFile;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 abstract class SmokeTest {
   private static final Logger logger = LoggerFactory.getLogger(SmokeTest.class);
@@ -100,7 +104,7 @@ abstract class SmokeTest {
     backend.start();
   }
 
-  protected static GenericContainer<?> startContainer(
+  protected static GenericContainer<?> startTarget(
       String image, Consumer<GenericContainer<?>> customizeContainer) {
 
     @SuppressWarnings("resource")
@@ -218,15 +222,22 @@ abstract class SmokeTest {
         });
   }
 
-  protected String getUrl(GenericContainer<?> target, String path, int port) {
+  protected static String getUrl(GenericContainer<?> target, String path, int port) {
     if (!path.startsWith("/")) {
       throw new IllegalArgumentException("path must start with '/'");
     }
     return String.format("http://localhost:%d%s", target.getMappedPort(port), path);
   }
 
-  protected String getAgentPath() {
-    return agentPath;
+  protected static void checkTracesResources(ResourceAttributesCheck check, List<ExportTraceServiceRequest> traces) {
+    traces.stream()
+        .flatMap(t -> t.getResourceSpansList().stream())
+        .map(ResourceSpans::getResource)
+        .forEach(resource -> check.verify(assertThat(getAttributes(resource.getAttributesList()))));
+  }
+
+  protected interface ResourceAttributesCheck {
+    void verify(MapAssert<String, AnyValue> attributes);
   }
 
   protected static int countResourcesByValue(
@@ -354,5 +365,28 @@ abstract class SmokeTest {
       sb.append(part);
     }
     return sb.toString();
+  }
+
+  protected void doRequest(String url, IOConsumer<Response> responseHandler) {
+    Request request = new Request.Builder().url(url).get().build();
+
+    try (Response response = client.newCall(request).execute()) {
+      responseHandler.accept(response);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @FunctionalInterface
+  protected interface IOConsumer<T> {
+    void accept(T t) throws IOException;
+  }
+
+  protected static IOConsumer<Response> okResponseBody(String body) {
+    return r -> {
+      assertThat(r.code()).isEqualTo(200);
+      assertThat(r.body()).isNotNull();
+      assertThat(r.body().string()).isEqualTo(body);
+    };
   }
 }

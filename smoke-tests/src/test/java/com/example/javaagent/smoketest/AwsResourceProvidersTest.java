@@ -18,17 +18,10 @@
  */
 package com.example.javaagent.smoketest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
-import io.opentelemetry.proto.common.v1.AnyValue;
-import io.opentelemetry.proto.trace.v1.ResourceSpans;
 import io.opentelemetry.semconv.ResourceAttributes;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import org.assertj.core.api.MapAssert;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -80,7 +73,7 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
 
     mockEc2Metadata();
 
-    startApp(
+    startTestApp(
         container -> {
           String jvmOptions = container.getEnvMap().get("JAVA_TOOL_OPTIONS");
           if (jvmOptions == null) {
@@ -115,7 +108,7 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
           "environment_name":"HttpSubscriber-env"
           }
           """);
-      startApp(container -> container
+      startTestApp(container -> container
           .withCopyFileToContainer(
               MountableFile.forHostPath(tempFile),
               "/var/elasticbeanstalk/xray/environment.conf"));
@@ -138,9 +131,10 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
     Path certFile = Files.createTempFile("test", "k8sCert");
     try {
       Files.writeString(tokenFile, "token123");
-      Files.writeString(certFile, "truststore123"); // TODO: need to replace this with a real trust store
+      Files.writeString(certFile,
+          "truststore123"); // TODO: need to replace this with a real trust store
 
-      startApp(container -> container
+      startTestApp(container -> container
           .withCopyFileToContainer(MountableFile.forHostPath(tokenFile),
               "/var/run/secrets/kubernetes.io/serviceaccount/token")
           .withCopyFileToContainer(MountableFile.forHostPath(certFile),
@@ -163,10 +157,10 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
   @Test
   void lambda() {
 
-    startApp(container -> container
+    startTestApp(container -> container
         .withEnv("AWS_REGION", "somewhere")
         .withEnv("AWS_LAMBDA_FUNCTION_NAME", "my_function")
-        .withEnv("AWS_LAMBDA_FUNCTION_VERSION","42"));
+        .withEnv("AWS_LAMBDA_FUNCTION_VERSION", "42"));
 
     testResourceProvider(attributes -> attributes
         .containsEntry(ResourceAttributes.CLOUD_PLATFORM.getKey(),
@@ -182,7 +176,7 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
 
     mockEcsMetadata();
 
-    startApp(container -> container
+    startTestApp(container -> container
         .withEnv("ECS_CONTAINER_METADATA_URI_V4",
             String.format("http://%s:%d/ecs/v4", MOCK_SERVER_HOST, MOCK_SERVER_PORT)));
 
@@ -196,15 +190,7 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
   private void testResourceProvider(ResourceAttributesCheck check) {
     doRequest(getUrl("/health"), okResponseBody("Alive!"));
 
-    List<ExportTraceServiceRequest> traces = waitForTraces();
-    traces.stream()
-        .flatMap(t -> t.getResourceSpansList().stream())
-        .map(ResourceSpans::getResource)
-        .forEach(resource -> check.verify(assertThat(getAttributes(resource.getAttributesList()))));
-  }
-
-  private interface ResourceAttributesCheck {
-    void verify(MapAssert<String, AnyValue> attributes);
+    checkTracesResources(check, waitForTraces());
   }
 
   private static void mockEc2Metadata() {
@@ -244,6 +230,7 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
             .withPath("/latest/meta-data/hostname")
     ).respond(HttpResponse.response().withBody("ec2-hostname"));
   }
+
   private void mockEcsMetadata() {
 
     // https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint-v4.html

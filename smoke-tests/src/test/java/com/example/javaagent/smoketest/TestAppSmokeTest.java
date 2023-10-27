@@ -22,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.testcontainers.containers.GenericContainer;
@@ -30,22 +29,17 @@ import org.testcontainers.containers.wait.strategy.Wait;
 
 public class TestAppSmokeTest extends SmokeTest {
 
-  private static final String IMAGE =
+  private static final String TEST_APP_IMAGE =
       "docker.elastic.co/open-telemetry/elastic-otel-java/smoke-test/test-app:latest";
+  private static final int PORT = 8080;
 
   private static GenericContainer<?> target;
 
-  protected static void startApp() {
-    startApp((container) -> {
-    });
-  }
-
-  public static void startApp(Consumer<GenericContainer<?>> customizeContainer) {
-    target = startContainer(
-            IMAGE,
-            customizeContainer.andThen(container -> container
-                .withExposedPorts(8080)
-                .waitingFor(Wait.forHttp("/health").forPort(8080))));
+  public static void startTestApp(Consumer<GenericContainer<?>> customizeContainer) {
+    target = startTarget(TEST_APP_IMAGE,
+        customizeContainer.andThen(container -> container
+            .withExposedPorts(PORT)
+            .waitingFor(Wait.forHttp("/health").forPort(PORT))));
   }
 
   protected static String getContainerId() {
@@ -60,29 +54,8 @@ public class TestAppSmokeTest extends SmokeTest {
   }
 
   protected String getUrl(String path) {
-    return getUrl(target, path, 8080);
+    return getUrl(target, path, PORT);
   }
 
-  protected void doRequest(String url, IOConsumer<Response> responseHandler) {
-    Request request = new Request.Builder().url(url).get().build();
 
-    try (Response response = client.newCall(request).execute()) {
-      responseHandler.accept(response);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @FunctionalInterface
-  protected interface IOConsumer<T> {
-    void accept(T t) throws IOException;
-  }
-
-  protected static IOConsumer<Response> okResponseBody(String body) {
-    return r -> {
-      assertThat(r.code()).isEqualTo(200);
-      assertThat(r.body()).isNotNull();
-      assertThat(r.body().string()).isEqualTo(body);
-    };
-  }
 }

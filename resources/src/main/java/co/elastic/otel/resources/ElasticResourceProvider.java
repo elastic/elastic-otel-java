@@ -23,6 +23,7 @@ import io.opentelemetry.contrib.aws.resource.Ec2Resource;
 import io.opentelemetry.contrib.aws.resource.EcsResource;
 import io.opentelemetry.contrib.aws.resource.EksResource;
 import io.opentelemetry.contrib.aws.resource.LambdaResource;
+import io.opentelemetry.contrib.resourceproviders.AppServerServiceNameProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
@@ -47,6 +48,9 @@ public class ElasticResourceProvider implements ResourceProvider {
         .merge(EcsResource.get())
         // relies on env variables only
         .merge(LambdaResource.get());
+
+    // application server providers
+    resource = resource.merge(new AppServerServiceNameProvider().createResource(config));
 
     return resource;
   }

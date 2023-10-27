@@ -18,6 +18,7 @@ include("resources")
 include("resources:repackaged")
 include("smoke-tests")
 include("smoke-tests:test-app")
+include("smoke-tests:test-app-war")
 include("testing:agent-for-testing")
 
 dependencyResolutionManagement {
