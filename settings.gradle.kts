@@ -14,8 +14,11 @@ include("agent")
 include("bootstrap")
 include("custom")
 include("instrumentation")
+include("resources")
+include("resources:repackaged")
 include("smoke-tests")
 include("smoke-tests:test-app")
+include("smoke-tests:test-app-war")
 include("testing:agent-for-testing")
 
 dependencyResolutionManagement {
@@ -35,8 +38,9 @@ dependencyResolutionManagement {
             version("junit", "5.10.0")
 
             version("opentelemetrySdk", "1.29.0")
-            version("opentelemetryJavaagent", "1.30.0-SNAPSHOT")
-            version("opentelemetryJavaagentAlpha", "1.30.0-alpha-SNAPSHOT")
+            version("opentelemetryJavaagent", "1.30.0")
+            version("opentelemetryJavaagentAlpha", "1.30.0-alpha")
+            version("opentelemetryContribAlpha", "1.30.0-alpha")
 
             version("autoservice", "1.1.1")
         }
