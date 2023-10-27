@@ -37,17 +37,18 @@ public class ElasticResourceProvider implements ResourceProvider {
     // TODO : find a way to make the resource providers async, and then retrieve it
     // maybe using a "magic value" for the config properties could be relevant here
 
-    resource = resource
-        // ec2 relies on http calls without pre-checks
-        .merge(Ec2Resource.get())
-        // beanstalk relies on json config file parsing
-        .merge(BeanstalkResource.get())
-        // relies on https call without pre-checks + TLS setup (thus quite expensive)
-        .merge(EksResource.get())
-        // relies on http call with url provided through env var used as pre-check
-        .merge(EcsResource.get())
-        // relies on env variables only
-        .merge(LambdaResource.get());
+    resource =
+        resource
+            // ec2 relies on http calls without pre-checks
+            .merge(Ec2Resource.get())
+            // beanstalk relies on json config file parsing
+            .merge(BeanstalkResource.get())
+            // relies on https call without pre-checks + TLS setup (thus quite expensive)
+            .merge(EksResource.get())
+            // relies on http call with url provided through env var used as pre-check
+            .merge(EcsResource.get())
+            // relies on env variables only
+            .merge(LambdaResource.get());
 
     // application server providers
     resource = resource.merge(new AppServerServiceNameProvider().createResource(config));

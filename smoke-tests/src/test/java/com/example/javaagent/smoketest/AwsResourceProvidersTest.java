@@ -43,12 +43,14 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
 
   @BeforeAll
   public static void beforeAll() {
-    mockServer = startMockServer(container -> {
-      // adds an extra network name for aws k8s endpoint
-      container.withNetworkAliases("kubernetes.default.svc");
-    });
-    mockServerClient = new MockServerClient("localhost",
-        mockServer.getMappedPort(MOCK_SERVER_PORT));
+    mockServer =
+        startMockServer(
+            container -> {
+              // adds an extra network name for aws k8s endpoint
+              container.withNetworkAliases("kubernetes.default.svc");
+            });
+    mockServerClient =
+        new MockServerClient("localhost", mockServer.getMappedPort(MOCK_SERVER_PORT));
   }
 
   @AfterAll
@@ -79,20 +81,23 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
           if (jvmOptions == null) {
             jvmOptions = "";
           }
-          jvmOptions += String.format(
-              " -Dotel.aws.imds.endpointOverride=%s:%d",
-              MOCK_SERVER_HOST,
-              MOCK_SERVER_PORT);
+          jvmOptions +=
+              String.format(
+                  " -Dotel.aws.imds.endpointOverride=%s:%d", MOCK_SERVER_HOST, MOCK_SERVER_PORT);
           container.withEnv("JAVA_TOOL_OPTIONS", jvmOptions);
         });
 
-    testResourceProvider(attributes -> attributes
-        .containsEntry(ResourceAttributes.CONTAINER_ID.getKey(),
-            attributeValue(getContainerId()))
-        .containsEntry(ResourceAttributes.CLOUD_PLATFORM.getKey(),
-            attributeValue(ResourceAttributes.CloudPlatformValues.AWS_EC2))
-        .containsEntry(ResourceAttributes.CLOUD_AVAILABILITY_ZONE.getKey(),
-            attributeValue("us-west-2b")));
+    testResourceProvider(
+        attributes ->
+            attributes
+                .containsEntry(
+                    ResourceAttributes.CONTAINER_ID.getKey(), attributeValue(getContainerId()))
+                .containsEntry(
+                    ResourceAttributes.CLOUD_PLATFORM.getKey(),
+                    attributeValue(ResourceAttributes.CloudPlatformValues.AWS_EC2))
+                .containsEntry(
+                    ResourceAttributes.CLOUD_AVAILABILITY_ZONE.getKey(),
+                    attributeValue("us-west-2b")));
   }
 
   @Test
@@ -100,7 +105,9 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
 
     Path tempFile = Files.createTempFile("test", "beanstalk");
     try {
-      Files.writeString(tempFile, """
+      Files.writeString(
+          tempFile,
+          """
           {
           "noise": "noise",
           "deployment_id":4,
@@ -108,67 +115,78 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
           "environment_name":"HttpSubscriber-env"
           }
           """);
-      startTestApp(container -> container
-          .withCopyFileToContainer(
-              MountableFile.forHostPath(tempFile),
-              "/var/elasticbeanstalk/xray/environment.conf"));
+      startTestApp(
+          container ->
+              container.withCopyFileToContainer(
+                  MountableFile.forHostPath(tempFile),
+                  "/var/elasticbeanstalk/xray/environment.conf"));
 
-      testResourceProvider(attributes -> attributes
-          .containsEntry(ResourceAttributes.CLOUD_PLATFORM.getKey(),
-              attributeValue(ResourceAttributes.CloudPlatformValues.AWS_ELASTIC_BEANSTALK))
-          .containsEntry(ResourceAttributes.SERVICE_VERSION.getKey(),
-              attributeValue("2"))
-      );
+      testResourceProvider(
+          attributes ->
+              attributes
+                  .containsEntry(
+                      ResourceAttributes.CLOUD_PLATFORM.getKey(),
+                      attributeValue(ResourceAttributes.CloudPlatformValues.AWS_ELASTIC_BEANSTALK))
+                  .containsEntry(ResourceAttributes.SERVICE_VERSION.getKey(), attributeValue("2")));
     } finally {
       Files.delete(tempFile);
     }
   }
 
   @Test
-  @Disabled // disabled for now due to TLS certificate setup requiring extra work
+  @Disabled
+  // disabled for now due to TLS certificate setup requiring extra work
   void eks() throws IOException {
     Path tokenFile = Files.createTempFile("test", "k8sToken");
     Path certFile = Files.createTempFile("test", "k8sCert");
     try {
       Files.writeString(tokenFile, "token123");
-      Files.writeString(certFile,
-          "truststore123"); // TODO: need to replace this with a real trust store
+      Files.writeString(
+          certFile, "truststore123"); // TODO: need to replace this with a real trust store
 
-      startTestApp(container -> container
-          .withCopyFileToContainer(MountableFile.forHostPath(tokenFile),
-              "/var/run/secrets/kubernetes.io/serviceaccount/token")
-          .withCopyFileToContainer(MountableFile.forHostPath(certFile),
-              "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")
-      );
+      startTestApp(
+          container ->
+              container
+                  .withCopyFileToContainer(
+                      MountableFile.forHostPath(tokenFile),
+                      "/var/run/secrets/kubernetes.io/serviceaccount/token")
+                  .withCopyFileToContainer(
+                      MountableFile.forHostPath(certFile),
+                      "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"));
 
-      testResourceProvider(attributes -> attributes
-          .containsEntry(ResourceAttributes.CLOUD_PLATFORM.getKey(),
-              attributeValue(ResourceAttributes.CloudPlatformValues.AWS_EKS))
-          .containsEntry(ResourceAttributes.K8S_CLUSTER_NAME.getKey(),
-              attributeValue("2")));
+      testResourceProvider(
+          attributes ->
+              attributes
+                  .containsEntry(
+                      ResourceAttributes.CLOUD_PLATFORM.getKey(),
+                      attributeValue(ResourceAttributes.CloudPlatformValues.AWS_EKS))
+                  .containsEntry(
+                      ResourceAttributes.K8S_CLUSTER_NAME.getKey(), attributeValue("2")));
 
     } finally {
       Files.delete(tokenFile);
       Files.delete(certFile);
     }
-
   }
 
   @Test
   void lambda() {
 
-    startTestApp(container -> container
-        .withEnv("AWS_REGION", "somewhere")
-        .withEnv("AWS_LAMBDA_FUNCTION_NAME", "my_function")
-        .withEnv("AWS_LAMBDA_FUNCTION_VERSION", "42"));
+    startTestApp(
+        container ->
+            container
+                .withEnv("AWS_REGION", "somewhere")
+                .withEnv("AWS_LAMBDA_FUNCTION_NAME", "my_function")
+                .withEnv("AWS_LAMBDA_FUNCTION_VERSION", "42"));
 
-    testResourceProvider(attributes -> attributes
-        .containsEntry(ResourceAttributes.CLOUD_PLATFORM.getKey(),
-            attributeValue(ResourceAttributes.CloudPlatformValues.AWS_LAMBDA))
-        .containsEntry(ResourceAttributes.FAAS_NAME.getKey(),
-            attributeValue("my_function"))
-        .containsEntry(ResourceAttributes.FAAS_VERSION.getKey(),
-            attributeValue("42")));
+    testResourceProvider(
+        attributes ->
+            attributes
+                .containsEntry(
+                    ResourceAttributes.CLOUD_PLATFORM.getKey(),
+                    attributeValue(ResourceAttributes.CloudPlatformValues.AWS_LAMBDA))
+                .containsEntry(ResourceAttributes.FAAS_NAME.getKey(), attributeValue("my_function"))
+                .containsEntry(ResourceAttributes.FAAS_VERSION.getKey(), attributeValue("42")));
   }
 
   @Test
@@ -176,15 +194,17 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
 
     mockEcsMetadata();
 
-    startTestApp(container -> container
-        .withEnv("ECS_CONTAINER_METADATA_URI_V4",
-            String.format("http://%s:%d/ecs/v4", MOCK_SERVER_HOST, MOCK_SERVER_PORT)));
+    startTestApp(
+        container ->
+            container.withEnv(
+                "ECS_CONTAINER_METADATA_URI_V4",
+                String.format("http://%s:%d/ecs/v4", MOCK_SERVER_HOST, MOCK_SERVER_PORT)));
 
-    testResourceProvider(attributes -> attributes
-        .containsEntry(ResourceAttributes.CLOUD_PLATFORM.getKey(),
-            attributeValue(ResourceAttributes.CloudPlatformValues.AWS_ECS))
-    );
-
+    testResourceProvider(
+        attributes ->
+            attributes.containsEntry(
+                ResourceAttributes.CLOUD_PLATFORM.getKey(),
+                attributeValue(ResourceAttributes.CloudPlatformValues.AWS_ECS)));
   }
 
   private void testResourceProvider(ResourceAttributesCheck check) {
@@ -194,17 +214,20 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
   }
 
   private static void mockEc2Metadata() {
-    mockServerClient.when(
-        HttpRequest.request()
-            .withMethod("PUT")
-            .withPath("/latest/api/token")
-    ).respond(HttpResponse.response().withBody("token-1234"));
 
-    mockServerClient.when(
-        HttpRequest.request()
-            .withMethod("GET")
-            .withPath("/latest/dynamic/instance-identity/document")
-    ).respond(HttpResponse.response().withBody("""
+    mockServerClient
+        .when(HttpRequest.request().withMethod("PUT").withPath("/latest/api/token"))
+        .respond(HttpResponse.response().withBody("token-1234"));
+
+    mockServerClient
+        .when(
+            HttpRequest.request()
+                .withMethod("GET")
+                .withPath("/latest/dynamic/instance-identity/document"))
+        .respond(
+            HttpResponse.response()
+                .withBody(
+                    """
         {
           "devpayProductCodes" : null,
           "marketplaceProductCodes" : [ "1abc2defghijklm3nopqrs4tu" ],
@@ -224,11 +247,9 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
         }
         """));
 
-    mockServerClient.when(
-        HttpRequest.request()
-            .withMethod("GET")
-            .withPath("/latest/meta-data/hostname")
-    ).respond(HttpResponse.response().withBody("ec2-hostname"));
+    mockServerClient
+        .when(HttpRequest.request().withMethod("GET").withPath("/latest/meta-data/hostname"))
+        .respond(HttpResponse.response().withBody("ec2-hostname"));
   }
 
   private void mockEcsMetadata() {
@@ -236,11 +257,12 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
     // https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint-v4.html
     // we only implement the v4 format here and assume others are already covered
 
-    mockServerClient.when(
-        HttpRequest.request()
-            .withMethod("GET")
-            .withPath("/ecs/v4")
-    ).respond(HttpResponse.response().withBody("""
+    mockServerClient
+        .when(HttpRequest.request().withMethod("GET").withPath("/ecs/v4"))
+        .respond(
+            HttpResponse.response()
+                .withBody(
+                    """
             {
                 "DockerId": "ea32192c8553fbff06c9340478a2ff089b2bb5646fb718b4ee206641c9086d66",
                 "Name": "curl",
@@ -287,11 +309,12 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
             }
         """));
 
-    mockServerClient.when(
-        HttpRequest.request()
-            .withMethod("GET")
-            .withPath("/ecs/v4/task")
-    ).respond(HttpResponse.response().withBody("""
+    mockServerClient
+        .when(HttpRequest.request().withMethod("GET").withPath("/ecs/v4/task"))
+        .respond(
+            HttpResponse.response()
+                .withBody(
+                    """
         {
             "Cluster": "default",
             "TaskARN": "arn:aws:ecs:us-west-2:111122223333:task/default/158d1c8083dd49d6b527399fd6414f5c",

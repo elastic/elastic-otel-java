@@ -18,6 +18,8 @@
  */
 package com.example.javaagent.smoketest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -55,8 +57,6 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.MountableFile;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 abstract class SmokeTest {
   private static final Logger logger = LoggerFactory.getLogger(SmokeTest.class);
@@ -133,7 +133,8 @@ abstract class SmokeTest {
             .append(JavaExecutable.jvmDebugArgument("remote-localhost", TARGET_DEBUG_PORT))
             .append(" ");
       }
-      // Use very long startup delay when debugging as the remote JVM is likely stopped before the app has started
+      // Use very long startup delay when debugging as the remote JVM is likely stopped before the
+      // app has started
       target.waitingFor(Wait.defaultWaitStrategy().withStartupTimeout(Duration.ofMinutes(10)));
     }
 
@@ -166,10 +167,11 @@ abstract class SmokeTest {
   }
 
   protected static GenericContainer<?> startMockServer() {
-    return startMockServer((container) -> {
-    });
+    return startMockServer((container) -> {});
   }
-  protected static GenericContainer<?> startMockServer(Consumer<GenericContainer<?>> customizeContainer) {
+
+  protected static GenericContainer<?> startMockServer(
+      Consumer<GenericContainer<?>> customizeContainer) {
     @SuppressWarnings("resource")
     GenericContainer<?> target =
         new GenericContainer<>("mockserver/mockserver:5.15.0")
@@ -229,7 +231,8 @@ abstract class SmokeTest {
     return String.format("http://localhost:%d%s", target.getMappedPort(port), path);
   }
 
-  protected static void checkTracesResources(ResourceAttributesCheck check, List<ExportTraceServiceRequest> traces) {
+  protected static void checkTracesResources(
+      ResourceAttributesCheck check, List<ExportTraceServiceRequest> traces) {
     traces.stream()
         .flatMap(t -> t.getResourceSpansList().stream())
         .map(ResourceSpans::getResource)

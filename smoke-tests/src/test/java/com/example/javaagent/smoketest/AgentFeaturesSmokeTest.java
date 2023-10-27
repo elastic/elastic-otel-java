@@ -34,8 +34,7 @@ class AgentFeaturesSmokeTest extends TestAppSmokeTest {
 
   @BeforeAll
   public static void start() {
-    startTestApp((container) -> {
-    });
+    startTestApp((container) -> {});
   }
 
   @AfterAll
