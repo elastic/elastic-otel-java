@@ -67,10 +67,10 @@ public class ElasticSpanExporter implements SpanExporter {
               @Override
               public Resource getResource() {
                 Resource original = span.getResource();
-                // TODO once we implement asynchronous cloud resource loading, this is the place where
-                // we can merge them to make it as if they were available through the otel SDK
-                // if the original resource is immutable, we can probably keep a map and cache to prevent too
-                // much allocation
+                // TODO once we implement asynchronous cloud resource loading, this is the place
+                // where we can merge them to make it as if they were available through the otel SDK
+                // if the original resource is immutable, we can probably keep a map and cache to
+                // prevent too much allocation
                 return Resource.create(original.getAttributes(), original.getSchemaUrl());
               }
             });
