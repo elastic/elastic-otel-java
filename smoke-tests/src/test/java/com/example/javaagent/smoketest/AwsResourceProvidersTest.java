@@ -214,6 +214,8 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
   }
 
   private static void mockEc2Metadata() {
+    // TODO when testing async resource loading, we need to configure extra delay on response, which
+    // should not slow down the app startup if the async loading works as expected
 
     mockServerClient
         .when(HttpRequest.request().withMethod("PUT").withPath("/latest/api/token"))
