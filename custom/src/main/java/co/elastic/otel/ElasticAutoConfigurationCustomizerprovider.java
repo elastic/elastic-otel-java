@@ -18,10 +18,12 @@
  */
 package co.elastic.otel;
 
+import co.elastic.otel.resources.ElasticResourceProvider;
 import io.opentelemetry.context.ContextStorage;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ElasticAutoConfigurationCustomizerprovider
     implements AutoConfigurationCustomizerProvider {
@@ -30,6 +32,14 @@ public class ElasticAutoConfigurationCustomizerprovider
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
 
     autoConfiguration
+        .addResourceCustomizer(
+            (resource, configProperties) -> {
+              // create the resource provider ourselves we can store a reference to it
+              ElasticResourceProvider resourceProvider = new ElasticResourceProvider();
+              ElasticExtension.INSTANCE.registerResourceProvider(resourceProvider);
+              // this will only provide the "fast" resource providers due to configuration
+              return resource.merge(resourceProvider.createResource(configProperties));
+            })
         .addTracerProviderCustomizer(
             (sdkTracerProviderBuilder, configProperties) ->
                 // span processor registration
@@ -40,7 +50,13 @@ public class ElasticAutoConfigurationCustomizerprovider
               // Wrap context storage when configuration is loaded,
               // configuration customization is used as an init hook but does not actually alter it.
               ContextStorage.addWrapper(ElasticExtension.INSTANCE::wrapContextStorage);
-              return Collections.emptyMap();
+              Map<String, String> extraConfig = new HashMap<>();
+              extraConfig.put(
+                  "otel.java.disabled.resource.providers",
+                  ElasticResourceProvider.class.getCanonicalName());
+              // make our resource provider only provide the "fast" resource heuristics by default
+              extraConfig.put(ElasticResourceProvider.ASYNC_RESOURCE, Boolean.toString(true));
+              return extraConfig;
             })
         .addSpanExporterCustomizer(
             (spanExporter, configProperties) ->

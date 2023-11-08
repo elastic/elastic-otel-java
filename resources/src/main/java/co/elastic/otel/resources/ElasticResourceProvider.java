@@ -18,41 +18,71 @@
  */
 package co.elastic.otel.resources;
 
-import io.opentelemetry.contrib.aws.resource.BeanstalkResource;
-import io.opentelemetry.contrib.aws.resource.Ec2Resource;
-import io.opentelemetry.contrib.aws.resource.EcsResource;
-import io.opentelemetry.contrib.aws.resource.EksResource;
-import io.opentelemetry.contrib.aws.resource.LambdaResource;
+import io.opentelemetry.contrib.aws.resource.BeanstalkResourceProvider;
+import io.opentelemetry.contrib.aws.resource.Ec2ResourceProvider;
+import io.opentelemetry.contrib.aws.resource.EcsResourceProvider;
+import io.opentelemetry.contrib.aws.resource.EksResourceProvider;
+import io.opentelemetry.contrib.aws.resource.LambdaResourceProvider;
 import io.opentelemetry.contrib.resourceproviders.AppServerServiceNameProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ElasticResourceProvider implements ResourceProvider {
 
+  private static final Logger logger = Logger.getLogger(ElasticResourceProvider.class.getName());
+
+  public static final String ASYNC_RESOURCE = "elastic.otel.async_resource";
+
+  private ConfigProperties config;
+
   @Override
   public Resource createResource(ConfigProperties config) {
-    Resource resource = Resource.empty();
+    this.config = config;
+    if (config.getBoolean(ASYNC_RESOURCE, false)) {
+      return getBaseResource(config);
+    }
+    return getBaseResource(config).merge(getExtraResource());
+  }
 
-    // TODO : find a way to make the resource providers async, and then retrieve it
-    // maybe using a "magic value" for the config properties could be relevant here
+  private Resource getBaseResource(ConfigProperties config) {
+    // application server providers : file parsing only thus fast
+    return invokeResourceProvider(new AppServerServiceNameProvider());
+  }
 
-    resource =
-        resource
+  public Resource getExtraResource() {
+    List<ResourceProvider> providers =
+        Arrays.asList(
             // ec2 relies on http calls without pre-checks
-            .merge(Ec2Resource.get())
+            new Ec2ResourceProvider(),
             // beanstalk relies on json config file parsing
-            .merge(BeanstalkResource.get())
+            new BeanstalkResourceProvider(),
             // relies on https call without pre-checks + TLS setup (thus quite expensive)
-            .merge(EksResource.get())
+            new EksResourceProvider(),
             // relies on http call with url provided through env var used as pre-check
-            .merge(EcsResource.get())
+            new EcsResourceProvider(),
             // relies on env variables only
-            .merge(LambdaResource.get());
-
-    // application server providers
-    resource = resource.merge(new AppServerServiceNameProvider().createResource(config));
-
+            new LambdaResourceProvider());
+    Resource resource = Resource.empty();
+    for (ResourceProvider provider : providers) {
+      resource = resource.merge(invokeResourceProvider(provider));
+    }
     return resource;
+  }
+
+  private Resource invokeResourceProvider(ResourceProvider provider) {
+    try {
+      return provider.createResource(config);
+    } catch (RuntimeException e) {
+      logger.warning(
+          String.format("error while invoking resource provider: %s", provider.getClass()));
+      return Resource.empty();
+    } finally {
+    }
   }
 }

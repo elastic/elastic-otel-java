@@ -18,10 +18,14 @@
  */
 package co.elastic.otel;
 
+import co.elastic.otel.resources.ElasticResourceProvider;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.context.ContextStorage;
+import io.opentelemetry.context.internal.shaded.WeakConcurrentMap;
+import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
+import java.util.Objects;
 
 public class ElasticExtension {
 
@@ -31,6 +35,10 @@ public class ElasticExtension {
   private final ElasticBreakdownMetrics breakdownMetrics;
   private final ElasticSpanProcessor spanProcessor;
   private ElasticSpanExporter spanExporter;
+  private ElasticResourceProvider resourceProvider;
+  private WeakConcurrentMap<Resource, Resource> cachedResources =
+      new WeakConcurrentMap.WithInlinedExpunction<>();
+  private Resource extraResource;
 
   private ElasticExtension() {
     this.profiler = new ElasticProfiler();
@@ -57,5 +65,24 @@ public class ElasticExtension {
     spanExporter = new ElasticSpanExporter(toWrap);
     breakdownMetrics.registerSpanExporter(spanExporter);
     return spanExporter;
+  }
+
+  public void registerResourceProvider(ElasticResourceProvider resourceProvider) {
+    this.resourceProvider = resourceProvider;
+  }
+
+  public Resource wrapResource(Resource resource) {
+    // because original resources are immutable
+    Resource result = cachedResources.get(resource);
+    if (result != null) {
+      return result;
+    }
+    Objects.requireNonNull(resourceProvider);
+    if (extraResource == null) {
+      extraResource = resourceProvider.getExtraResource();
+    }
+    result = resource.merge(extraResource);
+    cachedResources.put(resource, result);
+    return result;
   }
 }
