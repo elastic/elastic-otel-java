@@ -35,9 +35,9 @@ public class ElasticAutoConfigurationCustomizerprovider
         .addResourceCustomizer(
             (resource, configProperties) -> {
               // create the resource provider ourselves we can store a reference to it
-              ElasticResourceProvider resourceProvider = new ElasticResourceProvider();
+              // and that will only get "fast" resources attributes when invoked
+              ElasticResourceProvider resourceProvider = new ElasticResourceProvider(false);
               ElasticExtension.INSTANCE.registerResourceProvider(resourceProvider);
-              // this will only provide the "fast" resource providers due to configuration
               return resource.merge(resourceProvider.createResource(configProperties));
             })
         .addTracerProviderCustomizer(
@@ -54,8 +54,6 @@ public class ElasticAutoConfigurationCustomizerprovider
               extraConfig.put(
                   "otel.java.disabled.resource.providers",
                   ElasticResourceProvider.class.getCanonicalName());
-              // make our resource provider only provide the "fast" resource heuristics by default
-              extraConfig.put(ElasticResourceProvider.ASYNC_RESOURCE, Boolean.toString(true));
               return extraConfig;
             })
         .addSpanExporterCustomizer(

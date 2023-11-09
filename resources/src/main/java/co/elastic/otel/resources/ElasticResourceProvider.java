@@ -35,14 +35,21 @@ public class ElasticResourceProvider implements ResourceProvider {
 
   private static final Logger logger = Logger.getLogger(ElasticResourceProvider.class.getName());
 
-  public static final String ASYNC_RESOURCE = "elastic.internal.async_resource";
+  private final boolean withExtra;
 
   private ConfigProperties config;
+
+  public ElasticResourceProvider() {
+    this(true);
+  }
+  public ElasticResourceProvider(boolean withExtra){
+    this.withExtra = false;
+  }
 
   @Override
   public Resource createResource(ConfigProperties config) {
     this.config = config;
-    if (config.getBoolean(ASYNC_RESOURCE, false)) {
+    if(!withExtra){
       return getBaseResource(config);
     }
     return getBaseResource(config).merge(getExtraResource());
