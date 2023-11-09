@@ -93,16 +93,13 @@ public class ElasticResourceProvider implements ResourceProvider {
         logger.log(
             Level.FINE,
             String.format(
-                "resource provided did not provide any attribute: %s",
-                provider.getClass()));
+                "resource provided did not provide any attribute: %s", provider.getClass()));
       }
       return result;
     } catch (RuntimeException e) {
       logger.log(
           Level.WARNING,
-          String.format(
-              "error while invoking resource provider: %s",
-              provider.getClass()));
+          String.format("error while invoking resource provider: %s", provider.getClass()));
       return Resource.empty();
     }
   }
