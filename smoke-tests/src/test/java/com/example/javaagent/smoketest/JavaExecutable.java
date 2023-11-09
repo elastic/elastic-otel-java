@@ -62,7 +62,7 @@ public class JavaExecutable {
     return false;
   }
 
-  public static boolean isDebugInCI(){
+  public static boolean isDebugInCI() {
     // set in GitHub actions when "debug logging" is enabled
     // see https://docs.github.com/en/actions/learn-github-actions/variables
     return System.getenv("RUNNER_DEBUG") != null;

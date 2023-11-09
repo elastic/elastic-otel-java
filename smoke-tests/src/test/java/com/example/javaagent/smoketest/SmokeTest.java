@@ -180,7 +180,7 @@ abstract class SmokeTest {
             .withNetworkAliases(MOCK_SERVER_HOST)
             .withExposedPorts(MOCK_SERVER_PORT)
             .withEnv("SERVER_PORT", Integer.toString(MOCK_SERVER_PORT))
-            .waitingFor(Wait.forHttp("/").forStatusCodeMatching(integer -> true));
+            .waitingFor(Wait.forHttp("/mockserver/status").withMethod("PUT"));
 
     // only use mock server verbose output when debugging
     String logLevel = "WARN";
