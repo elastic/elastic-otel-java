@@ -62,7 +62,7 @@ class AgentFeaturesSmokeTest extends TestAppSmokeTest {
                   "elastic.span.is_local_root",
                   "elastic.span.local_root.id",
                   "elastic.span.self_time",
-                  "elastic.span.stacktrace");
+                  "code.stacktrace");
         });
   }
 

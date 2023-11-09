@@ -28,5 +28,7 @@ public interface ElasticAttributes {
   AttributeKey<Boolean> IS_LOCAL_ROOT = AttributeKey.booleanKey("elastic.span.is_local_root");
   AttributeKey<String> SPAN_TYPE = AttributeKey.stringKey("elastic.span.type");
   AttributeKey<String> SPAN_SUBTYPE = AttributeKey.stringKey("elastic.span.subtype");
-  AttributeKey<String> SPAN_STACKTRACE = AttributeKey.stringKey("elastic.span.stacktrace");
+
+  // TODO : replace this with semantic conventions v1.24.0 equivalent once released
+  AttributeKey<String> SPAN_STACKTRACE = AttributeKey.stringKey("code.stacktrace");
 }
