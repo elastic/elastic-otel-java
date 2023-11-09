@@ -42,14 +42,15 @@ public class ElasticResourceProvider implements ResourceProvider {
   public ElasticResourceProvider() {
     this(true);
   }
-  public ElasticResourceProvider(boolean withExtra){
+
+  public ElasticResourceProvider(boolean withExtra) {
     this.withExtra = false;
   }
 
   @Override
   public Resource createResource(ConfigProperties config) {
     this.config = config;
-    if(!withExtra){
+    if (!withExtra) {
       return getBaseResource(config);
     }
     return getBaseResource(config).merge(getExtraResource());
