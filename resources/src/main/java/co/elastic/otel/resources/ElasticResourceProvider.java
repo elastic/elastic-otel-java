@@ -37,7 +37,7 @@ public class ElasticResourceProvider implements ResourceProvider {
 
   private static final Logger logger = Logger.getLogger(ElasticResourceProvider.class.getName());
 
-  public static final String ASYNC_RESOURCE = "elastic.otel.async_resource";
+  public static final String ASYNC_RESOURCE = "elastic.internal.async_resource";
 
   private ConfigProperties config;
 
@@ -55,6 +55,10 @@ public class ElasticResourceProvider implements ResourceProvider {
     return invokeResourceProvider(new AppServerServiceNameProvider());
   }
 
+  /**
+   * @return extra resource attributes that are expected to take some time due to making requests to
+   *     external systems
+   */
   public Resource getExtraResource() {
     List<ResourceProvider> providers =
         Arrays.asList(
@@ -82,7 +86,6 @@ public class ElasticResourceProvider implements ResourceProvider {
       logger.warning(
           String.format("error while invoking resource provider: %s", provider.getClass()));
       return Resource.empty();
-    } finally {
     }
   }
 }
