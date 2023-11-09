@@ -182,12 +182,7 @@ abstract class SmokeTest {
             .withEnv("SERVER_PORT", Integer.toString(MOCK_SERVER_PORT))
             .waitingFor(Wait.forHttp("/").forStatusCodeMatching(integer -> true));
 
-    // only use mock server verbose output when debugging
-    String logLevel = "WARN";
-    if (JavaExecutable.isDebugging()) {
-      logLevel = "INFO";
-    }
-    target.withEnv("JAVA_TOOL_OPTIONS", "-Dmockserver.logLevel=" + logLevel);
+    target.withEnv("JAVA_TOOL_OPTIONS", "-Dmockserver.logLevel=INFO");
 
     customizeContainer.accept(target);
 

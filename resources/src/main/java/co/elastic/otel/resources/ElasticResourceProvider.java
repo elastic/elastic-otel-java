@@ -29,6 +29,7 @@ import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ElasticResourceProvider implements ResourceProvider {
@@ -87,10 +88,21 @@ public class ElasticResourceProvider implements ResourceProvider {
 
   private Resource invokeResourceProvider(ResourceProvider provider) {
     try {
-      return provider.createResource(config);
+      Resource result = provider.createResource(config);
+      if (Resource.empty().equals(result)) {
+        logger.log(
+            Level.FINE,
+            String.format(
+                "resource provided did not provide any attribute: %s",
+                provider.getClass()));
+      }
+      return result;
     } catch (RuntimeException e) {
-      logger.warning(
-          String.format("error while invoking resource provider: %s", provider.getClass()));
+      logger.log(
+          Level.WARNING,
+          String.format(
+              "error while invoking resource provider: %s",
+              provider.getClass()));
       return Resource.empty();
     }
   }
