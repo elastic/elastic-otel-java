@@ -28,6 +28,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+          cache: gradle
 
       - name: Gradle assemble
         uses: gradle/gradle-build-action@v2
