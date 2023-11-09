@@ -62,6 +62,12 @@ public class JavaExecutable {
     return false;
   }
 
+  public static boolean isDebugInCI(){
+    // set in GitHub actions when "debug logging" is enabled
+    // see https://docs.github.com/en/actions/learn-github-actions/variables
+    return System.getenv("RUNNER_DEBUG") != null;
+  }
+
   private static boolean probeListeningDebugger(int port) {
     // the most straightforward way to probe for an active debugger listening on port is to start
     // another JVM

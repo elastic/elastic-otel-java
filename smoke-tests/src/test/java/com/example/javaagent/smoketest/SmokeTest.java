@@ -184,7 +184,7 @@ abstract class SmokeTest {
 
     // only use mock server verbose output when debugging
     String logLevel = "WARN";
-    if (JavaExecutable.isDebugging()) {
+    if (JavaExecutable.isDebugging() || JavaExecutable.isDebugInCI()) {
       logLevel = "INFO";
     }
     target.withEnv("JAVA_TOOL_OPTIONS", "-Dmockserver.logLevel=" + logLevel);
