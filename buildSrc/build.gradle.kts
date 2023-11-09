@@ -16,4 +16,3 @@ dependencies {
     // that makes the transitive one from jib fail see https://github.com/elastic/elastic-otel-java/issues/9 for details
     // implementation("io.opentelemetry.instrumentation:gradle-plugins:1.30.0-alpha-SNAPSHOT")
 }
-

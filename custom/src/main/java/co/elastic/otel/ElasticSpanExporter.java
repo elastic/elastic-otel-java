@@ -23,6 +23,7 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.sdk.common.CompletableResultCode;
+import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.DelegatingSpanData;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
@@ -63,6 +64,16 @@ public class ElasticSpanExporter implements SpanExporter {
                 AttributesBuilder builder = span.getAttributes().toBuilder();
                 builder.putAll(extraAttributes.build());
                 return builder.build();
+              }
+
+              @Override
+              public Resource getResource() {
+                Resource original = span.getResource();
+                // TODO once we implement asynchronous cloud resource loading, this is the place
+                // where we can merge them to make it as if they were available through the otel SDK
+                // if the original resource is immutable, we can probably keep a map and cache to
+                // prevent too much allocation
+                return Resource.create(original.getAttributes(), original.getSchemaUrl());
               }
             });
       }

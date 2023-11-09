@@ -1,7 +1,17 @@
+import jdk.internal.joptsimple.internal.Strings
+
 // TODO : convert to kotlin for consistency
 plugins {
   id "java"
   alias gradlePlugins.plugins.taskinfo
+}
+
+configurations {
+  warOnly {
+    transitive = false
+    canBeResolved = true
+    canBeConsumed = false
+  }
 }
 
 dependencies {
@@ -15,6 +25,16 @@ dependencies {
   testImplementation("ch.qos.logback:logback-classic:1.4.11")
 
   testImplementation("org.assertj:assertj-core:3.24.2")
+
+  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv")
+
+  testImplementation("org.mock-server:mockserver-client-java:5.15.0")
+
+  warOnly(project("test-app-war")){
+    attributes {
+        attribute(Attribute.of("elastic.packaging", String.class), "war")
+      }
+  }
 }
 
 tasks.test {
@@ -30,7 +50,14 @@ tasks.test {
   dependsOn(agentShadowTask)
   inputs.files(layout.files(agentShadowTask))
 
+  // depends on the packaged test app war file
+  dependsOn(project(":smoke-tests:test-app-war").tasks.assemble)
+  def warFile = project.configurations.warOnly.files.stream().findFirst().get()
+  inputs.files(layout.files(warFile))
+
   doFirst {
-    jvmArgs("-Dio.opentelemetry.smoketest.agent.shadowJar.path=${agentShadowTask.archiveFile.get()}")
+    jvmArgs(
+        "-Dio.opentelemetry.smoketest.agent.shadowJar.path=${agentShadowTask.archiveFile.get()}",
+        "-Dio.opentelemetry.smoketest.agent.testAppWar.path=${warFile}")
   }
 }
