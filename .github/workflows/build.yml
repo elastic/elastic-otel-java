@@ -30,10 +30,8 @@ jobs:
           java-version: 17
           cache: gradle
 
-      - name: Gradle assemble
+      - name: Gradle
         uses: gradle/gradle-build-action@v2
-        with:
-          arguments: assemble
 
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v4.0.3
