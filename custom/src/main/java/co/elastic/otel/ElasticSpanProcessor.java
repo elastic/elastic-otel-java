@@ -81,7 +81,6 @@ public class ElasticSpanProcessor implements SpanProcessor {
       exception.printStackTrace(printWriter);
     }
 
-    // same text format as 'exception.stacktrace'
     // TODO should we filter-out the calling code that is within the agent: at least onEnd +
     // captureStackTrace will be included here
     spanExporter.addAttribute(
