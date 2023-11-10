@@ -23,10 +23,13 @@ import io.opentelemetry.context.ContextStorage;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ElasticAutoConfigurationCustomizerprovider
     implements AutoConfigurationCustomizerProvider {
+
+  public static final String DISABLED_RESOURCE_PROVIDERS = "otel.java.disabled.resource.providers";
 
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
@@ -48,13 +51,15 @@ public class ElasticAutoConfigurationCustomizerprovider
         .addPropertiesCustomizer(
             configProperties -> {
               // Wrap context storage when configuration is loaded,
-              // configuration customization is used as an init hook but does not actually alter it.
+              // using properties customization as a hook
               ContextStorage.addWrapper(ElasticExtension.INSTANCE::wrapContextStorage);
-              Map<String, String> extraConfig = new HashMap<>();
-              extraConfig.put(
-                  "otel.java.disabled.resource.providers",
-                  ElasticResourceProvider.class.getCanonicalName());
-              return extraConfig;
+
+              // disabling our resource provider from SDK init
+              Map<String, String> config = new HashMap<>();
+              List<String> disabledList = configProperties.getList(DISABLED_RESOURCE_PROVIDERS);
+              disabledList.add(ElasticResourceProvider.class.getCanonicalName());
+              config.put(DISABLED_RESOURCE_PROVIDERS, String.join(",", disabledList));
+              return config;
             })
         .addSpanExporterCustomizer(
             (spanExporter, configProperties) ->
