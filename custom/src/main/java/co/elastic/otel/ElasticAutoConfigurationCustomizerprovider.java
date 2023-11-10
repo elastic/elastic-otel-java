@@ -18,18 +18,32 @@
  */
 package co.elastic.otel;
 
+import co.elastic.otel.resources.ElasticResourceProvider;
 import io.opentelemetry.context.ContextStorage;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class ElasticAutoConfigurationCustomizerprovider
     implements AutoConfigurationCustomizerProvider {
+
+  public static final String DISABLED_RESOURCE_PROVIDERS = "otel.java.disabled.resource.providers";
 
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
 
     autoConfiguration
+        .addResourceCustomizer(
+            (resource, configProperties) -> {
+              // create the resource provider ourselves we can store a reference to it
+              // and that will only get "fast" resources attributes when invoked
+              ElasticResourceProvider resourceProvider = new ElasticResourceProvider(false);
+              ElasticExtension.INSTANCE.registerResourceProvider(resourceProvider);
+              return resource.merge(resourceProvider.createResource(configProperties));
+            })
         .addTracerProviderCustomizer(
             (sdkTracerProviderBuilder, configProperties) ->
                 // span processor registration
@@ -38,9 +52,16 @@ public class ElasticAutoConfigurationCustomizerprovider
         .addPropertiesCustomizer(
             configProperties -> {
               // Wrap context storage when configuration is loaded,
-              // configuration customization is used as an init hook but does not actually alter it.
+              // using properties customization as a hook
               ContextStorage.addWrapper(ElasticExtension.INSTANCE::wrapContextStorage);
-              return Collections.emptyMap();
+
+              // disabling our resource provider from SDK init
+              Map<String, String> config = new HashMap<>();
+              Set<String> disabledConfig =
+                  new HashSet<>(configProperties.getList(DISABLED_RESOURCE_PROVIDERS));
+              disabledConfig.add(ElasticResourceProvider.class.getCanonicalName());
+              config.put(DISABLED_RESOURCE_PROVIDERS, String.join(",", disabledConfig));
+              return config;
             })
         .addSpanExporterCustomizer(
             (spanExporter, configProperties) ->
