@@ -33,11 +33,12 @@ dependencies {
   bootstrapLibs(project(":bootstrap"))
 
   javaagentLibs(project(":custom"))
+  javaagentLibs(project(":resources"))
 
   // This is where we should add custom instrumentations
   // javaagentLibs(project(":instrumentation:servlet-3"))
 
-  upstreamAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:"+libraries.versions.opentelemetryJavaagent.get().toString())
+  upstreamAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:" + libraries.versions.opentelemetryJavaagent.get().toString())
 }
 
 CopySpec isolateClasses(Iterable<File> jars) {

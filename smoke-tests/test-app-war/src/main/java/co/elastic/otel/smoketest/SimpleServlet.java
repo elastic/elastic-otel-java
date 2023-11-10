@@ -16,27 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.example.javaagent.smoketest;
+package co.elastic.otel.smoketest;
 
-import java.util.concurrent.TimeUnit;
-import okhttp3.OkHttpClient;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 
-public class OkHttpUtils {
+public class SimpleServlet extends HttpServlet {
 
-  static OkHttpClient.Builder clientBuilder() {
-    TimeUnit unit = TimeUnit.MINUTES;
-    int timeout = JavaExecutable.isDebugging() ? 10 : 1;
-    return new OkHttpClient.Builder()
-        .connectTimeout(timeout, unit)
-        .writeTimeout(timeout, unit)
-        .readTimeout(timeout, unit);
-  }
-
-  public static OkHttpClient client() {
-    return client(false);
-  }
-
-  public static OkHttpClient client(boolean followRedirects) {
-    return clientBuilder().followRedirects(followRedirects).build();
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
+    resp.setStatus(200);
+    PrintWriter writer = resp.getWriter();
+    writer.write("home sweet home");
+    writer.close();
   }
 }
