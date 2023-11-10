@@ -23,8 +23,9 @@ import io.opentelemetry.context.ContextStorage;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class ElasticAutoConfigurationCustomizerprovider
     implements AutoConfigurationCustomizerProvider {
@@ -56,9 +57,10 @@ public class ElasticAutoConfigurationCustomizerprovider
 
               // disabling our resource provider from SDK init
               Map<String, String> config = new HashMap<>();
-              List<String> disabledList = configProperties.getList(DISABLED_RESOURCE_PROVIDERS);
-              disabledList.add(ElasticResourceProvider.class.getCanonicalName());
-              config.put(DISABLED_RESOURCE_PROVIDERS, String.join(",", disabledList));
+              Set<String> disabledConfig =
+                  new HashSet<>(configProperties.getList(DISABLED_RESOURCE_PROVIDERS));
+              disabledConfig.add(ElasticResourceProvider.class.getCanonicalName());
+              config.put(DISABLED_RESOURCE_PROVIDERS, String.join(",", disabledConfig));
               return config;
             })
         .addSpanExporterCustomizer(

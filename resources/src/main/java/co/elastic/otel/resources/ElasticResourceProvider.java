@@ -45,7 +45,7 @@ public class ElasticResourceProvider implements ResourceProvider {
   }
 
   public ElasticResourceProvider(boolean withExtra) {
-    this.withExtra = false;
+    this.withExtra = withExtra;
   }
 
   @Override
