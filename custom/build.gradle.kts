@@ -12,4 +12,7 @@ dependencies {
   // needs to be added in order to allow access to AgentListener interface
   // this is currently required because autoconfigure is currently not exposed to the extension API.
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+
+  testImplementation("org.assertj:assertj-core:3.24.2")
+
 }
