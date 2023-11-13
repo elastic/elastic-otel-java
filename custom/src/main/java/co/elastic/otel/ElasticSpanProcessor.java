@@ -81,9 +81,12 @@ public class ElasticSpanProcessor implements SpanProcessor {
       exception.printStackTrace(printWriter);
     }
 
-    // TODO should we filter-out the calling code that is within the agent: at least onEnd +
-    // captureStackTrace will be included here
-    spanExporter.addAttribute(
-        span.getSpanContext(), ElasticAttributes.SPAN_STACKTRACE, stringWriter.toString());
+    // do not overwrite stacktrace if present
+    if (span.getAttribute(ElasticAttributes.SPAN_STACKTRACE) == null) {
+      // TODO should we filter-out the calling code that is within the agent: at least onEnd +
+      // captureStackTrace will be included here
+      spanExporter.addAttribute(
+          span.getSpanContext(), ElasticAttributes.SPAN_STACKTRACE, stringWriter.toString());
+    }
   }
 }
