@@ -24,98 +24,98 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Based on <a href="https://gist.github.com/brianguertin/ada4b65c6d1c4f6d3eee3c12b6ce021b">https://gist.github.com/brianguertin</a>.
- * This code was released into the public domain by Brian Guertin on July 8, 2016 citing, verbatim the unlicense.
+ * Based on <a
+ * href="https://gist.github.com/brianguertin/ada4b65c6d1c4f6d3eee3c12b6ce021b">https://gist.github.com/brianguertin</a>.
+ * This code was released into the public domain by Brian Guertin on July 8, 2016 citing, verbatim
+ * the unlicense.
  */
 public class Version implements Comparable<Version> {
 
-    private static final Version INVALID = new Version(new int[0], "");
+  private static final Version INVALID = new Version(new int[0], "");
 
-    private static final Pattern VERSION_REGEX = Pattern.compile("^" +
-        "(?<prefix>.*?)" +
-        "(?<version>(\\d+)(\\.\\d+)*)" +
-        "(?<suffix>.*?)" +
-        "$");
+  private static final Pattern VERSION_REGEX =
+      Pattern.compile(
+          "^" + "(?<prefix>.*?)" + "(?<version>(\\d+)(\\.\\d+)*)" + "(?<suffix>.*?)" + "$");
 
-    private final int[] numbers;
-    private final String suffix;
+  private final int[] numbers;
+  private final String suffix;
 
-    public static Version of(String version) {
-        Matcher matcher = VERSION_REGEX.matcher(version);
-        if (!matcher.find()) {
-            return INVALID;
-        }
-        final String[] parts = matcher.group("version").split("\\.");
-        int[] numbers = new int[parts.length];
-        for (int i = 0; i < parts.length; i++) {
-            numbers[i] = Integer.parseInt(parts[i]);
-        }
-
-        String suffixTmp = matcher.group("suffix");
-        if (suffixTmp == null) {
-            suffixTmp = "";
-        }
-        String suffix = suffixTmp;
-        return new Version(numbers, suffix);
+  public static Version of(String version) {
+    Matcher matcher = VERSION_REGEX.matcher(version);
+    if (!matcher.find()) {
+      return INVALID;
+    }
+    final String[] parts = matcher.group("version").split("\\.");
+    int[] numbers = new int[parts.length];
+    for (int i = 0; i < parts.length; i++) {
+      numbers[i] = Integer.parseInt(parts[i]);
     }
 
-    private Version(int[] numbers, String suffix) {
-        this.numbers = numbers;
-        this.suffix = suffix;
+    String suffixTmp = matcher.group("suffix");
+    if (suffixTmp == null) {
+      suffixTmp = "";
     }
+    String suffix = suffixTmp;
+    return new Version(numbers, suffix);
+  }
 
-    public boolean hasSuffix() {
-        return suffix.length() > 0;
-    }
+  private Version(int[] numbers, String suffix) {
+    this.numbers = numbers;
+    this.suffix = suffix;
+  }
 
-    public Version withoutSuffix() {
-        return new Version(numbers, "");
-    }
+  public boolean hasSuffix() {
+    return suffix.length() > 0;
+  }
 
-    @Override
-    public int compareTo(Version another) {
-        final int maxLength = Math.max(numbers.length, another.numbers.length);
-        for (int i = 0; i < maxLength; i++) {
-            final int left = i < numbers.length ? numbers[i] : 0;
-            final int right = i < another.numbers.length ? another.numbers[i] : 0;
-            if (left != right) {
-                return left < right ? -1 : 1;
-            }
-        }
-        if (suffix.isEmpty() || another.suffix.isEmpty()) {
-            // no suffix is greater than any suffix (1.0.0 > 1.0.0-SNAPSHOT)
-            return another.suffix.compareTo(suffix);
-        } else {
-            // if both have a suffix, sort in natural order (1.0.0-RC2 > 1.0.0-RC1)
-            return suffix.compareTo(another.suffix);
-        }
-    }
+  public Version withoutSuffix() {
+    return new Version(numbers, "");
+  }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < numbers.length; i++) {
-            sb.append(numbers[i]);
-            if (i < numbers.length - 1) {
-                sb.append('.');
-            }
-        }
-        sb.append(suffix);
-        return sb.toString();
+  @Override
+  public int compareTo(Version another) {
+    final int maxLength = Math.max(numbers.length, another.numbers.length);
+    for (int i = 0; i < maxLength; i++) {
+      final int left = i < numbers.length ? numbers[i] : 0;
+      final int right = i < another.numbers.length ? another.numbers[i] : 0;
+      if (left != right) {
+        return left < right ? -1 : 1;
+      }
     }
+    if (suffix.isEmpty() || another.suffix.isEmpty()) {
+      // no suffix is greater than any suffix (1.0.0 > 1.0.0-SNAPSHOT)
+      return another.suffix.compareTo(suffix);
+    } else {
+      // if both have a suffix, sort in natural order (1.0.0-RC2 > 1.0.0-RC1)
+      return suffix.compareTo(another.suffix);
+    }
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Version version = (Version) o;
-        return Arrays.equals(numbers, version.numbers) && suffix.equals(version.suffix);
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < numbers.length; i++) {
+      sb.append(numbers[i]);
+      if (i < numbers.length - 1) {
+        sb.append('.');
+      }
     }
+    sb.append(suffix);
+    return sb.toString();
+  }
 
-    @Override
-    public int hashCode() {
-        int result = Objects.hash(suffix);
-        result = 31 * result + Arrays.hashCode(numbers);
-        return result;
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Version version = (Version) o;
+    return Arrays.equals(numbers, version.numbers) && suffix.equals(version.suffix);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = Objects.hash(suffix);
+    result = 31 * result + Arrays.hashCode(numbers);
+    return result;
+  }
 }
