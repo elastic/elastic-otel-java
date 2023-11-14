@@ -79,6 +79,7 @@ public class ElasticExtension {
     profiler.registerExporter(toWrap);
     spanExporter = new ElasticSpanExporter(toWrap);
     breakdownMetrics.registerSpanExporter(spanExporter);
+    spanProcessor.registerSpanExporter(spanExporter);
     return spanExporter;
   }
 
