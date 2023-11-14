@@ -57,13 +57,16 @@ public class ElasticSpanExporter implements SpanExporter {
       if (extraAttributes == null) {
         toSend.add(span);
       } else {
+        Attributes newAttributes = span.getAttributes()
+            .toBuilder()
+            .putAll(extraAttributes.build())
+            .build();
+
         toSend.add(
             new DelegatingSpanData(span) {
               @Override
               public Attributes getAttributes() {
-                AttributesBuilder builder = span.getAttributes().toBuilder();
-                builder.putAll(extraAttributes.build());
-                return builder.build();
+                return newAttributes;
               }
 
               @Override

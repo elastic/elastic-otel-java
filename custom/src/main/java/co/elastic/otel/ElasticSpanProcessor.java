@@ -75,14 +75,15 @@ public class ElasticSpanProcessor implements SpanProcessor {
     if (spanExporter == null) {
       return;
     }
-    Throwable exception = new Throwable();
-    StringWriter stringWriter = new StringWriter();
-    try (PrintWriter printWriter = new PrintWriter(stringWriter)) {
-      exception.printStackTrace(printWriter);
-    }
 
     // do not overwrite stacktrace if present
     if (span.getAttribute(ElasticAttributes.SPAN_STACKTRACE) == null) {
+      Throwable exception = new Throwable();
+      StringWriter stringWriter = new StringWriter();
+      try (PrintWriter printWriter = new PrintWriter(stringWriter)) {
+        exception.printStackTrace(printWriter);
+      }
+
       // TODO should we filter-out the calling code that is within the agent: at least onEnd +
       // captureStackTrace will be included here
       spanExporter.addAttribute(
