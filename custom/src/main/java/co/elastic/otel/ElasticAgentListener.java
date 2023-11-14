@@ -35,5 +35,14 @@ public class ElasticAgentListener implements AgentListener {
     OpenTelemetry openTelemetry = GlobalOpenTelemetry.get();
 
     ElasticExtension.INSTANCE.registerOpenTelemetry(openTelemetry);
+
+    Runtime.getRuntime()
+        .addShutdownHook(
+            new Thread() {
+              @Override
+              public void run() {
+                ElasticExtension.INSTANCE.shutdown();
+              }
+            });
   }
 }

@@ -18,7 +18,9 @@
  */
 package co.elastic.otel;
 
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.resources.Resource;
@@ -34,44 +36,40 @@ public class ElasticSpanExporter implements SpanExporter {
 
   private final SpanExporter delegate;
 
-  private ConcurrentHashMap<SpanContext, ElasticBreakdownMetrics.SpanContextData> storage;
+  private final ConcurrentHashMap<SpanContext, AttributesBuilder> attributes;
 
   public ElasticSpanExporter(SpanExporter delegate) {
     this.delegate = delegate;
-    this.storage = new ConcurrentHashMap<>();
+    this.attributes = new ConcurrentHashMap<>();
   }
 
   @Override
   public CompletableResultCode export(Collection<SpanData> spans) {
     // shortcut in the rare case where no filtering is required
-    if (storage.isEmpty()) {
+    if (attributes.isEmpty()) {
       return delegate.export(spans);
     }
 
     List<SpanData> toSend = new ArrayList<>(spans.size());
     for (SpanData span : spans) {
       SpanContext spanContext = span.getSpanContext();
-      ElasticBreakdownMetrics.SpanContextData data = storage.remove(spanContext);
-      if (data == null) {
+      AttributesBuilder extraAttributes = attributes.remove(spanContext);
+      if (extraAttributes == null) {
         toSend.add(span);
       } else {
+        Attributes newAttributes =
+            span.getAttributes().toBuilder().putAll(extraAttributes.build()).build();
+
         toSend.add(
             new DelegatingSpanData(span) {
               @Override
               public Attributes getAttributes() {
-                return span.getAttributes().toBuilder()
-                    .put(ElasticAttributes.SELF_TIME_ATTRIBUTE, data.getSelfTime())
-                    .build();
+                return newAttributes;
               }
 
               @Override
               public Resource getResource() {
-                Resource original = span.getResource();
-                // TODO once we implement asynchronous cloud resource loading, this is the place
-                // where we can merge them to make it as if they were available through the otel SDK
-                // if the original resource is immutable, we can probably keep a map and cache to
-                // prevent too much allocation
-                return Resource.create(original.getAttributes(), original.getSchemaUrl());
+                return ElasticExtension.INSTANCE.wrapResource(span.getResource());
               }
             });
       }
@@ -80,13 +78,21 @@ public class ElasticSpanExporter implements SpanExporter {
     return delegate.export(toSend);
   }
 
-  public void report(SpanContext spanContext, ElasticBreakdownMetrics.SpanContextData data) {
-    this.storage.put(spanContext, data);
+  public <T> void addAttribute(SpanContext spanContext, AttributeKey<T> key, T value) {
+    attributes.compute(
+        spanContext,
+        (k, builder) -> {
+          if (builder == null) {
+            builder = Attributes.builder();
+          }
+          builder.put(key, value);
+          return builder;
+        });
   }
 
   @Override
   public CompletableResultCode flush() {
-    storage.clear();
+    attributes.clear();
     return delegate.flush();
   }
 

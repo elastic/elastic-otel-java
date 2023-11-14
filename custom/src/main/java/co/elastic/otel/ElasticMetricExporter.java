@@ -18,13 +18,17 @@
  */
 package co.elastic.otel;
 
+import co.elastic.otel.metrics.DelegatingMetricData;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.Aggregation;
 import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
+import io.opentelemetry.sdk.resources.Resource;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class ElasticMetricExporter implements MetricExporter {
 
@@ -46,7 +50,17 @@ public class ElasticMetricExporter implements MetricExporter {
 
   @Override
   public CompletableResultCode export(Collection<MetricData> metrics) {
-    return delegate.export(metrics);
+    List<MetricData> toSend = new ArrayList<>(metrics.size());
+    for (MetricData metric : metrics) {
+      toSend.add(
+          new DelegatingMetricData(metric) {
+            @Override
+            public Resource getResource() {
+              return ElasticExtension.INSTANCE.wrapResource(super.getResource());
+            }
+          });
+    }
+    return delegate.export(toSend);
   }
 
   @Override

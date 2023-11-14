@@ -37,21 +37,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ElasticBreakdownMetrics {
 
-  private final ConcurrentHashMap<SpanContext, SpanContextData> elasticSpanData;
+  private final ConcurrentHashMap<SpanContext, BreakdownData> elasticSpanData;
 
   private ElasticSpanExporter spanExporter;
 
   private LongCounter breakDownCounter;
 
   // sidecar object we store for every span
-  public static class SpanContextData {
+  private static class BreakdownData {
 
     private ReadableSpan localRoot;
 
     private final ChildDuration childDuration;
     private long selfTime;
 
-    public SpanContextData(ReadableSpan localRoot, long start) {
+    public BreakdownData(ReadableSpan localRoot, long start) {
       this.localRoot = localRoot;
       this.childDuration = new ChildDuration(start);
       this.selfTime = Long.MIN_VALUE;
@@ -108,7 +108,7 @@ public class ElasticBreakdownMetrics {
       // the span is a local root span
       localRootSpanContext = spanContext;
 
-      elasticSpanData.put(spanContext, new SpanContextData(span, spanStart));
+      elasticSpanData.put(spanContext, new BreakdownData(span, spanStart));
 
     } else {
       ReadableSpan parentSpan = getReadableSpanFromContext(parentContext);
@@ -118,7 +118,7 @@ public class ElasticBreakdownMetrics {
       ReadableSpan localRoot = lookupLocalRootSpan(parentSpan);
       localRootSpanContext = localRoot.getSpanContext();
       if (localRootSpanContext.isValid()) {
-        elasticSpanData.put(spanContext, new SpanContextData(localRoot, spanStart));
+        elasticSpanData.put(spanContext, new BreakdownData(localRoot, spanStart));
       }
 
       // update direct parent span child durations for self-time
@@ -157,11 +157,11 @@ public class ElasticBreakdownMetrics {
     SpanData spanData = span.toSpanData();
 
     // children duration for current span
-    SpanContextData spanContextData = elasticSpanData.get(spanContext);
+    BreakdownData spanContextData = elasticSpanData.get(spanContext);
     Objects.requireNonNull(spanContextData, "missing elastic span data");
 
     // update children duration for direct parent
-    SpanContextData parentSpanContextData = elasticSpanData.get(span.getParentSpanContext());
+    BreakdownData parentSpanContextData = elasticSpanData.get(span.getParentSpanContext());
 
     if (parentSpanContextData != null) { // parent might be already terminated
       parentSpanContextData.childDuration.endChild(spanData.getEndEpochNanos());
@@ -176,14 +176,15 @@ public class ElasticBreakdownMetrics {
             // put measured metric as span attribute to allow using an ingest pipeline to alter
             // storage
             // ingest pipelines do not have access to _source and thus can't read the metric as-is.
-            .put(ElasticAttributes.SELF_TIME_ATTRIBUTE, selfTime);
+            .put(ElasticAttributes.SELF_TIME, selfTime);
 
     // unfortunately here we get a read-only span that has already been ended, thus even a cast to
     // ReadWriteSpan
     // does not allow us from adding extra span attributes
     if (spanExporter != null) {
       spanContextData.setSelfTime(selfTime);
-      spanExporter.report(spanContext, spanContextData);
+      spanExporter.addAttribute(
+          spanContext, ElasticAttributes.SELF_TIME, spanContextData.getSelfTime());
     }
 
     breakDownCounter.add(selfTime, metricAttributes.build());
@@ -194,8 +195,8 @@ public class ElasticBreakdownMetrics {
     AttributesBuilder builder =
         Attributes.builder()
             // default to app/internal unless other span attributes
-            .put(ElasticAttributes.ELASTIC_SPAN_TYPE, "app")
-            .put(ElasticAttributes.ELASTIC_SPAN_SUBTYPE, "internal");
+            .put(ElasticAttributes.SPAN_TYPE, "app")
+            .put(ElasticAttributes.SPAN_SUBTYPE, "internal");
 
     spanAttributes.forEach(
         (k, v) -> {
@@ -203,8 +204,8 @@ public class ElasticBreakdownMetrics {
           if (AttributeType.STRING.equals(k.getType())) {
             int index = key.indexOf(".system");
             if (index > 0) {
-              builder.put(ElasticAttributes.ELASTIC_SPAN_TYPE, key.substring(0, index));
-              builder.put(ElasticAttributes.ELASTIC_SPAN_SUBTYPE, v.toString());
+              builder.put(ElasticAttributes.SPAN_TYPE, key.substring(0, index));
+              builder.put(ElasticAttributes.SPAN_SUBTYPE, v.toString());
             }
           }
         });
@@ -212,7 +213,7 @@ public class ElasticBreakdownMetrics {
   }
 
   private ReadableSpan lookupLocalRootSpan(ReadableSpan span) {
-    SpanContextData spanContextData = elasticSpanData.get(span.getSpanContext());
+    BreakdownData spanContextData = elasticSpanData.get(span.getSpanContext());
     return spanContextData != null ? spanContextData.localRoot : (ReadableSpan) Span.getInvalid();
   }
 
