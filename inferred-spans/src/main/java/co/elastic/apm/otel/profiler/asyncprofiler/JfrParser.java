@@ -19,10 +19,10 @@
 package co.elastic.apm.otel.profiler.asyncprofiler;
 
 import co.elastic.apm.otel.profiler.StackFrame;
+import co.elastic.apm.otel.profiler.collections.Int2IntHashMap;
 import co.elastic.apm.otel.profiler.collections.Int2ObjectHashMap;
 import co.elastic.apm.otel.profiler.collections.Long2LongHashMap;
 import co.elastic.apm.otel.profiler.collections.Long2ObjectHashMap;
-import co.elastic.apm.otel.profiler.collections.Int2IntHashMap;
 import co.elastic.apm.otel.profiler.config.WildcardMatcher;
 import co.elastic.apm.otel.profiler.pooling.Recyclable;
 import java.io.File;
@@ -38,27 +38,26 @@ import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
 /**
- * Parses the binary JFR file created by async-profiler.
- * May not work with JFR files created by an actual flight recorder.
- * <p>
- * The implementation is tuned with to minimize allocations when parsing a JFR file.
- * Most data structures can be reused by first {@linkplain #resetState() resetting the state} and then {@linkplain #parse(File, List, List) parsing}
- * another file.
- * </p>
+ * Parses the binary JFR file created by async-profiler. May not work with JFR files created by an
+ * actual flight recorder.
+ *
+ * <p>The implementation is tuned with to minimize allocations when parsing a JFR file. Most data
+ * structures can be reused by first {@linkplain #resetState() resetting the state} and then
+ * {@linkplain #parse(File, List, List) parsing} another file.
  */
 public class JfrParser implements Recyclable {
 
   private static final Logger logger = Logger.getLogger(JfrParser.class.getName());
 
   private static final byte[] MAGIC_BYTES = new byte[] {'F', 'L', 'R', '\0'};
-  private static final Set<String> JAVA_FRAME_TYPES = new HashSet<>(
-      Arrays.asList("Interpreted", "JIT compiled", "Inlined"));
+  private static final Set<String> JAVA_FRAME_TYPES =
+      new HashSet<>(Arrays.asList("Interpreted", "JIT compiled", "Inlined"));
   private static final int BIG_FILE_BUFFER_SIZE = 5 * 1024 * 1024;
   private static final int SMALL_FILE_BUFFER_SIZE = 4 * 1024;
   private static final String SYMBOL_EXCLUDED = "3x cluded";
   private static final String SYMBOL_NULL = "n u11";
-  private final static StackFrame FRAME_EXCLUDED = new StackFrame("excluded", "excluded");
-  private final static StackFrame FRAME_NULL = new StackFrame("null", "null");
+  private static final StackFrame FRAME_EXCLUDED = new StackFrame("excluded", "excluded");
+  private static final StackFrame FRAME_NULL = new StackFrame("null", "null");
 
   private final BufferedFile bufferedFile;
   private final Int2IntHashMap classIdToClassNameSymbolId = new Int2IntHashMap(-1);
@@ -66,22 +65,21 @@ public class JfrParser implements Recyclable {
   private final Int2ObjectHashMap<String> symbolIdToString = new Int2ObjectHashMap<String>();
   private final Int2IntHashMap stackTraceIdToFilePositions = new Int2IntHashMap(-1);
   private final Long2LongHashMap nativeTidToJavaTid = new Long2LongHashMap(-1);
-  private final Long2ObjectHashMap<StackFrame> frameIdToFrame = new Long2ObjectHashMap<StackFrame>();
+  private final Long2ObjectHashMap<StackFrame> frameIdToFrame =
+      new Long2ObjectHashMap<StackFrame>();
   private final Long2LongHashMap frameIdToMethodSymbol = new Long2LongHashMap(-1);
   private final Long2LongHashMap frameIdToClassId = new Long2LongHashMap(-1);
   // used to resolve a symbol with minimal allocations
   private final StringBuilder symbolBuilder = new StringBuilder();
   private long eventsOffset;
   private long metadataOffset;
-  @Nullable
-  private boolean[] isJavaFrameType;
-  @Nullable
-  private List<WildcardMatcher> excludedClasses;
-  @Nullable
-  private List<WildcardMatcher> includedClasses;
+  @Nullable private boolean[] isJavaFrameType;
+  @Nullable private List<WildcardMatcher> excludedClasses;
+  @Nullable private List<WildcardMatcher> includedClasses;
 
   public JfrParser() {
-    this(ByteBuffer.allocateDirect(BIG_FILE_BUFFER_SIZE),
+    this(
+        ByteBuffer.allocateDirect(BIG_FILE_BUFFER_SIZE),
         ByteBuffer.allocateDirect(SMALL_FILE_BUFFER_SIZE));
   }
 
@@ -90,23 +88,27 @@ public class JfrParser implements Recyclable {
   }
 
   /**
-   * Initializes the parser to make it ready for {@link #resolveStackTrace(long, boolean, List, int)} to be called.
+   * Initializes the parser to make it ready for {@link #resolveStackTrace(long, boolean, List,
+   * int)} to be called.
    *
    * @param file the JFR file to parse
-   * @param excludedClasses Class names to exclude in stack traces (has an effect on {@link #resolveStackTrace(long, boolean, List, int)})
-   * @param includedClasses Class names to include in stack traces (has an effect on {@link #resolveStackTrace(long, boolean, List, int)})
+   * @param excludedClasses Class names to exclude in stack traces (has an effect on {@link
+   *     #resolveStackTrace(long, boolean, List, int)})
+   * @param includedClasses Class names to include in stack traces (has an effect on {@link
+   *     #resolveStackTrace(long, boolean, List, int)})
    * @throws IOException if some I/O error occurs
    */
-  public void parse(File file, List<WildcardMatcher> excludedClasses,
-      List<WildcardMatcher> includedClasses) throws IOException {
+  public void parse(
+      File file, List<WildcardMatcher> excludedClasses, List<WildcardMatcher> includedClasses)
+      throws IOException {
     this.excludedClasses = excludedClasses;
     this.includedClasses = includedClasses;
     bufferedFile.setFile(file);
     long fileSize = bufferedFile.size();
     if (fileSize < 16) {
       throw new IllegalStateException(
-          "Unexpected sampling profiler error, everything else should work as expected. " +
-              "Please report to us with as many details, including OS and JVM details.");
+          "Unexpected sampling profiler error, everything else should work as expected. "
+              + "Please report to us with as many details, including OS and JVM details.");
     }
     if (logger.isLoggable(Level.FINE)) {
       logger.log(Level.FINE, "Parsing {0} ({1} bytes)", new Object[] {file, fileSize});
@@ -149,7 +151,7 @@ public class JfrParser implements Recyclable {
 
   private void parseCheckpoint(long checkpointOffset) throws IOException {
     bufferedFile.position(checkpointOffset);
-    int size = bufferedFile.getInt();// size
+    int size = bufferedFile.getInt(); // size
     expectEventType(EventTypeId.EVENT_CHECKPOINT);
     bufferedFile.getLong(); // stop timestamp
     bufferedFile.getLong(); // previous checkpoint - always 0 in async-profiler
@@ -205,7 +207,8 @@ public class JfrParser implements Recyclable {
           // classId is an incrementing integer, no way there are more than 2 billion distinct ones
           int classId = (int) bufferedFile.getUnsafeLong();
           bufferedFile.getUnsafeLong(); // loader class
-          // symbol ids are incrementing integers, no way there are more than 2 billion distinct ones
+          // symbol ids are incrementing integers, no way there are more than 2 billion distinct
+          // ones
           int classNameSymbolId = (int) bufferedFile.getUnsafeLong();
           classIdToClassNameSymbolId.put(classId, classNameSymbolId); // class name
           bufferedFile.getUnsafeShort(); // access flags
@@ -217,7 +220,8 @@ public class JfrParser implements Recyclable {
           long id = bufferedFile.getUnsafeLong();
           // classId is an incrementing integer, no way there are more than 2 billion distinct ones
           int classId = (int) bufferedFile.getUnsafeLong();
-          // symbol ids are incrementing integers, no way there are more than 2 billion distinct ones
+          // symbol ids are incrementing integers, no way there are more than 2 billion distinct
+          // ones
           int methodNameSymbolId = (int) bufferedFile.getUnsafeLong();
           frameIdToFrame.put(id, FRAME_NULL);
           frameIdToClassId.put(id, classId);
@@ -229,7 +233,8 @@ public class JfrParser implements Recyclable {
         break;
       case ContentTypeId.CONTENT_SYMBOL:
         for (int i = 0; i < count; i++) {
-          // symbol ids are incrementing integers, no way there are more than 2 billion distinct ones
+          // symbol ids are incrementing integers, no way there are more than 2 billion distinct
+          // ones
           int symbolId = (int) bufferedFile.getLong();
           int pos = (int) bufferedFile.position();
           symbolIdToPos.put(symbolId, pos);
@@ -300,27 +305,30 @@ public class JfrParser implements Recyclable {
 
   /**
    * Resolves the stack trace with the given {@code stackTraceId}.
-   * <p>
-   * Note that his allocates strings for symbols in case a stack frame has not already been resolved for the current JFR file yet.
-   * These strings are currently not cached so this can create some GC pressure.
-   * </p>
-   * <p>
-   * Excludes frames based on the {@link WildcardMatcher}s supplied to {@link #parse(File, List, List)}.
-   * </p>
    *
-   * @param stackTraceId The id of the stack traced.
-   *     Used to look up the position of the file in which the given stack trace is stored via {@link #stackTraceIdToFilePositions}.
-   * @param onlyJavaFrames If {@code true}, will only resolve {@code Interpreted}, {@code JIT compiled} and {@code Inlined} frames.
-   *     If {@code false}, will also resolve {@code Native}, {@code Kernel} and {@code C++} frames.
-   * @param stackFrames The mutable list where the stack frames are written to.
-   *     Don't forget to {@link List#clear()} the list before calling this method if the list is reused.
-   * @param maxStackDepth The max size of the stackFrames list (excluded frames don't take up space).
-   *     In contrast to async-profiler's {@code jstackdepth} argument this does not truncate the bottom of the stack, only the top.
-   *     This is important to properly create a call tree without making it overly complex.
+   * <p>Note that his allocates strings for symbols in case a stack frame has not already been
+   * resolved for the current JFR file yet. These strings are currently not cached so this can
+   * create some GC pressure.
+   *
+   * <p>Excludes frames based on the {@link WildcardMatcher}s supplied to {@link #parse(File, List,
+   * List)}.
+   *
+   * @param stackTraceId The id of the stack traced. Used to look up the position of the file in
+   *     which the given stack trace is stored via {@link #stackTraceIdToFilePositions}.
+   * @param onlyJavaFrames If {@code true}, will only resolve {@code Interpreted}, {@code JIT
+   *     compiled} and {@code Inlined} frames. If {@code false}, will also resolve {@code Native},
+   *     {@code Kernel} and {@code C++} frames.
+   * @param stackFrames The mutable list where the stack frames are written to. Don't forget to
+   *     {@link List#clear()} the list before calling this method if the list is reused.
+   * @param maxStackDepth The max size of the stackFrames list (excluded frames don't take up
+   *     space). In contrast to async-profiler's {@code jstackdepth} argument this does not truncate
+   *     the bottom of the stack, only the top. This is important to properly create a call tree
+   *     without making it overly complex.
    * @throws IOException if there is an error reading in current buffer
    */
-  public void resolveStackTrace(long stackTraceId, boolean onlyJavaFrames,
-      List<StackFrame> stackFrames, int maxStackDepth) throws IOException {
+  public void resolveStackTrace(
+      long stackTraceId, boolean onlyJavaFrames, List<StackFrame> stackFrames, int maxStackDepth)
+      throws IOException {
     if (!bufferedFile.isSet()) {
       throw new IllegalStateException("getStackTrace was called before parse");
     }
@@ -344,8 +352,9 @@ public class JfrParser implements Recyclable {
     bufferedFile.position(position);
   }
 
-  private void addFrameIfIncluded(List<StackFrame> stackFrames, boolean onlyJavaFrames,
-      long frameId, byte frameType) throws IOException {
+  private void addFrameIfIncluded(
+      List<StackFrame> stackFrames, boolean onlyJavaFrames, long frameId, byte frameType)
+      throws IOException {
     if (!onlyJavaFrames || isJavaFrameType(frameType)) {
       StackFrame stackFrame = resolveStackFrame(frameId);
       if (stackFrame != FRAME_EXCLUDED) {
@@ -385,8 +394,8 @@ public class JfrParser implements Recyclable {
   }
 
   private boolean isClassIncluded(CharSequence className) {
-    return WildcardMatcher.isAnyMatch(includedClasses, className) && WildcardMatcher.isNoneMatch(
-        excludedClasses, className);
+    return WildcardMatcher.isAnyMatch(includedClasses, className)
+        && WildcardMatcher.isNoneMatch(excludedClasses, className);
   }
 
   private StackFrame resolveStackFrame(long frameId) throws IOException {
@@ -394,8 +403,8 @@ public class JfrParser implements Recyclable {
     if (stackFrame != FRAME_NULL) {
       return stackFrame;
     }
-    String className = resolveSymbol(
-        classIdToClassNameSymbolId.get((int) frameIdToClassId.get(frameId)), true);
+    String className =
+        resolveSymbol(classIdToClassNameSymbolId.get((int) frameIdToClassId.get(frameId)), true);
     if (className == SYMBOL_EXCLUDED) {
       stackFrame = FRAME_EXCLUDED;
     } else {
@@ -447,10 +456,12 @@ public class JfrParser implements Recyclable {
   public interface StackTraceConsumer {
 
     /**
-     * @param threadId The {@linkplain Thread#getId() Java thread id} for with the event was recorded.
-     * @param stackTraceId The id of the stack trace event.
-     *     Can be used to resolve the stack trace via {@link #resolveStackTrace(long, boolean, List, int)}
-     * @param nanoTime The timestamp of the event which can be correlated with {@link System#nanoTime()}
+     * @param threadId The {@linkplain Thread#getId() Java thread id} for with the event was
+     *     recorded.
+     * @param stackTraceId The id of the stack trace event. Can be used to resolve the stack trace
+     *     via {@link #resolveStackTrace(long, boolean, List, int)}
+     * @param nanoTime The timestamp of the event which can be correlated with {@link
+     *     System#nanoTime()}
      * @throws IOException if there is any error reading stack trace
      */
     void onCallTree(long threadId, long stackTraceId, long nanoTime) throws IOException;

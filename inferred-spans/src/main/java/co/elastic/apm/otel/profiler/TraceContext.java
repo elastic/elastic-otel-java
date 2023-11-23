@@ -1,8 +1,26 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.apm.otel.profiler;
 
+import co.elastic.apm.otel.profiler.pooling.Recyclable;
 import co.elastic.apm.otel.profiler.util.ByteUtils;
 import co.elastic.apm.otel.profiler.util.HexUtils;
-import co.elastic.apm.otel.profiler.pooling.Recyclable;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;
@@ -10,9 +28,9 @@ import io.opentelemetry.api.trace.TraceState;
 import javax.annotation.Nullable;
 
 /**
- * A mutable (and therefore recyclable) class storing the relevant bits of {@link SpanContext}
- * for generating inferred spans. Also stores a clock-anchor for the corresponding span obtained
- * via {@link NanoClock#getAnchor(Span)}.
+ * A mutable (and therefore recyclable) class storing the relevant bits of {@link SpanContext} for
+ * generating inferred spans. Also stores a clock-anchor for the corresponding span obtained via
+ * {@link NanoClock#getAnchor(Span)}.
  */
 public class TraceContext implements Recyclable {
 
@@ -24,8 +42,7 @@ public class TraceContext implements Recyclable {
 
   private long clockAnchor;
 
-  public TraceContext() {
-  }
+  public TraceContext() {}
 
   // For testing only
   static TraceContext fromSpanContextWithZeroClockAnchor(SpanContext ctx) {
@@ -40,7 +57,6 @@ public class TraceContext implements Recyclable {
     traceIdHigh = HexUtils.hexToLong(ctx.getTraceId(), 0);
     traceIdLow = HexUtils.hexToLong(ctx.getTraceId(), 16);
     flags = ctx.getTraceFlags().asByte();
-
   }
 
   public SpanContext toOtelSpanContext(StringBuilder temporaryBuilder) {
@@ -54,11 +70,7 @@ public class TraceContext implements Recyclable {
     String idStr = temporaryBuilder.toString();
 
     return SpanContext.create(
-        traceIdStr,
-        idStr,
-        TraceFlags.fromByte(flags),
-        TraceState.getDefault()
-    );
+        traceIdStr, idStr, TraceFlags.fromByte(flags), TraceState.getDefault());
   }
 
   public boolean idEquals(@Nullable TraceContext o) {
@@ -79,7 +91,6 @@ public class TraceContext implements Recyclable {
     flags = serialized[24];
     clockAnchor = ByteUtils.getLong(serialized, 25);
   }
-
 
   public boolean traceIdAndIdEquals(byte[] otherSerialized) {
     long otherTraceIdLow = ByteUtils.getLong(otherSerialized, 0);

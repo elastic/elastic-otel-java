@@ -18,7 +18,6 @@
  */
 package co.elastic.apm.otel.profiler;
 
-import co.elastic.apm.otel.profiler.NanoClock;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
@@ -28,9 +27,7 @@ public class FixedNanoClock implements NanoClock {
   private long nanoTime = -1L;
 
   @Override
-  public void onSpanStart(ReadWriteSpan started, Context parentContext) {
-
-  }
+  public void onSpanStart(ReadWriteSpan started, Context parentContext) {}
 
   @Override
   public long nanoTime() {
@@ -51,9 +48,7 @@ public class FixedNanoClock implements NanoClock {
   }
 
   @Override
-  public void periodicCleanup() {
-
-  }
+  public void periodicCleanup() {}
 
   public void setNanoTime(long nanoTime) {
     this.nanoTime = nanoTime;

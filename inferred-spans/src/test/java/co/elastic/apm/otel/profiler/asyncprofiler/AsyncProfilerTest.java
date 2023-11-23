@@ -55,8 +55,8 @@ public class AsyncProfilerTest {
     AsyncProfiler.getInstance(nonDefaultTempDirectory.getAbsolutePath(), 6);
     assertThat(Integer.valueOf(System.getProperty(SAFEMODE_SYSTEM_PROPERTY_NAME))).isEqualTo(6);
 
-    File[] libasyncProfilers = nonDefaultTempDirectory.listFiles(
-        getLibasyncProfilerFilenameFilter());
+    File[] libasyncProfilers =
+        nonDefaultTempDirectory.listFiles(getLibasyncProfilerFilenameFilter());
     assertThat(libasyncProfilers).hasSizeGreaterThanOrEqualTo(1);
   }
 

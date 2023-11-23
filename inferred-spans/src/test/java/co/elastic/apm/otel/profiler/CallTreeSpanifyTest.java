@@ -18,7 +18,6 @@
  */
 package co.elastic.apm.otel.profiler;
 
-
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 
 import co.elastic.apm.otel.profiler.pooling.ObjectPool;
@@ -43,7 +42,8 @@ import org.junit.jupiter.api.condition.OS;
 class CallTreeSpanifyTest {
 
   static {
-    //we can't reset context storage wrappers between tests, so we msut ensure that it is registered before we create ANY Otel instance
+    // we can't reset context storage wrappers between tests, so we msut ensure that it is
+    // registered before we create ANY Otel instance
     ProfilingActivationListener.ensureInitialized();
   }
 
@@ -52,23 +52,21 @@ class CallTreeSpanifyTest {
   @DisabledOnAppleSilicon
   void testSpanification() throws Exception {
     FixedNanoClock nanoClock = new FixedNanoClock();
-    try (ProfilerTestSetup setup = ProfilerTestSetup.create(config -> config
-        .clock(nanoClock)
-        .startScheduledProfiling(false)
-    )) {
+    try (ProfilerTestSetup setup =
+        ProfilerTestSetup.create(
+            config -> config.clock(nanoClock).startScheduledProfiling(false))) {
       setup.profiler.setProfilingSessionOngoing(true);
-      CallTree.Root callTree = CallTreeTest.getCallTree(setup, new String[] {
-          " dd   ",
-          " cc   ",
-          " bbb  ",
-          "aaaaee"
-      });
+      CallTree.Root callTree =
+          CallTreeTest.getCallTree(setup, new String[] {" dd   ", " cc   ", " bbb  ", "aaaaee"});
       assertThat(callTree.spanify(nanoClock, setup.sdk.getTracer("dummy-tracer"))).isEqualTo(4);
       assertThat(setup.getSpans()).hasSize(5);
-      assertThat(setup.getSpans().stream()
-          .map(SpanData::getName)
-      ).containsExactly("Call Tree Root", "CallTreeTest#a", "CallTreeTest#b",
-          "CallTreeTest#d", "CallTreeTest#e");
+      assertThat(setup.getSpans().stream().map(SpanData::getName))
+          .containsExactly(
+              "Call Tree Root",
+              "CallTreeTest#a",
+              "CallTreeTest#b",
+              "CallTreeTest#d",
+              "CallTreeTest#e");
 
       SpanData a = setup.getSpans().get(1);
       assertThat(a).hasName("CallTreeTest#a");
@@ -91,7 +89,6 @@ class CallTreeSpanifyTest {
       assertThat(e.getEndEpochNanos() - e.getStartEpochNanos()).isEqualTo(10_000_000);
       assertThat(e.getAttributes().get(CallTree.STACKTRACE_ATTRIBUTE_KEY)).isBlank();
     }
-
   }
 
   @Test
@@ -100,39 +97,42 @@ class CallTreeSpanifyTest {
 
     String traceId = "0af7651916cd43dd8448eb211c80319c";
     String rootSpanId = "b7ad6b7169203331";
-    TraceContext rootContext = TraceContext.fromSpanContextWithZeroClockAnchor(SpanContext.create(
-        traceId,
-        rootSpanId,
-        TraceFlags.getSampled(),
-        TraceState.getDefault()
-    ));
+    TraceContext rootContext =
+        TraceContext.fromSpanContextWithZeroClockAnchor(
+            SpanContext.create(
+                traceId, rootSpanId, TraceFlags.getSampled(), TraceState.getDefault()));
 
     ObjectPool<CallTree.Root> rootPool = ObjectPool.createRecyclable(2, CallTree.Root::new);
     ObjectPool<CallTree> childPool = ObjectPool.createRecyclable(2, CallTree::new);
 
-    CallTree.Root root = CallTree.createRoot(rootPool,
-        rootContext.serialize(), 0);
+    CallTree.Root root = CallTree.createRoot(rootPool, rootContext.serialize(), 0);
     root.addStackTrace(Collections.singletonList(StackFrame.of("A", "a")), 0, childPool, 0);
 
     String childSpanId = "a1b2c3d4e5f64242";
-    TraceContext spanContext = TraceContext.fromSpanContextWithZeroClockAnchor(SpanContext.create(
-        traceId,
-        childSpanId,
-        TraceFlags.getSampled(),
-        TraceState.getDefault()
-    ));
+    TraceContext spanContext =
+        TraceContext.fromSpanContextWithZeroClockAnchor(
+            SpanContext.create(
+                traceId, childSpanId, TraceFlags.getSampled(), TraceState.getDefault()));
 
     root.onActivation(spanContext.serialize(), TimeUnit.MILLISECONDS.toNanos(5));
-    root.addStackTrace(Arrays.asList(StackFrame.of("A", "b"), StackFrame.of("A", "a")),
-        TimeUnit.MILLISECONDS.toNanos(10), childPool, 0);
-    root.addStackTrace(Arrays.asList(StackFrame.of("A", "b"), StackFrame.of("A", "a")),
-        TimeUnit.MILLISECONDS.toNanos(20), childPool, 0);
-    root.onDeactivation(spanContext.serialize(), rootContext.serialize(),
-        TimeUnit.MILLISECONDS.toNanos(25));
+    root.addStackTrace(
+        Arrays.asList(StackFrame.of("A", "b"), StackFrame.of("A", "a")),
+        TimeUnit.MILLISECONDS.toNanos(10),
+        childPool,
+        0);
+    root.addStackTrace(
+        Arrays.asList(StackFrame.of("A", "b"), StackFrame.of("A", "a")),
+        TimeUnit.MILLISECONDS.toNanos(20),
+        childPool,
+        0);
+    root.onDeactivation(
+        spanContext.serialize(), rootContext.serialize(), TimeUnit.MILLISECONDS.toNanos(25));
 
-    root.addStackTrace(Collections.singletonList(StackFrame.of("A", "a")),
+    root.addStackTrace(
+        Collections.singletonList(StackFrame.of("A", "a")),
         TimeUnit.MILLISECONDS.toNanos(30),
-        childPool, 0);
+        childPool,
+        0);
     root.end(childPool, 0);
 
     System.out.println(root);
@@ -156,24 +156,20 @@ class CallTreeSpanifyTest {
     assertThat(b.getChildren()).isEmpty();
 
     InMemorySpanExporter exporter = InMemorySpanExporter.create();
-    OpenTelemetrySdkBuilder sdkBuilder = OpenTelemetrySdk.builder()
-        .setTracerProvider(SdkTracerProvider.builder()
-            .addSpanProcessor(SimpleSpanProcessor.create(exporter))
-            .build());
+    OpenTelemetrySdkBuilder sdkBuilder =
+        OpenTelemetrySdk.builder()
+            .setTracerProvider(
+                SdkTracerProvider.builder()
+                    .addSpanProcessor(SimpleSpanProcessor.create(exporter))
+                    .build());
 
     try (OpenTelemetrySdk outputSdk = sdkBuilder.build()) {
       root.spanify(nanoClock, outputSdk.getTracer("dummy-tracer"));
 
       List<SpanData> spans = exporter.getFinishedSpanItems();
       assertThat(spans).hasSize(2);
-      assertThat(spans.get(0))
-          .hasTraceId(traceId)
-          .hasParentSpanId(rootSpanId);
-      assertThat(spans.get(1))
-          .hasTraceId(traceId)
-          .hasParentSpanId(childSpanId);
+      assertThat(spans.get(0)).hasTraceId(traceId).hasParentSpanId(rootSpanId);
+      assertThat(spans.get(1)).hasTraceId(traceId).hasParentSpanId(childSpanId);
     }
-
   }
-
 }

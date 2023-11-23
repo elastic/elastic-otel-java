@@ -47,8 +47,7 @@ public class InferredSpansConfiguration {
       List<WildcardMatcher> excludedClasses,
       Duration profilerInterval,
       Duration profilingDuration,
-      String profilerLibDirectory
-  ) {
+      String profilerLibDirectory) {
     this.profilerLoggingEnabled = profilerLoggingEnabled;
     this.backupDiagnosticFiles = backupDiagnosticFiles;
     this.asyncProfilerSafeMode = asyncProfilerSafeMode;
@@ -107,13 +106,12 @@ public class InferredSpansConfiguration {
   }
 
   public String getProfilerLibDirectory() {
-    return profilerLibDirectory == null || profilerLibDirectory.isEmpty() ? System.getProperty(
-        "java.io.tmpdir")
+    return profilerLibDirectory == null || profilerLibDirectory.isEmpty()
+        ? System.getProperty("java.io.tmpdir")
         : profilerLibDirectory;
   }
 
   public boolean isPostProcessingEnabled() {
     return postProcessingEnabled;
   }
-
 }

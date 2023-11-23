@@ -16,22 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/*
- * Copyright 2014-2019 Real Logic Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package co.elastic.apm.otel.profiler.collections;
+
+import static co.elastic.apm.otel.profiler.collections.CollectionUtil.findNextPositivePowerOfTwo;
+import static co.elastic.apm.otel.profiler.collections.CollectionUtil.validateLoadFactor;
+import static java.util.Objects.requireNonNull;
 
 import java.io.Serializable;
 import java.util.AbstractCollection;
@@ -42,19 +31,13 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-import static co.elastic.apm.otel.profiler.collections.CollectionUtil.findNextPositivePowerOfTwo;
-import static co.elastic.apm.otel.profiler.collections.CollectionUtil.validateLoadFactor;
-import static java.util.Objects.requireNonNull;
-
-
 /**
- * {@link Map} implementation specialised for long keys using open addressing and
- * linear probing for cache efficient access.
+ * {@link Map} implementation specialised for long keys using open addressing and linear probing for
+ * cache efficient access.
  *
  * @param <V> type of values stored in the {@link Map}
  */
-public class Long2ObjectHashMap<V>
-    implements Map<Long, V>, Serializable {
+public class Long2ObjectHashMap<V> implements Map<Long, V>, Serializable {
   static final int MIN_CAPACITY = 8;
 
   private final float loadFactor;
@@ -73,9 +56,7 @@ public class Long2ObjectHashMap<V>
     this(MIN_CAPACITY, Hashing.DEFAULT_LOAD_FACTOR, true);
   }
 
-  public Long2ObjectHashMap(
-      final int initialCapacity,
-      final float loadFactor) {
+  public Long2ObjectHashMap(final int initialCapacity, final float loadFactor) {
     this(initialCapacity, loadFactor, true);
   }
 
@@ -87,9 +68,7 @@ public class Long2ObjectHashMap<V>
    * @param shouldAvoidAllocation should allocation be avoided by caching iterators and map entries.
    */
   public Long2ObjectHashMap(
-      final int initialCapacity,
-      final float loadFactor,
-      final boolean shouldAvoidAllocation) {
+      final int initialCapacity, final float loadFactor, final boolean shouldAvoidAllocation) {
     validateLoadFactor(loadFactor);
 
     this.loadFactor = loadFactor;
@@ -138,8 +117,8 @@ public class Long2ObjectHashMap<V>
   }
 
   /**
-   * Get the actual threshold which when reached the map will resize.
-   * This is a function of the current capacity and load factor.
+   * Get the actual threshold which when reached the map will resize. This is a function of the
+   * current capacity and load factor.
    *
    * @return the threshold when the map will resize.
    */
@@ -147,23 +126,17 @@ public class Long2ObjectHashMap<V>
     return resizeThreshold;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public int size() {
     return size;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public boolean isEmpty() {
     return 0 == size;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public boolean containsKey(final Object key) {
     return containsKey(((Long) key).longValue());
   }
@@ -191,9 +164,7 @@ public class Long2ObjectHashMap<V>
     return found;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public boolean containsValue(final Object value) {
     boolean found = false;
     final Object val = mapNullValue(value);
@@ -209,9 +180,7 @@ public class Long2ObjectHashMap<V>
     return found;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public V get(final Object key) {
     return get(((Long) key).longValue());
   }
@@ -243,9 +212,7 @@ public class Long2ObjectHashMap<V>
     return (V) value;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public V put(final Long key, final V value) {
     return put(key.longValue(), value);
   }
@@ -289,9 +256,7 @@ public class Long2ObjectHashMap<V>
     return unmapNullValue(oldValue);
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public V remove(final Object key) {
     return remove(((Long) key).longValue());
   }
@@ -322,9 +287,7 @@ public class Long2ObjectHashMap<V>
     return unmapNullValue(value);
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public void clear() {
     if (size > 0) {
       Arrays.fill(values, null);
@@ -333,26 +296,22 @@ public class Long2ObjectHashMap<V>
   }
 
   /**
-   * Compact the {@link Map} backing arrays by rehashing with a capacity just larger than current size
-   * and giving consideration to the load factor.
+   * Compact the {@link Map} backing arrays by rehashing with a capacity just larger than current
+   * size and giving consideration to the load factor.
    */
   public void compact() {
     final int idealCapacity = (int) Math.round(size() * (1.0d / loadFactor));
     rehash(findNextPositivePowerOfTwo(Math.max(MIN_CAPACITY, idealCapacity)));
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public void putAll(final Map<? extends Long, ? extends V> map) {
     for (final Entry<? extends Long, ? extends V> entry : map.entrySet()) {
       put(entry.getKey(), entry.getValue());
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public KeySet keySet() {
     if (null == keySet) {
       keySet = new KeySet();
@@ -361,9 +320,7 @@ public class Long2ObjectHashMap<V>
     return keySet;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public ValueCollection values() {
     if (null == valueCollection) {
       valueCollection = new ValueCollection();
@@ -372,9 +329,7 @@ public class Long2ObjectHashMap<V>
     return valueCollection;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public EntrySet entrySet() {
     if (null == entrySet) {
       entrySet = new EntrySet();
@@ -383,9 +338,7 @@ public class Long2ObjectHashMap<V>
     return entrySet;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public String toString() {
     if (isEmpty()) {
       return "{}";
@@ -397,7 +350,8 @@ public class Long2ObjectHashMap<V>
     final StringBuilder sb = new StringBuilder().append('{');
     while (true) {
       entryIterator.next();
-      sb.append(entryIterator.getLongKey()).append('=')
+      sb.append(entryIterator.getLongKey())
+          .append('=')
           .append(unmapNullValue(entryIterator.getValue()));
       if (!entryIterator.hasNext()) {
         return sb.append('}').toString();
@@ -406,9 +360,7 @@ public class Long2ObjectHashMap<V>
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public boolean equals(final Object o) {
     if (this == o) {
       return true;
@@ -437,9 +389,7 @@ public class Long2ObjectHashMap<V>
     return true;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public int hashCode() {
     int result = 0;
 
@@ -467,8 +417,8 @@ public class Long2ObjectHashMap<V>
    *
    * @param key key with which the specified value is associated
    * @param value value to be associated with the specified key
-   * @return the previous value associated with the specified key, or
-   *     {@code null} if there was no mapping for the key.
+   * @return the previous value associated with the specified key, or {@code null} if there was no
+   *     mapping for the key.
    */
   public V replace(final long key, final V value) {
     V curValue = get(key);
@@ -545,8 +495,8 @@ public class Long2ObjectHashMap<V>
 
       final int hash = Hashing.hash(keys[index], mask);
 
-      if ((index < hash && (hash <= deleteIndex || deleteIndex <= index)) ||
-          (hash <= deleteIndex && deleteIndex <= index)) {
+      if ((index < hash && (hash <= deleteIndex || deleteIndex <= index))
+          || (hash <= deleteIndex && deleteIndex <= index)) {
         keys[deleteIndex] = keys[index];
         values[deleteIndex] = values[index];
 
@@ -560,15 +510,11 @@ public class Long2ObjectHashMap<V>
   // Sets and Collections
   ///////////////////////////////////////////////////////////////////////////////////////////////
 
-  /**
-   * Set of keys which supports optionally cached iterators to avoid allocation.
-   */
+  /** Set of keys which supports optionally cached iterators to avoid allocation. */
   public final class KeySet extends AbstractSet<Long> implements Serializable {
     private final KeyIterator keyIterator = shouldAvoidAllocation ? new KeyIterator() : null;
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public KeyIterator iterator() {
       KeyIterator keyIterator = this.keyIterator;
       if (null == keyIterator) {
@@ -604,15 +550,11 @@ public class Long2ObjectHashMap<V>
     }
   }
 
-  /**
-   * Collection of values which supports optionally cached iterators to avoid allocation.
-   */
+  /** Collection of values which supports optionally cached iterators to avoid allocation. */
   public final class ValueCollection extends AbstractCollection<V> implements Serializable {
     private final ValueIterator valueIterator = shouldAvoidAllocation ? new ValueIterator() : null;
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public ValueIterator iterator() {
       ValueIterator valueIterator = this.valueIterator;
       if (null == valueIterator) {
@@ -636,15 +578,11 @@ public class Long2ObjectHashMap<V>
     }
   }
 
-  /**
-   * Set of entries which supports access via an optionally cached iterator to avoid allocation.
-   */
+  /** Set of entries which supports access via an optionally cached iterator to avoid allocation. */
   public final class EntrySet extends AbstractSet<Entry<Long, V>> implements Serializable {
     private final EntryIterator entryIterator = shouldAvoidAllocation ? new EntryIterator() : null;
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public EntryIterator iterator() {
       EntryIterator entryIterator = this.entryIterator;
       if (null == entryIterator) {
@@ -663,9 +601,7 @@ public class Long2ObjectHashMap<V>
       Long2ObjectHashMap.this.clear();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public boolean contains(final Object o) {
       final Entry entry = (Entry) o;
       final long key = (Long) entry.getKey();
@@ -754,9 +690,7 @@ public class Long2ObjectHashMap<V>
     }
   }
 
-  /**
-   * Iterator over values.
-   */
+  /** Iterator over values. */
   public class ValueIterator extends AbstractIterator<V> {
     public V next() {
       findNext();
@@ -765,9 +699,7 @@ public class Long2ObjectHashMap<V>
     }
   }
 
-  /**
-   * Iterator over keys which supports access to unboxed keys.
-   */
+  /** Iterator over keys which supports access to unboxed keys. */
   public class KeyIterator extends AbstractIterator<Long> {
     public Long next() {
       return nextLong();
@@ -780,12 +712,8 @@ public class Long2ObjectHashMap<V>
     }
   }
 
-  /**
-   * Iterator over entries which supports access to unboxed keys and values.
-   */
-  public class EntryIterator
-      extends AbstractIterator<Entry<Long, V>>
-      implements Entry<Long, V> {
+  /** Iterator over entries which supports access to unboxed keys and values. */
+  public class EntryIterator extends AbstractIterator<Entry<Long, V>> implements Entry<Long, V> {
     public Entry<Long, V> next() {
       findNext();
       if (shouldAvoidAllocation) {
@@ -823,8 +751,8 @@ public class Long2ObjectHashMap<V>
 
           final Entry e = (Entry) o;
 
-          return (e.getKey() != null && e.getKey().equals(k)) &&
-              ((e.getValue() == null && v == null) || e.getValue().equals(v));
+          return (e.getKey() != null && e.getKey().equals(k))
+              && ((e.getValue() == null && v == null) || e.getValue().equals(v));
         }
 
         public String toString() {

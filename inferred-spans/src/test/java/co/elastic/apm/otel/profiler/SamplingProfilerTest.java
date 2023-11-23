@@ -18,7 +18,6 @@
  */
 package co.elastic.apm.otel.profiler;
 
-
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.atLeast;
@@ -97,9 +96,7 @@ class SamplingProfilerTest {
 
     awaitProfilerStarted(setup.profiler);
 
-    assertThat(getProfilerTempFiles())
-        .describedAs("should have created two temp files")
-        .hasSize(2);
+    assertThat(getProfilerTempFiles()).describedAs("should have created two temp files").hasSize(2);
 
     setup.close();
     setup = null;
@@ -107,8 +104,6 @@ class SamplingProfilerTest {
     assertThat(getProfilerTempFiles())
         .describedAs("should delete temp files when profiler is stopped")
         .isEmpty();
-
-
   }
 
   private static List<Path> getProfilerTempFiles() {
@@ -123,16 +118,14 @@ class SamplingProfilerTest {
     }
   }
 
-
   @Test
   void shouldNotDeleteProvidedFiles() throws Exception {
     // when an existing file is provided to the profiler, we should not delete it
     // unlike the temporary files that are created by profiler itself
 
     InferredSpansConfiguration defaultConfig;
-    try (InferredSpansProcessor profiler1 = InferredSpansProcessor.builder()
-        .startScheduledProfiling(false)
-        .build()) {
+    try (InferredSpansProcessor profiler1 =
+        InferredSpansProcessor.builder().startScheduledProfiling(false).build()) {
       defaultConfig = profiler1.profiler.config;
     }
 
@@ -141,11 +134,13 @@ class SamplingProfilerTest {
 
     try (OpenTelemetrySdk sdk = OpenTelemetrySdk.builder().build()) {
 
-      SamplingProfiler otherProfiler = new SamplingProfiler(
-          defaultConfig,
-          new FixedNanoClock(),
-          () -> sdk.getTracer("my-tracer"),
-          tempFile1.toFile(), tempFile2.toFile());
+      SamplingProfiler otherProfiler =
+          new SamplingProfiler(
+              defaultConfig,
+              new FixedNanoClock(),
+              () -> sdk.getTracer("my-tracer"),
+              tempFile1.toFile(),
+              tempFile2.toFile());
 
       otherProfiler.start();
       awaitProfilerStarted(otherProfiler);
@@ -159,23 +154,26 @@ class SamplingProfilerTest {
   @Test
   void testStartCommand() {
     setupProfiler(false);
-    assertThat(setup.profiler.createStartCommand()).isEqualTo(
-        "start,jfr,event=wall,cstack=n,interval=5ms,filter,file=null,safemode=0");
+    assertThat(setup.profiler.createStartCommand())
+        .isEqualTo("start,jfr,event=wall,cstack=n,interval=5ms,filter,file=null,safemode=0");
 
     setup.close();
     setupProfiler(config -> config.startScheduledProfiling(false).profilerLoggingEnabled(false));
-    assertThat(setup.profiler.createStartCommand()).isEqualTo(
-        "start,jfr,event=wall,cstack=n,interval=5ms,filter,file=null,safemode=0,log=none");
+    assertThat(setup.profiler.createStartCommand())
+        .isEqualTo(
+            "start,jfr,event=wall,cstack=n,interval=5ms,filter,file=null,safemode=0,log=none");
 
     setup.close();
-    setupProfiler(config -> config
-        .startScheduledProfiling(false)
-        .profilerLoggingEnabled(false)
-        .samplingInterval(Duration.ofMillis(10))
-        .asyncProfilerSafeMode(14)
-    );
-    assertThat(setup.profiler.createStartCommand()).isEqualTo(
-        "start,jfr,event=wall,cstack=n,interval=10ms,filter,file=null,safemode=14,log=none");
+    setupProfiler(
+        config ->
+            config
+                .startScheduledProfiling(false)
+                .profilerLoggingEnabled(false)
+                .samplingInterval(Duration.ofMillis(10))
+                .asyncProfilerSafeMode(14));
+    assertThat(setup.profiler.createStartCommand())
+        .isEqualTo(
+            "start,jfr,event=wall,cstack=n,interval=10ms,filter,file=null,safemode=14,log=none");
   }
 
   @Test
@@ -204,46 +202,53 @@ class SamplingProfilerTest {
 
     assertThat(profilingActiveOnThread).isTrue();
 
-    Optional<SpanData> txData = setup.getSpans().stream()
-        .filter(s -> s.getName().equals("transaction"))
-        .findAny();
+    Optional<SpanData> txData =
+        setup.getSpans().stream().filter(s -> s.getName().equals("transaction")).findAny();
     assertThat(txData).isPresent();
     assertThat(txData.get()).hasNoParent();
 
-    Optional<SpanData> testProfileTransaction = setup.getSpans().stream()
-        .filter(s -> s.getName().equals("SamplingProfilerTest#testProfileTransaction"))
-        .findAny();
+    Optional<SpanData> testProfileTransaction =
+        setup.getSpans().stream()
+            .filter(s -> s.getName().equals("SamplingProfilerTest#testProfileTransaction"))
+            .findAny();
     assertThat(testProfileTransaction).isPresent();
     assertThat(testProfileTransaction.get()).hasParent(txData.get());
 
-    Optional<SpanData> inferredSpanA = setup.getSpans().stream()
-        .filter(s -> s.getName().equals("SamplingProfilerTest#aInferred")).findAny();
+    Optional<SpanData> inferredSpanA =
+        setup.getSpans().stream()
+            .filter(s -> s.getName().equals("SamplingProfilerTest#aInferred"))
+            .findAny();
     assertThat(inferredSpanA).isPresent();
     assertThat(inferredSpanA.get()).hasParent(testProfileTransaction.get());
 
-    Optional<SpanData> explicitSpanB = setup.getSpans().stream()
-        .filter(s -> s.getName().equals("bExplicit")).findAny();
+    Optional<SpanData> explicitSpanB =
+        setup.getSpans().stream().filter(s -> s.getName().equals("bExplicit")).findAny();
     assertThat(explicitSpanB).isPresent();
     assertThat(explicitSpanB.get()).hasParent(txData.get());
 
     assertThat(inferredSpanA.get().getLinks())
         .hasSize(1)
-        .anySatisfy(link -> {
-          assertThat(link.getAttributes()).containsEntry("elastic.is_child", true);
-          SpanData expectedSpan = explicitSpanB.get();
-          Assertions.assertThat(link.getSpanContext().getTraceId())
-              .isEqualTo(expectedSpan.getTraceId());
-          Assertions.assertThat(link.getSpanContext().getSpanId())
-              .isEqualTo(expectedSpan.getSpanId());
-        });
+        .anySatisfy(
+            link -> {
+              assertThat(link.getAttributes()).containsEntry("elastic.is_child", true);
+              SpanData expectedSpan = explicitSpanB.get();
+              Assertions.assertThat(link.getSpanContext().getTraceId())
+                  .isEqualTo(expectedSpan.getTraceId());
+              Assertions.assertThat(link.getSpanContext().getSpanId())
+                  .isEqualTo(expectedSpan.getSpanId());
+            });
 
-    Optional<SpanData> inferredSpanC = setup.getSpans().stream()
-        .filter(s -> s.getName().equals("SamplingProfilerTest#cInferred")).findAny();
+    Optional<SpanData> inferredSpanC =
+        setup.getSpans().stream()
+            .filter(s -> s.getName().equals("SamplingProfilerTest#cInferred"))
+            .findAny();
     assertThat(inferredSpanC).isPresent();
     assertThat(inferredSpanC.get()).hasParent(explicitSpanB.get());
 
-    Optional<SpanData> inferredSpanD = setup.getSpans().stream()
-        .filter(s -> s.getName().equals("SamplingProfilerTest#dInferred")).findAny();
+    Optional<SpanData> inferredSpanD =
+        setup.getSpans().stream()
+            .filter(s -> s.getName().equals("SamplingProfilerTest#dInferred"))
+            .findAny();
     assertThat(inferredSpanD).isPresent();
     assertThat(inferredSpanD.get()).hasParent(inferredSpanC.get());
   }
@@ -267,14 +272,15 @@ class SamplingProfilerTest {
     Tracer tracer = setup.sdk.getTracer("manual-spans");
 
     AtomicReference<Boolean> profilingActive = new AtomicReference<>();
-    Runnable task = () -> {
-      Span tx = tracer.spanBuilder("transaction").startSpan();
-      try (Scope scope = tx.makeCurrent()) {
-        profilingActive.set(setup.profiler.isProfilingActiveOnThread(Thread.currentThread()));
-      } finally {
-        tx.end();
-      }
-    };
+    Runnable task =
+        () -> {
+          Span tx = tracer.spanBuilder("transaction").startSpan();
+          try (Scope scope = tx.makeCurrent()) {
+            profilingActive.set(setup.profiler.isProfilingActiveOnThread(Thread.currentThread()));
+          } finally {
+            tx.end();
+          }
+        };
 
     Method startVirtualThread = Thread.class.getMethod("startVirtualThread", Runnable.class);
     Thread virtual = (Thread) startVirtualThread.invoke(null, task);
@@ -304,11 +310,10 @@ class SamplingProfilerTest {
         .timeout(5000, TimeUnit.MILLISECONDS)
         .untilAsserted(() -> assertThat(setup.getSpans()).hasSize(2));
 
-    Optional<SpanData> explicitSpanB = setup.getSpans().stream()
-        .filter(s -> s.getName().equals("bExplicit")).findAny();
+    Optional<SpanData> explicitSpanB =
+        setup.getSpans().stream().filter(s -> s.getName().equals("bExplicit")).findAny();
     assertThat(explicitSpanB).isPresent();
-    assertThat(explicitSpanB.get())
-        .hasParentSpanId(tx.getSpanContext().getSpanId());
+    assertThat(explicitSpanB.get()).hasParentSpanId(tx.getSpanContext().getSpanId());
   }
 
   private void aInferred(Tracer tracer) throws Exception {
@@ -334,16 +339,17 @@ class SamplingProfilerTest {
     setupProfiler(config -> config.startScheduledProfiling(enabled));
   }
 
-
   private void setupProfiler(Consumer<InferredSpansProcessorBuilder> configCustomizer) {
-    setup = ProfilerTestSetup.create(config -> {
-      config.profilingDuration(Duration.ofMillis(500))
-          .profilerInterval(Duration.ofMillis(500))
-          .samplingInterval(Duration.ofMillis(5));
-      configCustomizer.accept(config);
-    });
+    setup =
+        ProfilerTestSetup.create(
+            config -> {
+              config
+                  .profilingDuration(Duration.ofMillis(500))
+                  .profilerInterval(Duration.ofMillis(500))
+                  .samplingInterval(Duration.ofMillis(5));
+              configCustomizer.accept(config);
+            });
   }
-
 
   private static void awaitProfilerStarted(SamplingProfiler profiler) {
     // ensure profiler is initialized

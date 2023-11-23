@@ -52,7 +52,6 @@ public abstract class AbstractObjectPool<T> implements ObjectPool<T> {
     }
   }
 
-
   public final long getGarbageCreated() {
     return garbageCreated.longValue();
   }
@@ -63,7 +62,7 @@ public abstract class AbstractObjectPool<T> implements ObjectPool<T> {
    * @param obj recycled object to return to pool
    * @return true if object has been returned to pool, false if pool is already full
    */
-  abstract protected boolean returnToPool(T obj);
+  protected abstract boolean returnToPool(T obj);
 
   /**
    * Tries to create an instance in pool
@@ -71,5 +70,5 @@ public abstract class AbstractObjectPool<T> implements ObjectPool<T> {
    * @return {@code null} if pool capacity is exhausted
    */
   @Nullable
-  abstract protected T tryCreateInstance();
+  protected abstract T tryCreateInstance();
 }

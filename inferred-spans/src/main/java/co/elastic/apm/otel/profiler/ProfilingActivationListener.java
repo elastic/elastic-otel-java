@@ -36,11 +36,11 @@ public class ProfilingActivationListener implements Closeable {
   }
 
   public static void ensureInitialized() {
-    //does nothing but ensures that the static initializer ran
+    // does nothing but ensures that the static initializer ran
   }
 
-  private static volatile List<ProfilingActivationListener> activeListeners = Collections.emptyList();
-
+  private static volatile List<ProfilingActivationListener> activeListeners =
+      Collections.emptyList();
 
   private static class ContextStorageWrapper implements ContextStorage {
 
@@ -119,25 +119,17 @@ public class ProfilingActivationListener implements Closeable {
   public void beforeActivate(Span oldContext, Span newContext) {
     if (newContext.getSpanContext().isValid()
         && newContext.getSpanContext().isSampled()
-        && !ThreadUtils.isVirtual(Thread.currentThread())
-    ) {
-      profiler.onActivation(
-          newContext,
-          oldContext.getSpanContext().isValid() ? oldContext : null
-      );
+        && !ThreadUtils.isVirtual(Thread.currentThread())) {
+      profiler.onActivation(newContext, oldContext.getSpanContext().isValid() ? oldContext : null);
     }
   }
 
   public void afterDeactivate(Span deactivatedContext, Span newContext) {
     if (deactivatedContext.getSpanContext().isValid()
         && deactivatedContext.getSpanContext().isSampled()
-        && !ThreadUtils.isVirtual(Thread.currentThread())
-    ) {
+        && !ThreadUtils.isVirtual(Thread.currentThread())) {
       profiler.onDeactivation(
-          deactivatedContext,
-          newContext.getSpanContext().isValid() ? newContext : null
-      );
+          deactivatedContext, newContext.getSpanContext().isValid() ? newContext : null);
     }
   }
-
 }

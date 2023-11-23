@@ -46,8 +46,8 @@ import org.kohsuke.github.GitHub;
 import org.kohsuke.github.PagedIterable;
 
 /**
- * This test class is disabled by default. It is used as a utility for manually upgrading async profiler - update the
- * {@link #TARGET_VERSION} and run on a POSIX-compatible file system.
+ * This test class is disabled by default. It is used as a utility for manually upgrading async
+ * profiler - update the {@link #TARGET_VERSION} and run on a POSIX-compatible file system.
  */
 @Disabled
 public class AsyncProfilerUpgrader {
@@ -57,11 +57,7 @@ public class AsyncProfilerUpgrader {
   static final String COMMON_BINARY_FILE_NAME = "libasyncProfiler.so";
 
   static final String[] USED_ARTIFACTS = {
-      "linux-aarch64",
-      "linux-arm",
-      "linux-x64",
-      "linux-x86",
-      "macos-x64"
+    "linux-aarch64", "linux-arm", "linux-x64", "linux-x86", "macos-x64"
   };
 
   @Test
@@ -70,24 +66,31 @@ public class AsyncProfilerUpgrader {
     GHRepository repository = github.getRepository("jvm-profiling-tools/async-profiler");
     GHRelease release = repository.getReleaseByTagName("v" + TARGET_VERSION);
     PagedIterable<GHAsset> releaseAssets = release.listAssets();
-    Path downloadDirPath = Files.createTempDirectory(
-        String.format("AsyncProfiler_%s_", TARGET_VERSION));
+    Path downloadDirPath =
+        Files.createTempDirectory(String.format("AsyncProfiler_%s_", TARGET_VERSION));
     for (GHAsset releaseAsset : releaseAssets) {
       if (releaseAsset.getContentType().equals("application/x-gzip")) {
-        downloadAndReplaceBinary(releaseAsset.getBrowserDownloadUrl(), releaseAsset.getName(),
-            downloadDirPath, releaseAsset.getSize());
+        downloadAndReplaceBinary(
+            releaseAsset.getBrowserDownloadUrl(),
+            releaseAsset.getName(),
+            downloadDirPath,
+            releaseAsset.getSize());
       }
     }
 
     // test we are now using the right version
-    Path thisOsLib = getBinariesResourceDir().resolve(
-        co.elastic.apm.otel.profiler.asyncprofiler.AsyncProfiler.getLibraryFileName() + ".so");
+    Path thisOsLib =
+        getBinariesResourceDir()
+            .resolve(
+                co.elastic.apm.otel.profiler.asyncprofiler.AsyncProfiler.getLibraryFileName()
+                    + ".so");
     AsyncProfiler asyncProfiler = AsyncProfiler.getInstance(thisOsLib.toString());
     assertThat(asyncProfiler.getVersion()).isEqualTo(TARGET_VERSION);
   }
 
-  private void downloadAndReplaceBinary(String ghAssetDownloadUrl, String ghAssetName,
-      Path targetDownloadDir, long expectedSize) throws Exception {
+  private void downloadAndReplaceBinary(
+      String ghAssetDownloadUrl, String ghAssetName, Path targetDownloadDir, long expectedSize)
+      throws Exception {
     String artifactNamePattern = null;
     for (String artifact : USED_ARTIFACTS) {
       if (ghAssetName.contains(artifact)) {
@@ -102,10 +105,10 @@ public class AsyncProfilerUpgrader {
     }
     Path targetDownloadPath = targetDownloadDir.resolve(ghAssetName);
     System.out.println(
-        String.format("Downloading from %s into %s and extracting binary", ghAssetName,
-            targetDownloadDir));
-    Path localBinaryPath = downloadAndExtractBinary(ghAssetDownloadUrl, targetDownloadPath,
-        expectedSize);
+        String.format(
+            "Downloading from %s into %s and extracting binary", ghAssetName, targetDownloadDir));
+    Path localBinaryPath =
+        downloadAndExtractBinary(ghAssetDownloadUrl, targetDownloadPath, expectedSize);
     assertThat(localBinaryPath)
         .describedAs("Failed to download and extract binary file from " + ghAssetDownloadUrl)
         .isNotNull();
@@ -115,8 +118,8 @@ public class AsyncProfilerUpgrader {
   }
 
   @Nullable
-  private Path downloadAndExtractBinary(String ghAssetDownloadUrl, Path targetDownloadPath,
-      long expectedSize) throws IOException {
+  private Path downloadAndExtractBinary(
+      String ghAssetDownloadUrl, Path targetDownloadPath, long expectedSize) throws IOException {
     System.out.println("Downloading from " + ghAssetDownloadUrl);
     URLConnection assetUrlConnection = new URL(ghAssetDownloadUrl).openConnection();
     long actualSize;
@@ -132,16 +135,17 @@ public class AsyncProfilerUpgrader {
     String archiveFileName = assetArchivePath.getFileName().toString();
     if (!archiveFileName.endsWith(TAR_GZ_FILE_EXTENSION)) {
       throw new IllegalArgumentException(
-          String.format("Cannot extract %s - expecting a path to a %s file", archiveFileName,
-              TAR_GZ_FILE_EXTENSION));
+          String.format(
+              "Cannot extract %s - expecting a path to a %s file",
+              archiveFileName, TAR_GZ_FILE_EXTENSION));
     }
 
     Path assetDirPath = assetArchivePath.getParent();
     if (!Files.exists(assetDirPath)) {
       Files.createDirectory(assetDirPath);
     }
-    String extractedDirName = archiveFileName.substring(0,
-        archiveFileName.length() - TAR_GZ_FILE_EXTENSION.length());
+    String extractedDirName =
+        archiveFileName.substring(0, archiveFileName.length() - TAR_GZ_FILE_EXTENSION.length());
     Path extractedDirPath = assetDirPath.resolve(extractedDirName);
     if (!Files.exists(extractedDirPath)) {
       Files.createDirectory(extractedDirPath);
@@ -169,22 +173,23 @@ public class AsyncProfilerUpgrader {
 
   /**
    * Replaces an existing binary file with its downloaded counterpart.
-   * <p>
-   * NOTE: when replacing the existing binary file, this method attempts to apply the current binary file's
-   * permissions to the one replacing it, assuming the underlying file system is POSIX-compatible. If this is
-   * not the case, and error will occur
-   * </p>
+   *
+   * <p>NOTE: when replacing the existing binary file, this method attempts to apply the current
+   * binary file's permissions to the one replacing it, assuming the underlying file system is
+   * POSIX-compatible. If this is not the case, and error will occur
    *
    * @param downloadedArtifact the path to the downloaded binary file
    * @param artifactName the name of the artifact to replace, see {@link #USED_ARTIFACTS}
-   * @throws Exception thrown when an error occurs while trying to replace, or when running on non POSIX file system
+   * @throws Exception thrown when an error occurs while trying to replace, or when running on non
+   *     POSIX file system
    */
   private void replaceBinary(Path downloadedArtifact, String artifactName) throws Exception {
     if (!downloadedArtifact.toString().contains(artifactName)) {
       throw new IllegalArgumentException(
-          String.format("the provided path for the downloaded artifact [%s] must " +
-                  "be of a file containing the provided artifact name: %s", downloadedArtifact,
-              artifactName));
+          String.format(
+              "the provided path for the downloaded artifact [%s] must "
+                  + "be of a file containing the provided artifact name: %s",
+              downloadedArtifact, artifactName));
     }
 
     Path binariesResourceDir = getBinariesResourceDir();
@@ -196,20 +201,24 @@ public class AsyncProfilerUpgrader {
     }
     System.out.println(
         String.format("Replacing %s with %s", binaryResourcePath, downloadedArtifact));
-    Set<PosixFilePermission> posixFilePermissions = Files.getPosixFilePermissions(
-        binaryResourcePath);
+    Set<PosixFilePermission> posixFilePermissions =
+        Files.getPosixFilePermissions(binaryResourcePath);
     Files.move(downloadedArtifact, binaryResourcePath, StandardCopyOption.REPLACE_EXISTING);
     Files.setPosixFilePermissions(binaryResourcePath, posixFilePermissions);
   }
 
   private Path getBinariesResourceDir() throws URISyntaxException {
     // <agent-repo-root>/apm-agent-plugins/apm-profiling-plugin/target/classes/asyncprofiler
-    Path asyncProfilerTestResourcePath = Paths.get(
-        AsyncProfilerUpgrader.class.getResource("/asyncprofiler").toURI());
+    Path asyncProfilerTestResourcePath =
+        Paths.get(AsyncProfilerUpgrader.class.getResource("/asyncprofiler").toURI());
     // <agent-repo-root>/apm-agent-plugins/apm-profiling-plugin/target/classes/asyncprofiler
     Path pluginRootDir = asyncProfilerTestResourcePath.getParent().getParent().getParent();
-    // We are looking for // <agent-repo-root>/apm-agent-plugins/apm-profiling-plugin/src/main/resources/asyncprofiler
-    return pluginRootDir.resolve("src").resolve("main").resolve("resources")
+    // We are looking for //
+    // <agent-repo-root>/apm-agent-plugins/apm-profiling-plugin/src/main/resources/asyncprofiler
+    return pluginRootDir
+        .resolve("src")
+        .resolve("main")
+        .resolve("resources")
         .resolve("asyncprofiler");
   }
 }

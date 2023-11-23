@@ -16,31 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/*
- * Copyright 2014-2019 Real Logic Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package co.elastic.apm.otel.profiler.collections;
 
-/**
- * Utility functions for collection objects.
- */
+/** Utility functions for collection objects. */
 public class CollectionUtil {
   /**
    * Validate that a load factor is in the range of 0.1 to 0.9.
-   * <p>
-   * Load factors in the range 0.5 - 0.7 are recommended for open-addressing with linear probing.
+   *
+   * <p>Load factors in the range 0.5 - 0.7 are recommended for open-addressing with linear probing.
    *
    * @param loadFactor to be validated.
    */
@@ -53,11 +36,11 @@ public class CollectionUtil {
 
   /**
    * Fast method of finding the next power of 2 greater than or equal to the supplied value.
-   * <p>
-   * If the value is &lt;= 0 then 1 will be returned.
-   * <p>
-   * This method is not suitable for {@link Integer#MIN_VALUE} or numbers greater than 2^30. When provided
-   * then {@link Integer#MIN_VALUE} will be returned.
+   *
+   * <p>If the value is &lt;= 0 then 1 will be returned.
+   *
+   * <p>This method is not suitable for {@link Integer#MIN_VALUE} or numbers greater than 2^30. When
+   * provided then {@link Integer#MIN_VALUE} will be returned.
    *
    * @param value from which to search for next power of 2.
    * @return The next power of 2 or the value itself if it is a power of 2.
@@ -68,11 +51,11 @@ public class CollectionUtil {
 
   /**
    * Fast method of finding the next power of 2 greater than or equal to the supplied value.
-   * <p>
-   * If the value is &lt;= 0 then 1 will be returned.
-   * <p>
-   * This method is not suitable for {@link Long#MIN_VALUE} or numbers greater than 2^62. When provided
-   * then {@link Long#MIN_VALUE} will be returned.
+   *
+   * <p>If the value is &lt;= 0 then 1 will be returned.
+   *
+   * <p>This method is not suitable for {@link Long#MIN_VALUE} or numbers greater than 2^62. When
+   * provided then {@link Long#MIN_VALUE} will be returned.
    *
    * @param value from which to search for next power of 2.
    * @return The next power of 2 or the value itself if it is a power of 2.

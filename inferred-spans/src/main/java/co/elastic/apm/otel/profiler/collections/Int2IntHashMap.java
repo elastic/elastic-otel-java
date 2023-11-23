@@ -16,21 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/*
- * Copyright 2014-2019 Real Logic Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package co.elastic.apm.otel.profiler.collections;
 
 import java.io.Serializable;
@@ -42,12 +27,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-import static co.elastic.apm.otel.profiler.collections.CollectionUtil.findNextPositivePowerOfTwo;
-
-
-/**
- * A open addressing with linear probing hash map specialised for primitive key and value pairs.
- */
+/** A open addressing with linear probing hash map specialised for primitive key and value pairs. */
 public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
   static final int MIN_CAPACITY = 8;
 
@@ -66,10 +46,7 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
     this(MIN_CAPACITY, Hashing.DEFAULT_LOAD_FACTOR, missingValue);
   }
 
-  public Int2IntHashMap(
-      final int initialCapacity,
-      final float loadFactor,
-      final int missingValue) {
+  public Int2IntHashMap(final int initialCapacity, final float loadFactor, final int missingValue) {
     this(initialCapacity, loadFactor, missingValue, true);
   }
 
@@ -121,8 +98,8 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
   }
 
   /**
-   * Get the actual threshold which when reached the map will resize.
-   * This is a function of the current capacity and load factor.
+   * Get the actual threshold which when reached the map will resize. This is a function of the
+   * current capacity and load factor.
    *
    * @return the threshold when the map will resize.
    */
@@ -130,16 +107,12 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
     return resizeThreshold;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public int size() {
     return size;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public boolean isEmpty() {
     return size == 0;
   }
@@ -239,9 +212,9 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
 
   /**
    * Primitive specialised forEach implementation.
-   * <p>
-   * NB: Renamed from forEach to avoid overloading on parameter types of lambda
-   * expression, which doesn't play well with type inference in lambda expressions.
+   *
+   * <p>NB: Renamed from forEach to avoid overloading on parameter types of lambda expression, which
+   * doesn't play well with type inference in lambda expressions.
    *
    * @param consumer a callback called for each key/value pair in the map.
    */
@@ -253,8 +226,8 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
     for (int keyIndex = 0; keyIndex < length; keyIndex += 2) {
       if (entries[keyIndex + 1] != missingValue) // lgtm [java/index-out-of-bounds]
       {
-        consumer.accept(entries[keyIndex],
-            entries[keyIndex + 1]); // lgtm [java/index-out-of-bounds]
+        consumer.accept(
+            entries[keyIndex], entries[keyIndex + 1]); // lgtm [java/index-out-of-bounds]
       }
     }
   }
@@ -292,9 +265,7 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
     return found;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public void clear() {
     if (size > 0) {
       Arrays.fill(entries, missingValue);
@@ -303,8 +274,8 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
   }
 
   /**
-   * Compact the backing arrays by rehashing with a capacity just larger than current size
-   * and giving consideration to the load factor.
+   * Compact the backing arrays by rehashing with a capacity just larger than current size and
+   * giving consideration to the load factor.
    */
   public void compact() {
     final int idealCapacity = (int) Math.round(size() * (1.0d / loadFactor));
@@ -313,47 +284,34 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
 
   // ---------------- Boxed Versions Below ----------------
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public Integer get(final Object key) {
     return valOrNull(get((int) key));
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public Integer put(final Integer key, final Integer value) {
     return valOrNull(put((int) key, (int) value));
   }
 
-
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public boolean containsKey(final Object key) {
     return containsKey((int) key);
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public boolean containsValue(final Object value) {
     return containsValue((int) value);
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public void putAll(final Map<? extends Integer, ? extends Integer> map) {
     for (final Entry<? extends Integer, ? extends Integer> entry : map.entrySet()) {
       put(entry.getKey(), entry.getValue());
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public KeySet keySet() {
     if (null == keySet) {
       keySet = new KeySet();
@@ -362,9 +320,7 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
     return keySet;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public ValueCollection values() {
     if (null == values) {
       values = new ValueCollection();
@@ -373,9 +329,7 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
     return values;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public EntrySet entrySet() {
     if (null == entrySet) {
       entrySet = new EntrySet();
@@ -384,9 +338,7 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
     return entrySet;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public Integer remove(final Object key) {
     return valOrNull(remove((int) key));
   }
@@ -430,8 +382,8 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
 
       final int hash = Hashing.evenHash(entries[keyIndex], mask);
 
-      if ((keyIndex < hash && (hash <= deleteKeyIndex || deleteKeyIndex <= keyIndex)) ||
-          (hash <= deleteKeyIndex && deleteKeyIndex <= keyIndex)) {
+      if ((keyIndex < hash && (hash <= deleteKeyIndex || deleteKeyIndex <= keyIndex))
+          || (hash <= deleteKeyIndex && deleteKeyIndex <= keyIndex)) {
         entries[deleteKeyIndex] = entries[keyIndex];
         entries[deleteKeyIndex + 1] = entries[keyIndex + 1];
 
@@ -442,7 +394,8 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
   }
 
   /**
-   * Get the minimum value stored in the map. If the map is empty then it will return {@link #missingValue()}
+   * Get the minimum value stored in the map. If the map is empty then it will return {@link
+   * #missingValue()}
    *
    * @return the minimum value stored in the map.
    */
@@ -464,7 +417,8 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
   }
 
   /**
-   * Get the maximum value stored in the map. If the map is empty then it will return {@link #missingValue()}
+   * Get the maximum value stored in the map. If the map is empty then it will return {@link
+   * #missingValue()}
    *
    * @return the maximum value stored in the map.
    */
@@ -485,9 +439,7 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
     return max;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   public String toString() {
     if (isEmpty()) {
       return "{}";
@@ -512,8 +464,8 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
    *
    * @param key key with which the specified value is associated
    * @param value value to be associated with the specified key
-   * @return the previous value associated with the specified key, or
-   *     {@link #missingValue()} if there was no mapping for the key.
+   * @return the previous value associated with the specified key, or {@link #missingValue()} if
+   *     there was no mapping for the key.
    */
   public int replace(final int key, final int value) {
     int curValue = get(key);
@@ -543,9 +495,7 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
     return true;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @SuppressWarnings("unchecked")
   public boolean equals(final Object o) {
     if (this == o) {
@@ -558,7 +508,6 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
     final Map<Integer, Integer> that = (Map<Integer, Integer>) o;
 
     return size == that.size() && entrySet().equals(that.entrySet());
-
   }
 
   public int hashCode() {
@@ -665,9 +614,7 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
     }
   }
 
-  /**
-   * Iterator over keys which supports access to unboxed keys.
-   */
+  /** Iterator over keys which supports access to unboxed keys. */
   public final class KeyIterator extends AbstractIterator implements Iterator<Integer> {
     public Integer next() {
       return nextValue();
@@ -680,9 +627,7 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
     }
   }
 
-  /**
-   * Iterator over values which supports access to unboxed values.
-   */
+  /** Iterator over values which supports access to unboxed values. */
   public final class ValueIterator extends AbstractIterator implements Iterator<Integer> {
     public Integer next() {
       return nextValue();
@@ -695,11 +640,8 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
     }
   }
 
-  /**
-   * Iterator over entries which supports access to unboxed keys and values.
-   */
-  public final class EntryIterator
-      extends AbstractIterator
+  /** Iterator over entries which supports access to unboxed keys and values. */
+  public final class EntryIterator extends AbstractIterator
       implements Iterator<Entry<Integer, Integer>>, Entry<Integer, Integer> {
     public Integer getKey() {
       return getIntKey();
@@ -774,8 +716,8 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
 
           final Entry e = (Entry) o;
 
-          return (e.getKey() != null && e.getValue() != null) &&
-              (e.getKey().equals(k) && e.getValue().equals(v));
+          return (e.getKey() != null && e.getValue() != null)
+              && (e.getKey().equals(k) && e.getValue().equals(v));
         }
 
         public String toString() {
@@ -784,16 +726,12 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
       };
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public int hashCode() {
       return getIntKey() ^ getIntValue();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public boolean equals(final Object o) {
       if (this == o) {
         return true;
@@ -809,15 +747,11 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
     }
   }
 
-  /**
-   * Set of keys which supports optional cached iterators to avoid allocation.
-   */
+  /** Set of keys which supports optional cached iterators to avoid allocation. */
   public final class KeySet extends AbstractSet<Integer> implements Serializable {
     private final KeyIterator keyIterator = shouldAvoidAllocation ? new KeyIterator() : null;
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public KeyIterator iterator() {
       KeyIterator keyIterator = this.keyIterator;
       if (null == keyIterator) {
@@ -829,30 +763,22 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
       return keyIterator;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public int size() {
       return Int2IntHashMap.this.size();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public boolean isEmpty() {
       return Int2IntHashMap.this.isEmpty();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public void clear() {
       Int2IntHashMap.this.clear();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public boolean contains(final Object o) {
       return contains((int) o);
     }
@@ -862,15 +788,11 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
     }
   }
 
-  /**
-   * Collection of values which supports optionally cached iterators to avoid allocation.
-   */
+  /** Collection of values which supports optionally cached iterators to avoid allocation. */
   public final class ValueCollection extends AbstractCollection<Integer> {
     private final ValueIterator valueIterator = shouldAvoidAllocation ? new ValueIterator() : null;
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public ValueIterator iterator() {
       ValueIterator valueIterator = this.valueIterator;
       if (null == valueIterator) {
@@ -882,16 +804,12 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
       return valueIterator;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public int size() {
       return Int2IntHashMap.this.size();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public boolean contains(final Object o) {
       return contains((int) o);
     }
@@ -901,15 +819,11 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
     }
   }
 
-  /**
-   * Set of entries which supports optionally cached iterators to avoid allocation.
-   */
+  /** Set of entries which supports optionally cached iterators to avoid allocation. */
   public final class EntrySet extends AbstractSet<Entry<Integer, Integer>> implements Serializable {
     private final EntryIterator entryIterator = shouldAvoidAllocation ? new EntryIterator() : null;
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public EntryIterator iterator() {
       EntryIterator entryIterator = this.entryIterator;
       if (null == entryIterator) {
@@ -921,30 +835,22 @@ public class Int2IntHashMap implements Map<Integer, Integer>, Serializable {
       return entryIterator;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public int size() {
       return Int2IntHashMap.this.size();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public boolean isEmpty() {
       return Int2IntHashMap.this.isEmpty();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public void clear() {
       Int2IntHashMap.this.clear();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public boolean contains(final Object o) {
       final Entry entry = (Entry) o;
       final Integer value = get(entry.getKey());

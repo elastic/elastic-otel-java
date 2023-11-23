@@ -36,18 +36,19 @@ public class SamplingProfilerQueueTest {
   @DisabledOnAppleSilicon
   void testFillQueue() throws Exception {
 
-    try (ProfilerTestSetup setup = ProfilerTestSetup.create(
-        config -> config.clock(new FixedNanoClock()).startScheduledProfiling(false))) {
+    try (ProfilerTestSetup setup =
+        ProfilerTestSetup.create(
+            config -> config.clock(new FixedNanoClock()).startScheduledProfiling(false))) {
 
       setup.profiler.setProfilingSessionOngoing(true);
 
-      Span traceContext = Span.wrap(
-          SpanContext.create(
-              "0af7651916cd43dd8448eb211c80319c",
-              "b7ad6b7169203331",
-              TraceFlags.getSampled(),
-              TraceState.getDefault()
-          ));
+      Span traceContext =
+          Span.wrap(
+              SpanContext.create(
+                  "0af7651916cd43dd8448eb211c80319c",
+                  "b7ad6b7169203331",
+                  TraceFlags.getSampled(),
+                  TraceState.getDefault()));
 
       assertThat(setup.profiler.onActivation(traceContext, null)).isTrue();
 
@@ -63,6 +64,5 @@ public class SamplingProfilerQueueTest {
       // now there should be free slots
       assertThat(setup.profiler.onActivation(traceContext, null)).isTrue();
     }
-
   }
 }
