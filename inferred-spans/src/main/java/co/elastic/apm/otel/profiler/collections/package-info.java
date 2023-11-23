@@ -25,4 +25,4 @@
  * Java 7. That's why the relevant classes are copied over and methods referencing Java 8 types are
  * removed.
  */
-package co.elastic.apm.agent.profiler.collections;
+package co.elastic.apm.otel.profiler.collections;

@@ -16,125 +16,124 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.agent.profiler;
+package co.elastic.apm.otel.profiler;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
 
-import co.elastic.apm.agent.MockReporter;
-import co.elastic.apm.agent.MockTracer;
-import co.elastic.apm.agent.configuration.SpyConfiguration;
-import co.elastic.apm.agent.impl.ElasticApmTracer;
-import co.elastic.apm.agent.impl.transaction.Span;
-import co.elastic.apm.agent.impl.transaction.StackFrame;
-import co.elastic.apm.agent.impl.transaction.TraceContext;
-import co.elastic.apm.agent.objectpool.NoopObjectPool;
-import co.elastic.apm.agent.testutils.DisabledOnAppleSilicon;
-import java.io.IOException;
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
+
+import co.elastic.apm.otel.profiler.pooling.ObjectPool;
+import co.elastic.apm.otel.profiler.util.DisabledOnAppleSilicon;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.TraceFlags;
+import io.opentelemetry.api.trace.TraceState;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.OpenTelemetrySdkBuilder;
+import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
-import org.stagemonitor.configuration.ConfigurationRegistry;
 
 class CallTreeSpanifyTest {
 
-  private MockReporter reporter;
-  private ElasticApmTracer tracer;
-
-  @BeforeEach
-  void setUp() {
-    reporter = new MockReporter();
-    ConfigurationRegistry config = SpyConfiguration.createSpyConfig();
-    // disable scheduled profiling to not interfere with this test
-    doReturn(false).when(config.getConfig(ProfilingConfiguration.class)).isProfilingEnabled();
-    tracer = MockTracer.createRealTracer(reporter, config, false);
-  }
-
-  @AfterEach
-  void tearDown() throws IOException {
-    Objects.requireNonNull(tracer.getLifecycleListener(ProfilingFactory.class))
-        .getProfiler()
-        .clear();
-    reporter.assertRecycledAfterDecrementingReferences();
-    tracer.stop();
+  static {
+    //we can't reset context storage wrappers between tests, so we msut ensure that it is registered before we create ANY Otel instance
+    ProfilingActivationListener.ensureInitialized();
   }
 
   @Test
   @DisabledOnOs(OS.WINDOWS)
   @DisabledOnAppleSilicon
   void testSpanification() throws Exception {
-    CallTree.Root callTree =
-        CallTreeTest.getCallTree(tracer, new String[] {" dd   ", " cc   ", " bbb  ", "aaaaee"});
-    assertThat(callTree.spanify()).isEqualTo(4);
-    assertThat(reporter.getSpans()).hasSize(4);
-    assertThat(reporter.getSpans().stream().map(Span::getNameAsString))
-        .containsExactly("CallTreeTest#d", "CallTreeTest#b", "CallTreeTest#a", "CallTreeTest#e");
+    FixedNanoClock nanoClock = new FixedNanoClock();
+    try (ProfilerTestSetup setup = ProfilerTestSetup.create(config -> config
+        .clock(nanoClock)
+        .startScheduledProfiling(false)
+    )) {
+      setup.profiler.setProfilingSessionOngoing(true);
+      CallTree.Root callTree = CallTreeTest.getCallTree(setup, new String[] {
+          " dd   ",
+          " cc   ",
+          " bbb  ",
+          "aaaaee"
+      });
+      assertThat(callTree.spanify(nanoClock, setup.sdk.getTracer("dummy-tracer"))).isEqualTo(4);
+      assertThat(setup.getSpans()).hasSize(5);
+      assertThat(setup.getSpans().stream()
+          .map(SpanData::getName)
+      ).containsExactly("Call Tree Root", "CallTreeTest#a", "CallTreeTest#b",
+          "CallTreeTest#d", "CallTreeTest#e");
 
-    Span d = reporter.getSpans().get(0);
-    assertThat(d.getNameAsString()).isEqualTo("CallTreeTest#d");
-    assertThat(d.getDuration()).isEqualTo(TimeUnit.MILLISECONDS.toMicros(10));
-    assertThat(d.getStackFrames().stream().map(StackFrame::getMethodName)).containsExactly("c");
+      SpanData a = setup.getSpans().get(1);
+      assertThat(a).hasName("CallTreeTest#a");
+      assertThat(a.getEndEpochNanos() - a.getStartEpochNanos()).isEqualTo(30_000_000);
+      assertThat(a.getAttributes().get(CallTree.STACKTRACE_ATTRIBUTE_KEY)).isBlank();
 
-    Span b = reporter.getSpans().get(1);
-    assertThat(b.getNameAsString()).isEqualTo("CallTreeTest#b");
-    assertThat(b.getDuration()).isEqualTo(TimeUnit.MILLISECONDS.toMicros(20));
-    assertThat(b.getStackFrames()).isEmpty();
+      SpanData b = setup.getSpans().get(2);
+      assertThat(b).hasName("CallTreeTest#b");
+      assertThat(b.getEndEpochNanos() - b.getStartEpochNanos()).isEqualTo(20_000_000);
+      assertThat(b.getAttributes().get(CallTree.STACKTRACE_ATTRIBUTE_KEY)).isBlank();
 
-    Span a = reporter.getSpans().get(2);
-    assertThat(a.getNameAsString()).isEqualTo("CallTreeTest#a");
-    assertThat(a.getDuration()).isEqualTo(TimeUnit.MILLISECONDS.toMicros(30));
-    assertThat(a.getStackFrames()).isEmpty();
+      SpanData d = setup.getSpans().get(3);
+      assertThat(d).hasName("CallTreeTest#d");
+      assertThat(d.getEndEpochNanos() - d.getStartEpochNanos()).isEqualTo(10_000_000);
+      assertThat(d.getAttributes().get(CallTree.STACKTRACE_ATTRIBUTE_KEY))
+          .isEqualTo("at " + CallTreeTest.class.getName() + ".c(CallTreeTest.java)");
 
-    Span e = reporter.getSpans().get(3);
-    assertThat(e.getNameAsString()).isEqualTo("CallTreeTest#e");
-    assertThat(e.getDuration()).isEqualTo(TimeUnit.MILLISECONDS.toMicros(10));
-    assertThat(e.getStackFrames()).isEmpty();
+      SpanData e = setup.getSpans().get(4);
+      assertThat(e).hasName("CallTreeTest#e");
+      assertThat(e.getEndEpochNanos() - e.getStartEpochNanos()).isEqualTo(10_000_000);
+      assertThat(e.getAttributes().get(CallTree.STACKTRACE_ATTRIBUTE_KEY)).isBlank();
+    }
+
   }
 
   @Test
   void testCallTreeWithActiveSpan() {
-    TraceContext rootContext = CallTreeTest.rootTraceContext(tracer);
-    CallTree.Root root =
-        CallTree.createRoot(
-            NoopObjectPool.ofRecyclable(() -> new CallTree.Root(tracer)),
-            rootContext.serialize(),
-            rootContext.getServiceName(),
-            rootContext.getServiceVersion(),
-            0);
-    NoopObjectPool<CallTree> callTreePool = NoopObjectPool.ofRecyclable(CallTree::new);
-    root.addStackTrace(tracer, List.of(StackFrame.of("A", "a")), 0, callTreePool, 0);
+    FixedNanoClock nanoClock = new FixedNanoClock();
 
-    TraceContext spanContext = TraceContext.with64BitId(tracer);
-    TraceContext.fromParentContext().asChildOf(spanContext, rootContext);
+    String traceId = "0af7651916cd43dd8448eb211c80319c";
+    String rootSpanId = "b7ad6b7169203331";
+    TraceContext rootContext = TraceContext.fromSpanContextWithZeroClockAnchor(SpanContext.create(
+        traceId,
+        rootSpanId,
+        TraceFlags.getSampled(),
+        TraceState.getDefault()
+    ));
+
+    ObjectPool<CallTree.Root> rootPool = ObjectPool.createRecyclable(2, CallTree.Root::new);
+    ObjectPool<CallTree> childPool = ObjectPool.createRecyclable(2, CallTree::new);
+
+    CallTree.Root root = CallTree.createRoot(rootPool,
+        rootContext.serialize(), 0);
+    root.addStackTrace(Collections.singletonList(StackFrame.of("A", "a")), 0, childPool, 0);
+
+    String childSpanId = "a1b2c3d4e5f64242";
+    TraceContext spanContext = TraceContext.fromSpanContextWithZeroClockAnchor(SpanContext.create(
+        traceId,
+        childSpanId,
+        TraceFlags.getSampled(),
+        TraceState.getDefault()
+    ));
 
     root.onActivation(spanContext.serialize(), TimeUnit.MILLISECONDS.toNanos(5));
-    root.addStackTrace(
-        tracer,
-        List.of(StackFrame.of("A", "b"), StackFrame.of("A", "a")),
-        TimeUnit.MILLISECONDS.toNanos(10),
-        callTreePool,
-        0);
-    root.addStackTrace(
-        tracer,
-        List.of(StackFrame.of("A", "b"), StackFrame.of("A", "a")),
-        TimeUnit.MILLISECONDS.toNanos(20),
-        callTreePool,
-        0);
-    root.onDeactivation(
-        spanContext.serialize(), rootContext.serialize(), TimeUnit.MILLISECONDS.toNanos(25));
+    root.addStackTrace(Arrays.asList(StackFrame.of("A", "b"), StackFrame.of("A", "a")),
+        TimeUnit.MILLISECONDS.toNanos(10), childPool, 0);
+    root.addStackTrace(Arrays.asList(StackFrame.of("A", "b"), StackFrame.of("A", "a")),
+        TimeUnit.MILLISECONDS.toNanos(20), childPool, 0);
+    root.onDeactivation(spanContext.serialize(), rootContext.serialize(),
+        TimeUnit.MILLISECONDS.toNanos(25));
 
-    root.addStackTrace(
-        tracer,
-        List.of(StackFrame.of("A", "a")),
+    root.addStackTrace(Collections.singletonList(StackFrame.of("A", "a")),
         TimeUnit.MILLISECONDS.toNanos(30),
-        callTreePool,
-        0);
-    root.end(callTreePool, 0);
+        childPool, 0);
+    root.end(childPool, 0);
 
     System.out.println(root);
 
@@ -156,10 +155,25 @@ class CallTreeSpanifyTest {
     assertThat(b.getDurationUs()).isEqualTo(10_000);
     assertThat(b.getChildren()).isEmpty();
 
-    root.spanify();
+    InMemorySpanExporter exporter = InMemorySpanExporter.create();
+    OpenTelemetrySdkBuilder sdkBuilder = OpenTelemetrySdk.builder()
+        .setTracerProvider(SdkTracerProvider.builder()
+            .addSpanProcessor(SimpleSpanProcessor.create(exporter))
+            .build());
 
-    assertThat(reporter.getSpans()).hasSize(2);
-    assertThat(reporter.getSpans().get(1).getTraceContext().isChildOf(spanContext));
-    assertThat(reporter.getSpans().get(0).getTraceContext().isChildOf(rootContext));
+    try (OpenTelemetrySdk outputSdk = sdkBuilder.build()) {
+      root.spanify(nanoClock, outputSdk.getTracer("dummy-tracer"));
+
+      List<SpanData> spans = exporter.getFinishedSpanItems();
+      assertThat(spans).hasSize(2);
+      assertThat(spans.get(0))
+          .hasTraceId(traceId)
+          .hasParentSpanId(rootSpanId);
+      assertThat(spans.get(1))
+          .hasTraceId(traceId)
+          .hasParentSpanId(childSpanId);
+    }
+
   }
+
 }

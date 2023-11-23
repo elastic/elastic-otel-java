@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.agent.profiler;
+package co.elastic.apm.otel.profiler;
 
 public class ThreadMatcher {
 
@@ -31,19 +31,16 @@ public class ThreadMatcher {
     systemThreadGroup = threadGroup;
   }
 
-  public <S1, S2> void forEachThread(
-      NonCapturingPredicate<Thread, S1> predicate,
-      S1 state1,
-      NonCapturingConsumer<Thread, S2> consumer,
-      S2 state2) {
+  public <S1, S2> void forEachThread(NonCapturingPredicate<Thread, S1> predicate, S1 state1,
+      NonCapturingConsumer<Thread, S2> consumer, S2 state2) {
     int count = systemThreadGroup.activeCount();
     do {
       int expectedArrayLength = count + (count / 2) + 1;
       if (threads.length < expectedArrayLength) {
-        threads = new Thread[expectedArrayLength]; // slightly grow the array size
+        threads = new Thread[expectedArrayLength]; //slightly grow the array size
       }
       count = systemThreadGroup.enumerate(threads, true);
-      // return value of enumerate() must be strictly less than the array size according to javadoc
+      //return value of enumerate() must be strictly less than the array size according to javadoc
     } while (count >= threads.length);
 
     for (int i = 0; i < count; i++) {
@@ -62,4 +59,5 @@ public class ThreadMatcher {
   interface NonCapturingConsumer<T, S> {
     void accept(T t, S state);
   }
+
 }

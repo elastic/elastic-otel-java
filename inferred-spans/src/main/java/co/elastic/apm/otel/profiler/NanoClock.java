@@ -16,9 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.agent.profiler;
+package co.elastic.apm.otel.profiler;
+
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.sdk.trace.ReadWriteSpan;
 
 public interface NanoClock {
 
+  void onSpanStart(ReadWriteSpan started, Context parentContext);
+
   long nanoTime();
+
+  long getAnchor(Span parent);
+
+  long toEpochNanos(long anchor, long recordedNanoTime);
+
+  void periodicCleanup();
 }

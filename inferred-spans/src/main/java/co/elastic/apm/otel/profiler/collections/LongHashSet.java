@@ -16,10 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.agent.profiler.collections;
+/*
+ * Copyright 2014-2020 Real Logic Limited.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package co.elastic.apm.otel.profiler.collections;
 
-import static co.elastic.apm.agent.profiler.collections.CollectionUtil.findNextPositivePowerOfTwo;
-import static co.elastic.apm.agent.profiler.collections.CollectionUtil.validateLoadFactor;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
@@ -30,25 +43,28 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import static co.elastic.apm.otel.profiler.collections.CollectionUtil.findNextPositivePowerOfTwo;
+import static co.elastic.apm.otel.profiler.collections.CollectionUtil.validateLoadFactor;
+
 /**
- * Open-addressing with linear-probing expandable hash set. Allocation free in steady state use when
- * expanded.
- *
- * <p>By storing elements as long primitives this significantly reduces memory consumption compared
- * with Java's builtin <code>HashSet&lt;Long&gt;</code>. It implements <code>Set&lt;Long&gt;</code>
- * for convenience, but calling functionality via those methods can add boxing overhead to your
- * usage.
- *
- * <p>This class is not Threadsafe.
- *
- * <p>This HashSet caches its iterator object by default, so nested iteration is not supported. You
- * can override this behaviour at construction by indicating that the iterator should not be cached.
+ * Open-addressing with linear-probing expandable hash set. Allocation free in steady state use when expanded.
+ * <p>
+ * By storing elements as long primitives this significantly reduces memory consumption compared with Java's builtin
+ * <code>HashSet&lt;Long&gt;</code>. It implements <code>Set&lt;Long&gt;</code> for convenience, but calling
+ * functionality via those methods can add boxing overhead to your usage.
+ * <p>
+ * This class is not Threadsafe.
+ * <p>
+ * This HashSet caches its iterator object by default, so nested iteration is not supported. You can override this
+ * behaviour at construction by indicating that the iterator should not be cached.
  *
  * @see LongIterator
  * @see Set
  */
 public class LongHashSet extends AbstractSet<Long> implements Serializable {
-  /** The initial capacity used when none is specified in the constructor. */
+  /**
+   * The initial capacity used when none is specified in the constructor.
+   */
   public static final int DEFAULT_INITIAL_CAPACITY = 8;
 
   static final long MISSING_VALUE = -1;
@@ -64,51 +80,54 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
   private LongIterator iterator;
 
   /**
-   * Construct a hash set with {@link #DEFAULT_INITIAL_CAPACITY}, {@link
-   * Hashing#DEFAULT_LOAD_FACTOR}, and iterator caching support.
+   * Construct a hash set with {@link #DEFAULT_INITIAL_CAPACITY}, {@link Hashing#DEFAULT_LOAD_FACTOR},
+   * and iterator caching support.
    */
   public LongHashSet() {
     this(DEFAULT_INITIAL_CAPACITY);
   }
 
   /**
-   * Construct a hash set with a proposed capacity, {@link Hashing#DEFAULT_LOAD_FACTOR}, and
-   * iterator caching support.
+   * Construct a hash set with a proposed capacity, {@link Hashing#DEFAULT_LOAD_FACTOR},
+   * and iterator caching support.
    *
    * @param proposedCapacity for the initial capacity of the set.
    */
-  public LongHashSet(final int proposedCapacity) {
+  public LongHashSet(
+      final int proposedCapacity) {
     this(proposedCapacity, Hashing.DEFAULT_LOAD_FACTOR, true);
   }
 
   /**
-   * Construct a hash set with a proposed initial capacity, load factor, and iterator caching
-   * support.
+   * Construct a hash set with a proposed initial capacity, load factor, and iterator caching support.
    *
    * @param proposedCapacity for the initial capacity of the set.
    * @param loadFactor to be used for resizing.
    */
-  public LongHashSet(final int proposedCapacity, final float loadFactor) {
+  public LongHashSet(
+      final int proposedCapacity,
+      final float loadFactor) {
     this(proposedCapacity, loadFactor, true);
   }
 
   /**
-   * Construct a hash set with a proposed initial capacity, load factor, and indicated iterator
-   * caching support.
+   * Construct a hash set with a proposed initial capacity, load factor, and indicated iterator caching support.
    *
    * @param proposedCapacity for the initial capacity of the set.
    * @param loadFactor to be used for resizing.
    * @param shouldAvoidAllocation should the iterator be cached to avoid further allocation.
    */
   public LongHashSet(
-      final int proposedCapacity, final float loadFactor, final boolean shouldAvoidAllocation) {
+      final int proposedCapacity,
+      final float loadFactor,
+      final boolean shouldAvoidAllocation) {
     validateLoadFactor(loadFactor);
 
     this.shouldAvoidAllocation = shouldAvoidAllocation;
     this.loadFactor = loadFactor;
     sizeOfArrayValues = 0;
-    final int capacity =
-        findNextPositivePowerOfTwo(Math.max(DEFAULT_INITIAL_CAPACITY, proposedCapacity));
+    final int capacity = findNextPositivePowerOfTwo(
+        Math.max(DEFAULT_INITIAL_CAPACITY, proposedCapacity));
     resizeThreshold = (int) (capacity * loadFactor); // @DoNotSub
     values = new long[capacity];
     Arrays.fill(values, MISSING_VALUE);
@@ -133,8 +152,8 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
   }
 
   /**
-   * Get the actual threshold which when reached the map will resize. This is a function of the
-   * current capacity and load factor.
+   * Get the actual threshold which when reached the map will resize.
+   * This is a function of the current capacity and load factor.
    *
    * @return the threshold when the map will resize.
    */
@@ -142,7 +161,9 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
     return resizeThreshold;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public boolean add(final Long value) {
     return add(value.longValue());
   }
@@ -214,7 +235,9 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
     values = tempValues;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public boolean remove(final Object value) {
     return value instanceof Long && remove(((Long) value).longValue());
   }
@@ -268,8 +291,8 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
 
       final int hash = Hashing.hash(values[index], mask);
 
-      if ((index < hash && (hash <= deleteIndex || deleteIndex <= index))
-          || (hash <= deleteIndex && deleteIndex <= index)) {
+      if ((index < hash && (hash <= deleteIndex || deleteIndex <= index)) ||
+          (hash <= deleteIndex && deleteIndex <= index)) {
         values[deleteIndex] = values[index];
 
         values[index] = MISSING_VALUE;
@@ -279,15 +302,17 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
   }
 
   /**
-   * Compact the backing arrays by rehashing with a capacity just larger than current size and
-   * giving consideration to the load factor.
+   * Compact the backing arrays by rehashing with a capacity just larger than current size
+   * and giving consideration to the load factor.
    */
   public void compact() {
     final int idealCapacity = (int) Math.round(size() * (1.0 / loadFactor));
     rehash(findNextPositivePowerOfTwo(Math.max(DEFAULT_INITIAL_CAPACITY, idealCapacity)));
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public boolean contains(final Object value) {
     return value instanceof Long && contains(((Long) value).longValue());
   }
@@ -319,17 +344,23 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
     return false;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public int size() {
     return sizeOfArrayValues + (containsMissingValue ? 1 : 0);
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public boolean isEmpty() {
     return size() == 0;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public void clear() {
     if (size() > 0) {
       Arrays.fill(values, MISSING_VALUE);
@@ -338,7 +369,9 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
     }
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public boolean addAll(final Collection<? extends Long> coll) {
     boolean added = false;
 
@@ -390,8 +423,8 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
 
   /**
    * Fast Path set difference for comparison with another LongHashSet.
-   *
-   * <p><b>Note:</b> garbage free in the identical case, allocates otherwise.
+   * <p>
+   * <b>Note:</b> garbage free in the identical case, allocates otherwise.
    *
    * @param other the other set to subtract
    * @return null if identical, otherwise the set of differences
@@ -420,7 +453,9 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
     return difference;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public boolean removeAll(final Collection<?> coll) {
     boolean removed = false;
 
@@ -432,8 +467,8 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
   }
 
   /**
-   * Alias for {@link #removeAll(Collection)} for the specialized case when removing another
-   * LongHashSet, avoids boxing and allocations
+   * Alias for {@link #removeAll(Collection)} for the specialized case when removing another LongHashSet,
+   * avoids boxing and allocations
    *
    * @param coll containing the values to be removed.
    * @return {@code true} if this set changed as a result of the call
@@ -454,7 +489,9 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
     return acc;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public LongIterator iterator() {
     LongIterator iterator = this.iterator;
     if (null == iterator) {
@@ -477,7 +514,9 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
     this.containsMissingValue = that.containsMissingValue;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public String toString() {
     final StringBuilder sb = new StringBuilder();
     sb.append('{');
@@ -501,7 +540,9 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
     return sb.toString();
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   @SuppressWarnings("unchecked")
   public <T> T[] toArray(final T[] a) {
     final Class<?> componentType = a.getClass().getComponentType();
@@ -516,7 +557,9 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
     return arrayCopy;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public Object[] toArray() {
     final Object[] arrayCopy = new Object[size()];
     copyValues(arrayCopy);
@@ -538,7 +581,9 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
     }
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public boolean equals(final Object other) {
     if (other == this) {
       return true;
@@ -547,9 +592,9 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
     if (other instanceof LongHashSet) {
       final LongHashSet otherSet = (LongHashSet) other;
 
-      return otherSet.containsMissingValue == containsMissingValue
-          && otherSet.sizeOfArrayValues == sizeOfArrayValues
-          && containsAll(otherSet);
+      return otherSet.containsMissingValue == containsMissingValue &&
+          otherSet.sizeOfArrayValues == sizeOfArrayValues &&
+          containsAll(otherSet);
     }
 
     if (!(other instanceof Set)) {
@@ -568,7 +613,9 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
     }
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public int hashCode() {
     int hashCode = 0;
     for (final long value : values) {
@@ -584,7 +631,9 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
     return hashCode;
   }
 
-  /** Iterator which supports unboxed access to values. */
+  /**
+   * Iterator which supports unboxed access to values.
+   */
   public final class LongIterator implements Iterator<Long>, Serializable {
     private int remaining;
     private int positionCounter;
@@ -682,8 +731,10 @@ public class LongHashSet extends AbstractSet<Long> implements Serializable {
       throw new NoSuchElementException();
     }
 
-    private int position(final long[] values) {
+    private int position(
+        final long[] values) {
       return positionCounter & (values.length - 1);
     }
   }
 }
+

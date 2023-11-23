@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.agent.profiler;
+package co.elastic.apm.otel.profiler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import co.elastic.apm.otel.profiler.ThreadMatcher;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -31,21 +32,17 @@ class ThreadMatcherTest {
   @Test
   void testLookup() {
     ArrayList<Thread> threads = new ArrayList<>();
-    threadMatcher.forEachThread(
-        new ThreadMatcher.NonCapturingPredicate<Thread, Void>() {
-          @Override
-          public boolean test(Thread thread, Void state) {
-            return thread.getId() == Thread.currentThread().getId();
-          }
-        },
-        null,
-        new ThreadMatcher.NonCapturingConsumer<Thread, List<Thread>>() {
-          @Override
-          public void accept(Thread thread, List<Thread> state) {
-            state.add(thread);
-          }
-        },
-        threads);
+    threadMatcher.forEachThread(new ThreadMatcher.NonCapturingPredicate<Thread, Void>() {
+      @Override
+      public boolean test(Thread thread, Void state) {
+        return thread.getId() == Thread.currentThread().getId();
+      }
+    }, null, new ThreadMatcher.NonCapturingConsumer<Thread, List<Thread>>() {
+      @Override
+      public void accept(Thread thread, List<Thread> state) {
+        state.add(thread);
+      }
+    }, threads);
     assertThat(threads).isEqualTo(List.of(Thread.currentThread()));
   }
 }

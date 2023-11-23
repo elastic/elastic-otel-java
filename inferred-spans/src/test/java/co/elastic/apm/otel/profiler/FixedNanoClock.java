@@ -16,11 +16,46 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.agent.profiler;
+package co.elastic.apm.otel.profiler;
 
-public class SystemNanoClock implements NanoClock {
+import co.elastic.apm.otel.profiler.NanoClock;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.sdk.trace.ReadWriteSpan;
+
+public class FixedNanoClock implements NanoClock {
+
+  private long nanoTime = -1L;
+
+  @Override
+  public void onSpanStart(ReadWriteSpan started, Context parentContext) {
+
+  }
+
   @Override
   public long nanoTime() {
-    return System.nanoTime();
+    if (nanoTime == -1L) {
+      return System.nanoTime();
+    }
+    return nanoTime;
+  }
+
+  @Override
+  public long getAnchor(Span parent) {
+    return 0;
+  }
+
+  @Override
+  public long toEpochNanos(long anchor, long recordedNanoTime) {
+    return recordedNanoTime;
+  }
+
+  @Override
+  public void periodicCleanup() {
+
+  }
+
+  public void setNanoTime(long nanoTime) {
+    this.nanoTime = nanoTime;
   }
 }

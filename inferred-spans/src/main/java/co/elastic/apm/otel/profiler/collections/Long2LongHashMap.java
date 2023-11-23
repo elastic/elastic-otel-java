@@ -16,10 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.agent.profiler.collections;
-
-import static co.elastic.apm.agent.profiler.collections.CollectionUtil.findNextPositivePowerOfTwo;
-import static co.elastic.apm.agent.profiler.collections.CollectionUtil.validateLoadFactor;
+/*
+ * Copyright 2014-2020 Real Logic Limited.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package co.elastic.apm.otel.profiler.collections;
 
 import java.io.Serializable;
 import java.util.AbstractCollection;
@@ -30,7 +42,12 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-/** A open addressing with linear probing hash map specialised for primitive key and value pairs. */
+import static co.elastic.apm.otel.profiler.collections.CollectionUtil.findNextPositivePowerOfTwo;
+import static co.elastic.apm.otel.profiler.collections.CollectionUtil.validateLoadFactor;
+
+/**
+ * A open addressing with linear probing hash map specialised for primitive key and value pairs.
+ */
 public class Long2LongHashMap implements Map<Long, Long>, Serializable {
   static final int MIN_CAPACITY = 8;
 
@@ -50,7 +67,9 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
   }
 
   public Long2LongHashMap(
-      final int initialCapacity, final float loadFactor, final long missingValue) {
+      final int initialCapacity,
+      final float loadFactor,
+      final long missingValue) {
     this(initialCapacity, loadFactor, missingValue, true);
   }
 
@@ -102,8 +121,8 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
   }
 
   /**
-   * Get the actual threshold which when reached the map will resize. This is a function of the
-   * current capacity and load factor.
+   * Get the actual threshold which when reached the map will resize.
+   * This is a function of the current capacity and load factor.
    *
    * @return the threshold when the map will resize.
    */
@@ -111,12 +130,16 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
     return resizeThreshold;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public int size() {
     return size;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public boolean isEmpty() {
     return size == 0;
   }
@@ -216,9 +239,9 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
 
   /**
    * Primitive specialised forEach implementation.
-   *
-   * <p>NB: Renamed from forEach to avoid overloading on parameter types of lambda expression, which
-   * doesn't play well with type inference in lambda expressions.
+   * <p>
+   * NB: Renamed from forEach to avoid overloading on parameter types of lambda
+   * expression, which doesn't play well with type inference in lambda expressions.
    *
    * @param consumer a callback called for each key/value pair in the map.
    */
@@ -230,8 +253,8 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
     for (int keyIndex = 0; keyIndex < length; keyIndex += 2) {
       if (entries[keyIndex + 1] != missingValue) // lgtm [java/index-out-of-bounds]
       {
-        consumer.accept(
-            entries[keyIndex], entries[keyIndex + 1]); // lgtm [java/index-out-of-bounds]
+        consumer.accept(entries[keyIndex],
+            entries[keyIndex + 1]); // lgtm [java/index-out-of-bounds]
       }
     }
   }
@@ -269,7 +292,9 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
     return found;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public void clear() {
     if (size > 0) {
       Arrays.fill(entries, missingValue);
@@ -278,8 +303,8 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
   }
 
   /**
-   * Compact the backing arrays by rehashing with a capacity just larger than current size and
-   * giving consideration to the load factor.
+   * Compact the backing arrays by rehashing with a capacity just larger than current size
+   * and giving consideration to the load factor.
    */
   public void compact() {
     final int idealCapacity = (int) Math.round(size() * (1.0d / loadFactor));
@@ -288,34 +313,46 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
 
   // ---------------- Boxed Versions Below ----------------
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public Long get(final Object key) {
     return valOrNull(get((long) key));
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public Long put(final Long key, final Long value) {
     return valOrNull(put((long) key, (long) value));
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public boolean containsKey(final Object key) {
     return containsKey((long) key);
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public boolean containsValue(final Object value) {
     return containsValue((long) value);
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public void putAll(final Map<? extends Long, ? extends Long> map) {
     for (final Map.Entry<? extends Long, ? extends Long> entry : map.entrySet()) {
       put(entry.getKey(), entry.getValue());
     }
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public KeySet keySet() {
     if (null == keySet) {
       keySet = new KeySet();
@@ -324,7 +361,9 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
     return keySet;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public ValueCollection values() {
     if (null == values) {
       values = new ValueCollection();
@@ -333,7 +372,9 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
     return values;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public EntrySet entrySet() {
     if (null == entrySet) {
       entrySet = new EntrySet();
@@ -342,7 +383,9 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
     return entrySet;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public Long remove(final Object key) {
     return valOrNull(remove((long) key));
   }
@@ -386,8 +429,8 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
 
       final int hash = Hashing.evenHash(entries[keyIndex], mask);
 
-      if ((keyIndex < hash && (hash <= deleteKeyIndex || deleteKeyIndex <= keyIndex))
-          || (hash <= deleteKeyIndex && deleteKeyIndex <= keyIndex)) {
+      if ((keyIndex < hash && (hash <= deleteKeyIndex || deleteKeyIndex <= keyIndex)) ||
+          (hash <= deleteKeyIndex && deleteKeyIndex <= keyIndex)) {
         entries[deleteKeyIndex] = entries[keyIndex];
         entries[deleteKeyIndex + 1] = entries[keyIndex + 1];
 
@@ -398,8 +441,7 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
   }
 
   /**
-   * Get the minimum value stored in the map. If the map is empty then it will return {@link
-   * #missingValue()}
+   * Get the minimum value stored in the map. If the map is empty then it will return {@link #missingValue()}
    *
    * @return the minimum value stored in the map.
    */
@@ -421,8 +463,7 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
   }
 
   /**
-   * Get the maximum value stored in the map. If the map is empty then it will return {@link
-   * #missingValue()}
+   * Get the maximum value stored in the map. If the map is empty then it will return {@link #missingValue()}
    *
    * @return the maximum value stored in the map.
    */
@@ -443,7 +484,9 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
     return max;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public String toString() {
     if (isEmpty()) {
       return "{}";
@@ -468,8 +511,8 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
    *
    * @param key key with which the specified value is associated
    * @param value value to be associated with the specified key
-   * @return the previous value associated with the specified key, or {@link #missingValue()} if
-   *     there was no mapping for the key.
+   * @return the previous value associated with the specified key, or
+   *     {@link #missingValue()} if there was no mapping for the key.
    */
   public long replace(final long key, final long value) {
     long currentValue = get(key);
@@ -499,7 +542,9 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
     return true;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public boolean equals(final Object o) {
     if (this == o) {
       return true;
@@ -511,6 +556,7 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
     final Map<?, ?> that = (Map<?, ?>) o;
 
     return size == that.size() && entrySet().equals(that.entrySet());
+
   }
 
   public int hashCode() {
@@ -616,7 +662,9 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
     }
   }
 
-  /** Iterator over keys which supports access to unboxed keys. */
+  /**
+   * Iterator over keys which supports access to unboxed keys.
+   */
   public final class KeyIterator extends AbstractIterator implements Iterator<Long> {
     public Long next() {
       return nextValue();
@@ -628,7 +676,9 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
     }
   }
 
-  /** Iterator over values which supports access to unboxed values. */
+  /**
+   * Iterator over values which supports access to unboxed values.
+   */
   public final class ValueIterator extends AbstractIterator implements Iterator<Long> {
     public Long next() {
       return nextValue();
@@ -640,8 +690,11 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
     }
   }
 
-  /** Iterator over entries which supports access to unboxed keys and values. */
-  public final class EntryIterator extends AbstractIterator
+  /**
+   * Iterator over entries which supports access to unboxed keys and values.
+   */
+  public final class EntryIterator
+      extends AbstractIterator
       implements Iterator<Entry<Long, Long>>, Entry<Long, Long> {
     public Long getKey() {
       return getLongKey();
@@ -716,8 +769,8 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
 
           final Map.Entry<?, ?> e = (Entry<?, ?>) o;
 
-          return (e.getKey() != null && e.getValue() != null)
-              && (e.getKey().equals(k) && e.getValue().equals(v));
+          return (e.getKey() != null && e.getValue() != null) &&
+              (e.getKey().equals(k) && e.getValue().equals(v));
         }
 
         public String toString() {
@@ -726,12 +779,16 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
       };
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public int hashCode() {
       return Hashing.hashCode(getLongKey()) ^ Hashing.hashCode(getLongValue());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean equals(final Object o) {
       if (this == o) {
         return true;
@@ -747,11 +804,15 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
     }
   }
 
-  /** Set of keys which supports optional cached iterators to avoid allocation. */
+  /**
+   * Set of keys which supports optional cached iterators to avoid allocation.
+   */
   public final class KeySet extends AbstractSet<Long> implements Serializable {
     private final KeyIterator keyIterator = shouldAvoidAllocation ? new KeyIterator() : null;
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public KeyIterator iterator() {
       KeyIterator keyIterator = this.keyIterator;
       if (null == keyIterator) {
@@ -763,22 +824,30 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
       return keyIterator;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public int size() {
       return Long2LongHashMap.this.size();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean isEmpty() {
       return Long2LongHashMap.this.isEmpty();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void clear() {
       Long2LongHashMap.this.clear();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean contains(final Object o) {
       return contains((long) o);
     }
@@ -788,11 +857,15 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
     }
   }
 
-  /** Collection of values which supports optionally cached iterators to avoid allocation. */
+  /**
+   * Collection of values which supports optionally cached iterators to avoid allocation.
+   */
   public final class ValueCollection extends AbstractCollection<Long> {
     private final ValueIterator valueIterator = shouldAvoidAllocation ? new ValueIterator() : null;
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public ValueIterator iterator() {
       ValueIterator valueIterator = this.valueIterator;
       if (null == valueIterator) {
@@ -804,12 +877,16 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
       return valueIterator;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public int size() {
       return Long2LongHashMap.this.size();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean contains(final Object o) {
       return contains((long) o);
     }
@@ -819,11 +896,15 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
     }
   }
 
-  /** Set of entries which supports optionally cached iterators to avoid allocation. */
+  /**
+   * Set of entries which supports optionally cached iterators to avoid allocation.
+   */
   public final class EntrySet extends AbstractSet<Map.Entry<Long, Long>> implements Serializable {
     private final EntryIterator entryIterator = shouldAvoidAllocation ? new EntryIterator() : null;
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public EntryIterator iterator() {
       EntryIterator entryIterator = this.entryIterator;
       if (null == entryIterator) {
@@ -835,22 +916,30 @@ public class Long2LongHashMap implements Map<Long, Long>, Serializable {
       return entryIterator;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public int size() {
       return Long2LongHashMap.this.size();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean isEmpty() {
       return Long2LongHashMap.this.isEmpty();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void clear() {
       Long2LongHashMap.this.clear();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean contains(final Object o) {
       if (!(o instanceof Entry)) {
         return false;

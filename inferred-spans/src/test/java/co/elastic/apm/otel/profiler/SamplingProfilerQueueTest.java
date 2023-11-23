@@ -16,16 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.agent.profiler;
+package co.elastic.apm.otel.profiler;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
-import co.elastic.apm.agent.MockTracer;
-import co.elastic.apm.agent.impl.ElasticApmTracer;
-import co.elastic.apm.agent.impl.transaction.TraceContext;
-import co.elastic.apm.agent.objectpool.ObjectPoolFactory;
-import co.elastic.apm.agent.testutils.DisabledOnAppleSilicon;
+import co.elastic.apm.otel.profiler.util.DisabledOnAppleSilicon;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.TraceFlags;
+import io.opentelemetry.api.trace.TraceState;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -36,30 +35,34 @@ public class SamplingProfilerQueueTest {
   @DisabledOnOs(OS.WINDOWS)
   @DisabledOnAppleSilicon
   void testFillQueue() throws Exception {
-    System.out.println(System.getProperty("os.name"));
 
-    ElasticApmTracer tracer = MockTracer.create();
-    when(tracer.getObjectPoolFactory()).thenReturn(new ObjectPoolFactory());
+    try (ProfilerTestSetup setup = ProfilerTestSetup.create(
+        config -> config.clock(new FixedNanoClock()).startScheduledProfiling(false))) {
 
-    SamplingProfiler profiler = new SamplingProfiler(tracer, new SystemNanoClock());
+      setup.profiler.setProfilingSessionOngoing(true);
 
-    profiler.setProfilingSessionOngoing(true);
-    TraceContext traceContext = TraceContext.with64BitId(tracer);
+      Span traceContext = Span.wrap(
+          SpanContext.create(
+              "0af7651916cd43dd8448eb211c80319c",
+              "b7ad6b7169203331",
+              TraceFlags.getSampled(),
+              TraceState.getDefault()
+          ));
 
-    assertThat(profiler.onActivation(traceContext, null)).isTrue();
-    long timeAfterFirstEvent = System.nanoTime();
-    Thread.sleep(1);
+      assertThat(setup.profiler.onActivation(traceContext, null)).isTrue();
 
-    for (int i = 0; i < SamplingProfiler.RING_BUFFER_SIZE - 1; i++) {
-      assertThat(profiler.onActivation(traceContext, null)).isTrue();
+      for (int i = 0; i < SamplingProfiler.RING_BUFFER_SIZE - 1; i++) {
+        assertThat(setup.profiler.onActivation(traceContext, null)).isTrue();
+      }
+
+      // no more free slots after adding RING_BUFFER_SIZE events
+      assertThat(setup.profiler.onActivation(traceContext, null)).isFalse();
+
+      setup.profiler.consumeActivationEventsFromRingBufferAndWriteToFile();
+
+      // now there should be free slots
+      assertThat(setup.profiler.onActivation(traceContext, null)).isTrue();
     }
 
-    // no more free slots after adding RING_BUFFER_SIZE events
-    assertThat(profiler.onActivation(traceContext, null)).isFalse();
-
-    profiler.consumeActivationEventsFromRingBufferAndWriteToFile();
-
-    // now there should be free slots
-    assertThat(profiler.onActivation(traceContext, null)).isTrue();
   }
 }

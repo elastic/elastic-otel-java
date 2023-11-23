@@ -16,43 +16,128 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.agent.profiler;
+package co.elastic.apm.otel.profiler;
 
-import co.elastic.apm.agent.impl.ActivationListener;
-import co.elastic.apm.agent.impl.ElasticApmTracer;
-import co.elastic.apm.agent.impl.transaction.AbstractSpan;
-import co.elastic.apm.agent.sdk.internal.ThreadUtil;
-import java.util.Objects;
+import co.elastic.apm.otel.profiler.util.ThreadUtils;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.ContextStorage;
+import io.opentelemetry.context.Scope;
+import java.io.Closeable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import javax.annotation.Nullable;
 
-public class ProfilingActivationListener implements ActivationListener {
+public class ProfilingActivationListener implements Closeable {
 
-  private final ElasticApmTracer tracer;
-  private final SamplingProfiler profiler;
-
-  public ProfilingActivationListener(ElasticApmTracer tracer) {
-    this(tracer, Objects.requireNonNull(tracer.getLifecycleListener(SamplingProfiler.class)));
+  static {
+    ContextStorage.addWrapper(ContextStorageWrapper::new);
   }
 
-  ProfilingActivationListener(ElasticApmTracer tracer, SamplingProfiler profiler) {
-    this.tracer = tracer;
+  public static void ensureInitialized() {
+    //does nothing but ensures that the static initializer ran
+  }
+
+  private static volatile List<ProfilingActivationListener> activeListeners = Collections.emptyList();
+
+
+  private static class ContextStorageWrapper implements ContextStorage {
+
+    private final ContextStorage delegate;
+
+    private ContextStorageWrapper(ContextStorage delegate) {
+      this.delegate = delegate;
+    }
+
+    @Override
+    public Scope attach(Context toAttach) {
+      List<ProfilingActivationListener> listeners = activeListeners;
+      if (listeners.isEmpty()) {
+        // no unnecessary allocations when no listener is active
+        return delegate.attach(toAttach);
+      }
+      Span attached = spanFromContextNullSafe(toAttach);
+      Span oldCtx = spanFromContextNullSafe(delegate.current());
+      for (ProfilingActivationListener listener : listeners) {
+        listener.beforeActivate(oldCtx, attached);
+      }
+      Scope delegateScope = delegate.attach(toAttach);
+      return () -> {
+        delegateScope.close();
+        Span newCtx = spanFromContextNullSafe(delegate.current());
+        for (ProfilingActivationListener listener : listeners) {
+          listener.afterDeactivate(attached, newCtx);
+        }
+      };
+    }
+
+    Span spanFromContextNullSafe(@Nullable Context context) {
+      if (context == null) {
+        return Span.getInvalid();
+      }
+      return Span.fromContext(context);
+    }
+
+    @Nullable
+    @Override
+    public Context current() {
+      return delegate.current();
+    }
+
+    @Override
+    public Context root() {
+      return delegate.root();
+    }
+  }
+
+  private final SamplingProfiler profiler;
+
+  private ProfilingActivationListener(SamplingProfiler profiler) {
     this.profiler = profiler;
   }
 
-  @Override
-  public void beforeActivate(AbstractSpan<?> context) {
-    if (context.isSampled() && !ThreadUtil.isVirtual(Thread.currentThread())) {
-      AbstractSpan<?> active = tracer.getActive();
-      profiler.onActivation(
-          context.getTraceContext(), active != null ? active.getTraceContext() : null);
+  public static ProfilingActivationListener register(SamplingProfiler profiler) {
+    ProfilingActivationListener result = new ProfilingActivationListener(profiler);
+    synchronized (ProfilingActivationListener.class) {
+      List<ProfilingActivationListener> listenersList = new ArrayList<>(activeListeners);
+      listenersList.add(result);
+      activeListeners = Collections.unmodifiableList(listenersList);
     }
+    return result;
   }
 
   @Override
-  public void afterDeactivate(AbstractSpan<?> deactivatedContext) {
-    if (deactivatedContext.isSampled() && !ThreadUtil.isVirtual(Thread.currentThread())) {
-      AbstractSpan<?> active = tracer.getActive();
-      profiler.onDeactivation(
-          deactivatedContext.getTraceContext(), active != null ? active.getTraceContext() : null);
+  public void close() {
+    synchronized (ProfilingActivationListener.class) {
+      List<ProfilingActivationListener> listenersList = new ArrayList<>(activeListeners);
+      listenersList.remove(this);
+      activeListeners = Collections.unmodifiableList(listenersList);
     }
   }
+
+  public void beforeActivate(Span oldContext, Span newContext) {
+    if (newContext.getSpanContext().isValid()
+        && newContext.getSpanContext().isSampled()
+        && !ThreadUtils.isVirtual(Thread.currentThread())
+    ) {
+      profiler.onActivation(
+          newContext,
+          oldContext.getSpanContext().isValid() ? oldContext : null
+      );
+    }
+  }
+
+  public void afterDeactivate(Span deactivatedContext, Span newContext) {
+    if (deactivatedContext.getSpanContext().isValid()
+        && deactivatedContext.getSpanContext().isSampled()
+        && !ThreadUtils.isVirtual(Thread.currentThread())
+    ) {
+      profiler.onDeactivation(
+          deactivatedContext,
+          newContext.getSpanContext().isValid() ? newContext : null
+      );
+    }
+  }
+
 }

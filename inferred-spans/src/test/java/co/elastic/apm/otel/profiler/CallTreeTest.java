@@ -16,34 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.agent.profiler;
+package co.elastic.apm.otel.profiler;
 
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static java.util.stream.Collectors.toMap;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
 
-import co.elastic.apm.agent.MockReporter;
-import co.elastic.apm.agent.MockTracer;
-import co.elastic.apm.agent.configuration.SpyConfiguration;
-import co.elastic.apm.agent.impl.ElasticApmTracer;
-import co.elastic.apm.agent.impl.sampling.ConstantSampler;
-import co.elastic.apm.agent.impl.transaction.AbstractSpan;
-import co.elastic.apm.agent.impl.transaction.Span;
-import co.elastic.apm.agent.impl.transaction.StackFrame;
-import co.elastic.apm.agent.impl.transaction.TraceContext;
-import co.elastic.apm.agent.impl.transaction.Transaction;
-import co.elastic.apm.agent.objectpool.NoopObjectPool;
-import co.elastic.apm.agent.objectpool.ObjectPool;
-import co.elastic.apm.agent.objectpool.impl.ListBasedObjectPool;
-import co.elastic.apm.agent.testutils.DisabledOnAppleSilicon;
-import co.elastic.apm.agent.tracer.configuration.TimeDuration;
+import co.elastic.apm.otel.profiler.pooling.ObjectPool;
+import co.elastic.apm.otel.profiler.util.DisabledOnAppleSilicon;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.Scope;
+import io.opentelemetry.sdk.trace.data.LinkData;
+import io.opentelemetry.sdk.trace.data.SpanData;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -55,65 +48,42 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
-import org.stagemonitor.configuration.ConfigurationRegistry;
 
 @DisabledOnOs(OS.WINDOWS)
 @DisabledOnAppleSilicon
 class CallTreeTest {
 
-  private MockReporter reporter;
-  private ElasticApmTracer tracer;
-  private ProfilingConfiguration profilerConfig;
+  private ProfilerTestSetup profilerSetup;
+
+  private FixedNanoClock nanoClock;
 
   @BeforeEach
   void setUp() {
-    reporter = new MockReporter();
-    ConfigurationRegistry config = SpyConfiguration.createSpyConfig();
+    nanoClock = new FixedNanoClock();
     // disable scheduled profiling to not interfere with this test
-    profilerConfig = config.getConfig(ProfilingConfiguration.class);
-    doReturn(true).when(profilerConfig).isProfilingEnabled();
-    tracer = MockTracer.createRealTracer(reporter, config, false);
+    profilerSetup = ProfilerTestSetup.create(
+        config -> config.clock(nanoClock).startScheduledProfiling(false));
+    profilerSetup.profiler.setProfilingSessionOngoing(true);
   }
 
   @AfterEach
   void tearDown() throws IOException {
-    Objects.requireNonNull(tracer.getLifecycleListener(ProfilingFactory.class))
-        .getProfiler()
-        .clear();
-    tracer.stop();
+    profilerSetup.close();
   }
 
   @Test
   void testCallTree() {
-    TraceContext traceContext = TraceContext.with64BitId(MockTracer.create());
-    CallTree.Root root =
-        CallTree.createRoot(
-            NoopObjectPool.ofRecyclable(() -> new CallTree.Root(tracer)),
-            traceContext.serialize(),
-            traceContext.getServiceName(),
-            traceContext.getServiceVersion(),
-            0);
-    ObjectPool<CallTree> callTreePool =
-        ListBasedObjectPool.ofRecyclable(new ArrayList<>(), Integer.MAX_VALUE, CallTree::new);
-    root.addStackTrace(tracer, List.of(StackFrame.of("A", "a")), 0, callTreePool, 0);
-    root.addStackTrace(
-        tracer,
-        List.of(StackFrame.of("A", "b"), StackFrame.of("A", "a")),
-        TimeUnit.MILLISECONDS.toNanos(10),
-        callTreePool,
-        0);
-    root.addStackTrace(
-        tracer,
-        List.of(StackFrame.of("A", "b"), StackFrame.of("A", "a")),
-        TimeUnit.MILLISECONDS.toNanos(20),
-        callTreePool,
-        0);
-    root.addStackTrace(
-        tracer,
-        List.of(StackFrame.of("A", "a")),
-        TimeUnit.MILLISECONDS.toNanos(30),
-        callTreePool,
-        0);
+    TraceContext traceContext = new TraceContext();
+    CallTree.Root root = CallTree.createRoot(
+        ObjectPool.createRecyclable(100, CallTree.Root::new), traceContext.serialize(), 0);
+    ObjectPool<CallTree> callTreePool = ObjectPool.createRecyclable(100, CallTree::new);
+    root.addStackTrace(List.of(StackFrame.of("A", "a")), 0, callTreePool, 0);
+    root.addStackTrace(List.of(StackFrame.of("A", "b"), StackFrame.of("A", "a")),
+        TimeUnit.MILLISECONDS.toNanos(10), callTreePool, 0);
+    root.addStackTrace(List.of(StackFrame.of("A", "b"), StackFrame.of("A", "a")),
+        TimeUnit.MILLISECONDS.toNanos(20), callTreePool, 0);
+    root.addStackTrace(List.of(StackFrame.of("A", "a")), TimeUnit.MILLISECONDS.toNanos(30),
+        callTreePool, 0);
     root.end(callTreePool, 0);
 
     System.out.println(root);
@@ -157,113 +127,130 @@ class CallTreeTest {
     assertThat(poor.hasChildIds()).isTrue();
   }
 
+
   @Test
   void testTwoDistinctInvocationsOfMethodBShouldNotBeFoldedIntoOne() throws Exception {
-    assertCallTree(
-        new String[] {" bb bb", "aaaaaa"},
-        new Object[][] {
-          {"a", 6},
-          {"  b", 2},
-          {"  b", 2}
-        });
+    assertCallTree(new String[] {
+        " bb bb",
+        "aaaaaa"
+    }, new Object[][] {
+        {"a", 6},
+        {"  b", 2},
+        {"  b", 2}
+    });
   }
+
 
   @Test
   void testBasicCallTree() throws Exception {
-    assertCallTree(
-        new String[] {" cc ", " bbb", "aaaa"},
-        new Object[][] {
-          {"a", 4},
-          {"  b", 3},
-          {"    c", 2}
-        },
-        new Object[][] {
-          {"a", 3},
-          {"  b", 2},
-          {"    c", 1}
-        });
+    assertCallTree(new String[] {
+        " cc ",
+        " bbb",
+        "aaaa"
+    }, new Object[][] {
+        {"a", 4},
+        {"  b", 3},
+        {"    c", 2}
+    }, new Object[][] {
+        {"a", 3},
+        {"  b", 2},
+        {"    c", 1}
+    });
   }
 
   @Test
   void testShouldNotCreateInferredSpansForPillarsAndLeafShouldHaveStacktrace() throws Exception {
-    assertCallTree(
-        new String[] {" dd ", " cc ", " bb ", "aaaa"},
-        new Object[][] {
-          {"a", 4},
-          {"  b", 2},
-          {"    c", 2},
-          {"      d", 2}
-        },
-        new Object[][] {
-          {"a", 3},
-          {"  d", 1, List.of("c", "b")}
-        });
+    assertCallTree(new String[] {
+        " dd ",
+        " cc ",
+        " bb ",
+        "aaaa"
+    }, new Object[][] {
+        {"a", 4},
+        {"  b", 2},
+        {"    c", 2},
+        {"      d", 2}
+    }, new Object[][] {
+        {"a", 3},
+        {"  d", 1, List.of("c", "b")}
+    });
   }
 
   @Test
   void testRemoveNodesWithCountOne() throws Exception {
-    assertCallTree(
-        new String[] {" b ", "aaa"}, new Object[][] {{"a", 3}}, new Object[][] {{"a", 2}});
+    assertCallTree(new String[] {
+        " b ",
+        "aaa"
+    }, new Object[][] {
+        {"a", 3}
+    }, new Object[][] {
+        {"a", 2}
+    });
   }
 
   @Test
   void testSameTopOfStackDifferentBottom() throws Exception {
-    assertCallTree(
-        new String[] {"cccc", "aabb"},
-        new Object[][] {
-          {"a", 2},
-          {"  c", 2},
-          {"b", 2},
-          {"  c", 2},
-        });
+    assertCallTree(new String[] {
+        "cccc",
+        "aabb"
+    }, new Object[][] {
+        {"a", 2},
+        {"  c", 2},
+        {"b", 2},
+        {"  c", 2},
+    });
   }
 
   @Test
   void testStackTraceWithRecursion() throws Exception {
-    assertCallTree(
-        new String[] {"bbccbbcc", "bbbbbbbb", "aaaaaaaa"},
-        new Object[][] {
-          {"a", 8},
-          {"  b", 8},
-          {"    b", 2},
-          {"    c", 2},
-          {"    b", 2},
-          {"    c", 2},
-        });
+    assertCallTree(new String[] {
+        "bbccbbcc",
+        "bbbbbbbb",
+        "aaaaaaaa"
+    }, new Object[][] {
+        {"a", 8},
+        {"  b", 8},
+        {"    b", 2},
+        {"    c", 2},
+        {"    b", 2},
+        {"    c", 2},
+    });
   }
 
   @Test
   void testFirstInferredSpanShouldHaveNoStackTrace() throws Exception {
-    assertCallTree(
-        new String[] {"bb", "aa"},
-        new Object[][] {
-          {"a", 2},
-          {"  b", 2},
-        },
-        new Object[][] {
-          {"b", 1},
-        });
+    assertCallTree(new String[] {
+        "bb",
+        "aa"
+    }, new Object[][] {
+        {"a", 2},
+        {"  b", 2},
+    }, new Object[][] {
+        {"b", 1},
+    });
   }
 
   @Test
   void testCallTreeWithSpanActivations() throws Exception {
-    assertCallTree(
-        new String[] {"    cc ee   ", "   bbb dd   ", " a aaaaaa a ", "1 2      2 1"},
-        new Object[][] {
-          {"a", 8},
-          {"  b", 3},
-          {"    c", 2},
-          {"  d", 2},
-          {"    e", 2},
-        },
-        new Object[][] {
-          {"1", 11},
-          {"  a", 9},
-          {"    2", 7},
-          {"      b", 2},
-          {"        c", 1},
-          {"      e", 1, List.of("d")},
-        });
+    assertCallTree(new String[] {
+        "    cc ee   ",
+        "   bbb dd   ",
+        " a aaaaaa a ",
+        "1 2      2 1"
+    }, new Object[][] {
+        {"a", 8},
+        {"  b", 3},
+        {"    c", 2},
+        {"  d", 2},
+        {"    e", 2},
+    }, new Object[][] {
+        {"1", 11},
+        {"  a", 9},
+        {"    2", 7},
+        {"      b", 2},
+        {"        c", 1},
+        {"      e", 1, List.of("d")},
+    });
   }
 
   /*
@@ -276,28 +263,25 @@ class CallTreeTest {
    */
   @Test
   void testDeactivationBeforeEnd() throws Exception {
-    assertCallTree(
-        new String[] {
-          "   dd      ",
-          "   cccc c  ",
-          "   bbbb bb ", // <- deactivation for span 2 happens before b and c ends
-          " a aaaa aa ", //    that means b and c must have started before 2 has been activated
-          "1 2    2  1" //    but we saw the first stack trace of b only after the activation of 2
-        },
-        new Object[][] {
-          {"a", 7},
-          {"  b", 6},
-          {"    c", 5},
-          {"      d", 2},
-        },
-        new Object[][] {
-          {"1", 10},
-          {"  a", 8},
-          {"    b", 7},
-          {"      c", 6},
-          {"        2", 5},
-          {"          d", 1},
-        });
+    assertCallTree(new String[] {
+        "   dd      ",
+        "   cccc c  ",
+        "   bbbb bb ", // <- deactivation for span 2 happens before b and c ends
+        " a aaaa aa ", //    that means b and c must have started before 2 has been activated
+        "1 2    2  1"  //    but we saw the first stack trace of b only after the activation of 2
+    }, new Object[][] {
+        {"a", 7},
+        {"  b", 6},
+        {"    c", 5},
+        {"      d", 2},
+    }, new Object[][] {
+        {"1", 10},
+        {"  a", 8},
+        {"    b", 7},
+        {"      c", 6},
+        {"        2", 5},
+        {"          d", 1},
+    });
   }
 
   /*
@@ -308,19 +292,20 @@ class CallTreeTest {
    */
   @Test
   void testDectivationBeforeEnd2() throws Exception {
-    assertCallTree(
-        new String[] {"   bbbb b     ", " a aaaa a a a ", "1 2    2 3 3 1"},
-        new Object[][] {
-          {"a", 8},
-          {"  b", 5},
-        },
-        new Object[][] {
-          {"1", 13},
-          {"  a", 11},
-          {"    b", 6},
-          {"      2", 5},
-          {"    3", 2},
-        });
+    assertCallTree(new String[] {
+        "   bbbb b     ",
+        " a aaaa a a a ",
+        "1 2    2 3 3 1"
+    }, new Object[][] {
+        {"a", 8},
+        {"  b", 5},
+    }, new Object[][] {
+        {"1", 13},
+        {"  a", 11},
+        {"    b", 6},
+        {"      2", 5},
+        {"    3", 2},
+    });
   }
 
   /*
@@ -332,22 +317,29 @@ class CallTreeTest {
    */
   @Test
   void testDectivationBeforeEnd_DontStealChildIdsOfUnrelatedActivations() throws Exception {
-    Map<String, AbstractSpan<?>> spans =
-        assertCallTree(
-            new String[] {"      c c ", "      b b ", "a   a a aa", " 1 1 2 2  "},
-            new Object[][] {
-              {"a", 5},
-              {"  b", 2},
-              {"    c", 2},
-            },
-            new Object[][] {
-              {"a", 9},
-              {"  1", 2},
-              {"  c", 3, List.of("b")},
-              {"    2", 2},
-            });
-    assertThat(spans.get("a").getChildIds().getSize()).isEqualTo(1);
-    assertThat(spans.get("c").getChildIds().getSize()).isEqualTo(1);
+    Map<String, SpanData> spans = assertCallTree(new String[] {
+        "      c c ",
+        "      b b ",
+        "a   a a aa",
+        " 1 1 2 2  "
+    }, new Object[][] {
+        {"a", 5},
+        {"  b", 2},
+        {"    c", 2},
+    }, new Object[][] {
+        {"a", 9},
+        {"  1", 2},
+        {"  c", 3, List.of("b")},
+        {"    2", 2},
+    });
+    assertThat(spans.get("a").getLinks())
+        .hasSize(1)
+        .anySatisfy(
+            link -> assertThat(link.getAttributes()).containsEntry("elastic.is_child", true));
+    assertThat(spans.get("c").getLinks())
+        .hasSize(1)
+        .anySatisfy(
+            link -> assertThat(link.getAttributes()).containsEntry("elastic.is_child", true));
   }
 
   /*
@@ -359,23 +351,30 @@ class CallTreeTest {
    */
   @Test
   void testDectivationBeforeEnd_DontStealChildIdsOfUnrelatedActivations_Nested() throws Exception {
-    Map<String, AbstractSpan<?>> spans =
-        assertCallTree(
-            new String[] {"       c  c ", "       b  b ", "a   a  a  aa", " 1 1 23 32  "},
-            new Object[][] {
-              {"a", 5},
-              {"  b", 2},
-              {"    c", 2},
-            },
-            new Object[][] {
-              {"a", 11},
-              {"  1", 2},
-              {"  c", 4, List.of("b")},
-              {"    2", 4},
-              {"      3", 2},
-            });
-    assertThat(spans.get("a").getChildIds().getSize()).isEqualTo(1);
-    assertThat(spans.get("c").getChildIds().getSize()).isEqualTo(1);
+    Map<String, SpanData> spans = assertCallTree(new String[] {
+        "       c  c ",
+        "       b  b ",
+        "a   a  a  aa",
+        " 1 1 23 32  "
+    }, new Object[][] {
+        {"a", 5},
+        {"  b", 2},
+        {"    c", 2},
+    }, new Object[][] {
+        {"a", 11},
+        {"  1", 2},
+        {"  c", 4, List.of("b")},
+        {"    2", 4},
+        {"      3", 2},
+    });
+    assertThat(spans.get("a").getLinks())
+        .hasSize(1)
+        .anySatisfy(
+            link -> assertThat(link.getAttributes()).containsEntry("elastic.is_child", true));
+    assertThat(spans.get("c").getLinks())
+        .hasSize(1)
+        .anySatisfy(
+            link -> assertThat(link.getAttributes()).containsEntry("elastic.is_child", true));
   }
 
   /*
@@ -384,17 +383,18 @@ class CallTreeTest {
    */
   @Test
   void testActivationAfterMethodEnds() throws Exception {
-    assertCallTree(
-        new String[] {"bb   ", "aa a ", "  1 1"},
-        new Object[][] {
-          {"a", 3},
-          {"  b", 2},
-        },
-        new Object[][] {
-          {"a", 3},
-          {"  b", 1},
-          {"  1", 2}
-        });
+    assertCallTree(new String[] {
+        "bb   ",
+        "aa a ",
+        "  1 1"
+    }, new Object[][] {
+        {"a", 3},
+        {"  b", 2},
+    }, new Object[][] {
+        {"a", 3},
+        {"  b", 1},
+        {"  1", 2}
+    });
   }
 
   /*
@@ -403,17 +403,18 @@ class CallTreeTest {
    */
   @Test
   void testActivationBetweenMethods() throws Exception {
-    assertCallTree(
-        new String[] {"bb   ", "aa  a", "  11 "},
-        new Object[][] {
-          {"a", 3},
-          {"  b", 2},
-        },
-        new Object[][] {
-          {"a", 4},
-          {"  b", 1},
-          {"  1", 1},
-        });
+    assertCallTree(new String[] {
+        "bb   ",
+        "aa  a",
+        "  11 "
+    }, new Object[][] {
+        {"a", 3},
+        {"  b", 2},
+    }, new Object[][] {
+        {"a", 4},
+        {"  b", 1},
+        {"  1", 1},
+    });
   }
 
   /*
@@ -423,17 +424,19 @@ class CallTreeTest {
    */
   @Test
   void testActivationBetweenMethods_AfterFastMethod() throws Exception {
-    assertCallTree(
-        new String[] {" c   ", "bb   ", "aa  a", "  11 "},
-        new Object[][] {
-          {"a", 3},
-          {"  b", 2},
-        },
-        new Object[][] {
-          {"a", 4},
-          {"  b", 1},
-          {"  1", 1},
-        });
+    assertCallTree(new String[] {
+        " c   ",
+        "bb   ",
+        "aa  a",
+        "  11 "
+    }, new Object[][] {
+        {"a", 3},
+        {"  b", 2},
+    }, new Object[][] {
+        {"a", 4},
+        {"  b", 1},
+        {"  1", 1},
+    });
   }
 
   /*
@@ -443,46 +446,46 @@ class CallTreeTest {
    */
   @Test
   void testActivationBetweenFastMethods() throws Exception {
-    assertCallTree(
-        new String[] {"c  d   ", "b  b   ", "a  a  a", " 11 22 "},
-        new Object[][] {
-          {"a", 3},
-          {"  b", 2},
-        },
-        new Object[][] {
-          {"a", 6},
-          {"  b", 3},
-          {"    1", 1},
-          {"  2", 1},
-        });
+    assertCallTree(new String[] {
+        "c  d   ",
+        "b  b   ",
+        "a  a  a",
+        " 11 22 "
+    }, new Object[][] {
+        {"a", 3},
+        {"  b", 2},
+    }, new Object[][] {
+        {"a", 6},
+        {"  b", 3},
+        {"    1", 1},
+        {"  2", 1},
+    });
   }
 
-  /*    */
-  /*
+  /*    *//*
    * [a       ]
    * [b] [1 [c]
-   */
-  /*
-  @Test
-  void testActivationBetweenMethods_WithCommonAncestor() throws Exception {
-      assertCallTree(new String[]{
-          "  c     f  g ",
-          "bbb  e  d  dd",
-          "aaa  a  a  aa",
-          "   11 22 33  "
-      }, new Object[][] {
-          {"a",   7},
-          {"  b", 3},
-          {"  d", 3},
-      }, new Object[][] {
-          {"a",     12},
-          {"  b",   2},
-          {"  1",   1},
-          {"  2",   1},
-          {"  d",   4},
-          {"    3", 1},
-      });
-  }*/
+   *//*
+    @Test
+    void testActivationBetweenMethods_WithCommonAncestor() throws Exception {
+        assertCallTree(new String[]{
+            "  c     f  g ",
+            "bbb  e  d  dd",
+            "aaa  a  a  aa",
+            "   11 22 33  "
+        }, new Object[][] {
+            {"a",   7},
+            {"  b", 3},
+            {"  d", 3},
+        }, new Object[][] {
+            {"a",     12},
+            {"  b",   2},
+            {"  1",   1},
+            {"  2",   1},
+            {"  d",   4},
+            {"    3", 1},
+        });
+    }*/
 
   /*
    * [a    ]
@@ -491,17 +494,16 @@ class CallTreeTest {
    */
   @Test
   void testNestedActivation() throws Exception {
-    Map<String, AbstractSpan<?>> spans =
-        assertCallTree(
-            new String[] {"a  a  a", " 12 21 "},
-            new Object[][] {
-              {"a", 3},
-            },
-            new Object[][] {
-              {"a", 6},
-              {"  1", 4},
-              {"    2", 2},
-            });
+    assertCallTree(new String[] {
+        "a  a  a",
+        " 12 21 "
+    }, new Object[][] {
+        {"a", 3},
+    }, new Object[][] {
+        {"a", 6},
+        {"  1", 4},
+        {"    2", 2},
+    });
   }
 
   /*
@@ -512,25 +514,23 @@ class CallTreeTest {
    */
   @Test
   void testNestedActivationAfterMethodEnds_RootChangesToC() throws Exception {
-    Map<String, AbstractSpan<?>> spans =
-        assertCallTree(
-            new String[] {" bbb        ", " aaa  ccc   ", "1   23   321"},
-            new Object[][] {
-              {"a", 3},
-              {"  b", 3},
-              {"c", 3},
-            },
-            new Object[][] {
-              {"1", 11},
-              {"  b", 2, List.of("a")},
-              {"  2", 6},
-              {"    3", 4},
-              {"      c", 2}
-            });
+    Map<String, SpanData> spans = assertCallTree(new String[] {
+        " bbb        ",
+        " aaa  ccc   ",
+        "1   23   321"
+    }, new Object[][] {
+        {"a", 3},
+        {"  b", 3},
+        {"c", 3},
+    }, new Object[][] {
+        {"1", 11},
+        {"  b", 2, List.of("a")},
+        {"  2", 6},
+        {"    3", 4},
+        {"      c", 2}
+    });
 
-    if (spans.get("b").getChildIds() != null) {
-      assertThat(spans.get("b").getChildIds().isEmpty()).isTrue();
-    }
+    assertThat(spans.get("b").getLinks()).isEmpty();
   }
 
   /*
@@ -541,21 +541,23 @@ class CallTreeTest {
    */
   @Test
   void testRegularActivationFollowedByNestedActivationAfterMethodEnds() throws Exception {
-    assertCallTree(
-        new String[] {"   d          ", " b b b        ", " a a a  ccc   ", "1 2 2 34   431"},
-        new Object[][] {
-          {"a", 3},
-          {"  b", 3},
-          {"c", 3},
-        },
-        new Object[][] {
-          {"1", 13},
-          {"  b", 4, List.of("a")},
-          {"    2", 2},
-          {"  3", 6},
-          {"    4", 4},
-          {"      c", 2}
-        });
+    assertCallTree(new String[] {
+        "   d          ",
+        " b b b        ",
+        " a a a  ccc   ",
+        "1 2 2 34   431"
+    }, new Object[][] {
+        {"a", 3},
+        {"  b", 3},
+        {"c", 3},
+    }, new Object[][] {
+        {"1", 13},
+        {"  b", 4, List.of("a")},
+        {"    2", 2},
+        {"  3", 6},
+        {"    4", 4},
+        {"      c", 2}
+    });
   }
 
   /*
@@ -567,30 +569,43 @@ class CallTreeTest {
    */
   @Test
   void testNestedActivationAfterMethodEnds_CommonAncestorA() throws Exception {
-    Map<String, AbstractSpan<?>> spans =
-        assertCallTree(
-            new String[] {"  b b b  ccc    ", " aa a a  aaa  a ", "1  2 2 34   43 1"},
-            new Object[][] {
-              {"a", 8},
-              {"  b", 3},
-              {"  c", 3},
-            },
-            new Object[][] {
-              {"1", 15},
-              {"  a", 13},
-              {"    b", 4},
-              {"      2", 2},
-              {"    3", 6},
-              {"      4", 4},
-              {"        c", 2}
-            });
+    Map<String, SpanData> spans = assertCallTree(new String[] {
+        "  b b b  ccc    ",
+        " aa a a  aaa  a ",
+        "1  2 2 34   43 1"
+    }, new Object[][] {
+        {"a", 8},
+        {"  b", 3},
+        {"  c", 3},
+    }, new Object[][] {
+        {"1", 15},
+        {"  a", 13},
+        {"    b", 4},
+        {"      2", 2},
+        {"    3", 6},
+        {"      4", 4},
+        {"        c", 2}
+    });
 
-    assertThat(spans.get("b").getChildIds().toArray())
-        .containsExactly(spans.get("2").getTraceContext().getId().readLong(0));
-    assertThat(spans.get("c").getChildIds()).isNull();
-    // only has 3 as a child as 4 is a nested activation
-    assertThat(spans.get("a").getChildIds().toArray())
-        .containsExactly(spans.get("3").getTraceContext().getId().readLong(0));
+    assertThat(spans.get("b").getLinks())
+        .hasSize(1)
+        .anySatisfy(link -> {
+          assertThat(link.getAttributes()).containsEntry("elastic.is_child", true);
+          SpanData expectedSpan = spans.get("2");
+          assertThat(link.getSpanContext().getTraceId()).isEqualTo(expectedSpan.getTraceId());
+          assertThat(link.getSpanContext().getSpanId()).isEqualTo(expectedSpan.getSpanId());
+        });
+
+    assertThat(spans.get("c").getLinks()).isEmpty();
+
+    assertThat(spans.get("a").getLinks())
+        .hasSize(1)
+        .anySatisfy(link -> {
+          assertThat(link.getAttributes()).containsEntry("elastic.is_child", true);
+          SpanData expectedSpan = spans.get("3");
+          assertThat(link.getSpanContext().getTraceId()).isEqualTo(expectedSpan.getTraceId());
+          assertThat(link.getSpanContext().getSpanId()).isEqualTo(expectedSpan.getSpanId());
+        });
   }
 
   /*
@@ -602,19 +617,20 @@ class CallTreeTest {
    */
   @Test
   void testActivationAfterMethodEnds_RootChangesToB() throws Exception {
-    assertCallTree(
-        new String[] {"     ccc  ", " aaa bbb  ", "1   2   21"},
-        new Object[][] {
-          {"a", 3},
-          {"b", 3},
-          {"  c", 3},
-        },
-        new Object[][] {
-          {"1", 9},
-          {"  a", 2},
-          {"  2", 4},
-          {"    c", 2, List.of("b")}
-        });
+    assertCallTree(new String[] {
+        "     ccc  ",
+        " aaa bbb  ",
+        "1   2   21"
+    }, new Object[][] {
+        {"a", 3},
+        {"b", 3},
+        {"  c", 3},
+    }, new Object[][] {
+        {"1", 9},
+        {"  a", 2},
+        {"  2", 4},
+        {"    c", 2, List.of("b")}
+    });
   }
 
   /*
@@ -625,35 +641,37 @@ class CallTreeTest {
    */
   @Test
   void testActivationAfterMethodEnds_RootChangesToB2() throws Exception {
-    assertCallTree(
-        new String[] {" aaa bbb  ", "1   2   21"},
-        new Object[][] {
-          {"a", 3},
-          {"b", 3},
-        },
-        new Object[][] {
-          {"1", 9},
-          {"  a", 2},
-          {"  2", 4},
-          {"    b", 2}
-        });
+    assertCallTree(new String[] {
+        " aaa bbb  ",
+        "1   2   21"
+    }, new Object[][] {
+        {"a", 3},
+        {"b", 3},
+    }, new Object[][] {
+        {"1", 9},
+        {"  a", 2},
+        {"  2", 4},
+        {"    b", 2}
+    });
   }
 
-  /*
-   * [1]
-   *  [a]
-  @Test
-  void testActivationBeforeCallTree() throws Exception {
-      assertCallTree(new String[]{
-          " aaa",
-          "1 1 "
-      }, new Object[][] {
-          {"a",   3},
-      }, new Object[][] {
-          {"a",   3},
-          {"  1", 2},
-      });
-  }     */
+
+    /*
+     * [1]
+     *  [a]
+    @Test
+    void testActivationBeforeCallTree() throws Exception {
+        assertCallTree(new String[]{
+            " aaa",
+            "1 1 "
+        }, new Object[][] {
+            {"a",   3},
+        }, new Object[][] {
+            {"a",   3},
+            {"  1", 2},
+        });
+    }     */
+
 
   /*
    * [1       ]
@@ -664,18 +682,19 @@ class CallTreeTest {
    */
   @Test
   void testActivationAfterMethodEnds_SameRootDeeperStack() throws Exception {
-    assertCallTree(
-        new String[] {"     ccc  ", " aaa aaa  ", "1   2   21"},
-        new Object[][] {
-          {"a", 6},
-          {"  c", 3},
-        },
-        new Object[][] {
-          {"1", 9},
-          {"  a", 6},
-          {"    2", 4},
-          {"      c", 2}
-        });
+    assertCallTree(new String[] {
+        "     ccc  ",
+        " aaa aaa  ",
+        "1   2   21"
+    }, new Object[][] {
+        {"a", 6},
+        {"  c", 3},
+    }, new Object[][] {
+        {"1", 9},
+        {"  a", 6},
+        {"    2", 4},
+        {"      c", 2}
+    });
   }
 
   /*
@@ -686,18 +705,19 @@ class CallTreeTest {
    */
   @Test
   void testActivationBeforeMethodStarts() throws Exception {
-    assertCallTree(
-        new String[] {"   bbb   ", " a aaa a ", "1 2   2 1"},
-        new Object[][] {
-          {"a", 5},
-          {"  b", 3},
-        },
-        new Object[][] {
-          {"1", 8},
-          {"  a", 6},
-          {"    2", 4},
-          {"      b", 2}
-        });
+    assertCallTree(new String[] {
+        "   bbb   ",
+        " a aaa a ",
+        "1 2   2 1"
+    }, new Object[][] {
+        {"a", 5},
+        {"  b", 3},
+    }, new Object[][] {
+        {"1", 8},
+        {"  a", 6},
+        {"    2", 4},
+        {"      b", 2}
+    });
   }
 
   /*
@@ -710,110 +730,133 @@ class CallTreeTest {
    */
   @Test
   void testDectivationAfterEnd() throws Exception {
-    assertCallTree(
-        new String[] {
-          "     dd     ",
-          "   c ccc    ",
-          "  bb bbb    ", // <- deactivation for span 2 happens after b ends
-          " aaa aaa aa ", //    that means b must have ended after 2 has been deactivated
-          "1   2   2  1" //    but we saw the last stack trace of b before the deactivation of 2
-        },
-        new Object[][] {
-          {"a", 8},
-          {"  b", 5},
-          {"    c", 4},
-          {"      d", 2},
-        },
-        new Object[][] {
-          {"1", 11},
-          {"  a", 9},
-          {"    b", 6},
-          {"      c", 5},
-          {"        2", 4},
-          {"          d", 1},
-        });
+    assertCallTree(new String[] {
+        "     dd     ",
+        "   c ccc    ",
+        "  bb bbb    ", // <- deactivation for span 2 happens after b ends
+        " aaa aaa aa ", //    that means b must have ended after 2 has been deactivated
+        "1   2   2  1"  //    but we saw the last stack trace of b before the deactivation of 2
+    }, new Object[][] {
+        {"a", 8},
+        {"  b", 5},
+        {"    c", 4},
+        {"      d", 2},
+    }, new Object[][] {
+        {"1", 11},
+        {"  a", 9},
+        {"    b", 6},
+        {"      c", 5},
+        {"        2", 4},
+        {"          d", 1},
+    });
   }
 
   @Test
   void testCallTreeActivationAsParentOfFastSpan() throws Exception {
-    assertCallTree(
-        new String[] {"    b    ", " aa a aa ", "1  2 2  1"},
-        new Object[][] {{"a", 5}},
-        new Object[][] {
-          {"1", 8},
-          {"  a", 6},
-          {"    2", 2},
-        });
+    assertCallTree(new String[] {
+        "    b    ",
+        " aa a aa ",
+        "1  2 2  1"
+    }, new Object[][] {
+        {"a", 5}
+    }, new Object[][] {
+        {"1", 8},
+        {"  a", 6},
+        {"    2", 2},
+    });
   }
 
   @Test
   void testCallTreeActivationAsChildOfFastSpan() throws Exception {
-    doReturn(TimeDuration.of("50ms")).when(profilerConfig).getInferredSpansMinDuration();
-    assertCallTree(
-        new String[] {"   c  c   ", "   b  b   ", " aaa  aaa ", "1   22   1"},
-        new Object[][] {{"a", 6}},
-        new Object[][] {
-          {"1", 9},
-          {"  a", 7},
-          {"    2", 1},
-        });
+    profilerSetup.close();
+    profilerSetup = ProfilerTestSetup.create(
+        config -> config
+            .inferredSpansMinDuration(Duration.ofMillis(50)).clock(nanoClock)
+            .startScheduledProfiling(false));
+    profilerSetup.profiler.setProfilingSessionOngoing(true);
+    assertCallTree(new String[] {
+        "   c  c   ",
+        "   b  b   ",
+        " aaa  aaa ",
+        "1   22   1"
+    }, new Object[][] {
+        {"a", 6}
+    }, new Object[][] {
+        {"1", 9},
+        {"  a", 7},
+        {"    2", 1},
+    });
   }
 
   @Test
   void testCallTreeActivationAsLeaf() throws Exception {
-    assertCallTree(
-        new String[] {" aa  aa ", "1  22  1"},
-        new Object[][] {{"a", 4}},
-        new Object[][] {
-          {"1", 7},
-          {"  a", 5},
-          {"    2", 1},
-        });
+    assertCallTree(new String[] {
+        " aa  aa ",
+        "1  22  1"
+    }, new Object[][] {
+        {"a", 4}
+    }, new Object[][] {
+        {"1", 7},
+        {"  a", 5},
+        {"    2", 1},
+    });
   }
+
 
   @Test
   void testCallTreeMultipleActivationsAsLeaf() throws Exception {
-    assertCallTree(
-        new String[] {" aa  aaa  aa ", "1  22   33  1"},
-        new Object[][] {{"a", 7}},
-        new Object[][] {
-          {"1", 12},
-          {"  a", 10},
-          {"    2", 1},
-          {"    3", 1},
-        });
+    assertCallTree(new String[] {
+        " aa  aaa  aa ",
+        "1  22   33  1"
+    }, new Object[][] {
+        {"a", 7}
+    }, new Object[][] {
+        {"1", 12},
+        {"  a", 10},
+        {"    2", 1},
+        {"    3", 1},
+    });
   }
 
   @Test
   void testCallTreeMultipleActivationsAsLeafWithExcludedParent() throws Exception {
-    doReturn(TimeDuration.of("50ms")).when(profilerConfig).getInferredSpansMinDuration();
+    profilerSetup.close();
+    profilerSetup = ProfilerTestSetup.create(
+        config -> config.clock(nanoClock)
+            .startScheduledProfiling(false)
+            .inferredSpansMinDuration(Duration.ofMillis(50)));
+    profilerSetup.profiler.setProfilingSessionOngoing(true);
     // min duration 4
-    assertCallTree(
-        new String[] {"  b  b c  c  ", " aa  aaa  aa ", "1  22   33  1"},
-        new Object[][] {{"a", 7}},
-        new Object[][] {
-          {"1", 12},
-          {"  a", 10},
-          {"    2", 1},
-          {"    3", 1},
-        });
+    assertCallTree(new String[] {
+        "  b  b c  c  ",
+        " aa  aaa  aa ",
+        "1  22   33  1"
+    }, new Object[][] {
+        {"a", 7}
+    }, new Object[][] {
+        {"1", 12},
+        {"  a", 10},
+        {"    2", 1},
+        {"    3", 1},
+    });
   }
 
   @Test
   void testCallTreeMultipleActivationsWithOneChild() throws Exception {
-    assertCallTree(
-        new String[] {"         bb    ", " aa  aaa aa aa ", "1  22   3  3  1"},
-        new Object[][] {
-          {"a", 9},
-          {"  b", 2}
-        },
-        new Object[][] {
-          {"1", 14},
-          {"  a", 12},
-          {"    2", 1},
-          {"    3", 3},
-          {"      b", 1},
-        });
+    assertCallTree(new String[] {
+        "         bb    ",
+        " aa  aaa aa aa ",
+        "1  22   3  3  1"
+    }, new Object[][] {
+        {"a", 9},
+        {"  b", 2}
+    }, new Object[][] {
+        {"1", 14},
+        {"  a", 12},
+        {"    2", 1},
+        {"    3", 3},
+        {"      b", 1},
+    });
   }
 
   /*
@@ -826,26 +869,25 @@ class CallTreeTest {
   @Test
   @Disabled("fix me")
   void testNestedActivationBeforeCallTree() throws Exception {
-    assertCallTree(
-        new String[] {"  aaa ", "12 2 1"},
-        new Object[][] {
-          {"a", 3},
-        },
-        new Object[][] {
-          {"1", 5},
-          {"  a", 3}, // a is actually a child of the transaction
-          {"    2", 2}, // 2 is not within the child_ids of a
-        });
+    assertCallTree(new String[] {
+        "  aaa ",
+        "12 2 1"
+    }, new Object[][] {
+        {"a", 3},
+    }, new Object[][] {
+        {"1", 5},
+        {"  a", 3}, // a is actually a child of the transaction
+        {"    2", 2}, // 2 is not within the child_ids of a
+    });
   }
 
   private void assertCallTree(String[] stackTraces, Object[][] expectedTree) throws Exception {
     assertCallTree(stackTraces, expectedTree, null);
   }
 
-  private Map<String, AbstractSpan<?>> assertCallTree(
-      String[] stackTraces, Object[][] expectedTree, @Nullable Object[][] expectedSpans)
-      throws Exception {
-    CallTree.Root root = getCallTree(tracer, stackTraces);
+  private Map<String, SpanData> assertCallTree(String[] stackTraces, Object[][] expectedTree,
+      @Nullable Object[][] expectedSpans) throws Exception {
+    CallTree.Root root = getCallTree(profilerSetup, stackTraces);
     StringBuilder expectedResult = new StringBuilder();
     for (int i = 0; i < expectedTree.length; i++) {
       Object[] objects = expectedTree[i];
@@ -855,24 +897,25 @@ class CallTreeTest {
       }
     }
 
-    String actualResult = root.toString().replace(CallTreeTest.class.getName() + ".", "");
-    actualResult =
-        Arrays.stream(actualResult.split("\n"))
-            // skip root node
-            .skip(1)
-            // trim first two spaces
-            .map(s -> s.substring(2))
-            .collect(Collectors.joining("\n"));
+    String actualResult = root.toString()
+        .replace(CallTreeTest.class.getName() + ".", "");
+    actualResult = Arrays.stream(actualResult.split("\n"))
+        // skip root node
+        .skip(1)
+        // trim first two spaces
+        .map(s -> s.substring(2))
+        .collect(Collectors.joining("\n"));
 
     assertThat(actualResult).isEqualTo(expectedResult.toString());
 
     if (expectedSpans != null) {
-      root.spanify();
-      Map<String, AbstractSpan<?>> spans =
-          reporter.getSpans().stream()
-              .collect(toMap(s -> s.getNameAsString().replaceAll(".*#", ""), Function.identity()));
-      assertThat(reporter.getSpans()).hasSize(expectedSpans.length);
-      spans.put(null, reporter.getTransactions().get(0));
+      root.spanify(nanoClock, profilerSetup.sdk.getTracer("dummy-inferred-spans-tracer"));
+      Map<String, SpanData> spans = profilerSetup.getSpans()
+          .stream()
+          .collect(toMap(
+              s -> s.getName().replaceAll(".*#", ""),
+              Function.identity()));
+      assertThat(profilerSetup.getSpans()).hasSize(expectedSpans.length + 1);
 
       for (int i = 0; i < expectedSpans.length; i++) {
         Object[] expectedSpan = expectedSpans[i];
@@ -882,58 +925,75 @@ class CallTreeTest {
             expectedSpan.length == 3 ? (List<String>) expectedSpan[2] : List.of();
         int nestingLevel = getNestingLevel((String) expectedSpan[0]);
         String parentName = getParentName(expectedSpans, i, nestingLevel);
+        if (parentName == null) {
+          parentName = "Call Tree Root";
+        }
         assertThat(spans).containsKey(spanName);
         assertThat(spans).containsKey(parentName);
-        AbstractSpan<?> span = spans.get(spanName);
-        assertThat(span.isChildOf(spans.get(parentName)))
-            .withFailMessage(
-                "Expected %s (%s) to be a child of %s (%s) but was %s (%s)",
-                spanName,
-                span.getTraceContext().getId(),
-                parentName,
-                spans.get(parentName).getTraceContext().getId(),
-                reporter.getSpans().stream()
-                    .filter(
-                        s ->
-                            s.getTraceContext()
-                                .getId()
-                                .equals(span.getTraceContext().getParentId()))
-                    .findAny()
-                    .map(Span::getNameAsString)
-                    .orElse(null),
-                span.getTraceContext().getParentId())
-            .isTrue();
-        assertThat(spans.get(parentName).isChildOf(span))
-            .withFailMessage(
-                "Expected %s (%s) to not be a child of %s (%s) but was %s (%s)",
-                parentName,
-                spans.get(parentName).getTraceContext().getId(),
-                spanName,
-                span.getTraceContext().getId(),
-                reporter.getSpans().stream()
-                    .filter(
-                        s ->
-                            s.getTraceContext()
-                                .getId()
-                                .equals(span.getTraceContext().getParentId()))
-                    .findAny()
-                    .map(Span::getNameAsString)
-                    .orElse(null),
-                span.getTraceContext().getParentId())
-            .isFalse();
-        assertThat(span.getDuration())
-            .describedAs("Unexpected duration for span %s", span)
-            .isEqualTo(durationMs * 1000);
-        assertThat(
-                Objects.requireNonNullElse(((Span) span).getStackFrames(), List.<StackFrame>of())
+        SpanData span = spans.get(spanName);
+        assertThat(isChild(spans.get(parentName), span))
+            .withFailMessage("Expected %s (%s) to be a child of %s (%s) but was %s (%s)",
+                spanName, span.getSpanContext().getSpanId(),
+                parentName, spans.get(parentName).getSpanId(),
+                profilerSetup.getSpans()
                     .stream()
-                    .map(StackFrame::getMethodName)
-                    .collect(Collectors.toList()))
-            .isEqualTo(stackTrace);
+                    .filter(s -> s.getSpanId()
+                        .equals(span.getParentSpanId())).findAny()
+                    .map(SpanData::getName)
+                    .orElse(null),
+                span.getParentSpanId())
+            .isTrue();
+        assertThat(isChild(span, spans.get(parentName)))
+            .withFailMessage("Expected %s (%s) to not be a child of %s (%s) but was %s (%s)",
+                parentName, spans.get(parentName).getSpanId(),
+                spanName, span.getSpanId(),
+                profilerSetup.getSpans()
+                    .stream()
+                    .filter(s -> s.getSpanId()
+                        .equals(span.getParentSpanId())).findAny()
+                    .map(SpanData::getName)
+                    .orElse(null),
+                span.getParentSpanId())
+            .isFalse();
+        assertThat(span.getEndEpochNanos() - span.getStartEpochNanos())
+            .describedAs("Unexpected duration for span %s", span)
+            .isEqualTo(durationMs * 1_000_000L);
+
+        String actualStacktrace = span.getAttributes().get(CallTree.STACKTRACE_ATTRIBUTE_KEY);
+        if (stackTrace == null || stackTrace.isEmpty()) {
+          assertThat(actualStacktrace).isBlank();
+        } else {
+          String expected = stackTrace.stream()
+              .map(funcName -> "at " + CallTreeTest.class.getName() + "." + funcName
+                  + "(CallTreeTest.java)")
+              .collect(Collectors.joining("\n"));
+          assertThat(actualStacktrace).isEqualTo(expected);
+        }
       }
       return spans;
     }
     return null;
+  }
+
+  public boolean isChild(SpanData parent, SpanData expectedChild) {
+    if (!parent.getTraceId().equals(expectedChild.getTraceId())) {
+      return false;
+    }
+    if (parent.getSpanId().equals(expectedChild.getParentSpanId())) {
+      return true;
+    }
+    for (LinkData link : parent.getLinks()) {
+      Boolean isChild = link.getAttributes().get(CallTree.IS_CHILD_ATTRIBUTE_KEY);
+      if (isChild != null && isChild) {
+        SpanContext linkSpanCtx = link.getSpanContext();
+        if (linkSpanCtx.getTraceId().equals(expectedChild.getTraceId()) && linkSpanCtx.getSpanId()
+            .equals(expectedChild.getSpanId())) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   @Nullable
@@ -955,59 +1015,60 @@ class CallTreeTest {
     return ((spanName).length() - 1) / 2;
   }
 
-  public static CallTree.Root getCallTree(ElasticApmTracer tracer, String[] stackTraces)
+  public static CallTree.Root getCallTree(ProfilerTestSetup profilerSetup, String[] stackTraces)
       throws Exception {
-    ProfilingFactory profilingFactory = tracer.getLifecycleListener(ProfilingFactory.class);
-    assertThat(profilingFactory).isNotNull();
-
-    SamplingProfiler profiler = profilingFactory.getProfiler();
-    FixedNanoClock nanoClock = (FixedNanoClock) profilingFactory.getNanoClock();
-    nanoClock.setNanoTime(0);
+    SamplingProfiler profiler = profilerSetup.profiler;
+    FixedNanoClock nanoClock = (FixedNanoClock) profilerSetup.profiler.getClock();
+    nanoClock.setNanoTime(1);
     profiler.setProfilingSessionOngoing(true);
-    Transaction transaction =
-        tracer
-            .startRootTransaction(ConstantSampler.of(true), 0, null)
-            .withName("Call Tree Root")
-            .activate();
-    transaction.getTraceContext().getClock().init(0, 0);
-    Map<String, AbstractSpan<?>> spanMap = new HashMap<>();
-    List<StackTraceEvent> stackTraceEvents = new ArrayList<>();
-    for (int i = 0; i < stackTraces[0].length(); i++) {
-      nanoClock.setNanoTime(i * TimeUnit.MILLISECONDS.toNanos(10));
-      List<StackFrame> trace = new ArrayList<>();
-      for (String stackTrace : stackTraces) {
-        char c = stackTrace.charAt(i);
-        if (Character.isDigit(c)) {
-          handleSpanEvent(tracer, spanMap, Character.toString(c), nanoClock.nanoTime());
-          break;
-        } else if (!Character.isSpaceChar(c)) {
-          trace.add(StackFrame.of(CallTreeTest.class.getName(), Character.toString(c)));
+
+    CallTree.Root root = null;
+    ObjectPool<CallTree> callTreePool = ObjectPool.createRecyclable(2, CallTree::new);
+    Map<String, Span> spanMap = new HashMap<>();
+    Map<String, Scope> spanScopeMap = new HashMap<>();
+
+    Tracer tracer = profilerSetup.sdk.getTracer("testing-tracer");
+
+    Span transaction = tracer.spanBuilder("Call Tree Root")
+        .setStartTimestamp(1, TimeUnit.NANOSECONDS)
+        .startSpan();
+    try (Scope scope = transaction.makeCurrent()) {
+      List<StackTraceEvent> stackTraceEvents = new ArrayList<>();
+      for (int i = 0; i < stackTraces[0].length(); i++) {
+        nanoClock.setNanoTime(1 + i * TimeUnit.MILLISECONDS.toNanos(10));
+        List<StackFrame> trace = new ArrayList<>();
+        for (String stackTrace : stackTraces) {
+          char c = stackTrace.charAt(i);
+          if (Character.isDigit(c)) {
+            handleSpanEvent(tracer, spanMap, spanScopeMap, Character.toString(c),
+                nanoClock.nanoTime());
+            break;
+          } else if (!Character.isSpaceChar(c)) {
+            trace.add(StackFrame.of(CallTreeTest.class.getName(), Character.toString(c)));
+          }
+        }
+        if (!trace.isEmpty()) {
+          stackTraceEvents.add(new StackTraceEvent(trace, nanoClock.nanoTime()));
         }
       }
-      if (!trace.isEmpty()) {
-        stackTraceEvents.add(new StackTraceEvent(trace, nanoClock.nanoTime()));
+
+      profiler.consumeActivationEventsFromRingBufferAndWriteToFile();
+      long eof = profiler.startProcessingActivationEventsFile();
+      for (StackTraceEvent stackTraceEvent : stackTraceEvents) {
+        profiler.processActivationEventsUpTo(stackTraceEvent.nanoTime, eof);
+        if (root == null) {
+          root = profiler.getRoot();
+          assertThat(root).isNotNull();
+        }
+        long millis = profilerSetup.profiler.config.getInferredSpansMinDuration().toMillis();
+        root.addStackTrace(stackTraceEvent.trace, stackTraceEvent.nanoTime, callTreePool,
+            TimeUnit.MILLISECONDS.toNanos(millis));
       }
+
+    } finally {
+      transaction.end();
     }
-    profiler.consumeActivationEventsFromRingBufferAndWriteToFile();
-    long eof = profiler.startProcessingActivationEventsFile();
-    CallTree.Root root = null;
-    NoopObjectPool<CallTree> callTreePool = NoopObjectPool.ofRecyclable(CallTree::new);
-    for (StackTraceEvent stackTraceEvent : stackTraceEvents) {
-      profiler.processActivationEventsUpTo(stackTraceEvent.nanoTime, eof);
-      if (root == null) {
-        root = profiler.getRoot();
-        assertThat(root).isNotNull();
-      }
-      long millis =
-          tracer.getConfig(ProfilingConfiguration.class).getInferredSpansMinDuration().getMillis();
-      root.addStackTrace(
-          tracer,
-          stackTraceEvent.trace,
-          stackTraceEvent.nanoTime,
-          callTreePool,
-          TimeUnit.MILLISECONDS.toNanos(millis));
-    }
-    transaction.deactivate().end(nanoClock.nanoTime() / 1000);
+
     assertThat(root).isNotNull();
     root.end(callTreePool, 0);
     return root;
@@ -1025,19 +1086,20 @@ class CallTreeTest {
     }
   }
 
-  private static void handleSpanEvent(
-      ElasticApmTracer tracer, Map<String, AbstractSpan<?>> spanMap, String name, long nanoTime) {
+  private static void handleSpanEvent(Tracer tracer, Map<String, Span> spanMap,
+      Map<String, Scope> spanScopeMap,
+      String name, long nanoTime) {
     if (!spanMap.containsKey(name)) {
-      Span span = tracer.getActive().createSpan(nanoTime / 1000).appendToName(name).activate();
+      Span span = tracer.spanBuilder(name)
+          .setParent(Context.current())
+          .setStartTimestamp(nanoTime, TimeUnit.NANOSECONDS)
+          .startSpan();
       spanMap.put(name, span);
+      spanScopeMap.put(name, span.makeCurrent());
     } else {
-      spanMap.get(name).deactivate().end(nanoTime / 1000);
+      spanScopeMap.remove(name).close();
+      spanMap.get(name).end(nanoTime, TimeUnit.NANOSECONDS);
     }
   }
 
-  public static TraceContext rootTraceContext(ElasticApmTracer tracer) {
-    TraceContext traceContext = TraceContext.with64BitId(tracer);
-    traceContext.asRootSpan(ConstantSampler.of(true));
-    return traceContext;
-  }
 }

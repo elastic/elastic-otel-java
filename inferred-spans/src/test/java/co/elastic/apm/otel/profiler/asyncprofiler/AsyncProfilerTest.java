@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.agent.profiler.asyncprofiler;
+package co.elastic.apm.otel.profiler.asyncprofiler;
 
-import static co.elastic.apm.agent.profiler.asyncprofiler.AsyncProfiler.SAFEMODE_SYSTEM_PROPERTY_NAME;
+import static co.elastic.apm.otel.profiler.asyncprofiler.AsyncProfiler.SAFEMODE_SYSTEM_PROPERTY_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import co.elastic.apm.agent.testutils.DisabledOnAppleSilicon;
+import co.elastic.apm.otel.profiler.util.DisabledOnAppleSilicon;
 import java.io.File;
 import java.io.FilenameFilter;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,8 +55,8 @@ public class AsyncProfilerTest {
     AsyncProfiler.getInstance(nonDefaultTempDirectory.getAbsolutePath(), 6);
     assertThat(Integer.valueOf(System.getProperty(SAFEMODE_SYSTEM_PROPERTY_NAME))).isEqualTo(6);
 
-    File[] libasyncProfilers =
-        nonDefaultTempDirectory.listFiles(getLibasyncProfilerFilenameFilter());
+    File[] libasyncProfilers = nonDefaultTempDirectory.listFiles(
+        getLibasyncProfilerFilenameFilter());
     assertThat(libasyncProfilers).hasSizeGreaterThanOrEqualTo(1);
   }
 

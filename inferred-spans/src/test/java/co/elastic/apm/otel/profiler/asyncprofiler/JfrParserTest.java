@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.agent.profiler.asyncprofiler;
+package co.elastic.apm.otel.profiler.asyncprofiler;
 
-import static co.elastic.apm.agent.common.util.WildcardMatcher.caseSensitiveMatcher;
+import static co.elastic.apm.otel.profiler.config.WildcardMatcher.caseSensitiveMatcher;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import co.elastic.apm.agent.impl.transaction.StackFrame;
+import co.elastic.apm.otel.profiler.StackFrame;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.file.Paths;
@@ -40,24 +40,23 @@ class JfrParserTest {
     // should trigger most edge cases in the buffer being exhausted
     JfrParser jfrParser = new JfrParser(ByteBuffer.allocate(113), ByteBuffer.allocate(113));
 
-    File file =
-        Paths.get(JfrParserTest.class.getClassLoader().getResource("recording.jfr").toURI())
-            .toFile();
+    File file = Paths.get(JfrParserTest.class.getClassLoader().getResource("recording.jfr").toURI())
+        .toFile();
 
     jfrParser.parse(file, List.of(), List.of(caseSensitiveMatcher("co.elastic.apm.*")));
     AtomicInteger stackTraces = new AtomicInteger();
     ArrayList<StackFrame> stackFrames = new ArrayList<>();
-    jfrParser.consumeStackTraces(
-        (threadId, stackTraceId, nanoTime) -> {
-          jfrParser.resolveStackTrace(stackTraceId, true, stackFrames, MAX_STACK_DEPTH);
-          if (!stackFrames.isEmpty()) {
-            stackTraces.incrementAndGet();
-            assertThat(stackFrames.get(stackFrames.size() - 1).getMethodName())
-                .isEqualTo("testProfileTransaction");
-            assertThat(stackFrames).hasSizeLessThanOrEqualTo(MAX_STACK_DEPTH);
-          }
-          stackFrames.clear();
-        });
+    jfrParser.consumeStackTraces((threadId, stackTraceId, nanoTime) -> {
+      jfrParser.resolveStackTrace(stackTraceId, true, stackFrames, MAX_STACK_DEPTH);
+      if (!stackFrames.isEmpty()) {
+        stackTraces.incrementAndGet();
+        assertThat(stackFrames.get(stackFrames.size() - 1).getMethodName()).isEqualTo(
+            "testProfileTransaction");
+        assertThat(stackFrames).hasSizeLessThanOrEqualTo(MAX_STACK_DEPTH);
+      }
+      stackFrames.clear();
+    });
     assertThat(stackTraces.get()).isEqualTo(97);
   }
+
 }

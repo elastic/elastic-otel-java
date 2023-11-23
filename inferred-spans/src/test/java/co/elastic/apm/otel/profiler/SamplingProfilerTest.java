@@ -16,33 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.agent.profiler;
+package co.elastic.apm.otel.profiler;
 
-import static org.assertj.core.api.Assertions.assertThat;
+
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.verify;
 
-import co.elastic.apm.agent.MockReporter;
-import co.elastic.apm.agent.MockTracer;
-import co.elastic.apm.agent.common.util.WildcardMatcher;
-import co.elastic.apm.agent.configuration.SpyConfiguration;
-import co.elastic.apm.agent.impl.ElasticApmTracer;
-import co.elastic.apm.agent.impl.transaction.Span;
-import co.elastic.apm.agent.impl.transaction.Transaction;
-import co.elastic.apm.agent.testutils.DisabledOnAppleSilicon;
-import co.elastic.apm.agent.tracer.Scope;
-import co.elastic.apm.agent.tracer.configuration.TimeDuration;
+import co.elastic.apm.otel.profiler.util.DisabledOnAppleSilicon;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.trace.data.SpanData;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,18 +50,14 @@ import org.junit.jupiter.api.condition.DisabledForJreRange;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.api.condition.OS;
-import org.stagemonitor.configuration.ConfigurationRegistry;
+import org.mockito.Mockito;
 
 // async-profiler doesn't work on Windows
 @DisabledOnOs(OS.WINDOWS)
 @DisabledOnAppleSilicon
 class SamplingProfilerTest {
 
-  private MockReporter reporter;
-
-  @Nullable private ElasticApmTracer tracer;
-  private SamplingProfiler profiler;
-  private ProfilingConfiguration profilingConfig;
+  private ProfilerTestSetup setup;
 
   @BeforeEach
   void setup() {
@@ -71,10 +67,10 @@ class SamplingProfilerTest {
 
   @AfterEach
   void tearDown() {
-    if (tracer != null) {
-      tracer.stop();
+    if (setup != null) {
+      setup.close();
+      setup = null;
     }
-
     getProfilerTempFiles().forEach(SamplingProfilerTest::silentDeleteFile);
   }
 
@@ -87,7 +83,7 @@ class SamplingProfilerTest {
     // temporary files should be created on-demand, and properly deleted afterwards
     setupProfiler(false);
 
-    assertThat(profiler.getProfilingSessions())
+    assertThat(setup.profiler.getProfilingSessions())
         .describedAs("profiler should not have any session when disabled")
         .isEqualTo(0);
 
@@ -95,17 +91,24 @@ class SamplingProfilerTest {
         .describedAs("should not create a temp file when disabled")
         .isEmpty();
 
-    doReturn(true).when(profilingConfig).isProfilingEnabled();
+    setup.close();
+    setup = null;
+    setupProfiler(true);
 
-    awaitProfilerStarted(profiler);
+    awaitProfilerStarted(setup.profiler);
 
-    assertThat(getProfilerTempFiles()).describedAs("should have created two temp files").hasSize(2);
+    assertThat(getProfilerTempFiles())
+        .describedAs("should have created two temp files")
+        .hasSize(2);
 
-    profiler.stop();
+    setup.close();
+    setup = null;
 
     assertThat(getProfilerTempFiles())
         .describedAs("should delete temp files when profiler is stopped")
         .isEmpty();
+
+
   }
 
   private static List<Path> getProfilerTempFiles() {
@@ -120,23 +123,34 @@ class SamplingProfilerTest {
     }
   }
 
+
   @Test
   void shouldNotDeleteProvidedFiles() throws Exception {
     // when an existing file is provided to the profiler, we should not delete it
     // unlike the temporary files that are created by profiler itself
 
-    setupProfiler(true);
-    profiler.stop();
+    InferredSpansConfiguration defaultConfig;
+    try (InferredSpansProcessor profiler1 = InferredSpansProcessor.builder()
+        .startScheduledProfiling(false)
+        .build()) {
+      defaultConfig = profiler1.profiler.config;
+    }
 
     Path tempFile1 = Files.createTempFile("apm-provided", "test.bin");
     Path tempFile2 = Files.createTempFile("apm-provided", "test.jfr");
 
-    SamplingProfiler otherProfiler =
-        new SamplingProfiler(tracer, new FixedNanoClock(), tempFile1.toFile(), tempFile2.toFile());
+    try (OpenTelemetrySdk sdk = OpenTelemetrySdk.builder().build()) {
 
-    otherProfiler.start(tracer);
-    awaitProfilerStarted(otherProfiler);
-    otherProfiler.stop();
+      SamplingProfiler otherProfiler = new SamplingProfiler(
+          defaultConfig,
+          new FixedNanoClock(),
+          () -> sdk.getTracer("my-tracer"),
+          tempFile1.toFile(), tempFile2.toFile());
+
+      otherProfiler.start();
+      awaitProfilerStarted(otherProfiler);
+      otherProfiler.stop();
+    }
 
     assertThat(tempFile1).exists();
     assertThat(tempFile2).exists();
@@ -144,98 +158,123 @@ class SamplingProfilerTest {
 
   @Test
   void testStartCommand() {
-    setupProfiler(true);
-    assertThat(profiler.createStartCommand())
-        .isEqualTo("start,jfr,event=wall,cstack=n,interval=5ms,filter,file=null,safemode=0");
-    doReturn(false).when(profilingConfig).isProfilingLoggingEnabled();
-    assertThat(profiler.createStartCommand())
-        .isEqualTo(
-            "start,jfr,event=wall,cstack=n,interval=5ms,filter,file=null,safemode=0,log=none");
-    doReturn(TimeDuration.of("10ms")).when(profilingConfig).getSamplingInterval();
-    doReturn(14).when(profilingConfig).getAsyncProfilerSafeMode();
-    assertThat(profiler.createStartCommand())
-        .isEqualTo(
-            "start,jfr,event=wall,cstack=n,interval=10ms,filter,file=null,safemode=14,log=none");
+    setupProfiler(false);
+    assertThat(setup.profiler.createStartCommand()).isEqualTo(
+        "start,jfr,event=wall,cstack=n,interval=5ms,filter,file=null,safemode=0");
+
+    setup.close();
+    setupProfiler(config -> config.startScheduledProfiling(false).profilerLoggingEnabled(false));
+    assertThat(setup.profiler.createStartCommand()).isEqualTo(
+        "start,jfr,event=wall,cstack=n,interval=5ms,filter,file=null,safemode=0,log=none");
+
+    setup.close();
+    setupProfiler(config -> config
+        .startScheduledProfiling(false)
+        .profilerLoggingEnabled(false)
+        .samplingInterval(Duration.ofMillis(10))
+        .asyncProfilerSafeMode(14)
+    );
+    assertThat(setup.profiler.createStartCommand()).isEqualTo(
+        "start,jfr,event=wall,cstack=n,interval=10ms,filter,file=null,safemode=14,log=none");
   }
 
   @Test
   void testProfileTransaction() throws Exception {
     setupProfiler(true);
-    awaitProfilerStarted(profiler);
+    awaitProfilerStarted(setup.profiler);
 
-    Transaction transaction = tracer.startRootTransaction(null).withName("transaction");
-    try (Scope scope = transaction.activateInScope()) {
+    Tracer tracer = setup.sdk.getTracer("manual-spans");
+
+    boolean profilingActiveOnThread;
+    Span tx = tracer.spanBuilder("transaction").startSpan();
+    try (Scope scope = tx.makeCurrent()) {
       // makes sure that the rest will be captured by another profiling session
       // this tests that restoring which threads to profile works
       Thread.sleep(600);
-      assertThat(profiler.isProfilingActiveOnThread(Thread.currentThread())).isTrue();
-      aInferred(transaction);
+      profilingActiveOnThread = setup.profiler.isProfilingActiveOnThread(Thread.currentThread());
+      aInferred(tracer);
     } finally {
-      transaction.end();
+      tx.end();
     }
 
     await()
         .pollDelay(10, TimeUnit.MILLISECONDS)
         .timeout(5000, TimeUnit.MILLISECONDS)
-        .untilAsserted(() -> assertThat(reporter.getSpans()).hasSize(5));
+        .untilAsserted(() -> assertThat(setup.getSpans()).hasSizeGreaterThanOrEqualTo(6));
 
-    Optional<Span> testProfileTransaction =
-        reporter.getSpans().stream()
-            .filter(s -> s.getNameAsString().equals("SamplingProfilerTest#testProfileTransaction"))
-            .findAny();
+    assertThat(profilingActiveOnThread).isTrue();
+
+    Optional<SpanData> txData = setup.getSpans().stream()
+        .filter(s -> s.getName().equals("transaction"))
+        .findAny();
+    assertThat(txData).isPresent();
+    assertThat(txData.get()).hasNoParent();
+
+    Optional<SpanData> testProfileTransaction = setup.getSpans().stream()
+        .filter(s -> s.getName().equals("SamplingProfilerTest#testProfileTransaction"))
+        .findAny();
     assertThat(testProfileTransaction).isPresent();
-    assertThat(testProfileTransaction.get().isChildOf(transaction)).isTrue();
+    assertThat(testProfileTransaction.get()).hasParent(txData.get());
 
-    Optional<Span> inferredSpanA =
-        reporter.getSpans().stream()
-            .filter(s -> s.getNameAsString().equals("SamplingProfilerTest#aInferred"))
-            .findAny();
+    Optional<SpanData> inferredSpanA = setup.getSpans().stream()
+        .filter(s -> s.getName().equals("SamplingProfilerTest#aInferred")).findAny();
     assertThat(inferredSpanA).isPresent();
-    assertThat(inferredSpanA.get().isChildOf(testProfileTransaction.get())).isTrue();
+    assertThat(inferredSpanA.get()).hasParent(testProfileTransaction.get());
 
-    Optional<Span> explicitSpanB =
-        reporter.getSpans().stream().filter(s -> s.getNameAsString().equals("bExplicit")).findAny();
+    Optional<SpanData> explicitSpanB = setup.getSpans().stream()
+        .filter(s -> s.getName().equals("bExplicit")).findAny();
     assertThat(explicitSpanB).isPresent();
-    assertThat(explicitSpanB.get().isChildOf(inferredSpanA.get())).isTrue();
+    assertThat(explicitSpanB.get()).hasParent(txData.get());
 
-    Optional<Span> inferredSpanC =
-        reporter.getSpans().stream()
-            .filter(s -> s.getNameAsString().equals("SamplingProfilerTest#cInferred"))
-            .findAny();
+    assertThat(inferredSpanA.get().getLinks())
+        .hasSize(1)
+        .anySatisfy(link -> {
+          assertThat(link.getAttributes()).containsEntry("elastic.is_child", true);
+          SpanData expectedSpan = explicitSpanB.get();
+          Assertions.assertThat(link.getSpanContext().getTraceId())
+              .isEqualTo(expectedSpan.getTraceId());
+          Assertions.assertThat(link.getSpanContext().getSpanId())
+              .isEqualTo(expectedSpan.getSpanId());
+        });
+
+    Optional<SpanData> inferredSpanC = setup.getSpans().stream()
+        .filter(s -> s.getName().equals("SamplingProfilerTest#cInferred")).findAny();
     assertThat(inferredSpanC).isPresent();
-    assertThat(inferredSpanC.get().isChildOf(explicitSpanB.get())).isTrue();
+    assertThat(inferredSpanC.get()).hasParent(explicitSpanB.get());
 
-    Optional<Span> inferredSpanD =
-        reporter.getSpans().stream()
-            .filter(s -> s.getNameAsString().equals("SamplingProfilerTest#dInferred"))
-            .findAny();
+    Optional<SpanData> inferredSpanD = setup.getSpans().stream()
+        .filter(s -> s.getName().equals("SamplingProfilerTest#dInferred")).findAny();
     assertThat(inferredSpanD).isPresent();
-    assertThat(inferredSpanD.get().isChildOf(inferredSpanC.get())).isTrue();
+    assertThat(inferredSpanD.get()).hasParent(inferredSpanC.get());
+  }
+
+  @Test
+  void ensurePeriodicCleanupInvoked() throws Exception {
+    NanoClock mockClock = Mockito.mock(NanoClock.class);
+    setupProfiler(config -> config.clock(mockClock));
+    awaitProfilerStarted(setup.profiler);
+
+    Thread.sleep(600);
+
+    verify(mockClock, atLeast(1)).periodicCleanup();
   }
 
   @Test
   @DisabledForJreRange(max = JRE.JAVA_20)
   void testVirtualThreadsExcluded() throws Exception {
     setupProfiler(true);
-    awaitProfilerStarted(profiler);
+    awaitProfilerStarted(setup.profiler);
+    Tracer tracer = setup.sdk.getTracer("manual-spans");
 
     AtomicReference<Boolean> profilingActive = new AtomicReference<>();
-    Runnable task =
-        () -> {
-          Transaction transaction = tracer.startRootTransaction(null).withName("transaction");
-          try (Scope scope = transaction.activateInScope()) {
-            // makes sure that the rest will be captured by another profiling session
-            // this tests that restoring which threads to profile works
-            try {
-              Thread.sleep(600);
-            } catch (Exception e) {
-              throw new RuntimeException(e);
-            }
-            profilingActive.set(profiler.isProfilingActiveOnThread(Thread.currentThread()));
-          } finally {
-            transaction.end();
-          }
-        };
+    Runnable task = () -> {
+      Span tx = tracer.spanBuilder("transaction").startSpan();
+      try (Scope scope = tx.makeCurrent()) {
+        profilingActive.set(setup.profiler.isProfilingActiveOnThread(Thread.currentThread()));
+      } finally {
+        tx.end();
+      }
+    };
 
     Method startVirtualThread = Thread.class.getMethod("startVirtualThread", Runnable.class);
     Thread virtual = (Thread) startVirtualThread.invoke(null, task);
@@ -246,34 +285,35 @@ class SamplingProfilerTest {
 
   @Test
   void testPostProcessingDisabled() throws Exception {
-    setupProfiler(true);
-    doReturn(false).when(profilingConfig).isPostProcessingEnabled();
-    awaitProfilerStarted(profiler);
+    setupProfiler(config -> config.postProcessingEnabled(false));
+    awaitProfilerStarted(setup.profiler);
+    Tracer tracer = setup.sdk.getTracer("manual-spans");
 
-    Transaction transaction = tracer.startRootTransaction(null).withName("transaction");
-    try (Scope scope = transaction.activateInScope()) {
+    Span tx = tracer.spanBuilder("transaction").startSpan();
+    try (Scope scope = tx.makeCurrent()) {
       // makes sure that the rest will be captured by another profiling session
       // this tests that restoring which threads to profile works
       Thread.sleep(600);
-      aInferred(transaction);
+      aInferred(tracer);
     } finally {
-      transaction.end();
+      tx.end();
     }
 
     await()
         .pollDelay(10, TimeUnit.MILLISECONDS)
         .timeout(5000, TimeUnit.MILLISECONDS)
-        .untilAsserted(() -> assertThat(reporter.getSpans()).hasSize(1));
+        .untilAsserted(() -> assertThat(setup.getSpans()).hasSize(2));
 
-    Optional<Span> explicitSpanB =
-        reporter.getSpans().stream().filter(s -> s.getNameAsString().equals("bExplicit")).findAny();
+    Optional<SpanData> explicitSpanB = setup.getSpans().stream()
+        .filter(s -> s.getName().equals("bExplicit")).findAny();
     assertThat(explicitSpanB).isPresent();
-    assertThat(explicitSpanB.get().isChildOf(transaction)).isTrue();
+    assertThat(explicitSpanB.get())
+        .hasParentSpanId(tx.getSpanContext().getSpanId());
   }
 
-  private void aInferred(Transaction transaction) throws Exception {
-    Span span = transaction.createSpan().withName("bExplicit").withType("custom");
-    try (Scope spanScope = span.activateInScope()) {
+  private void aInferred(Tracer tracer) throws Exception {
+    Span span = tracer.spanBuilder("bExplicit").startSpan();
+    try (Scope spanScope = span.makeCurrent()) {
       cInferred();
     } finally {
       span.end();
@@ -291,20 +331,19 @@ class SamplingProfilerTest {
   }
 
   private void setupProfiler(boolean enabled) {
-    reporter = new MockReporter();
-    ConfigurationRegistry config = SpyConfiguration.createSpyConfig();
-    profilingConfig = config.getConfig(ProfilingConfiguration.class);
-
-    doReturn(List.of(WildcardMatcher.valueOf(getClass().getName())))
-        .when(profilingConfig)
-        .getIncludedClasses();
-    doReturn(enabled).when(profilingConfig).isProfilingEnabled();
-    doReturn(TimeDuration.of("500ms")).when(profilingConfig).getProfilingDuration();
-    doReturn(TimeDuration.of("500ms")).when(profilingConfig).getProfilingInterval();
-    doReturn(TimeDuration.of("5ms")).when(profilingConfig).getSamplingInterval();
-    tracer = MockTracer.createRealTracer(reporter, config);
-    profiler = tracer.getLifecycleListener(ProfilingFactory.class).getProfiler();
+    setupProfiler(config -> config.startScheduledProfiling(enabled));
   }
+
+
+  private void setupProfiler(Consumer<InferredSpansProcessorBuilder> configCustomizer) {
+    setup = ProfilerTestSetup.create(config -> {
+      config.profilingDuration(Duration.ofMillis(500))
+          .profilerInterval(Duration.ofMillis(500))
+          .samplingInterval(Duration.ofMillis(5));
+      configCustomizer.accept(config);
+    });
+  }
+
 
   private static void awaitProfilerStarted(SamplingProfiler profiler) {
     // ensure profiler is initialized

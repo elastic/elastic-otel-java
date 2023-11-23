@@ -16,11 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.apm.agent.profiler.collections;
-
-import static co.elastic.apm.agent.profiler.collections.CollectionUtil.findNextPositivePowerOfTwo;
-import static co.elastic.apm.agent.profiler.collections.CollectionUtil.validateLoadFactor;
-import static java.util.Objects.requireNonNull;
+/*
+ * Copyright 2014-2019 Real Logic Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package co.elastic.apm.otel.profiler.collections;
 
 import java.io.Serializable;
 import java.util.AbstractCollection;
@@ -31,13 +42,19 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+import static co.elastic.apm.otel.profiler.collections.CollectionUtil.findNextPositivePowerOfTwo;
+import static co.elastic.apm.otel.profiler.collections.CollectionUtil.validateLoadFactor;
+import static java.util.Objects.requireNonNull;
+
+
 /**
- * {@link Map} implementation specialised for int keys using open addressing and linear probing for
- * cache efficient access.
+ * {@link Map} implementation specialised for int keys using open addressing and
+ * linear probing for cache efficient access.
  *
  * @param <V> type of values stored in the {@link Map}
  */
-public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
+public class Int2ObjectHashMap<V>
+    implements Map<Integer, V>, Serializable {
   static final int MIN_CAPACITY = 8;
 
   private final float loadFactor;
@@ -56,7 +73,9 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
     this(MIN_CAPACITY, Hashing.DEFAULT_LOAD_FACTOR, true);
   }
 
-  public Int2ObjectHashMap(final int initialCapacity, final float loadFactor) {
+  public Int2ObjectHashMap(
+      final int initialCapacity,
+      final float loadFactor) {
     this(initialCapacity, loadFactor, true);
   }
 
@@ -68,14 +87,18 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
    * @param shouldAvoidAllocation should allocation be avoided by caching iterators and map entries.
    */
   public Int2ObjectHashMap(
-      final int initialCapacity, final float loadFactor, final boolean shouldAvoidAllocation) {
+      final int initialCapacity,
+      final float loadFactor,
+      final boolean shouldAvoidAllocation) {
     validateLoadFactor(loadFactor);
 
     this.loadFactor = loadFactor;
     this.shouldAvoidAllocation = shouldAvoidAllocation;
 
-    /* */ final int capacity = findNextPositivePowerOfTwo(Math.max(MIN_CAPACITY, initialCapacity));
-    /* */ resizeThreshold = (int) (capacity * loadFactor);
+    /* */
+    final int capacity = findNextPositivePowerOfTwo(Math.max(MIN_CAPACITY, initialCapacity));
+    /* */
+    resizeThreshold = (int) (capacity * loadFactor);
 
     keys = new int[capacity];
     values = new Object[capacity];
@@ -115,8 +138,8 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
   }
 
   /**
-   * Get the actual threshold which when reached the map will resize. This is a function of the
-   * current capacity and load factor.
+   * Get the actual threshold which when reached the map will resize.
+   * This is a function of the current capacity and load factor.
    *
    * @return the threshold when the map will resize.
    */
@@ -124,17 +147,23 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
     return resizeThreshold;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public int size() {
     return size;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public boolean isEmpty() {
     return 0 == size;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public boolean containsKey(final Object key) {
     return containsKey(((Integer) key).intValue());
   }
@@ -162,7 +191,9 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
     return found;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public boolean containsValue(final Object value) {
     boolean found = false;
     final Object val = mapNullValue(value);
@@ -178,7 +209,9 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
     return found;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public V get(final Object key) {
     return get(((Integer) key).intValue());
   }
@@ -210,7 +243,9 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
     return (V) value;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public V put(final Integer key, final V value) {
     return put(key.intValue(), value);
   }
@@ -254,7 +289,9 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
     return unmapNullValue(oldValue);
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public V remove(final Object key) {
     return remove(((Integer) key).intValue());
   }
@@ -285,7 +322,9 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
     return unmapNullValue(value);
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public void clear() {
     if (size > 0) {
       Arrays.fill(values, null);
@@ -294,22 +333,26 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
   }
 
   /**
-   * Compact the {@link Map} backing arrays by rehashing with a capacity just larger than current
-   * size and giving consideration to the load factor.
+   * Compact the {@link Map} backing arrays by rehashing with a capacity just larger than current size
+   * and giving consideration to the load factor.
    */
   public void compact() {
     final int idealCapacity = (int) Math.round(size() * (1.0d / loadFactor));
     rehash(findNextPositivePowerOfTwo(Math.max(MIN_CAPACITY, idealCapacity)));
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public void putAll(final Map<? extends Integer, ? extends V> map) {
     for (final Entry<? extends Integer, ? extends V> entry : map.entrySet()) {
       put(entry.getKey(), entry.getValue());
     }
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public KeySet keySet() {
     if (null == keySet) {
       keySet = new KeySet();
@@ -318,7 +361,9 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
     return keySet;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public ValueCollection values() {
     if (null == valueCollection) {
       valueCollection = new ValueCollection();
@@ -327,7 +372,9 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
     return valueCollection;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public EntrySet entrySet() {
     if (null == entrySet) {
       entrySet = new EntrySet();
@@ -336,7 +383,9 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
     return entrySet;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public String toString() {
     if (isEmpty()) {
       return "{}";
@@ -348,8 +397,7 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
     final StringBuilder sb = new StringBuilder().append('{');
     while (true) {
       entryIterator.next();
-      sb.append(entryIterator.getIntKey())
-          .append('=')
+      sb.append(entryIterator.getIntKey()).append('=')
           .append(unmapNullValue(entryIterator.getValue()));
       if (!entryIterator.hasNext()) {
         return sb.append('}').toString();
@@ -358,7 +406,9 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
     }
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public boolean equals(final Object o) {
     if (this == o) {
       return true;
@@ -387,7 +437,9 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
     return true;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * {@inheritDoc}
+   */
   public int hashCode() {
     int result = 0;
 
@@ -415,8 +467,8 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
    *
    * @param key key with which the specified value is associated
    * @param value value to be associated with the specified key
-   * @return the previous value associated with the specified key, or {@code null} if there was no
-   *     mapping for the key.
+   * @return the previous value associated with the specified key, or
+   *     {@code null} if there was no mapping for the key.
    */
   public V replace(final int key, final V value) {
     V curValue = get(key);
@@ -457,7 +509,8 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
 
   private void rehash(final int newCapacity) {
     final int mask = newCapacity - 1;
-    /* */ resizeThreshold = (int) (newCapacity * loadFactor);
+    /* */
+    resizeThreshold = (int) (newCapacity * loadFactor);
 
     final int[] tempKeys = new int[newCapacity];
     final Object[] tempValues = new Object[newCapacity];
@@ -492,8 +545,8 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
 
       final int hash = Hashing.hash(keys[index], mask);
 
-      if ((index < hash && (hash <= deleteIndex || deleteIndex <= index))
-          || (hash <= deleteIndex && deleteIndex <= index)) {
+      if ((index < hash && (hash <= deleteIndex || deleteIndex <= index)) ||
+          (hash <= deleteIndex && deleteIndex <= index)) {
         keys[deleteIndex] = keys[index];
         values[deleteIndex] = values[index];
 
@@ -507,11 +560,15 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
   // Sets and Collections
   ///////////////////////////////////////////////////////////////////////////////////////////////
 
-  /** Set of keys which supports optionally cached iterators to avoid allocation. */
+  /**
+   * Set of keys which supports optionally cached iterators to avoid allocation.
+   */
   public final class KeySet extends AbstractSet<Integer> implements Serializable {
     private final KeyIterator keyIterator = shouldAvoidAllocation ? new KeyIterator() : null;
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public KeyIterator iterator() {
       KeyIterator keyIterator = this.keyIterator;
       if (null == keyIterator) {
@@ -547,11 +604,15 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
     }
   }
 
-  /** Collection of values which supports optionally cached iterators to avoid allocation. */
+  /**
+   * Collection of values which supports optionally cached iterators to avoid allocation.
+   */
   public final class ValueCollection extends AbstractCollection<V> implements Serializable {
     private final ValueIterator valueIterator = shouldAvoidAllocation ? new ValueIterator() : null;
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public ValueIterator iterator() {
       ValueIterator valueIterator = this.valueIterator;
       if (null == valueIterator) {
@@ -575,11 +636,15 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
     }
   }
 
-  /** Set of entries which supports access via an optionally cached iterator to avoid allocation. */
+  /**
+   * Set of entries which supports access via an optionally cached iterator to avoid allocation.
+   */
   public final class EntrySet extends AbstractSet<Entry<Integer, V>> implements Serializable {
     private final EntryIterator entryIterator = shouldAvoidAllocation ? new EntryIterator() : null;
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public EntryIterator iterator() {
       EntryIterator entryIterator = this.entryIterator;
       if (null == entryIterator) {
@@ -598,7 +663,9 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
       Int2ObjectHashMap.this.clear();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public boolean contains(final Object o) {
       final Entry entry = (Entry) o;
       final int key = (Integer) entry.getKey();
@@ -687,7 +754,9 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
     }
   }
 
-  /** Iterator over values. */
+  /**
+   * Iterator over values.
+   */
   public class ValueIterator extends AbstractIterator<V> {
     public V next() {
       findNext();
@@ -696,7 +765,9 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
     }
   }
 
-  /** Iterator over keys which supports access to unboxed keys. */
+  /**
+   * Iterator over keys which supports access to unboxed keys.
+   */
   public class KeyIterator extends AbstractIterator<Integer> {
     public Integer next() {
       return nextInt();
@@ -709,8 +780,11 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
     }
   }
 
-  /** Iterator over entries which supports access to unboxed keys and values. */
-  public class EntryIterator extends AbstractIterator<Entry<Integer, V>>
+  /**
+   * Iterator over entries which supports access to unboxed keys and values.
+   */
+  public class EntryIterator
+      extends AbstractIterator<Entry<Integer, V>>
       implements Entry<Integer, V> {
     public Entry<Integer, V> next() {
       findNext();
@@ -749,8 +823,8 @@ public class Int2ObjectHashMap<V> implements Map<Integer, V>, Serializable {
 
           final Entry e = (Entry) o;
 
-          return (e.getKey() != null && e.getKey().equals(k))
-              && ((e.getValue() == null && v == null) || e.getValue().equals(v));
+          return (e.getKey() != null && e.getKey().equals(k)) &&
+              ((e.getValue() == null && v == null) || e.getValue().equals(v));
         }
 
         public String toString() {
