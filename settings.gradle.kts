@@ -24,6 +24,9 @@ include("testing:agent-for-testing")
 dependencyResolutionManagement {
     versionCatalogs {
         create("catalog") {
+          // the version catalog is currently limited to a single file due to dependabot
+          // see https://github.com/dependabot/dependabot-core/issues/8079 for details.
+          // Also, only the 'gradle/libs.versions.toml' path is supported for now.
           from(files("gradle/libs.versions.toml"))
         }
     }
