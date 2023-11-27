@@ -1,0 +1,16 @@
+
+[versions]
+shadow = "8.1.1"
+jib = "3.4.0"
+spotless = "6.21.0"
+
+[libraries]
+
+[bundles]
+
+[plugins]
+
+shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
+jib = { id = "com.google.cloud.tools.jib", version.ref = "jib"}
+spotless = { id = "com.diffplug.spotless:spotless", version.ref = "spotless"}
+taskinfo = { id = "org.barfuin.gradle.taskinfo", version = '2.1.0'}
