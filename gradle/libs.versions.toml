@@ -1,8 +1,17 @@
+# the version catalog is currently limited to a single file due to dependabot
+# see https://github.com/dependabot/dependabot-core/issues/8079 for details
 
 [versions]
 shadow = "8.1.1"
 jib = "3.4.0"
 spotless = "6.21.0"
+junit = "5.10.0"
+autoservice = "1.1.1"
+
+opentelemetrySdk = "1.29.0"
+opentelemetryJavaagent = "1.30.0"
+opentelemetryJavaagentAlpha = "1.30.0-alpha"
+opentelemetryContribAlpha = "1.30.0-alpha"
 
 [libraries]
 

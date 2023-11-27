@@ -1,7 +1,7 @@
 plugins {
   java
-  alias(gradlePlugins.plugins.shadow)
-  alias(gradlePlugins.plugins.taskinfo)
+  alias(catalog.plugins.shadow)
+  alias(catalog.plugins.taskinfo)
 }
 
 val shadowedImplementation by configurations.creating {
@@ -12,13 +12,13 @@ val shadowedImplementation by configurations.creating {
 dependencies {
 
   // AWS cloud resource providers
-  shadowedImplementation("io.opentelemetry.contrib:opentelemetry-aws-resources:" + libraries.versions.opentelemetryContribAlpha.get())
+  shadowedImplementation("io.opentelemetry.contrib:opentelemetry-aws-resources:" + catalog.versions.opentelemetryContribAlpha.get())
 
   // TODO : GCP resource providers
   // "com.google.cloud.opentelemetry:detector-resources:0.25.2-alpha"
 
   // application servers resource providers
-  shadowedImplementation("io.opentelemetry.contrib:opentelemetry-resource-providers:" + libraries.versions.opentelemetryContribAlpha.get())
+  shadowedImplementation("io.opentelemetry.contrib:opentelemetry-resource-providers:" + catalog.versions.opentelemetryContribAlpha.get())
 }
 
 tasks {

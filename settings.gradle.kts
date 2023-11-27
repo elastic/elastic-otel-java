@@ -23,11 +23,8 @@ include("testing:agent-for-testing")
 
 dependencyResolutionManagement {
     versionCatalogs {
-        create("gradlePlugins") {
-          from(files("gradle/gradlePlugins.toml"))
-        }
-        create("libraries") {
-          from(files("gradle/libraries.toml"))
+        create("catalog") {
+          from(files("gradle/libs.versions.toml"))
         }
     }
 }
