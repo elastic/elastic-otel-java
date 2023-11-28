@@ -626,5 +626,4 @@ public class Configurations {
           ConfigurationOption.unspecifiedOption()
               .key("context_propagation_only")
               .buildNotEnabled());
-
 }
