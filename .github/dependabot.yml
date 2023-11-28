@@ -20,7 +20,7 @@ updates:
 
   # Gradle
   - package-ecosystem: "gradle"
-    directory: "/"
+    directory: "/gradle/" # for now only on the version catalog to prevent noise
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
