@@ -40,11 +40,11 @@ subprojects {
 
   dependencies {
 
-    implementation(platform("io.opentelemetry:opentelemetry-bom:" + catalog.versions.opentelemetrySdk.get().toString()))
+    implementation(platform(catalog.opentelemetryBom))
 
     // these serve as a test of the instrumentation boms
-    implementation(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:" + catalog.versions.opentelemetryJavaagent.get().toString()))
-    implementation(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:" + catalog.versions.opentelemetryJavaagentAlpha.get().toString()))
+    implementation(platform(catalog.opentelemetryInstrumentationBom))
+    implementation(platform(catalog.opentelemetryInstrumentationAlphaBom))
 
     testImplementation("org.mockito:mockito-core:5.5.0")
 

@@ -12,6 +12,10 @@ opentelemetryContribAlpha = "1.30.0-alpha"
 
 [libraries]
 
+opentelemetryBom = { group = "io.opentelemetry", name = "opentelemetry-bom", version.ref = "opentelemetrySdk" }
+opentelemetryInstrumentationBom = { group = "io.opentelemetry", name = "opentelemetry-instrumentation-bom", version.ref = "opentelemetrySdk" }
+opentelemetryInstrumentationAlphaBom = { group = "io.opentelemetry", name = "opentelemetry-instrumentation-alpha-bom", version.ref = "opentelemetrySdk" }
+
 [bundles]
 
 [plugins]
