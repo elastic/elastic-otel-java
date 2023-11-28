@@ -620,4 +620,10 @@ public class Configurations {
           ConfigurationOption.unspecifiedOption()
               .key("elasticsearch_capture_body_urls")
               .buildNotEnabled());
+
+  private final ConfigurationOption<Boolean> contextPropagationOnly =
+      addOption(
+          ConfigurationOption.unspecifiedOption()
+              .key("context_propagation_only")
+              .buildNotEnabled());
 }
