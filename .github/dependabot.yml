@@ -1,7 +1,9 @@
 ---
 version: 2
-updates:
 
+registries:
+
+updates:
   # GitHub actions
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -15,3 +17,10 @@ updates:
       github-actions:
         patterns:
           - "*"
+
+  # Gradle
+  - package-ecosystem: "gradle"
+    directory: "/gradle/" # for now only on the version catalog to prevent noise
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10

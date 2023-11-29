@@ -1,8 +1,8 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-  alias gradlePlugins.plugins.shadow
-  alias gradlePlugins.plugins.taskinfo
+  alias catalog.plugins.shadow
+  alias catalog.plugins.taskinfo
 }
 
 base.archivesName.set("elastic-otel-javaagent")
@@ -38,7 +38,7 @@ dependencies {
   // This is where we should add custom instrumentations
   // javaagentLibs(project(":instrumentation:servlet-3"))
 
-  upstreamAgent("io.opentelemetry.javaagent:opentelemetry-javaagent:" + libraries.versions.opentelemetryJavaagent.get().toString())
+  upstreamAgent(catalog.opentelemetryJavaagent)
 }
 
 CopySpec isolateClasses(Iterable<File> jars) {
@@ -124,7 +124,7 @@ tasks {
       attributes.put("Can-Retransform-Classes", "true")
       attributes.put("Implementation-Vendor", "Elastic")
       // TODO : add git hash to version for easier support
-      attributes.put("Implementation-Version", "elastic-${project.version}-otel-" + libraries.versions.opentelemetryJavaagent.get().toString())
+      attributes.put("Implementation-Version", "elastic-${project.version}-otel-" + catalog.versions.opentelemetryJavaagent.get().toString())
     }
   }
 
