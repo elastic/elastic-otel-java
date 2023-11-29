@@ -19,8 +19,8 @@ dependencies {
       implementation("com.squareup.okhttp3:okhttp:4.11.0")
 
       // required to make the IDE compile our own resource provider, won't be included as dependency
-      compileOnly("io.opentelemetry.contrib:opentelemetry-aws-resources:" + catalog.versions.opentelemetryContribAlpha.get())
-      compileOnly("io.opentelemetry.contrib:opentelemetry-resource-providers:" + catalog.versions.opentelemetryContribAlpha.get())
+      compileOnly(catalog.awsContribResources)
+      compileOnly(catalog.contribResources)
     }
   }
 

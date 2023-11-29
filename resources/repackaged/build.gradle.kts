@@ -12,13 +12,13 @@ val shadowedImplementation by configurations.creating {
 dependencies {
 
   // AWS cloud resource providers
-  shadowedImplementation("io.opentelemetry.contrib:opentelemetry-aws-resources:" + catalog.versions.opentelemetryContribAlpha.get())
+  shadowedImplementation(catalog.awsContribResources)
 
   // TODO : GCP resource providers
   // "com.google.cloud.opentelemetry:detector-resources:0.25.2-alpha"
 
   // application servers resource providers
-  shadowedImplementation("io.opentelemetry.contrib:opentelemetry-resource-providers:" + catalog.versions.opentelemetryContribAlpha.get())
+  shadowedImplementation(catalog.contribResources)
 }
 
 tasks {
