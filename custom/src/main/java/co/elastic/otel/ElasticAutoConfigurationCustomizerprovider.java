@@ -18,14 +18,19 @@
  */
 package co.elastic.otel;
 
+import co.elastic.otel.config.Configurations;
 import co.elastic.otel.resources.ElasticResourceProvider;
 import io.opentelemetry.context.ContextStorage;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
+import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.Function;
 
 public class ElasticAutoConfigurationCustomizerprovider
     implements AutoConfigurationCustomizerProvider {
@@ -52,21 +57,85 @@ public class ElasticAutoConfigurationCustomizerprovider
         .addPropertiesCustomizer(
             configProperties -> {
               // Wrap context storage when configuration is loaded,
-              // using properties customization as a hook
+              // configuration customization is used as an init hook but does not actually alter it.
               ContextStorage.addWrapper(ElasticExtension.INSTANCE::wrapContextStorage);
-
-              // disabling our resource provider from SDK init
-              Map<String, String> config = new HashMap<>();
-              Set<String> disabledConfig =
-                  new HashSet<>(configProperties.getList(DISABLED_RESOURCE_PROVIDERS));
-              disabledConfig.add(ElasticResourceProvider.class.getCanonicalName());
-              config.put(DISABLED_RESOURCE_PROVIDERS, String.join(",", disabledConfig));
-              return config;
+              return Collections.emptyMap();
             })
         .addSpanExporterCustomizer(
             (spanExporter, configProperties) ->
                 // wrap the original span exporter
                 ElasticExtension.INSTANCE.wrapSpanExporter(spanExporter))
-        .addMetricExporterCustomizer((exporter, config) -> new ElasticMetricExporter(exporter));
+        .addMetricExporterCustomizer((exporter, config) -> new ElasticMetricExporter(exporter))
+        .addPropertiesSupplier(this::getDefaultProperties)
+        .addPropertiesCustomizer(getPropertiesCustomizer());
+  }
+
+  private Map<String, String> getDefaultProperties() {
+    Map<String, String> properties = new HashMap<>();
+    Configurations configurations = Configurations.getInstance();
+    if (configurations.getSecretToken() != null) {
+      properties.put(
+          "otel.exporter.otlp.headers", "Authorization=Bearer " + configurations.getSecretToken());
+    }
+    properties.put(
+        "otel.javaagent.debug", Boolean.toString(configurations.getLogLevel().isDebug()));
+    //    switchDebugging(configurations.getLogLevel().isDebug(), properties);
+    return properties;
+  }
+
+  private Function<ConfigProperties, Map<String, String>> getPropertiesCustomizer() {
+    return new Function<ConfigProperties, Map<String, String>>() {
+      @Override
+      public Map<String, String> apply(ConfigProperties configProperties) {
+        Map<String, String> properties = new HashMap<>();
+        Configurations configurations = Configurations.getInstance();
+        String elasticEndpoint = configurations.getServerUrl().toString();
+        // The three otel.exporter.otlp.*.endpoint and fallback otel.exporter.otlp.endpoint have a
+        // relationship
+        // It's not possible to reset the defaults and keep the relationship consistent, so we set
+        // them here
+        // If nothing was set, the values for the three here are null, with fallback
+        // http://backend:8080, so:
+        // 1. If the fallback is set to anything other than http://backend:8080, we don't change
+        // anything
+        // 2. If the fallback is set to http://backend:8080, we change it and any of the three that
+        // are null, to elasticEndpoint
+        String fallbackEndpoint = configProperties.getString("otel.exporter.otlp.endpoint");
+        if ("http://backend:8080".equals(fallbackEndpoint)) {
+          String tracesEndpoint = configProperties.getString("otel.exporter.otlp.traces.endpoint");
+          if (tracesEndpoint == null) {
+            properties.put("otel.exporter.otlp.traces.endpoint", elasticEndpoint);
+          }
+          String metricsEndpoint =
+              configProperties.getString("otel.exporter.otlp.metrics.endpoint");
+          if (metricsEndpoint == null) {
+            properties.put("otel.exporter.otlp.metrics.endpoint", elasticEndpoint);
+          }
+          String logsEndpoint = configProperties.getString("otel.exporter.otlp.logs.endpoint");
+          if (logsEndpoint == null) {
+            properties.put("otel.exporter.otlp.logs.endpoint", elasticEndpoint);
+          }
+        }
+        // logAllProperties(configProperties);
+        return properties;
+      }
+    };
+  }
+
+  // Kept for convenience for now
+  private void logAllProperties(ConfigProperties configProperties) {
+    if (configProperties instanceof DefaultConfigProperties) {
+      try {
+        Field configField = DefaultConfigProperties.class.getDeclaredField("config");
+        configField.setAccessible(true);
+        Map<String, String> config = (Map<String, String>) configField.get(configProperties);
+        for (String key : new TreeSet<>(config.keySet())) {
+          String value = config.get(key);
+          System.out.println(key + " -> " + value);
+        }
+      } catch (Exception e) {
+        // ignore, we just don't log anything
+      }
+    }
   }
 }

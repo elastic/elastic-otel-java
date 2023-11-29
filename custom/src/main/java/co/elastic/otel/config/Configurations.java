@@ -18,6 +18,8 @@
  */
 package co.elastic.otel.config;
 
+import co.elastic.otel.logging.LogLevel;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,6 +28,8 @@ import java.util.Map;
 
 public class Configurations {
 
+  public static final String REPORTER_CATEGORY = "Reporter";
+  private static final String LOGGING_CATEGORY = "Logging";
   private static final String MESSAGE_POLLING_TRANSACTION_STRATEGY =
       "message_polling_transaction_strategy";
   private static final String MESSAGE_BATCH_STRATEGY = "message_batch_strategy";
@@ -57,8 +61,30 @@ public class Configurations {
   static final String INITIAL_STATUS_LOGGER_LEVEL =
       "org.apache.logging.log4j.simplelog.StatusLogger.level";
   static final String DEFAULT_LISTENER_LEVEL = "Log4jDefaultStatusLevel";
+  public static final URL LOCAL_APM_SERVER_URL;
+  private static final String DEPRECATION_VERSION = "1.50.0";
+
+  static {
+    try {
+      LOCAL_APM_SERVER_URL = new URL("http://127.0.0.1:8200");
+    } catch (MalformedURLException e) {
+      throw new IllegalArgumentException(e.getMessage());
+    }
+  }
 
   private List<ConfigurationOption<?>> allOptions = new ArrayList<>();
+
+  // TODO make sure this is set by agent initialization and cached
+  //  or held in some shared instance
+  //  and consider the concurrency aspect (currently synchronized)
+  private static Configurations INSTANCE;
+
+  public static synchronized Configurations getInstance() {
+    if (INSTANCE == null) {
+      INSTANCE = new Configurations();
+    }
+    return INSTANCE;
+  }
 
   protected List<ConfigurationOption<?>> getAllOptions() {
     return allOptions;
@@ -68,6 +94,71 @@ public class Configurations {
     allOptions.add(configurationOption);
     return configurationOption;
   }
+
+  private final ConfigurationOption<URL> serverUrl =
+      addOption(
+          ConfigurationOption.urlOption()
+              .key("server_url")
+              .configurationCategory(REPORTER_CATEGORY)
+              .label("The URL for your APM Server")
+              .description(
+                  "The URL must be fully qualified, including protocol (http or https) and port.\n"
+                      + "\n"
+                      + "If SSL is enabled on the APM Server, use the `https` protocol. For more information, see \n"
+                      + "<<ssl-configuration>>.\n"
+                      + "\n"
+                      + "If outgoing HTTP traffic has to go through a proxy,\n"
+                      + "you can use the Java system properties `http.proxyHost` and `http.proxyPort` to set that up.\n"
+                      + "See also https://docs.oracle.com/javase/8/docs/technotes/guides/net/proxies.html[Java's proxy documentation] \n"
+                      + "for more information.\n"
+                      + "\n"
+                      + "NOTE: This configuration can only be reloaded dynamically after 1.8.0 and before 2.0.0. From "
+                      + DEPRECATION_VERSION
+                      + " dynamic reloading is deprecated")
+              .descriptionChange(
+                  "NOTE: This configuration can only be reloaded dynamically as of 1.8.0",
+                  "NOTE: This configuration can only be reloaded dynamically after 1.8.0 and before 2.0.0. From "
+                      + DEPRECATION_VERSION
+                      + " dynamic reloading is deprecated")
+              .noLongerDynamic()
+              .buildWithDefault(LOCAL_APM_SERVER_URL));
+
+  private final ConfigurationOption<String> secretToken =
+      addOption(
+          ConfigurationOption.stringOption()
+              .key("secret_token")
+              .configurationCategory(REPORTER_CATEGORY)
+              .description(
+                  "This string is used to ensure that only your agents can send data to your APM server.\n"
+                      + "\n"
+                      + "Both the agents and the APM server have to be configured with the same secret token.\n"
+                      + "Use if APM Server requires a token.")
+              .sensitive()
+              .noLongerDynamic()
+              .build());
+
+  // TODO - SLF4J log levels are not dynamic, so we need to replace the logger in order to
+  //  see debug logging, there is some support for that I think, but it's not immediately obvious
+  // TODO the `otel.javaagent.debug` set to true installs the LoggingSpanExporter, but this
+  //  won't get uninstalled, so need to switch it on and off for dynamic log level changes
+  public ConfigurationOption<LogLevel> logLevel =
+      addOption(
+          ConfigurationOption.enumOption(LogLevel.class)
+              .key(LOG_LEVEL_KEY)
+              .configurationCategory(LOGGING_CATEGORY)
+              .description(
+                  "Sets the logging level for the agent.\n"
+                      + "This option is case-insensitive.\n"
+                      + "\n"
+                      + "NOTE: `CRITICAL` is a valid option, but it is mapped to `ERROR`; `WARN` and `WARNING` are equivalent; \n"
+                      + "`OFF` is only available since version 1.16.0")
+              .descriptionChange(
+                  "1.16.0",
+                  "1.16.0.\n"
+                      + "Otel only supports debug on or off, so DEBUG and TRACE turn debug on, all other options leave basic logging with debug off. Note `logging.log_level` and dynamic reloading are deprecated From "
+                      + DEPRECATION_VERSION)
+              .noLongerDynamic()
+              .buildWithDefault(LogLevel.INFO));
 
   private final ConfigurationOption<Boolean> recording =
       addOption(ConfigurationOption.unspecifiedOption().key(RECORDING).buildNotEnabled());
@@ -267,9 +358,6 @@ public class Configurations {
   private final ConfigurationOption<?> baggateToAttach =
       addOption(ConfigurationOption.unspecifiedOption().key("baggage_to_attach").buildNotEnabled());
 
-  public ConfigurationOption<?> logLevel =
-      addOption(ConfigurationOption.unspecifiedOption().key(LOG_LEVEL_KEY).buildNotEnabled());
-
   @SuppressWarnings("unused")
   public ConfigurationOption<String> logFile =
       addOption(ConfigurationOption.unspecifiedOption().key(LOG_FILE_KEY).buildNotEnabled());
@@ -431,14 +519,8 @@ public class Configurations {
               .key("span_stack_trace_min_duration")
               .buildNotEnabled());
 
-  private final ConfigurationOption<String> secretToken =
-      addOption(ConfigurationOption.unspecifiedOption().key("secret_token").buildNotEnabled());
-
   private final ConfigurationOption<String> apiKey =
       addOption(ConfigurationOption.unspecifiedOption().key("api_key").buildNotEnabled());
-
-  private final ConfigurationOption<URL> serverUrl =
-      addOption(ConfigurationOption.unspecifiedOption().key("server_url").buildNotEnabled());
 
   private final ConfigurationOption<List<URL>> serverUrls =
       addOption(ConfigurationOption.unspecifiedOption().key("server_urls").buildNotEnabled());
@@ -626,4 +708,16 @@ public class Configurations {
           ConfigurationOption.unspecifiedOption()
               .key("context_propagation_only")
               .buildNotEnabled());
+
+  public URL getServerUrl() {
+    return serverUrl.getCurrentValue();
+  }
+
+  public LogLevel getLogLevel() {
+    return logLevel.getCurrentValue();
+  }
+
+  public String getSecretToken() {
+    return secretToken.getCurrentValue();
+  }
 }

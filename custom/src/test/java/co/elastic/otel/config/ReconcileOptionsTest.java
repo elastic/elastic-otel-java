@@ -202,7 +202,8 @@ public class ReconcileOptionsTest {
             ? null
             : Arrays.asList(validators),
         aliasKeys == new ArrayList<String>() ? null : Arrays.asList(aliasKeys),
-        validOptions);
+        validOptions,
+        null);
   }
 
   private static Object getField(Class<?> clazz, Object obj, String fieldName)
