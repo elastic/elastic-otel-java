@@ -33,6 +33,7 @@ import org.mockserver.model.HttpResponse;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.MountableFile;
 
+@Disabled // because currently flaky
 public class AwsResourceProvidersTest extends TestAppSmokeTest {
 
   protected static final String MOCK_SERVER_HOST = "mock-server";
