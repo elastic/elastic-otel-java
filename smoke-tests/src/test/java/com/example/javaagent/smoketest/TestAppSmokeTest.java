@@ -37,6 +37,7 @@ public class TestAppSmokeTest extends SmokeTest {
             customizeContainer.andThen(
                 container ->
                     container
+                        .withEnv("OTEL_JAVAAGENT_DEBUG", "true")
                         .withExposedPorts(PORT)
                         .waitingFor(Wait.forHttp("/health").forPort(PORT))));
   }
