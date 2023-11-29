@@ -13,7 +13,7 @@ opentelemetryContribAlpha = "1.30.0-alpha"
 [libraries]
 
 opentelemetryJavaagent = { group = "io.opentelemetry.javaagent", name = "opentelemetry-javaagent", version.ref = "opentelemetryJavaagent" }
-opentelemetryJavaagentForTesting = { group = "io.opentelemetry.javaagent", name = "opentelemetry-agent-for-testing", version.ref = "opentelemetryJavaagent" }
+opentelemetryJavaagentForTesting = { group = "io.opentelemetry.javaagent", name = "opentelemetry-agent-for-testing", version.ref = "opentelemetryJavaagentAlpha" }
 
 opentelemetryBom = { group = "io.opentelemetry", name = "opentelemetry-bom", version.ref = "opentelemetrySdk" }
 opentelemetryInstrumentationBom = { group = "io.opentelemetry.instrumentation", name = "opentelemetry-instrumentation-bom", version.ref = "opentelemetryJavaagent" }
