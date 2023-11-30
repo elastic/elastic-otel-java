@@ -14,7 +14,7 @@ reformatted_files="$(git ls-files --modified)"
 if [ '' != "${reformatted_files}" ]; then
     for f in ${reformatted_files}; do
         echo "WARNING: automatic reformatting applied to ${f}"
-        git add ${f}
     done
+    echo "ERROR: aborting commit command due to formatting errors, please review and add them to the index to continue"
     exit 1
 fi
