@@ -7,14 +7,13 @@ project_root="$(dirname $0)/../.."
 # Redirect output to stderr.
 exec 1>&2
 
-${project_root}/gradlew spotlessApply
+set +e
+${project_root}/gradlew spotlessCheck
+set -e
 
-# optionally add reformatted files to the index
 reformatted_files="$(git ls-files --modified)"
 if [ '' != "${reformatted_files}" ]; then
-    for f in ${reformatted_files}; do
-        echo "WARNING: automatic reformatting applied to ${f}"
-    done
-    echo "ERROR: aborting commit command due to formatting errors, please review and add them to the index to continue"
+    ${project_root}/gradlew spotlessApply
+    echo "ERROR: aborting commit command due to formatting errors, please review local changes and add them to the index to continue"
     exit 1
 fi
