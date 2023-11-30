@@ -58,8 +58,12 @@ public class ElasticResourceProvider implements ResourceProvider {
   }
 
   private Resource getBaseResource(ConfigProperties config) {
+    long start = System.currentTimeMillis();
+    logger.info("start get base resource");
     // application server providers : file parsing only thus fast
-    return invokeResourceProvider(new AppServerServiceNameProvider());
+    Resource resource = invokeResourceProvider(new AppServerServiceNameProvider());
+    logger.info("end get base resource duration (ms): " + (System.currentTimeMillis() - start));
+    return resource;
   }
 
   /**
@@ -67,6 +71,8 @@ public class ElasticResourceProvider implements ResourceProvider {
    *     external systems
    */
   public Resource getExtraResource() {
+    long start = System.currentTimeMillis();
+    logger.info("start get extra resource");
     List<ResourceProvider> providers =
         Arrays.asList(
             // ec2 relies on http calls without pre-checks
@@ -83,6 +89,7 @@ public class ElasticResourceProvider implements ResourceProvider {
     for (ResourceProvider provider : providers) {
       resource = resource.merge(invokeResourceProvider(provider));
     }
+    logger.info("end get extra resource duration (ms): " + (System.currentTimeMillis() - start));
     return resource;
   }
 
