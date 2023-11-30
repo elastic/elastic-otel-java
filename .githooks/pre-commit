@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -euo pipefail
+
+project_root="$(dirname $0)/../.."
+
+# Redirect output to stderr.
+exec 1>&2
+
+${project_root}/gradlew spotlessApply
+
+# optionally add reformatted files to the index
+reformatted_files="$(git ls-files --modified)"
+if [ '' != "${reformatted_files}" ]; then
+    for f in ${reformatted_files}; do
+        echo "WARNING: automatic reformatting applied to ${f}"
+        git add ${f}
+    done
+    exit 1
+fi
