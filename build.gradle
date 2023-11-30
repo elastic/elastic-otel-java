@@ -62,3 +62,14 @@ subprojects {
     }
   }
 }
+
+task copyGitHooks(type:Copy) {
+  from layout.projectDirectory.dir(".githooks")
+  into layout.projectDirectory.dir(".git").dir("hooks")
+}
+
+tasks.configure {
+  doLast {
+    copyGitHooks
+  }
+}
