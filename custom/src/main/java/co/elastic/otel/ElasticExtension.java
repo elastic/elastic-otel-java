@@ -91,6 +91,7 @@ public class ElasticExtension {
     // because original resources are immutable
     Resource result = cachedResources.get(resource);
     if (result != null) {
+      logger.info("wrap resource: cached for key : " + result + " >>> " + resource);
       return result;
     }
     Objects.requireNonNull(resourceFuture);
@@ -101,6 +102,7 @@ public class ElasticExtension {
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
       logger.log(Level.WARNING, "unable capture resource attributes", e);
     }
+    logger.info("wrap resource: new cached value for key : " + resource + " >>> " + result);
     return result;
   }
 
