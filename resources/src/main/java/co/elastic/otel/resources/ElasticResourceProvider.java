@@ -89,7 +89,9 @@ public class ElasticResourceProvider implements ResourceProvider {
     for (ResourceProvider provider : providers) {
       resource = resource.merge(invokeResourceProvider(provider));
     }
-    logger.info("end get extra resource duration (ms): " + (System.currentTimeMillis() - start));
+    logger.info(
+        "end get extra resource duration (ms): " + (System.currentTimeMillis() - start) + " >>> "
+            + resource);
     return resource;
   }
 
