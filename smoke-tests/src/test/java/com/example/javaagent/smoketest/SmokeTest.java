@@ -90,7 +90,7 @@ abstract class SmokeTest {
             .withExposedPorts(8080)
             .waitingFor(Wait.forHttp("/health").forPort(8080))
             .withNetwork(network)
-            .withNetworkAliases("backend")
+            .withNetworkAliases("elastic")
             .withLogConsumer(new Slf4jLogConsumer(logger));
 
     if (JavaExecutable.isDebugging()
@@ -119,7 +119,7 @@ abstract class SmokeTest {
             // batch span processor: very short delay for testing
             .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
             .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
-            .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://backend:8080");
+            .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://elastic:8080");
 
     StringBuilder jvmArgs = new StringBuilder();
 
