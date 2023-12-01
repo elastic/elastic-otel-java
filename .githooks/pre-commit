@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Warning:
+#
+# When using git worktrees and making modifications to this file,
+# you will need to manually overwrite the base worktree in "<base-worktree>/.git/hooks/pre-commit"
+# in order to properly test it, otherwise the base copy will be executed.
+# See git hooks documentation for details
+
 set -euo pipefail
 
 project_root="$(dirname $0)/../.."
