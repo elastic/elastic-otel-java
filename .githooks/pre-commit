@@ -6,7 +6,7 @@ project_root="$(dirname $0)/../.."
 
 silent_gradle(){
     set +e
-    ${project_root}/gradlew -q ${1}2>&1 > /dev/null
+    ${project_root}/gradlew -q ${1} 2>&1 > /dev/null
     set -e
 }
 
