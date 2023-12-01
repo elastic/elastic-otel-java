@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Warning:
+#
+# When using git worktrees and making modifications to this file,
+# you will need to manually overwrite the base worktree in "<base-worktree>/.git/hooks/pre-commit"
+# in order to properly test it, otherwise the base copy will be executed.
+# See git hooks documentation for details
+
+set -euo pipefail
+
+project_root="$(dirname $0)/../.."
+
+silent_gradle(){
+    set +e
+    ${project_root}/gradlew -q ${1} 1>/dev/null 2>/dev/null
+    echo $?
+    set -e
+}
+
+# Redirect output to stderr.
+exec 1>&2
+
+do_reformat=$(silent_gradle spotlessCheck)
+if [ 1 == ${do_reformat} ]; then
+    do_reformat=$(silent_gradle spotlessApply)
+    echo "ERROR: aborting commit command due to formatting errors, please review local changes and add them to the index to continue"
+    exit 1
+fi
+
