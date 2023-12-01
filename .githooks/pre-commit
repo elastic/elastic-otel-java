@@ -4,6 +4,8 @@ set -euo pipefail
 
 project_root="$(dirname $0)/../.."
 
+echo "working directory = $(pwd)"
+
 # Redirect output to stderr.
 exec 1>&2
 
@@ -12,8 +14,11 @@ ${project_root}/gradlew spotlessCheck
 reformat_needed=$?
 set -e
 
-if [ 0 != ${reformat_needed} ]; then
-    ${project_root}/gradlew spotlessApply
-    echo "ERROR: aborting commit command due to formatting errors, please review local changes and add them to the index to continue"
-    exit 1
+if [ 0 == ${reformat_needed} ]; then
+  exit 0
 fi
+
+${project_root}/gradlew spotlessApply
+echo "ERROR: aborting commit command due to formatting errors, please review local changes and add them to the index to continue"
+exit 1
+
