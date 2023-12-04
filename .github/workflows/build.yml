@@ -7,9 +7,6 @@ on:
   pull_request:
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
 
   # validate gradle wrapper binary https://github.com/gradle/wrapper-validation-action
