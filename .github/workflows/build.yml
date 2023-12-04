@@ -18,11 +18,6 @@ jobs:
 
   gradle:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      actions: read
-      # Write access for running the dorny/test-reporter step
-      checks: write
     steps:
 
       - name: Checkout
@@ -40,13 +35,12 @@ jobs:
         with:
           arguments: check
 
-      - name: Publish Test Results
-        uses: dorny/test-reporter@v1
-        if: success() || failure() # always run even if the previous step fails
+      - name: Store test results
+        if: success() || failure()
+        uses: actions/upload-artifact@v3
         with:
-          name: JUnit Tests
+          name: java-junit
           path: '**/build/test-results/test/TEST-*.xml'
-          reporter: java-junit
 
       - name: Agent artifact
         uses: actions/upload-artifact@v3
