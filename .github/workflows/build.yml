@@ -18,13 +18,18 @@ jobs:
 
   gradle:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      # Write access for running the dorny/test-reporter step
+      checks: write
     steps:
 
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Gradle JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
