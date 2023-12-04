@@ -7,6 +7,7 @@ on:
   workflow_run:
     workflows:
       - Build
+      - test-reporter
     types: [completed]
 
 jobs:
