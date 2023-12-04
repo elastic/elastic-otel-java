@@ -39,7 +39,7 @@ jobs:
         if: success() || failure()
         uses: actions/upload-artifact@v3
         with:
-          name: java-junit
+          name: test-results
           path: '**/build/test-results/test/TEST-*.xml'
 
       - name: Agent artifact
