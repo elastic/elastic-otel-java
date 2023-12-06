@@ -22,7 +22,7 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 
-public class FixedNanoClock implements NanoClock {
+public class FixedClock extends SpanAnchoredClock {
 
   private long nanoTime = -1L;
 

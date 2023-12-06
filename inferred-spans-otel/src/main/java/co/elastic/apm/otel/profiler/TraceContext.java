@@ -30,7 +30,7 @@ import javax.annotation.Nullable;
 /**
  * A mutable (and therefore recyclable) class storing the relevant bits of {@link SpanContext} for
  * generating inferred spans. Also stores a clock-anchor for the corresponding span obtained via
- * {@link NanoClock#getAnchor(Span)}.
+ * {@link SpanAnchoredClock#getAnchor(Span)}.
  */
 public class TraceContext implements Recyclable {
 

@@ -45,7 +45,7 @@ public class InferredSpansProcessor implements SpanProcessor {
 
   InferredSpansProcessor(
       InferredSpansConfiguration config,
-      NanoClock clock,
+      SpanAnchoredClock clock,
       boolean startScheduledProfiling,
       @Nullable File activationEventsFile,
       @Nullable File jfrFile) {
@@ -89,6 +89,7 @@ public class InferredSpansProcessor implements SpanProcessor {
   public CompletableResultCode shutdown() {
     CompletableResultCode result = new CompletableResultCode();
     logger.fine("Stopping Inferred Spans Processor");
+    //TODO: Replace with co.elastic.otel.util.ExecutorUtils
     Executors.newSingleThreadExecutor()
         .submit(
             () -> {

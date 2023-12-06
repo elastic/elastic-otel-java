@@ -23,7 +23,7 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 
-public class SpanAnchoredNanoClock implements NanoClock {
+public class SpanAnchoredClock {
   private final WeakConcurrentMap<Span, Long> nanoTimeOffsetMap = new WeakConcurrentMap<>(false);
 
   public void onSpanStart(ReadWriteSpan started, Context parentContext) {
@@ -40,22 +40,28 @@ public class SpanAnchoredNanoClock implements NanoClock {
     }
   }
 
-  @Override
   public long nanoTime() {
     return System.nanoTime();
   }
 
-  @Override
+  /**
+   * Returns a value which allows to translate timestamps obtained via {@link #nanoTime()}
+   * to absolute epoche time stamps based on the start-time of the given span.
+   * <p>
+   * This anchor value can be used in {@link #toEpochNanos(long, long)} to perform the translation.
+   */
   public long getAnchor(Span span) {
     return nanoTimeOffsetMap.get(span);
   }
 
-  @Override
+  /**
+   * Translates a timestamp obtained via {@link #nanoTime()} with the help of an anchor obtaines via {@link #getAnchor(Span)}
+   * to an absolute nano-precision epoch timestamp.
+   */
   public long toEpochNanos(long anchor, long recordedNanoTime) {
     return recordedNanoTime + anchor;
   }
 
-  @Override
   public void periodicCleanup() {
     nanoTimeOffsetMap.expungeStaleEntries();
   }

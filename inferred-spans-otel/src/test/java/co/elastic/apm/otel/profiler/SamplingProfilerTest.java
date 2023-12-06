@@ -137,7 +137,7 @@ class SamplingProfilerTest {
       SamplingProfiler otherProfiler =
           new SamplingProfiler(
               defaultConfig,
-              new FixedNanoClock(),
+              new FixedClock(),
               () -> sdk.getTracer("my-tracer"),
               tempFile1.toFile(),
               tempFile2.toFile());
@@ -255,7 +255,7 @@ class SamplingProfilerTest {
 
   @Test
   void ensurePeriodicCleanupInvoked() throws Exception {
-    NanoClock mockClock = Mockito.mock(NanoClock.class);
+    SpanAnchoredClock mockClock = Mockito.mock(SpanAnchoredClock.class);
     setupProfiler(config -> config.clock(mockClock));
     awaitProfilerStarted(setup.profiler);
 

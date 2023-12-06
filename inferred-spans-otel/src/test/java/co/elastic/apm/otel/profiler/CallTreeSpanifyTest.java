@@ -51,7 +51,7 @@ class CallTreeSpanifyTest {
   @DisabledOnOs(OS.WINDOWS)
   @DisabledOnAppleSilicon
   void testSpanification() throws Exception {
-    FixedNanoClock nanoClock = new FixedNanoClock();
+    FixedClock nanoClock = new FixedClock();
     try (ProfilerTestSetup setup =
         ProfilerTestSetup.create(
             config -> config.clock(nanoClock).startScheduledProfiling(false))) {
@@ -93,7 +93,7 @@ class CallTreeSpanifyTest {
 
   @Test
   void testCallTreeWithActiveSpan() {
-    FixedNanoClock nanoClock = new FixedNanoClock();
+    FixedClock nanoClock = new FixedClock();
 
     String traceId = "0af7651916cd43dd8448eb211c80319c";
     String rootSpanId = "b7ad6b7169203331";

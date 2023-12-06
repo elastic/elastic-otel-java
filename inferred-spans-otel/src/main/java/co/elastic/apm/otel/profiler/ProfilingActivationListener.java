@@ -32,10 +32,17 @@ import javax.annotation.Nullable;
 public class ProfilingActivationListener implements Closeable {
 
   static {
+    // ContextStorage.addWrapper must
+    // * happen before anyone accesses any Context
+    // * happen exactly once
+    // The "exactly" once part is why we use a static initializer:
+    // If an Otel-SDK is created and immediately shutdown again and if we create another SDK afterwards,
+    // we might accidentally register the wrapper twice
     ContextStorage.addWrapper(ContextStorageWrapper::new);
   }
 
-  public static void ensureInitialized() {
+  //For testing only
+  static void ensureInitialized() {
     // does nothing but ensures that the static initializer ran
   }
 

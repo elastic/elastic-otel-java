@@ -51,6 +51,7 @@ public class StackFrame {
   }
 
   public void appendFileName(StringBuilder replaceBuilder) {
+    final String unknownCodeSource = "<Unknown>";
     if (className != null) {
       int fileNameEnd = className.indexOf('$');
       if (fileNameEnd < 0) {
@@ -61,10 +62,10 @@ public class StackFrame {
         replaceBuilder.append(className, classNameStart + 1, fileNameEnd);
         replaceBuilder.append(".java");
       } else {
-        replaceBuilder.append("<Unknown>");
+        replaceBuilder.append(unknownCodeSource);
       }
     } else {
-      replaceBuilder.append("<Unknown>");
+      replaceBuilder.append(unknownCodeSource);
     }
   }
 

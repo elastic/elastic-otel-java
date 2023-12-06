@@ -128,8 +128,8 @@ class SamplingProfiler implements Runnable {
               active,
               Thread.currentThread().getId(),
               previouslyActive,
-              nanoClock.nanoTime(),
-              nanoClock);
+              clock.nanoTime(),
+              clock);
         }
       };
   private final EventTranslatorTwoArg<ActivationEvent, Span, Span> DEACTIVATION_EVENT_TRANSLATOR =
@@ -141,8 +141,8 @@ class SamplingProfiler implements Runnable {
               active,
               Thread.currentThread().getId(),
               previouslyActive,
-              nanoClock.nanoTime(),
-              nanoClock);
+              clock.nanoTime(),
+              clock);
         }
       };
   // sizeof(ActivationEvent) is 176B so the ring buffer should be around 880KiB
@@ -155,7 +155,7 @@ class SamplingProfiler implements Runnable {
   private final RingBuffer<ActivationEvent> eventBuffer;
   private volatile boolean profilingSessionOngoing = false;
   private final Sequence sequence;
-  private final NanoClock nanoClock;
+  private final SpanAnchoredClock clock;
   private final ObjectPool<CallTree.Root> rootPool;
   private final ThreadMatcher threadMatcher = new ThreadMatcher();
   private final EventPoller<ActivationEvent> poller;
@@ -198,12 +198,13 @@ class SamplingProfiler implements Runnable {
    */
   SamplingProfiler(
       InferredSpansConfiguration config,
-      NanoClock nanoClock,
+      SpanAnchoredClock nanoClock,
       Supplier<Tracer> tracerProvider,
       @Nullable File activationEventsFile,
       @Nullable File jfrFile) {
     this.config = config;
     this.tracerProvider = tracerProvider;
+    //TODO: replace with co.elastic.otel.util.ExecutorUtils
     this.scheduler =
         Executors.newSingleThreadScheduledExecutor(
             runnable -> {
@@ -211,7 +212,7 @@ class SamplingProfiler implements Runnable {
               result.setName("elastic-otel-inferred-spans");
               return result;
             });
-    this.nanoClock = nanoClock;
+    this.clock = nanoClock;
     this.eventBuffer = createRingBuffer();
     this.sequence = new Sequence();
     // tells the ring buffer to not override slots which have not been read yet
@@ -726,7 +727,7 @@ class SamplingProfiler implements Runnable {
   }
 
   public void start() {
-    scheduler.scheduleAtFixedRate(nanoClock::periodicCleanup, 500, 500, TimeUnit.MILLISECONDS);
+    scheduler.scheduleAtFixedRate(clock::periodicCleanup, 500, 500, TimeUnit.MILLISECONDS);
     scheduler.submit(this);
   }
 
@@ -795,8 +796,8 @@ class SamplingProfiler implements Runnable {
     return profilingSessions;
   }
 
-  public NanoClock getClock() {
-    return nanoClock;
+  public SpanAnchoredClock getClock() {
+    return clock;
   }
 
   public static class StackTraceEvent implements Comparable<StackTraceEvent> {
@@ -854,7 +855,7 @@ class SamplingProfiler implements Runnable {
         long threadId,
         @Nullable Span previousContext,
         long nanoTime,
-        NanoClock clock) {
+        SpanAnchoredClock clock) {
       set(context, threadId, true, previousContext, nanoTime, clock);
     }
 
@@ -863,7 +864,7 @@ class SamplingProfiler implements Runnable {
         long threadId,
         @Nullable Span previousContext,
         long nanoTime,
-        NanoClock clock) {
+        SpanAnchoredClock clock) {
       set(context, threadId, false, previousContext, nanoTime, clock);
     }
 
@@ -873,7 +874,7 @@ class SamplingProfiler implements Runnable {
         boolean activation,
         @Nullable Span previousContext,
         long nanoTime,
-        NanoClock clock) {
+        SpanAnchoredClock clock) {
       TraceContext.serialize(
           traceContext.getSpanContext(), clock.getAnchor(traceContext), traceContextBuffer);
       this.threadId = threadId;

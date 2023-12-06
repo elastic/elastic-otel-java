@@ -38,7 +38,7 @@ public class SamplingProfilerQueueTest {
 
     try (ProfilerTestSetup setup =
         ProfilerTestSetup.create(
-            config -> config.clock(new FixedNanoClock()).startScheduledProfiling(false))) {
+            config -> config.clock(new FixedClock()).startScheduledProfiling(false))) {
 
       setup.profiler.setProfilingSessionOngoing(true);
 

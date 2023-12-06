@@ -53,7 +53,7 @@ public class InferredSpansProcessorBuilder {
   private String profilerLibDirectory = null;
 
   // The following options are only intended to be modified in tests
-  private NanoClock clock = new SpanAnchoredNanoClock();
+  private SpanAnchoredClock clock = new SpanAnchoredClock();
   private boolean startScheduledProfiling = true;
   private @Nullable File activationEventsFile = null;
   private @Nullable File jfrFile = null;
@@ -175,7 +175,7 @@ public class InferredSpansProcessorBuilder {
   }
 
   /** For testing only. */
-  InferredSpansProcessorBuilder clock(NanoClock clock) {
+  InferredSpansProcessorBuilder clock(SpanAnchoredClock clock) {
     this.clock = clock;
     return this;
   }

@@ -446,7 +446,7 @@ public class CallTree implements Recyclable {
       CallTree.Root root,
       @Nullable Span parentSpan,
       TraceContext parentContext,
-      NanoClock clock,
+      SpanAnchoredClock clock,
       StringBuilder tempBuilder,
       Tracer tracer) {
     int createdSpans = 0;
@@ -481,7 +481,7 @@ public class CallTree implements Recyclable {
       @Nullable Span parentSpan,
       TraceContext parentContext,
       Tracer tracer,
-      NanoClock clock,
+      SpanAnchoredClock clock,
       StringBuilder tempBuilder) {
 
     Context parentOtelCtx;
@@ -868,7 +868,7 @@ public class CallTree implements Recyclable {
      * possible to update the {@link TraceContext#parentId} of a regular span so that it correctly
      * reflects being a child of an inferred span.
      */
-    public int spanify(NanoClock clock, Tracer tracer) {
+    public int spanify(SpanAnchoredClock clock, Tracer tracer) {
       StringBuilder tempBuilder = new StringBuilder();
       int createdSpans = 0;
       List<CallTree> callTrees = getChildren();
