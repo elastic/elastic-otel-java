@@ -6,8 +6,8 @@ dependencies {
   annotationProcessor(libs.autoservice.processor)
   compileOnly(libs.autoservice.annotations)
 
-  implementation(libs.assertj.core)
-  implementation("io.opentelemetry:opentelemetry-sdk-testing")
+  api(libs.assertj.core)
+  api("io.opentelemetry:opentelemetry-sdk-testing")
   implementation("io.opentelemetry:opentelemetry-exporter-logging")
   implementation(enforcedPlatform("org.junit:junit-bom:" + catalog.versions.junit.get()))
   implementation("org.junit.jupiter:junit-jupiter")

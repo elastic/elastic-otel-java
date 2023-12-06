@@ -21,7 +21,7 @@ package co.elastic.otel.profiler;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 
 import co.elastic.otel.profiler.pooling.ObjectPool;
-import co.elastic.otel.profiler.util.DisabledOnAppleSilicon;
+import co.elastic.otel.testing.DisabledOnAppleSilicon;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
