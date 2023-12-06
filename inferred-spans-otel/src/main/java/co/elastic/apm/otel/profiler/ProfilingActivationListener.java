@@ -37,8 +37,7 @@ public class ProfilingActivationListener implements Closeable {
     // * happen exactly once
     // The "exactly" once part is why we use a static initializer:
     // If an Otel-SDK is created and immediately shutdown again and if we create another SDK
-    // afterwards,
-    // we might accidentally register the wrapper twice
+    // afterwards, we might accidentally register the wrapper twice
     ContextStorage.addWrapper(ContextStorageWrapper::new);
   }
 
@@ -47,6 +46,9 @@ public class ProfilingActivationListener implements Closeable {
     // does nothing but ensures that the static initializer ran
   }
 
+  // In normal use-cases there is only one ProfilingActivationListener active or zero
+  // (e.g. after SDK shutdown). However, in theory nothing prevents users from starting
+  // two SDKs at the same time, so it is safest to use a List here.
   private static volatile List<ProfilingActivationListener> activeListeners =
       Collections.emptyList();
 
