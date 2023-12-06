@@ -125,11 +125,7 @@ class SamplingProfiler implements Runnable {
         public void translateTo(
             ActivationEvent event, long sequence, Span active, Span previouslyActive) {
           event.activation(
-              active,
-              Thread.currentThread().getId(),
-              previouslyActive,
-              clock.nanoTime(),
-              clock);
+              active, Thread.currentThread().getId(), previouslyActive, clock.nanoTime(), clock);
         }
       };
   private final EventTranslatorTwoArg<ActivationEvent, Span, Span> DEACTIVATION_EVENT_TRANSLATOR =
@@ -138,11 +134,7 @@ class SamplingProfiler implements Runnable {
         public void translateTo(
             ActivationEvent event, long sequence, Span active, Span previouslyActive) {
           event.deactivation(
-              active,
-              Thread.currentThread().getId(),
-              previouslyActive,
-              clock.nanoTime(),
-              clock);
+              active, Thread.currentThread().getId(), previouslyActive, clock.nanoTime(), clock);
         }
       };
   // sizeof(ActivationEvent) is 176B so the ring buffer should be around 880KiB
@@ -204,7 +196,7 @@ class SamplingProfiler implements Runnable {
       @Nullable File jfrFile) {
     this.config = config;
     this.tracerProvider = tracerProvider;
-    //TODO: replace with co.elastic.otel.util.ExecutorUtils
+    // TODO: replace with co.elastic.otel.util.ExecutorUtils
     this.scheduler =
         Executors.newSingleThreadScheduledExecutor(
             runnable -> {

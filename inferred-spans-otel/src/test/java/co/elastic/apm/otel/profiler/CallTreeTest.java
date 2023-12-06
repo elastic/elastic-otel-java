@@ -139,9 +139,9 @@ class CallTreeTest {
     assertCallTree(
         new String[] {" bb bb", "aaaaaa"},
         new Object[][] {
-            {"a", 6},
-            {"  b", 2},
-            {"  b", 2}
+          {"a", 6},
+          {"  b", 2},
+          {"  b", 2}
         });
   }
 
@@ -150,14 +150,14 @@ class CallTreeTest {
     assertCallTree(
         new String[] {" cc ", " bbb", "aaaa"},
         new Object[][] {
-            {"a", 4},
-            {"  b", 3},
-            {"    c", 2}
+          {"a", 4},
+          {"  b", 3},
+          {"    c", 2}
         },
         new Object[][] {
-            {"a", 3},
-            {"  b", 2},
-            {"    c", 1}
+          {"a", 3},
+          {"  b", 2},
+          {"    c", 1}
         });
   }
 
@@ -166,14 +166,14 @@ class CallTreeTest {
     assertCallTree(
         new String[] {" dd ", " cc ", " bb ", "aaaa"},
         new Object[][] {
-            {"a", 4},
-            {"  b", 2},
-            {"    c", 2},
-            {"      d", 2}
+          {"a", 4},
+          {"  b", 2},
+          {"    c", 2},
+          {"      d", 2}
         },
         new Object[][] {
-            {"a", 3},
-            {"  d", 1, List.of("c", "b")}
+          {"a", 3},
+          {"  d", 1, List.of("c", "b")}
         });
   }
 
@@ -188,10 +188,10 @@ class CallTreeTest {
     assertCallTree(
         new String[] {"cccc", "aabb"},
         new Object[][] {
-            {"a", 2},
-            {"  c", 2},
-            {"b", 2},
-            {"  c", 2},
+          {"a", 2},
+          {"  c", 2},
+          {"b", 2},
+          {"  c", 2},
         });
   }
 
@@ -200,12 +200,12 @@ class CallTreeTest {
     assertCallTree(
         new String[] {"bbccbbcc", "bbbbbbbb", "aaaaaaaa"},
         new Object[][] {
-            {"a", 8},
-            {"  b", 8},
-            {"    b", 2},
-            {"    c", 2},
-            {"    b", 2},
-            {"    c", 2},
+          {"a", 8},
+          {"  b", 8},
+          {"    b", 2},
+          {"    c", 2},
+          {"    b", 2},
+          {"    c", 2},
         });
   }
 
@@ -214,11 +214,11 @@ class CallTreeTest {
     assertCallTree(
         new String[] {"bb", "aa"},
         new Object[][] {
-            {"a", 2},
-            {"  b", 2},
+          {"a", 2},
+          {"  b", 2},
         },
         new Object[][] {
-            {"b", 1},
+          {"b", 1},
         });
   }
 
@@ -227,19 +227,19 @@ class CallTreeTest {
     assertCallTree(
         new String[] {"    cc ee   ", "   bbb dd   ", " a aaaaaa a ", "1 2      2 1"},
         new Object[][] {
-            {"a", 8},
-            {"  b", 3},
-            {"    c", 2},
-            {"  d", 2},
-            {"    e", 2},
+          {"a", 8},
+          {"  b", 3},
+          {"    c", 2},
+          {"  d", 2},
+          {"    e", 2},
         },
         new Object[][] {
-            {"1", 11},
-            {"  a", 9},
-            {"    2", 7},
-            {"      b", 2},
-            {"        c", 1},
-            {"      e", 1, List.of("d")},
+          {"1", 11},
+          {"  a", 9},
+          {"    2", 7},
+          {"      b", 2},
+          {"        c", 1},
+          {"      e", 1, List.of("d")},
         });
   }
 
@@ -255,25 +255,25 @@ class CallTreeTest {
   void testDeactivationBeforeEnd() throws Exception {
     assertCallTree(
         new String[] {
-            "   dd      ",
-            "   cccc c  ",
-            "   bbbb bb ", // <- deactivation for span 2 happens before b and c ends
-            " a aaaa aa ", //    that means b and c must have started before 2 has been activated
-            "1 2    2  1" //    but we saw the first stack trace of b only after the activation of 2
+          "   dd      ",
+          "   cccc c  ",
+          "   bbbb bb ", // <- deactivation for span 2 happens before b and c ends
+          " a aaaa aa ", //    that means b and c must have started before 2 has been activated
+          "1 2    2  1" //    but we saw the first stack trace of b only after the activation of 2
         },
         new Object[][] {
-            {"a", 7},
-            {"  b", 6},
-            {"    c", 5},
-            {"      d", 2},
+          {"a", 7},
+          {"  b", 6},
+          {"    c", 5},
+          {"      d", 2},
         },
         new Object[][] {
-            {"1", 10},
-            {"  a", 8},
-            {"    b", 7},
-            {"      c", 6},
-            {"        2", 5},
-            {"          d", 1},
+          {"1", 10},
+          {"  a", 8},
+          {"    b", 7},
+          {"      c", 6},
+          {"        2", 5},
+          {"          d", 1},
         });
   }
 
@@ -288,15 +288,15 @@ class CallTreeTest {
     assertCallTree(
         new String[] {"   bbbb b     ", " a aaaa a a a ", "1 2    2 3 3 1"},
         new Object[][] {
-            {"a", 8},
-            {"  b", 5},
+          {"a", 8},
+          {"  b", 5},
         },
         new Object[][] {
-            {"1", 13},
-            {"  a", 11},
-            {"    b", 6},
-            {"      2", 5},
-            {"    3", 2},
+          {"1", 13},
+          {"  a", 11},
+          {"    b", 6},
+          {"      2", 5},
+          {"    3", 2},
         });
   }
 
@@ -313,15 +313,15 @@ class CallTreeTest {
         assertCallTree(
             new String[] {"      c c ", "      b b ", "a   a a aa", " 1 1 2 2  "},
             new Object[][] {
-                {"a", 5},
-                {"  b", 2},
-                {"    c", 2},
+              {"a", 5},
+              {"  b", 2},
+              {"    c", 2},
             },
             new Object[][] {
-                {"a", 9},
-                {"  1", 2},
-                {"  c", 3, List.of("b")},
-                {"    2", 2},
+              {"a", 9},
+              {"  1", 2},
+              {"  c", 3, List.of("b")},
+              {"    2", 2},
             });
     assertThat(spans.get("a").getLinks())
         .hasSize(1)
@@ -346,16 +346,16 @@ class CallTreeTest {
         assertCallTree(
             new String[] {"       c  c ", "       b  b ", "a   a  a  aa", " 1 1 23 32  "},
             new Object[][] {
-                {"a", 5},
-                {"  b", 2},
-                {"    c", 2},
+              {"a", 5},
+              {"  b", 2},
+              {"    c", 2},
             },
             new Object[][] {
-                {"a", 11},
-                {"  1", 2},
-                {"  c", 4, List.of("b")},
-                {"    2", 4},
-                {"      3", 2},
+              {"a", 11},
+              {"  1", 2},
+              {"  c", 4, List.of("b")},
+              {"    2", 4},
+              {"      3", 2},
             });
     assertThat(spans.get("a").getLinks())
         .hasSize(1)
@@ -376,13 +376,13 @@ class CallTreeTest {
     assertCallTree(
         new String[] {"bb   ", "aa a ", "  1 1"},
         new Object[][] {
-            {"a", 3},
-            {"  b", 2},
+          {"a", 3},
+          {"  b", 2},
         },
         new Object[][] {
-            {"a", 3},
-            {"  b", 1},
-            {"  1", 2}
+          {"a", 3},
+          {"  b", 1},
+          {"  1", 2}
         });
   }
 
@@ -395,13 +395,13 @@ class CallTreeTest {
     assertCallTree(
         new String[] {"bb   ", "aa  a", "  11 "},
         new Object[][] {
-            {"a", 3},
-            {"  b", 2},
+          {"a", 3},
+          {"  b", 2},
         },
         new Object[][] {
-            {"a", 4},
-            {"  b", 1},
-            {"  1", 1},
+          {"a", 4},
+          {"  b", 1},
+          {"  1", 1},
         });
   }
 
@@ -415,13 +415,13 @@ class CallTreeTest {
     assertCallTree(
         new String[] {" c   ", "bb   ", "aa  a", "  11 "},
         new Object[][] {
-            {"a", 3},
-            {"  b", 2},
+          {"a", 3},
+          {"  b", 2},
         },
         new Object[][] {
-            {"a", 4},
-            {"  b", 1},
-            {"  1", 1},
+          {"a", 4},
+          {"  b", 1},
+          {"  1", 1},
         });
   }
 
@@ -435,14 +435,14 @@ class CallTreeTest {
     assertCallTree(
         new String[] {"c  d   ", "b  b   ", "a  a  a", " 11 22 "},
         new Object[][] {
-            {"a", 3},
-            {"  b", 2},
+          {"a", 3},
+          {"  b", 2},
         },
         new Object[][] {
-            {"a", 6},
-            {"  b", 3},
-            {"    1", 1},
-            {"  2", 1},
+          {"a", 6},
+          {"  b", 3},
+          {"    1", 1},
+          {"  2", 1},
         });
   }
 
@@ -483,12 +483,12 @@ class CallTreeTest {
     assertCallTree(
         new String[] {"a  a  a", " 12 21 "},
         new Object[][] {
-            {"a", 3},
+          {"a", 3},
         },
         new Object[][] {
-            {"a", 6},
-            {"  1", 4},
-            {"    2", 2},
+          {"a", 6},
+          {"  1", 4},
+          {"    2", 2},
         });
   }
 
@@ -504,16 +504,16 @@ class CallTreeTest {
         assertCallTree(
             new String[] {" bbb        ", " aaa  ccc   ", "1   23   321"},
             new Object[][] {
-                {"a", 3},
-                {"  b", 3},
-                {"c", 3},
+              {"a", 3},
+              {"  b", 3},
+              {"c", 3},
             },
             new Object[][] {
-                {"1", 11},
-                {"  b", 2, List.of("a")},
-                {"  2", 6},
-                {"    3", 4},
-                {"      c", 2}
+              {"1", 11},
+              {"  b", 2, List.of("a")},
+              {"  2", 6},
+              {"    3", 4},
+              {"      c", 2}
             });
 
     assertThat(spans.get("b").getLinks()).isEmpty();
@@ -530,17 +530,17 @@ class CallTreeTest {
     assertCallTree(
         new String[] {"   d          ", " b b b        ", " a a a  ccc   ", "1 2 2 34   431"},
         new Object[][] {
-            {"a", 3},
-            {"  b", 3},
-            {"c", 3},
+          {"a", 3},
+          {"  b", 3},
+          {"c", 3},
         },
         new Object[][] {
-            {"1", 13},
-            {"  b", 4, List.of("a")},
-            {"    2", 2},
-            {"  3", 6},
-            {"    4", 4},
-            {"      c", 2}
+          {"1", 13},
+          {"  b", 4, List.of("a")},
+          {"    2", 2},
+          {"  3", 6},
+          {"    4", 4},
+          {"      c", 2}
         });
   }
 
@@ -557,18 +557,18 @@ class CallTreeTest {
         assertCallTree(
             new String[] {"  b b b  ccc    ", " aa a a  aaa  a ", "1  2 2 34   43 1"},
             new Object[][] {
-                {"a", 8},
-                {"  b", 3},
-                {"  c", 3},
+              {"a", 8},
+              {"  b", 3},
+              {"  c", 3},
             },
             new Object[][] {
-                {"1", 15},
-                {"  a", 13},
-                {"    b", 4},
-                {"      2", 2},
-                {"    3", 6},
-                {"      4", 4},
-                {"        c", 2}
+              {"1", 15},
+              {"  a", 13},
+              {"    b", 4},
+              {"      2", 2},
+              {"    3", 6},
+              {"      4", 4},
+              {"        c", 2}
             });
 
     assertThat(spans.get("b").getLinks())
@@ -606,15 +606,15 @@ class CallTreeTest {
     assertCallTree(
         new String[] {"     ccc  ", " aaa bbb  ", "1   2   21"},
         new Object[][] {
-            {"a", 3},
-            {"b", 3},
-            {"  c", 3},
+          {"a", 3},
+          {"b", 3},
+          {"  c", 3},
         },
         new Object[][] {
-            {"1", 9},
-            {"  a", 2},
-            {"  2", 4},
-            {"    c", 2, List.of("b")}
+          {"1", 9},
+          {"  a", 2},
+          {"  2", 4},
+          {"    c", 2, List.of("b")}
         });
   }
 
@@ -629,14 +629,14 @@ class CallTreeTest {
     assertCallTree(
         new String[] {" aaa bbb  ", "1   2   21"},
         new Object[][] {
-            {"a", 3},
-            {"b", 3},
+          {"a", 3},
+          {"b", 3},
         },
         new Object[][] {
-            {"1", 9},
-            {"  a", 2},
-            {"  2", 4},
-            {"    b", 2}
+          {"1", 9},
+          {"  a", 2},
+          {"  2", 4},
+          {"    b", 2}
         });
   }
 
@@ -668,14 +668,14 @@ class CallTreeTest {
     assertCallTree(
         new String[] {"     ccc  ", " aaa aaa  ", "1   2   21"},
         new Object[][] {
-            {"a", 6},
-            {"  c", 3},
+          {"a", 6},
+          {"  c", 3},
         },
         new Object[][] {
-            {"1", 9},
-            {"  a", 6},
-            {"    2", 4},
-            {"      c", 2}
+          {"1", 9},
+          {"  a", 6},
+          {"    2", 4},
+          {"      c", 2}
         });
   }
 
@@ -690,14 +690,14 @@ class CallTreeTest {
     assertCallTree(
         new String[] {"   bbb   ", " a aaa a ", "1 2   2 1"},
         new Object[][] {
-            {"a", 5},
-            {"  b", 3},
+          {"a", 5},
+          {"  b", 3},
         },
         new Object[][] {
-            {"1", 8},
-            {"  a", 6},
-            {"    2", 4},
-            {"      b", 2}
+          {"1", 8},
+          {"  a", 6},
+          {"    2", 4},
+          {"      b", 2}
         });
   }
 
@@ -713,25 +713,25 @@ class CallTreeTest {
   void testDectivationAfterEnd() throws Exception {
     assertCallTree(
         new String[] {
-            "     dd     ",
-            "   c ccc    ",
-            "  bb bbb    ", // <- deactivation for span 2 happens after b ends
-            " aaa aaa aa ", //    that means b must have ended after 2 has been deactivated
-            "1   2   2  1" //    but we saw the last stack trace of b before the deactivation of 2
+          "     dd     ",
+          "   c ccc    ",
+          "  bb bbb    ", // <- deactivation for span 2 happens after b ends
+          " aaa aaa aa ", //    that means b must have ended after 2 has been deactivated
+          "1   2   2  1" //    but we saw the last stack trace of b before the deactivation of 2
         },
         new Object[][] {
-            {"a", 8},
-            {"  b", 5},
-            {"    c", 4},
-            {"      d", 2},
+          {"a", 8},
+          {"  b", 5},
+          {"    c", 4},
+          {"      d", 2},
         },
         new Object[][] {
-            {"1", 11},
-            {"  a", 9},
-            {"    b", 6},
-            {"      c", 5},
-            {"        2", 4},
-            {"          d", 1},
+          {"1", 11},
+          {"  a", 9},
+          {"    b", 6},
+          {"      c", 5},
+          {"        2", 4},
+          {"          d", 1},
         });
   }
 
@@ -741,9 +741,9 @@ class CallTreeTest {
         new String[] {"    b    ", " aa a aa ", "1  2 2  1"},
         new Object[][] {{"a", 5}},
         new Object[][] {
-            {"1", 8},
-            {"  a", 6},
-            {"    2", 2},
+          {"1", 8},
+          {"  a", 6},
+          {"    2", 2},
         });
   }
 
@@ -762,9 +762,9 @@ class CallTreeTest {
         new String[] {"   c  c   ", "   b  b   ", " aaa  aaa ", "1   22   1"},
         new Object[][] {{"a", 6}},
         new Object[][] {
-            {"1", 9},
-            {"  a", 7},
-            {"    2", 1},
+          {"1", 9},
+          {"  a", 7},
+          {"    2", 1},
         });
   }
 
@@ -774,9 +774,9 @@ class CallTreeTest {
         new String[] {" aa  aa ", "1  22  1"},
         new Object[][] {{"a", 4}},
         new Object[][] {
-            {"1", 7},
-            {"  a", 5},
-            {"    2", 1},
+          {"1", 7},
+          {"  a", 5},
+          {"    2", 1},
         });
   }
 
@@ -786,10 +786,10 @@ class CallTreeTest {
         new String[] {" aa  aaa  aa ", "1  22   33  1"},
         new Object[][] {{"a", 7}},
         new Object[][] {
-            {"1", 12},
-            {"  a", 10},
-            {"    2", 1},
-            {"    3", 1},
+          {"1", 12},
+          {"  a", 10},
+          {"    2", 1},
+          {"    3", 1},
         });
   }
 
@@ -809,10 +809,10 @@ class CallTreeTest {
         new String[] {"  b  b c  c  ", " aa  aaa  aa ", "1  22   33  1"},
         new Object[][] {{"a", 7}},
         new Object[][] {
-            {"1", 12},
-            {"  a", 10},
-            {"    2", 1},
-            {"    3", 1},
+          {"1", 12},
+          {"  a", 10},
+          {"    2", 1},
+          {"    3", 1},
         });
   }
 
@@ -821,15 +821,15 @@ class CallTreeTest {
     assertCallTree(
         new String[] {"         bb    ", " aa  aaa aa aa ", "1  22   3  3  1"},
         new Object[][] {
-            {"a", 9},
-            {"  b", 2}
+          {"a", 9},
+          {"  b", 2}
         },
         new Object[][] {
-            {"1", 14},
-            {"  a", 12},
-            {"    2", 1},
-            {"    3", 3},
-            {"      b", 1},
+          {"1", 14},
+          {"  a", 12},
+          {"    2", 1},
+          {"    3", 3},
+          {"      b", 1},
         });
   }
 
@@ -846,12 +846,12 @@ class CallTreeTest {
     assertCallTree(
         new String[] {"  aaa ", "12 2 1"},
         new Object[][] {
-            {"a", 3},
+          {"a", 3},
         },
         new Object[][] {
-            {"1", 5},
-            {"  a", 3}, // a is actually a child of the transaction
-            {"    2", 2}, // 2 is not within the child_ids of a
+          {"1", 5},
+          {"  a", 3}, // a is actually a child of the transaction
+          {"    2", 2}, // 2 is not within the child_ids of a
         });
   }
 

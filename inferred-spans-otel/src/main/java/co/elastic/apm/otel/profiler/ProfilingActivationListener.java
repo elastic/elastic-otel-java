@@ -36,12 +36,13 @@ public class ProfilingActivationListener implements Closeable {
     // * happen before anyone accesses any Context
     // * happen exactly once
     // The "exactly" once part is why we use a static initializer:
-    // If an Otel-SDK is created and immediately shutdown again and if we create another SDK afterwards,
+    // If an Otel-SDK is created and immediately shutdown again and if we create another SDK
+    // afterwards,
     // we might accidentally register the wrapper twice
     ContextStorage.addWrapper(ContextStorageWrapper::new);
   }
 
-  //For testing only
+  // For testing only
   static void ensureInitialized() {
     // does nothing but ensures that the static initializer ran
   }

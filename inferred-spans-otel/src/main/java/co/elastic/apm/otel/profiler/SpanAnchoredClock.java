@@ -45,18 +45,19 @@ public class SpanAnchoredClock {
   }
 
   /**
-   * Returns a value which allows to translate timestamps obtained via {@link #nanoTime()}
-   * to absolute epoche time stamps based on the start-time of the given span.
-   * <p>
-   * This anchor value can be used in {@link #toEpochNanos(long, long)} to perform the translation.
+   * Returns a value which allows to translate timestamps obtained via {@link #nanoTime()} to
+   * absolute epoche time stamps based on the start-time of the given span.
+   *
+   * <p>This anchor value can be used in {@link #toEpochNanos(long, long)} to perform the
+   * translation.
    */
   public long getAnchor(Span span) {
     return nanoTimeOffsetMap.get(span);
   }
 
   /**
-   * Translates a timestamp obtained via {@link #nanoTime()} with the help of an anchor obtaines via {@link #getAnchor(Span)}
-   * to an absolute nano-precision epoch timestamp.
+   * Translates a timestamp obtained via {@link #nanoTime()} with the help of an anchor obtaines via
+   * {@link #getAnchor(Span)} to an absolute nano-precision epoch timestamp.
    */
   public long toEpochNanos(long anchor, long recordedNanoTime) {
     return recordedNanoTime + anchor;
