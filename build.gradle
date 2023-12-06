@@ -18,8 +18,8 @@ subprojects {
   ext {
     deps = [
         autoservice: [
-            "com.google.auto.service:auto-service:" + libraries.versions.autoservice.get(),
-            "com.google.auto.service:auto-service-annotations:" + libraries.versions.autoservice.get(),
+            "com.google.auto.service:auto-service:" + catalog.versions.autoservice.get(),
+            "com.google.auto.service:auto-service-annotations:" + catalog.versions.autoservice.get(),
         ]
     ]
   }
@@ -43,15 +43,15 @@ subprojects {
 
   dependencies {
 
-    implementation(platform("io.opentelemetry:opentelemetry-bom:" + libraries.versions.opentelemetrySdk.get().toString()))
+    implementation(platform(catalog.opentelemetryBom))
 
     // these serve as a test of the instrumentation boms
-    implementation(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:" + libraries.versions.opentelemetryJavaagent.get().toString()))
-    implementation(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:" + libraries.versions.opentelemetryJavaagentAlpha.get().toString()))
+    implementation(platform(catalog.opentelemetryInstrumentationBom))
+    implementation(platform(catalog.opentelemetryInstrumentationAlphaBom))
 
     testImplementation("org.mockito:mockito-core:5.5.0")
 
-    testImplementation(enforcedPlatform("org.junit:junit-bom:" + libraries.versions.junit.get().toString()))
+    testImplementation(enforcedPlatform("org.junit:junit-bom:" + catalog.versions.junit.get().toString()))
     testImplementation("org.junit.jupiter:junit-jupiter")
   }
 
@@ -63,5 +63,16 @@ subprojects {
     compileJava {
       options.release.set(8)
     }
+  }
+}
+
+task copyGitHooks(type:Copy) {
+  from layout.projectDirectory.dir(".githooks")
+  into layout.projectDirectory.dir(".git").dir("hooks")
+}
+
+tasks.configure {
+  doLast {
+    copyGitHooks
   }
 }

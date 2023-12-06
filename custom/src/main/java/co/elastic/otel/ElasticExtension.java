@@ -18,24 +18,47 @@
  */
 package co.elastic.otel;
 
+import co.elastic.otel.resources.ElasticResourceProvider;
+import co.elastic.otel.util.ExecutorUtils;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.context.ContextStorage;
+import io.opentelemetry.context.internal.shaded.WeakConcurrentMap;
+import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ElasticExtension {
+
+  private static final Logger logger = Logger.getLogger(ElasticExtension.class.getName());
 
   public static final ElasticExtension INSTANCE = new ElasticExtension();
 
   private final ElasticProfiler profiler;
   private final ElasticBreakdownMetrics breakdownMetrics;
   private final ElasticSpanProcessor spanProcessor;
+  private final ExecutorService asyncInitExecutor;
   private ElasticSpanExporter spanExporter;
+  private WeakConcurrentMap<Resource, Resource> cachedResources =
+      new WeakConcurrentMap.WithInlinedExpunction<>();
+  private Resource extraResource;
+  private Future<Resource> resourceFuture;
 
   private ElasticExtension() {
     this.profiler = new ElasticProfiler();
     this.breakdownMetrics = new ElasticBreakdownMetrics();
     this.spanProcessor = new ElasticSpanProcessor(profiler, breakdownMetrics);
+
+    this.asyncInitExecutor =
+        Executors.newSingleThreadExecutor(ExecutorUtils.threadFactory("resource-init", true));
   }
 
   public void registerOpenTelemetry(OpenTelemetry openTelemetry) {
@@ -56,6 +79,32 @@ public class ElasticExtension {
     profiler.registerExporter(toWrap);
     spanExporter = new ElasticSpanExporter(toWrap);
     breakdownMetrics.registerSpanExporter(spanExporter);
+    spanProcessor.registerSpanExporter(spanExporter);
     return spanExporter;
+  }
+
+  public void registerResourceProvider(ElasticResourceProvider resourceProvider) {
+    this.resourceFuture = asyncInitExecutor.submit(resourceProvider::getExtraResource);
+  }
+
+  public Resource wrapResource(Resource resource) {
+    // because original resources are immutable
+    Resource result = cachedResources.get(resource);
+    if (result != null) {
+      return result;
+    }
+    Objects.requireNonNull(resourceFuture);
+    try {
+      extraResource = resourceFuture.get(5, TimeUnit.SECONDS);
+      result = resource.merge(extraResource);
+      cachedResources.put(resource, result);
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      logger.log(Level.WARNING, "unable capture resource attributes", e);
+    }
+    return result;
+  }
+
+  public void shutdown() {
+    ExecutorUtils.shutdownAndWaitTermination(asyncInitExecutor);
   }
 }

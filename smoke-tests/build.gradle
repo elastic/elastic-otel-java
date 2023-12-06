@@ -3,7 +3,7 @@ import jdk.internal.joptsimple.internal.Strings
 // TODO : convert to kotlin for consistency
 plugins {
   id "java"
-  alias gradlePlugins.plugins.taskinfo
+  alias catalog.plugins.taskinfo
 }
 
 configurations {

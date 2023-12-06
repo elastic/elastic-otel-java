@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-  alias(gradlePlugins.plugins.shadow)
+  alias(catalog.plugins.shadow)
 }
 
 apply from: "$rootDir/gradle/shadow.gradle"
@@ -29,7 +29,7 @@ configurations {
 dependencies {
   bootstrapLibs(project(":bootstrap"))
   // and finally include everything from otel agent for testing
-  upstreamAgent("io.opentelemetry.javaagent:opentelemetry-agent-for-testing:"+libraries.versions.opentelemetryJavaagentAlpha.get().toString())
+  upstreamAgent(catalog.opentelemetryJavaagentForTesting)
 }
 
 CopySpec isolateClasses(Iterable<File> jars) {
@@ -114,7 +114,7 @@ tasks {
       attributes.put("Can-Redefine-Classes", "true")
       attributes.put("Can-Retransform-Classes", "true")
       attributes.put("Implementation-Vendor", "Elastic")
-      attributes.put("Implementation-Version", "elastic-${project.version}-otel-" + libraries.versions.opentelemetryJavaagent.get().toString())
+      attributes.put("Implementation-Version", "elastic-${project.version}-otel-" + catalog.versions.opentelemetryJavaagent.get().toString())
     }
   }
 

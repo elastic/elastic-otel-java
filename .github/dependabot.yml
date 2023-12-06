@@ -1,0 +1,26 @@
+---
+version: 2
+
+registries:
+
+updates:
+  # GitHub actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "22:00"
+    reviewers:
+      - "elastic/observablt-ci"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  # Gradle
+  - package-ecosystem: "gradle"
+    directory: "/gradle/" # for now only on the version catalog to prevent noise
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10

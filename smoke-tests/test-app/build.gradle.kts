@@ -1,7 +1,7 @@
 plugins {
-  alias(gradlePlugins.plugins.shadow)
-  alias(gradlePlugins.plugins.jib)
-  alias(gradlePlugins.plugins.taskinfo)
+  alias(catalog.plugins.shadow)
+  alias(catalog.plugins.jib)
+  alias(catalog.plugins.taskinfo)
 }
 
 dependencies {

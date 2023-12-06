@@ -1,5 +1,5 @@
 plugins {
-  alias(gradlePlugins.plugins.taskinfo)
+  alias(catalog.plugins.taskinfo)
   war
 }
 
