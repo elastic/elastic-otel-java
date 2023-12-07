@@ -35,9 +35,16 @@ subprojects {
 
   spotless {
     java {
-      googleJavaFormat()
-      licenseHeaderFile(rootProject.file("buildscripts/spotless.license.java"), "(package|import|public)")
       target("src/**/*.java")
+      googleJavaFormat()
+
+      licenseHeaderFile(rootProject.file("buildscripts/spotless.license.java"), "(package|import|public)")
+          .named("default")
+
+      licenseHeaderFile(rootProject.file("buildscripts/spotless.reallogic.license.java"), "(package|import|public)")
+          .named("reallogic")
+          .onlyIfContentMatches("package co.elastic.apm.otel.profiler.collections;")
+
     }
   }
 

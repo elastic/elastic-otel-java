@@ -31,16 +31,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package co.elastic.apm.otel.profiler.collections;
-
-/** This is an (int, int) primitive specialisation of a BiConsumer */
-@FunctionalInterface
-public interface IntIntConsumer {
-  /**
-   * Accept two values that comes as a tuple of ints.
-   *
-   * @param valueOne for the tuple.
-   * @param valueTwo for the tuple.
-   */
-  void accept(int valueOne, int valueTwo);
-}
