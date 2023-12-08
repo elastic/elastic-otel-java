@@ -31,5 +31,3 @@ spec:
           access_level: BUILD_AND_READ
         everyone:
           access_level: READ_ONLY
-
-
