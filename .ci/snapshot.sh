@@ -24,12 +24,13 @@ echo $PATH
 java -version
 
 set +x
-echo "--- Deploy the snapshot :package:"
 
-cmd="./gradlew --console=plain --quiet clean assemble"
+dry_run_arg=''
 if [[ "$dry_run" == "true" ]] ; then
-  echo "dry-run mode, command that would have been executed:"
-  echo "  ${cmd}"
+    dry_run_arg='--dry-run'
+    echo "--- Deploy the snapshot :package: (dry-run)"
 else
-  ${cmd}
+    echo "--- Deploy the snapshot :package:"
 fi
+
+./gradlew --console=plain ${dry_run_arg} clean assemble
