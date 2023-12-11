@@ -26,9 +26,10 @@ java -version
 set +x
 echo "--- Deploy the snapshot :package:"
 
-echo "---> no-op until plumbing is working as expected <---"
-#if [[ "$dry_run" == "true" ]] ; then
-#  echo './mvnw -V -s .ci/settings.xml -Pgpg clean deploy -DskipTests --batch-mode'
-#else
-#  ./mvnw -V -s .ci/settings.xml -Pgpg clean deploy -DskipTests --batch-mode | tee snapshot.txt
-#fi
+cmd="./gradlew --console=plain --quiet clean assemble"
+if [[ "$dry_run" == "true" ]] ; then
+  echo "dry-run mode, command that would have been executed:"
+  echo "  ${cmd}"
+else
+  ${cmd}
+fi
