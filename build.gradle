@@ -43,7 +43,7 @@ subprojects {
 
       licenseHeaderFile(rootProject.file("buildscripts/spotless.reallogic.license.java"), "(package|import|public)")
           .named("reallogic")
-          .onlyIfContentMatches("package co.elastic.apm.otel.profiler.collections;")
+          .onlyIfContentMatches("package co.elastic.otel.profiler.collections;")
 
     }
   }
