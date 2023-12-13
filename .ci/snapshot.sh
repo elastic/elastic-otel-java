@@ -23,8 +23,6 @@ echo $JAVA_HOME
 echo $PATH
 java -version
 
-set +x
-
 dry_run_arg=''
 if [[ "$dry_run" == "true" ]] ; then
     dry_run_arg='--dry-run'
@@ -33,4 +31,4 @@ else
     echo "--- Deploy the snapshot :package:"
 fi
 
-./gradlew --console=plain ${dry_run_arg} clean assemble
+./gradlew --console=plain ${dry_run_arg} clean assemble | tee snapshot.txt
