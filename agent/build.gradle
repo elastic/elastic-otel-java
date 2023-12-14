@@ -1,6 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
+  id "maven-publish"
   alias catalog.plugins.shadow
   alias catalog.plugins.taskinfo
 }
@@ -130,5 +131,22 @@ tasks {
 
   assemble {
     dependsOn(shadowJar)
+  }
+}
+
+publishing {
+  publications {
+    agentJar(MavenPublication) {
+      groupId = "co.elastic.observability"
+      artifactId = "javaagent"
+      artifact shadowJar
+    }
+  }
+
+  repositories {
+    maven {
+      name = 'testRepo'
+      url = layout.buildDirectory.dir("repo")
+    }
   }
 }
