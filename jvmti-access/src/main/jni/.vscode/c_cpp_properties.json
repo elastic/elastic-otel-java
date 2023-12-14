@@ -1,0 +1,10 @@
+{
+    "configurations": [
+      {
+        "name": "General",
+        "includePath": ["${env:JAVA_HOME}/include", "${env:JAVA_HOME}/include/darwin"]
+      }
+    ],
+    "version": 4
+  }
+  
