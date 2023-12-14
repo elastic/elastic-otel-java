@@ -4,11 +4,10 @@
 #    && apt install -y clang
 
 
-ARG OSXCROSS_VERSION=latest
-FROM crazymax/osxcross:${OSXCROSS_VERSION}-ubuntu AS osxcross
+FROM crazymax/osxcross:13.1-r0-ubuntu AS osxcross
 FROM elastic_jni_build_java_includes:latest AS java_includes
 
-FROM ubuntu
+FROM ubuntu:jammy-20231128
 RUN apt-get update && apt-get install -y curl clang lld libc6-dev
 ENV PATH="/osxcross/bin:$PATH"
 ENV LD_LIBRARY_PATH="/osxcross/lib:$LD_LIBRARY_PATH"
