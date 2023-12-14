@@ -24,26 +24,27 @@ sourceSets {
   }
 }
 
+val sharedCompilerArgs = "-std=c++20 -O2 -ftls-model=global-dynamic -fPIC -Wall -Werror -Wextra -shared"
 val nativeTargets = listOf(
   NativeTarget(
     "darwin-arm64.so",
     "jni_darwin.Dockerfile",
-    "-arch arm64 -std=c++20 -O2 -ftls-model=global-dynamic -fPIC -shared"
+    "-arch arm64 $sharedCompilerArgs"
   ),
   NativeTarget(
     "darwin-x64.so",
     "jni_darwin.Dockerfile",
-    "-arch x86_64 -std=c++20 -O2 -ftls-model=global-dynamic -fPIC -shared"
+    "-arch x86_64 $sharedCompilerArgs"
   ),
   NativeTarget(
     "linux-arm64.so",
     "jni_linux_arm64.Dockerfile",
-    "-mtls-dialect=desc -std=c++20 -O2 -ftls-model=global-dynamic -fPIC -shared"
+    "-mtls-dialect=desc $sharedCompilerArgs"
   ),
   NativeTarget(
     "linux-x64.so",
     "jni_linux_x64.Dockerfile",
-    "-mtls-dialect=gnu2 -std=c++20 -O2 -ftls-model=global-dynamic -fPIC -shared"
+    "-mtls-dialect=gnu2 $sharedCompilerArgs"
   )
 )
 
@@ -71,7 +72,7 @@ nativeTargets.forEach {
 
   val artifactCompileTask = task("compileJni$taskSuffix", DockerRun::class) {
     dependsOn(createImageTask)
-    //compile-java generated the JNI-headers
+    //compileJava generates the JNI-headers from native methods
     dependsOn(tasks.compileJava)
 
     val artifactName = "elastic-jvmti-${it.artifactSuffix}"
