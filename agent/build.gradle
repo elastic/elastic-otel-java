@@ -2,6 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
   id "maven-publish"
+  id "signing"
   alias catalog.plugins.shadow
   alias catalog.plugins.taskinfo
 }
@@ -149,4 +150,10 @@ publishing {
       url = layout.buildDirectory.dir("repo")
     }
   }
+}
+
+signing {
+  // use gpg agent
+  useGpgCmd()
+  sign publishing.publications.agentJar
 }
