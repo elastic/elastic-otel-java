@@ -1,9 +1,3 @@
-#FROM ubuntu:20.04
-#RUN apt update \
-#    && apt install -y curl \
-#    && apt install -y clang
-
-
 FROM crazymax/osxcross:13.1-r0-ubuntu AS osxcross
 FROM elastic_jni_build_java_includes:latest AS java_includes
 
