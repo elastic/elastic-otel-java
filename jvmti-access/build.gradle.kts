@@ -16,6 +16,19 @@ dependencies {
   testImplementation(libs.assertJ.core)
 }
 
+// we use Java 7 for this project so that it can be reused in the old elastic-apm-agent
+// Subsequently, the newest Java compiler we can use is java 17
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(17)
+  }
+}
+tasks {
+  compileJava {
+    options.release.set(7)
+  }
+}
+
 val jniSrcDir = file("src/main/jni")
 val jniBuildDir: Directory = layout.buildDirectory.dir("jni").get()
 
