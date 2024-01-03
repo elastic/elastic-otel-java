@@ -1,3 +1,21 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.otel;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,8 +42,8 @@ public class ResourceExtractionUtilTest {
 
   @Test
   void exportResourceToDirectory(@TempDir Path tmpDir) throws URISyntaxException {
-    Path tmp = ResourceExtractionUtil.extractResourceToDirectory("test.txt", "test", ".tmp",
-        tmpDir);
+    Path tmp =
+        ResourceExtractionUtil.extractResourceToDirectory("test.txt", "test", ".tmp", tmpDir);
 
     Path referenceFile = Paths.get(ResourceExtractionUtil.class.getResource("/test.txt").toURI());
 
@@ -34,30 +52,33 @@ public class ResourceExtractionUtilTest {
 
   @Test
   void exportResourceToDirectoryIdempotence(@TempDir Path tmpDir) throws Exception {
-    Path tmp = ResourceExtractionUtil.extractResourceToDirectory("test.txt", "test", ".tmp",
-        tmpDir);
+    Path tmp =
+        ResourceExtractionUtil.extractResourceToDirectory("test.txt", "test", ".tmp", tmpDir);
     FileTime created = Files.getLastModifiedTime(tmp);
     Thread.sleep(1000);
-    Path after = ResourceExtractionUtil.extractResourceToDirectory("test.txt", "test", ".tmp",
-        tmpDir);
+    Path after =
+        ResourceExtractionUtil.extractResourceToDirectory("test.txt", "test", ".tmp", tmpDir);
     assertThat(created).isEqualTo(Files.getLastModifiedTime(after));
   }
 
   @Test
   void testContentDoesNotMatch(@TempDir Path tmpDir) throws Exception {
-    Path tmp = ResourceExtractionUtil.extractResourceToDirectory("test.txt", "test", ".tmp",
-        tmpDir);
+    Path tmp =
+        ResourceExtractionUtil.extractResourceToDirectory("test.txt", "test", ".tmp", tmpDir);
     Files.writeString(tmp, "changed");
     assertThatThrownBy(
-        () -> ResourceExtractionUtil.extractResourceToDirectory("test.txt", "test", ".tmp", tmpDir))
+            () ->
+                ResourceExtractionUtil.extractResourceToDirectory(
+                    "test.txt", "test", ".tmp", tmpDir))
         .isInstanceOf(IllegalStateException.class);
   }
 
   @Test
   void exportResourceToDirectory_throwExceptionIfNotFound(@TempDir Path tmpDir) {
     assertThatThrownBy(
-        () -> ResourceExtractionUtil.extractResourceToDirectory("nonexist", "nonexist", ".tmp",
-            tmpDir))
+            () ->
+                ResourceExtractionUtil.extractResourceToDirectory(
+                    "nonexist", "nonexist", ".tmp", tmpDir))
         .hasMessage("nonexist not found");
   }
 
@@ -71,12 +92,14 @@ public class ResourceExtractionUtilTest {
     final String tempFileNamePrefix = UUID.randomUUID().toString();
 
     for (int i = 0; i < nbThreads; i++) {
-      futureList.add(executorService.submit(() -> {
-        countDownLatch.countDown();
-        countDownLatch.await();
-        return ResourceExtractionUtil.extractResourceToDirectory("test.txt", tempFileNamePrefix,
-            ".tmp", tmpDir);
-      }));
+      futureList.add(
+          executorService.submit(
+              () -> {
+                countDownLatch.countDown();
+                countDownLatch.await();
+                return ResourceExtractionUtil.extractResourceToDirectory(
+                    "test.txt", tempFileNamePrefix, ".tmp", tmpDir);
+              }));
     }
 
     executorService.shutdown();
@@ -87,5 +110,4 @@ public class ResourceExtractionUtilTest {
       assertThat(future.get()).exists();
     }
   }
-
 }

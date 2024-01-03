@@ -67,7 +67,7 @@ public class JvmtiAccess {
         }
       case LOADED:
         try {
-          //TODO: call an initialization method and check the results
+          // TODO: call an initialization method and check the results
           state = State.INITIALIZED;
         } catch (Throwable t) {
           logger.log(Level.SEVERE, "Failed to initialize jvmti native library", t);
@@ -81,7 +81,7 @@ public class JvmtiAccess {
     switch (state) {
       case INITIALIZED:
         try {
-          //TODO: Call a native descrutction method for cleaning up native resources
+          // TODO: Call a native descrutction method for cleaning up native resources
           state = State.LOADED;
         } catch (Throwable t) {
           logger.log(Level.SEVERE, "Failed to shutdown jvmti native library", t);
@@ -116,8 +116,12 @@ public class JvmtiAccess {
 
     String libraryDirectory = System.getProperty("java.io.tmpdir");
     libraryName = "elastic-jvmti-" + libraryName;
-    Path file = ResourceExtractionUtil.extractResourceToDirectory(
-        "elastic-jvmti/" + libraryName + ".so", libraryName, ".so", Paths.get(libraryDirectory));
+    Path file =
+        ResourceExtractionUtil.extractResourceToDirectory(
+            "elastic-jvmti/" + libraryName + ".so",
+            libraryName,
+            ".so",
+            Paths.get(libraryDirectory));
     System.load(file.toString());
   }
 }
