@@ -35,7 +35,6 @@ val jniBuildDir: Directory = layout.buildDirectory.dir("jni").get()
 sourceSets {
   main {
     resources {
-      // add a new resource dir that is produced by the task
       srcDir(jniBuildDir)
     }
   }
@@ -69,7 +68,6 @@ task("buildJavaIncludesImage", DockerBuildImage::class) {
   dockerFile.set(file("jni-build/java_includes.Dockerfile"))
   inputDir.set(file("jni-build"))
   images.add("elastic_jni_build_java_includes:latest")
-
 }
 
 val compileJniTask = task("compileJni")
