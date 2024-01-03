@@ -12,6 +12,10 @@ plugins {
     id("com.bmuschko.docker-java-application") version "9.4.0"
 }
 
+dependencies {
+  testImplementation(libs.assertJ.core)
+}
+
 val jniSrcDir = file("src/main/jni")
 val jniBuildDir: Directory = layout.buildDirectory.dir("jni").get()
 

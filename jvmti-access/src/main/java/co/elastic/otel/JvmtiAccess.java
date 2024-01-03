@@ -54,20 +54,6 @@ public class JvmtiAccess {
     }
   }
 
-  private static boolean checkInitialized() {
-    switch (state) {
-      case NOT_LOADED:
-      case LOADED:
-        try {
-          doInit();
-        } catch (Throwable t) {
-          logger.log(Level.SEVERE, "Failed to initialize JVMTI agent", t);
-        }
-    }
-    return state == State.INITIALIZED;
-  }
-
-
   private static synchronized void doInit() {
     switch (state) {
       case NOT_LOADED:
@@ -95,18 +81,12 @@ public class JvmtiAccess {
     switch (state) {
       case INITIALIZED:
         try {
+          //TODO: Call a native descrutction method for cleaning up native resources
           state = State.LOADED;
         } catch (Throwable t) {
           logger.log(Level.SEVERE, "Failed to shutdown jvmti native library", t);
           state = State.DESTROY_FAILED;
         }
-    }
-  }
-
-
-  private static void checkError(int returnCode) {
-    if (returnCode < 0) {
-      throw new RuntimeException("Elastic JVMTI Agent returned error code " + returnCode);
     }
   }
 
