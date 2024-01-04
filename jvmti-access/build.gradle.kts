@@ -8,12 +8,13 @@ import java.io.IOException
 import java.util.*
 
 plugins {
-    id("java")
+    id("java-library")
     id("com.bmuschko.docker-java-application") version "9.4.0"
 }
 
 dependencies {
   testImplementation(libs.assertj.core)
+  implementation(libs.jsr305)
 }
 
 // we use Java 7 for this project so that it can be reused in the old elastic-apm-agent
@@ -27,6 +28,10 @@ tasks {
   compileJava {
     options.release.set(7)
   }
+}
+
+tasks.withType<Test>().configureEach {
+  jvmArgs("-Xcheck:jni")
 }
 
 val jniSrcDir = file("src/main/jni")
