@@ -38,8 +38,7 @@ public class MutableSpanTest {
 
   @Test
   public void noSpanDataCopyWithoutMutation() {
-    ReadableSpan original = createSpan("foo", builder -> {
-    });
+    ReadableSpan original = createSpan("foo", builder -> {});
 
     MutableSpan mutable = MutableSpan.makeMutable(original);
     SpanData first = mutable.toSpanData();
@@ -52,8 +51,7 @@ public class MutableSpanTest {
 
   @Test
   public void freezeAfterMutation() {
-    ReadableSpan original = createSpan("foo", builder -> {
-    });
+    ReadableSpan original = createSpan("foo", builder -> {});
 
     MutableSpan mutable1 = MutableSpan.makeMutable(original);
     mutable1.setName("updated");
@@ -145,8 +143,7 @@ public class MutableSpanTest {
 
   @Test
   public void noDoubleWrapping() {
-    ReadableSpan original = createSpan("foo", builder -> {
-    });
+    ReadableSpan original = createSpan("foo", builder -> {});
 
     MutableSpan mutable = MutableSpan.makeMutable(original);
     assertThat(MutableSpan.makeMutable(mutable)).isSameAs(mutable);

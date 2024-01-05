@@ -27,9 +27,25 @@ public interface ChainingSpanProcessorRegisterer {
   int ORDER_DEFAULT = 0;
   int ORDER_LAST = Integer.MAX_VALUE;
 
+  /**
+   * Registered the provided processor (represented by its factory method) to be autoconfigured with
+   * default order.
+   *
+   * @param processorFactory a function creating the desired chained processor. The argument is the
+   *     next processor in the chain.
+   */
   default void register(Function<SpanProcessor, SpanProcessor> processorFactory) {
     register(processorFactory, ORDER_DEFAULT);
   }
 
+  /**
+   * Registered the provided processor (represented by its factory method) to be autoconfigured with
+   * the provided order.
+   *
+   * @param processorFactory a function creating the desired chained processor. The argument is the
+   *     next processor in the chain.
+   * @param order lower values mean that the processor is earlier in the chain, higher values mean
+   *     later
+   */
   void register(Function<SpanProcessor, SpanProcessor> processorFactory, int order);
 }

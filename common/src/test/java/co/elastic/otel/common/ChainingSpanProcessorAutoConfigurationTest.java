@@ -48,10 +48,8 @@ import org.mockito.Mockito;
 public class ChainingSpanProcessorAutoConfigurationTest {
   @BeforeEach
   public void reset() {
-    AutoConfigA.delegate = (a, b) -> {
-    };
-    AutoConfigB.delegate = (a, b) -> {
-    };
+    AutoConfigA.delegate = (a, b) -> {};
+    AutoConfigB.delegate = (a, b) -> {};
     GlobalOpenTelemetry.resetForTest();
     GlobalEventEmitterProvider.resetForTest();
   }
@@ -99,7 +97,7 @@ public class ChainingSpanProcessorAutoConfigurationTest {
       assertThat(spanProcessors)
           .containsExactlyInAnyOrder(
               chainingProcessor.get(), SpanProcessor.composite() // NOOP-processor
-          );
+              );
 
       SpanProcessor terminal = chainingProcessor.get().next;
       assertThat(terminal).isInstanceOf(MutableCompositeSpanProcessor.class);
@@ -252,8 +250,7 @@ public class ChainingSpanProcessorAutoConfigurationTest {
 
   @AutoService(ChainingSpanProcessorAutoConfiguration.class)
   public static class AutoConfigA implements ChainingSpanProcessorAutoConfiguration {
-    public static ChainingSpanProcessorAutoConfiguration delegate = (a, b) -> {
-    };
+    public static ChainingSpanProcessorAutoConfiguration delegate = (a, b) -> {};
 
     @Override
     public void registerSpanProcessors(
@@ -264,8 +261,7 @@ public class ChainingSpanProcessorAutoConfigurationTest {
 
   @AutoService(ChainingSpanProcessorAutoConfiguration.class)
   public static class AutoConfigB implements ChainingSpanProcessorAutoConfiguration {
-    public static ChainingSpanProcessorAutoConfiguration delegate = (a, b) -> {
-    };
+    public static ChainingSpanProcessorAutoConfiguration delegate = (a, b) -> {};
 
     @Override
     public void registerSpanProcessors(

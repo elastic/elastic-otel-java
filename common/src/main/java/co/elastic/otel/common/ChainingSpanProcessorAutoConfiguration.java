@@ -20,6 +20,10 @@ package co.elastic.otel.common;
 
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 
+/**
+ * SPI for autoconfiguring chaining span processors (e.g. usually instances of {@link
+ * AbstractSimpleChainingSpanProcessor})
+ */
 public interface ChainingSpanProcessorAutoConfiguration {
 
   void registerSpanProcessors(

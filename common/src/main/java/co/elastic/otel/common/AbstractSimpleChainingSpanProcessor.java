@@ -39,22 +39,47 @@ public abstract class AbstractSimpleChainingSpanProcessor implements SpanProcess
   private final boolean nextRequiresStart;
   private final boolean nextRequiresEnd;
 
+  /**
+   * @param next the next processor to be invoked after the one being constructed.
+   */
   public AbstractSimpleChainingSpanProcessor(SpanProcessor next) {
     this.next = next;
     nextRequiresStart = next.isStartRequired();
     nextRequiresEnd = next.isEndRequired();
   }
 
+  /**
+   * Equivalent of {@link SpanProcessor#onStart(Context, ReadWriteSpan)}. The onStart callback of
+   * the next processor must not be invoked from this method, this is already handled by the
+   * implementation of {@link #onStart(Context, ReadWriteSpan)}.
+   */
   protected void doOnStart(Context context, ReadWriteSpan readWriteSpan) {}
 
+  /**
+   * Equivalent of {@link SpanProcessor#onEnd(ReadableSpan)}}.
+   *
+   * <p>If this method returns null, the provided span will be dropped and not passed to the next
+   * processor. If anything non-null is returned, the returned instance is passed to the next
+   * processor.
+   *
+   * <p>So in order to mutate the span, simply use {@link MutableSpan#makeMutable(ReadableSpan)} on
+   * the provided argument and return the {@link MutableSpan} from this method.
+   */
   protected ReadableSpan doOnEnd(ReadableSpan readableSpan) {
     return readableSpan;
   }
 
+  /**
+   * @return true, if this implementation would like {@link #doOnStart(Context, ReadWriteSpan)} to
+   *     be invoked.
+   */
   protected boolean requiresStart() {
     return true;
   }
 
+  /**
+   * @return true, if this implementation would like {@link #doOnEnd(ReadableSpan)} to be invoked.
+   */
   protected boolean requiresEnd() {
     return true;
   }
