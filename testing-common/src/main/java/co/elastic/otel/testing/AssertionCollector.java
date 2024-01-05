@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.common.testutils;
+package co.elastic.otel.testing;
 
 import java.util.ArrayList;
 import java.util.List;

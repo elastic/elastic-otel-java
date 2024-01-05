@@ -16,37 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.common.testutils;
+package co.elastic.otel.testing;
 
-import java.util.HashMap;
-import java.util.Map;
 import javax.annotation.Nullable;
 
-public class TemporaryProperties implements AutoCloseable {
+public class AutoConfigTestProperties extends TemporaryProperties {
 
-  private final Map<String, String> originalValues = new HashMap<>();
-
-  public TemporaryProperties put(String key, @Nullable String value) {
-    if (!originalValues.containsKey(key)) {
-      originalValues.put(key, System.getProperty(key));
-    }
-    if (value == null) {
-      System.clearProperty(key);
-    } else {
-      System.setProperty(key, value);
-    }
-    return this;
+  public AutoConfigTestProperties() {
+    put("otel.java.global-autoconfigure.enabled", "true");
+    put("otel.traces.exporter", "logging");
+    put("otel.metrics.exporter", "logging");
+    put("otel.logs.exporter", "logging");
   }
 
   @Override
-  public void close() {
-    for (String key : originalValues.keySet()) {
-      String value = originalValues.get(key);
-      if (value == null) {
-        System.clearProperty(key);
-      } else {
-        System.setProperty(key, value);
-      }
-    }
+  public AutoConfigTestProperties put(String key, @Nullable String value) {
+    super.put(key, value);
+    return this;
   }
 }

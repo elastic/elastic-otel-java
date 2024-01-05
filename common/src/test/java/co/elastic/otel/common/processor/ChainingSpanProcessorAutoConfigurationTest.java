@@ -21,13 +21,14 @@ package co.elastic.otel.common.processor;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static org.mockito.Mockito.verifyNoInteractions;
 
-import co.elastic.otel.common.testutils.AssertionCollector;
-import co.elastic.otel.common.testutils.AutoConfigTestProperties;
-import co.elastic.otel.common.testutils.AutoConfiguredDataCapture;
-import co.elastic.otel.common.testutils.OtelReflectionUtils;
+import co.elastic.otel.testing.AssertionCollector;
+import co.elastic.otel.testing.AutoConfigTestProperties;
+import co.elastic.otel.testing.AutoConfiguredDataCapture;
+import co.elastic.otel.testing.OtelReflectionUtils;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.events.GlobalEventEmitterProvider;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
@@ -47,9 +48,12 @@ import org.mockito.Mockito;
 public class ChainingSpanProcessorAutoConfigurationTest {
   @BeforeEach
   public void reset() {
-    AutoConfigA.delegate = (a, b) -> {};
-    AutoConfigB.delegate = (a, b) -> {};
+    AutoConfigA.delegate = (a, b) -> {
+    };
+    AutoConfigB.delegate = (a, b) -> {
+    };
     GlobalOpenTelemetry.resetForTest();
+    GlobalEventEmitterProvider.resetForTest();
   }
 
   @Test
@@ -95,7 +99,7 @@ public class ChainingSpanProcessorAutoConfigurationTest {
       assertThat(spanProcessors)
           .containsExactlyInAnyOrder(
               chainingProcessor.get(), SpanProcessor.composite() // NOOP-processor
-              );
+          );
 
       SpanProcessor terminal = chainingProcessor.get().next;
       assertThat(terminal).isInstanceOf(MutableCompositeSpanProcessor.class);
@@ -248,7 +252,8 @@ public class ChainingSpanProcessorAutoConfigurationTest {
 
   @AutoService(ChainingSpanProcessorAutoConfiguration.class)
   public static class AutoConfigA implements ChainingSpanProcessorAutoConfiguration {
-    public static ChainingSpanProcessorAutoConfiguration delegate = (a, b) -> {};
+    public static ChainingSpanProcessorAutoConfiguration delegate = (a, b) -> {
+    };
 
     @Override
     public void registerSpanProcessors(
@@ -259,7 +264,8 @@ public class ChainingSpanProcessorAutoConfigurationTest {
 
   @AutoService(ChainingSpanProcessorAutoConfiguration.class)
   public static class AutoConfigB implements ChainingSpanProcessorAutoConfiguration {
-    public static ChainingSpanProcessorAutoConfiguration delegate = (a, b) -> {};
+    public static ChainingSpanProcessorAutoConfiguration delegate = (a, b) -> {
+    };
 
     @Override
     public void registerSpanProcessors(

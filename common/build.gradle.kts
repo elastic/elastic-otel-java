@@ -15,8 +15,9 @@ dependencies {
     testImplementation("io.opentelemetry:opentelemetry-sdk")
     testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
     testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
-    testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
+    testImplementation(project(":testing-common"))
     testImplementation("io.opentelemetry:opentelemetry-exporter-otlp")
-    //testImplementation("io.opentelemetry:opentelemetry-api-events")
+    testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
+    testImplementation("io.opentelemetry:opentelemetry-api-events")
     testImplementation(libs.assertJ.core)
 }

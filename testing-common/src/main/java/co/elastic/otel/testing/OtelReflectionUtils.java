@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.common.testutils;
+package co.elastic.otel.testing;
 
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.TracerProvider;
@@ -43,7 +43,8 @@ public class OtelReflectionUtils {
     return flattenCompositeProcessor(potentiallyComposite, true);
   }
 
-  public static List<SpanProcessor> flattenCompositeProcessor(
+  @SuppressWarnings("unchecked")
+  private static List<SpanProcessor> flattenCompositeProcessor(
       SpanProcessor active, boolean recurse) {
     if (active.getClass().getName().contains("MultiSpanProcessor")) {
       List<SpanProcessor> childProcessors =

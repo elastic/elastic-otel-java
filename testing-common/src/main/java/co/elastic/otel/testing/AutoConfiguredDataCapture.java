@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.common.testutils;
+package co.elastic.otel.testing;
 
 import com.google.auto.service.AutoService;
 import io.opentelemetry.exporter.logging.LoggingSpanExporter;
