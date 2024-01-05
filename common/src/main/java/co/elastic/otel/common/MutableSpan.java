@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.common.processor;
+package co.elastic.otel.common;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.SpanContext;
