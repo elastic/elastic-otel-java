@@ -1,0 +1,9 @@
+{
+    "configurations": [
+      {
+        "name": "General",
+        "includePath": ["${env:JAVA_HOME}/include", "${env:JAVA_HOME}/include/linux", "${env:JAVA_HOME}/include/darwin", "../../../build/generated/sources/headers/java/main"]
+      }
+    ],
+    "version": 4
+  }
