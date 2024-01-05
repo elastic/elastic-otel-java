@@ -1,3 +1,21 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.otel.common.processor;
 
 import com.google.auto.service.AutoService;
@@ -25,19 +43,20 @@ public class ChainingSpanProcessorsInstaller implements AutoConfigurationCustomi
 
       MutableCompositeSpanProcessor exporterProcessor = new MutableCompositeSpanProcessor();
 
-      autoConfigurationCustomizer.addSpanProcessorCustomizer((spanProcessor, config) -> {
-        if (isSpanExportingProcessor(spanProcessor)) {
-          if (exporterProcessor.isEmpty()) {
-            exporterProcessor.addDelegate(spanProcessor);
-            return createProcessorChain(autoConfigs, config, exporterProcessor);
-          } else {
-            exporterProcessor.addDelegate(spanProcessor);
-            //return NOOP, because exporterProcessor is already registered
-            return SpanProcessor.composite();
-          }
-        }
-        return spanProcessor;
-      });
+      autoConfigurationCustomizer.addSpanProcessorCustomizer(
+          (spanProcessor, config) -> {
+            if (isSpanExportingProcessor(spanProcessor)) {
+              if (exporterProcessor.isEmpty()) {
+                exporterProcessor.addDelegate(spanProcessor);
+                return createProcessorChain(autoConfigs, config, exporterProcessor);
+              } else {
+                exporterProcessor.addDelegate(spanProcessor);
+                // return NOOP, because exporterProcessor is already registered
+                return SpanProcessor.composite();
+              }
+            }
+            return spanProcessor;
+          });
     }
   }
 
@@ -49,14 +68,17 @@ public class ChainingSpanProcessorsInstaller implements AutoConfigurationCustomi
     List<ProcessorFactoryWithOrder> factories = new ArrayList<>();
 
     for (ChainingSpanProcessorAutoConfiguration autoConfig : chainedProcessorAutoConfigs) {
-      autoConfig.registerSpanProcessors(properties, new ChainingSpanProcessorRegisterer() {
-        @Override
-        public void register(Function<SpanProcessor, SpanProcessor> processorFactory, int order) {
-          factories.add(new ProcessorFactoryWithOrder(processorFactory, order));
-        }
-      });
+      autoConfig.registerSpanProcessors(
+          properties,
+          new ChainingSpanProcessorRegisterer() {
+            @Override
+            public void register(
+                Function<SpanProcessor, SpanProcessor> processorFactory, int order) {
+              factories.add(new ProcessorFactoryWithOrder(processorFactory, order));
+            }
+          });
     }
-    //sort from highest (= last processor) to first
+    // sort from highest (= last processor) to first
     factories.sort((a, b) -> Integer.compare(b.order, a.order));
 
     SpanProcessor result = terminalProcessor;

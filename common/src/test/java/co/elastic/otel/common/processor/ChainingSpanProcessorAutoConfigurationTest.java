@@ -1,5 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.otel.common.processor;
-
 
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -30,21 +47,19 @@ import org.mockito.Mockito;
 public class ChainingSpanProcessorAutoConfigurationTest {
   @BeforeEach
   public void reset() {
-    AutoConfigA.delegate = (a, b) -> {
-    };
-    AutoConfigB.delegate = (a, b) -> {
-    };
+    AutoConfigA.delegate = (a, b) -> {};
+    AutoConfigB.delegate = (a, b) -> {};
     GlobalOpenTelemetry.resetForTest();
   }
 
   @Test
   public void noProcessorCreatedWithoutExporter() {
-    ChainingSpanProcessorAutoConfiguration mockConfig = Mockito.mock(
-        ChainingSpanProcessorAutoConfiguration.class);
+    ChainingSpanProcessorAutoConfiguration mockConfig =
+        Mockito.mock(ChainingSpanProcessorAutoConfiguration.class);
     AutoConfigA.delegate = mockConfig;
 
-    try (AutoConfigTestProperties props = new AutoConfigTestProperties()
-        .put("otel.traces.exporter", "NONE")) {
+    try (AutoConfigTestProperties props =
+        new AutoConfigTestProperties().put("otel.traces.exporter", "NONE")) {
 
       OpenTelemetry otel = GlobalOpenTelemetry.get();
       Tracer tracer = otel.getTracer("dummy-tracer");
@@ -55,36 +70,39 @@ public class ChainingSpanProcessorAutoConfigurationTest {
     }
   }
 
-
   @Test
   public void multipleExporterProcessors() {
 
-    AtomicReference<AbstractSimpleChainingSpanProcessor> chainingProcessor = new AtomicReference<>();
+    AtomicReference<AbstractSimpleChainingSpanProcessor> chainingProcessor =
+        new AtomicReference<>();
 
-    AutoConfigA.delegate = (props, registerer) ->
-        registerer.register(next -> {
-          chainingProcessor.set(new AbstractSimpleChainingSpanProcessor(next) {});
-          return chainingProcessor.get();
-        });
+    AutoConfigA.delegate =
+        (props, registerer) ->
+            registerer.register(
+                next -> {
+                  chainingProcessor.set(new AbstractSimpleChainingSpanProcessor(next) {});
+                  return chainingProcessor.get();
+                });
 
-    try (AutoConfigTestProperties props = new AutoConfigTestProperties()
-        .put("otel.traces.exporter", "logging,otlp")) {
-      //Logging will use a SimpleSpanExporter, otlp a BatchSpanProcessor
+    try (AutoConfigTestProperties props =
+        new AutoConfigTestProperties().put("otel.traces.exporter", "logging,otlp")) {
+      // Logging will use a SimpleSpanExporter, otlp a BatchSpanProcessor
 
       OpenTelemetry otel = GlobalOpenTelemetry.get();
       assertThat(chainingProcessor.get()).isNotNull();
 
       List<SpanProcessor> spanProcessors = OtelReflectionUtils.getSpanProcessors(otel);
-      assertThat(spanProcessors).containsExactlyInAnyOrder(
-          chainingProcessor.get(),
-          SpanProcessor.composite() //NOOP-processor
-      );
+      assertThat(spanProcessors)
+          .containsExactlyInAnyOrder(
+              chainingProcessor.get(), SpanProcessor.composite() // NOOP-processor
+              );
 
       SpanProcessor terminal = chainingProcessor.get().next;
       assertThat(terminal).isInstanceOf(MutableCompositeSpanProcessor.class);
 
-      List<SpanProcessor> exportingProcessors = OtelReflectionUtils
-          .flattenCompositeProcessors(((MutableCompositeSpanProcessor) terminal).composite);
+      List<SpanProcessor> exportingProcessors =
+          OtelReflectionUtils.flattenCompositeProcessors(
+              ((MutableCompositeSpanProcessor) terminal).composite);
 
       assertThat(exportingProcessors)
           .hasSize(2)
@@ -92,7 +110,6 @@ public class ChainingSpanProcessorAutoConfigurationTest {
           .anySatisfy(proc -> assertThat(proc).isInstanceOf(SimpleSpanProcessor.class));
     }
   }
-
 
   @Test
   public void verifyProcessorOrder() {
@@ -107,80 +124,93 @@ public class ChainingSpanProcessorAutoConfigurationTest {
     AtomicInteger endCountB = new AtomicInteger();
     AtomicInteger endCountC = new AtomicInteger();
 
-    AutoConfigA.delegate = (props, registry) -> {
-      registry.register(next -> new AbstractSimpleChainingSpanProcessor(next) {
+    AutoConfigA.delegate =
+        (props, registry) -> {
+          registry.register(
+              next ->
+                  new AbstractSimpleChainingSpanProcessor(next) {
 
-        @Override
-        protected void doOnStart(Context context, ReadWriteSpan readWriteSpan) {
-          int cnt = startCountA.incrementAndGet();
-          assertionCollector.collect(() -> {
-            assertThat(startCountB.get()).isEqualTo(cnt - 1);
-            assertThat(startCountC.get()).isEqualTo(cnt - 1);
-          });
-        }
+                    @Override
+                    protected void doOnStart(Context context, ReadWriteSpan readWriteSpan) {
+                      int cnt = startCountA.incrementAndGet();
+                      assertionCollector.collect(
+                          () -> {
+                            assertThat(startCountB.get()).isEqualTo(cnt - 1);
+                            assertThat(startCountC.get()).isEqualTo(cnt - 1);
+                          });
+                    }
 
-        @Override
-        protected ReadableSpan doOnEnd(ReadableSpan readableSpan) {
-          int cnt = endCountA.incrementAndGet();
-          assertionCollector.collect(() -> {
-            assertThat(endCountB.get()).isEqualTo(cnt - 1);
-            assertThat(endCountC.get()).isEqualTo(cnt - 1);
-            assertThat(AutoConfiguredDataCapture.getSpans())
-                .hasSize(cnt - 1);
-          });
-          return readableSpan;
-        }
-      }, ChainingSpanProcessorRegisterer.ORDER_FIRST);
+                    @Override
+                    protected ReadableSpan doOnEnd(ReadableSpan readableSpan) {
+                      int cnt = endCountA.incrementAndGet();
+                      assertionCollector.collect(
+                          () -> {
+                            assertThat(endCountB.get()).isEqualTo(cnt - 1);
+                            assertThat(endCountC.get()).isEqualTo(cnt - 1);
+                            assertThat(AutoConfiguredDataCapture.getSpans()).hasSize(cnt - 1);
+                          });
+                      return readableSpan;
+                    }
+                  },
+              ChainingSpanProcessorRegisterer.ORDER_FIRST);
 
-      registry.register(next -> new AbstractSimpleChainingSpanProcessor(next) {
-        @Override
-        protected void doOnStart(Context context, ReadWriteSpan readWriteSpan) {
-          int cnt = startCountC.incrementAndGet();
-          assertionCollector.collect(() -> {
-            assertThat(startCountA.get()).isEqualTo(cnt);
-            assertThat(startCountB.get()).isEqualTo(cnt);
-          });
-        }
+          registry.register(
+              next ->
+                  new AbstractSimpleChainingSpanProcessor(next) {
+                    @Override
+                    protected void doOnStart(Context context, ReadWriteSpan readWriteSpan) {
+                      int cnt = startCountC.incrementAndGet();
+                      assertionCollector.collect(
+                          () -> {
+                            assertThat(startCountA.get()).isEqualTo(cnt);
+                            assertThat(startCountB.get()).isEqualTo(cnt);
+                          });
+                    }
 
-        @Override
-        protected ReadableSpan doOnEnd(ReadableSpan readableSpan) {
-          int cnt = endCountC.incrementAndGet();
-          assertionCollector.collect(() -> {
-            assertThat(endCountA.get()).isEqualTo(cnt);
-            assertThat(endCountB.get()).isEqualTo(cnt);
-            assertThat(AutoConfiguredDataCapture.getSpans())
-                .hasSize(cnt - 1);
-          });
-          return readableSpan;
-        }
-      }, ChainingSpanProcessorRegisterer.ORDER_LAST);
-    };
+                    @Override
+                    protected ReadableSpan doOnEnd(ReadableSpan readableSpan) {
+                      int cnt = endCountC.incrementAndGet();
+                      assertionCollector.collect(
+                          () -> {
+                            assertThat(endCountA.get()).isEqualTo(cnt);
+                            assertThat(endCountB.get()).isEqualTo(cnt);
+                            assertThat(AutoConfiguredDataCapture.getSpans()).hasSize(cnt - 1);
+                          });
+                      return readableSpan;
+                    }
+                  },
+              ChainingSpanProcessorRegisterer.ORDER_LAST);
+        };
 
-    AutoConfigB.delegate = (props, registry) -> {
-      registry.register(next -> new AbstractSimpleChainingSpanProcessor(next) {
-        @Override
-        protected void doOnStart(Context context, ReadWriteSpan readWriteSpan) {
-          int cnt = startCountB.incrementAndGet();
-          assertionCollector.collect(() -> {
-            assertThat(startCountA.get()).isEqualTo(cnt);
-            assertThat(startCountC.get()).isEqualTo(cnt - 1);
-          });
-        }
+    AutoConfigB.delegate =
+        (props, registry) -> {
+          registry.register(
+              next ->
+                  new AbstractSimpleChainingSpanProcessor(next) {
+                    @Override
+                    protected void doOnStart(Context context, ReadWriteSpan readWriteSpan) {
+                      int cnt = startCountB.incrementAndGet();
+                      assertionCollector.collect(
+                          () -> {
+                            assertThat(startCountA.get()).isEqualTo(cnt);
+                            assertThat(startCountC.get()).isEqualTo(cnt - 1);
+                          });
+                    }
 
-        @Override
-        protected ReadableSpan doOnEnd(ReadableSpan readableSpan) {
-          int cnt = endCountB.incrementAndGet();
-          assertionCollector.collect(() -> {
-            assertThat(endCountA.get()).isEqualTo(cnt);
-            assertThat(endCountC.get()).isEqualTo(cnt - 1);
-            assertThat(AutoConfiguredDataCapture.getSpans())
-                .hasSize(cnt - 1);
-          });
-          return readableSpan;
-        }
-      }, ChainingSpanProcessorRegisterer.ORDER_DEFAULT);
-
-    };
+                    @Override
+                    protected ReadableSpan doOnEnd(ReadableSpan readableSpan) {
+                      int cnt = endCountB.incrementAndGet();
+                      assertionCollector.collect(
+                          () -> {
+                            assertThat(endCountA.get()).isEqualTo(cnt);
+                            assertThat(endCountC.get()).isEqualTo(cnt - 1);
+                            assertThat(AutoConfiguredDataCapture.getSpans()).hasSize(cnt - 1);
+                          });
+                      return readableSpan;
+                    }
+                  },
+              ChainingSpanProcessorRegisterer.ORDER_DEFAULT);
+        };
 
     try (AutoConfigTestProperties props = new AutoConfigTestProperties()) {
       OpenTelemetry otel = GlobalOpenTelemetry.get();
@@ -218,27 +248,23 @@ public class ChainingSpanProcessorAutoConfigurationTest {
 
   @AutoService(ChainingSpanProcessorAutoConfiguration.class)
   public static class AutoConfigA implements ChainingSpanProcessorAutoConfiguration {
-    public static ChainingSpanProcessorAutoConfiguration delegate = (a, b) -> {
-    };
+    public static ChainingSpanProcessorAutoConfiguration delegate = (a, b) -> {};
 
     @Override
-    public void registerSpanProcessors(ConfigProperties properties,
-        ChainingSpanProcessorRegisterer registerer) {
+    public void registerSpanProcessors(
+        ConfigProperties properties, ChainingSpanProcessorRegisterer registerer) {
       delegate.registerSpanProcessors(properties, registerer);
     }
   }
-
 
   @AutoService(ChainingSpanProcessorAutoConfiguration.class)
   public static class AutoConfigB implements ChainingSpanProcessorAutoConfiguration {
-    public static ChainingSpanProcessorAutoConfiguration delegate = (a, b) -> {
-    };
+    public static ChainingSpanProcessorAutoConfiguration delegate = (a, b) -> {};
 
     @Override
-    public void registerSpanProcessors(ConfigProperties properties,
-        ChainingSpanProcessorRegisterer registerer) {
+    public void registerSpanProcessors(
+        ConfigProperties properties, ChainingSpanProcessorRegisterer registerer) {
       delegate.registerSpanProcessors(properties, registerer);
     }
   }
-
 }

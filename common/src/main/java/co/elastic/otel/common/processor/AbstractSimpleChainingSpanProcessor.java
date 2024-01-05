@@ -1,3 +1,21 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.otel.common.processor;
 
 import io.opentelemetry.context.Context;
@@ -8,9 +26,12 @@ import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.util.Arrays;
 
 /**
- * A @{@link io.opentelemetry.sdk.trace.SpanProcessor}
- * which in addition to all standard operations is capable
- * of modifying and optionally filtering spans in the end-callback.
+ * A @{@link io.opentelemetry.sdk.trace.SpanProcessor} which in addition to all standard operations
+ * is capable of modifying and optionally filtering spans in the end-callback.
+ *
+ * <p>This is done by chaining processors and registering only the first processor with the SDK.
+ * Mutations can be performed in {@link #doOnEnd(ReadableSpan)} by wrapping the span in a {@link
+ * MutableSpan}
  */
 public abstract class AbstractSimpleChainingSpanProcessor implements SpanProcessor {
 
@@ -24,9 +45,7 @@ public abstract class AbstractSimpleChainingSpanProcessor implements SpanProcess
     nextRequiresEnd = next.isEndRequired();
   }
 
-
-  protected void doOnStart(Context context, ReadWriteSpan readWriteSpan) {
-  }
+  protected void doOnStart(Context context, ReadWriteSpan readWriteSpan) {}
 
   protected ReadableSpan doOnEnd(ReadableSpan readableSpan) {
     return readableSpan;
@@ -87,18 +106,12 @@ public abstract class AbstractSimpleChainingSpanProcessor implements SpanProcess
 
   @Override
   public final CompletableResultCode shutdown() {
-    return CompletableResultCode.ofAll(Arrays.asList(
-        doShutdown(),
-        next.shutdown()
-    ));
+    return CompletableResultCode.ofAll(Arrays.asList(doShutdown(), next.shutdown()));
   }
 
   @Override
   public final CompletableResultCode forceFlush() {
-    return CompletableResultCode.ofAll(Arrays.asList(
-        doForceFlush(),
-        next.forceFlush()
-    ));
+    return CompletableResultCode.ofAll(Arrays.asList(doForceFlush(), next.forceFlush()));
   }
 
   @Override

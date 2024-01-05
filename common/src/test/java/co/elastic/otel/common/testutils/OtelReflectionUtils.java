@@ -1,5 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.otel.common.testutils;
-
 
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.TracerProvider;
@@ -17,8 +34,8 @@ public class OtelReflectionUtils {
   @SuppressWarnings("unchecked")
   public static List<SpanProcessor> getSpanProcessors(OpenTelemetry otel) {
     SdkTracerProvider tracer = unwrap(otel.getTracerProvider());
-    SpanProcessor active = (SpanProcessor) readFieldChain(tracer, "sharedState",
-        "activeSpanProcessor");
+    SpanProcessor active =
+        (SpanProcessor) readFieldChain(tracer, "sharedState", "activeSpanProcessor");
     return flattenCompositeProcessor(active, false);
   }
 
@@ -26,8 +43,8 @@ public class OtelReflectionUtils {
     return flattenCompositeProcessor(potentiallyComposite, true);
   }
 
-  public static List<SpanProcessor> flattenCompositeProcessor(SpanProcessor active,
-      boolean recurse) {
+  public static List<SpanProcessor> flattenCompositeProcessor(
+      SpanProcessor active, boolean recurse) {
     if (active.getClass().getName().contains("MultiSpanProcessor")) {
       List<SpanProcessor> childProcessors =
           (List<SpanProcessor>) readField(active, "spanProcessorsAll");
@@ -53,7 +70,6 @@ public class OtelReflectionUtils {
     throw new IllegalStateException("Unknown class: " + tracerProvider.getClass().getName());
   }
 
-
   private static Object readFieldChain(Object instance, String... fields) {
     Object current = instance;
     for (String fieldName : fields) {
@@ -64,8 +80,11 @@ public class OtelReflectionUtils {
 
   private static Object readField(Object instance, String fieldName) {
 
-    List<Field> fields = ReflectionSupport.findFields(instance.getClass(),
-        field -> field.getName().equals(fieldName), HierarchyTraversalMode.BOTTOM_UP);
+    List<Field> fields =
+        ReflectionSupport.findFields(
+            instance.getClass(),
+            field -> field.getName().equals(fieldName),
+            HierarchyTraversalMode.BOTTOM_UP);
 
     if (fields.isEmpty()) {
       throw new IllegalArgumentException(
@@ -81,5 +100,4 @@ public class OtelReflectionUtils {
       throw new IllegalStateException(e);
     }
   }
-
 }

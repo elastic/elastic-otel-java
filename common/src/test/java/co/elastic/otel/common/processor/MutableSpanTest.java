@@ -1,3 +1,21 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.otel.common.processor;
 
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
@@ -20,22 +38,20 @@ public class MutableSpanTest {
 
   @Test
   public void noSpanDataCopyWithoutMutation() {
-    ReadableSpan original = createSpan("foo", builder -> {
-    });
+    ReadableSpan original = createSpan("foo", builder -> {});
 
     MutableSpan mutable = MutableSpan.makeMutable(original);
     SpanData first = mutable.toSpanData();
     SpanData second = mutable.toSpanData();
 
-    assertThat(first.getClass().getName()).isEqualTo(
-        "io.opentelemetry.sdk.trace.AutoValue_SpanWrapper");
+    assertThat(first.getClass().getName())
+        .isEqualTo("io.opentelemetry.sdk.trace.AutoValue_SpanWrapper");
     assertThat(first).isSameAs(second);
   }
 
   @Test
   public void freezeAfterMutation() {
-    ReadableSpan original = createSpan("foo", builder -> {
-    });
+    ReadableSpan original = createSpan("foo", builder -> {});
 
     MutableSpan mutable1 = MutableSpan.makeMutable(original);
     mutable1.setName("updated");
@@ -44,14 +60,16 @@ public class MutableSpanTest {
     assertThatThrownBy(() -> mutable1.setName("should not be allowed"))
         .isInstanceOf(IllegalStateException.class);
 
-    //it should be okay to wrap again and then mutate
+    // it should be okay to wrap again and then mutate
     MutableSpan mutable2 = MutableSpan.makeMutable(mutable1);
     mutable2.setName("updated again");
 
     assertThat(mutable1.toSpanData()).hasName("updated");
     assertThat(mutable2.toSpanData()).hasName("updated again");
-  }
 
+    assertThat(mutable1.getOriginalSpan()).isSameAs(original);
+    assertThat(mutable2.getOriginalSpan()).isSameAs(mutable1);
+  }
 
   @Test
   public void testAttributesMutations() {
@@ -60,11 +78,14 @@ public class MutableSpanTest {
     AttributeKey<String> remove = AttributeKey.stringKey("remove-me");
     AttributeKey<String> add = AttributeKey.stringKey("add-me");
 
-    ReadableSpan original = createSpan("foo", builder -> {
-      builder.setAttribute(keep, "keep-original");
-      builder.setAttribute(update, "update-original");
-      builder.setAttribute(remove, "remove-original");
-    });
+    ReadableSpan original =
+        createSpan(
+            "foo",
+            builder -> {
+              builder.setAttribute(keep, "keep-original");
+              builder.setAttribute(update, "update-original");
+              builder.setAttribute(remove, "remove-original");
+            });
 
     MutableSpan mutable = MutableSpan.makeMutable(original);
 
@@ -81,7 +102,7 @@ public class MutableSpanTest {
     assertThat(mutable.getAttribute(remove)).isNull();
     assertThat(mutable.getAttribute(add)).isEqualTo("added");
 
-    //check again after the MutableSpan has been frozen due ot the toSpanData() call
+    // check again after the MutableSpan has been frozen due ot the toSpanData() call
     assertThat(mutable.toSpanData().getAttributes())
         .hasSize(3)
         .containsEntry(keep, "keep-original")
@@ -93,9 +114,8 @@ public class MutableSpanTest {
     assertThat(mutable.getAttribute(remove)).isNull();
     assertThat(mutable.getAttribute(add)).isEqualTo("added");
 
-    //Ensure attributes are cached
-    assertThat(mutable.toSpanData().getAttributes())
-        .isSameAs(mutable.toSpanData().getAttributes());
+    // Ensure attributes are cached
+    assertThat(mutable.toSpanData().getAttributes()).isSameAs(mutable.toSpanData().getAttributes());
   }
 
   @Test
@@ -103,9 +123,12 @@ public class MutableSpanTest {
     AttributeKey<String> key = AttributeKey.stringKey("first-key");
     AttributeKey<String> cancelledKey = AttributeKey.stringKey("second-key");
 
-    ReadableSpan original = createSpan("foo", builder -> {
-      builder.setAttribute(key, "original");
-    });
+    ReadableSpan original =
+        createSpan(
+            "foo",
+            builder -> {
+              builder.setAttribute(key, "original");
+            });
 
     MutableSpan mutable1 = MutableSpan.makeMutable(original);
     mutable1.setAttribute(key, "updated");
@@ -115,14 +138,12 @@ public class MutableSpanTest {
 
     SpanData mutatedSpanData = mutable1.toSpanData();
 
-    assertThat(mutatedSpanData.getAttributes())
-        .isSameAs(original.toSpanData().getAttributes());
+    assertThat(mutatedSpanData.getAttributes()).isSameAs(original.toSpanData().getAttributes());
   }
 
   @Test
   public void noDoubleWrapping() {
-    ReadableSpan original = createSpan("foo", builder -> {
-    });
+    ReadableSpan original = createSpan("foo", builder -> {});
 
     MutableSpan mutable = MutableSpan.makeMutable(original);
     assertThat(MutableSpan.makeMutable(mutable)).isSameAs(mutable);
@@ -134,34 +155,33 @@ public class MutableSpanTest {
   private ReadableSpan createSpan(String name, Consumer<SpanBuilder> spanCustomizer) {
 
     AtomicReference<ReadableSpan> resultSpan = new AtomicReference<>();
-    SpanProcessor collecting = new SpanProcessor() {
-      @Override
-      public void onStart(Context parentContext, ReadWriteSpan span) {
+    SpanProcessor collecting =
+        new SpanProcessor() {
+          @Override
+          public void onStart(Context parentContext, ReadWriteSpan span) {}
 
-      }
+          @Override
+          public boolean isStartRequired() {
+            return false;
+          }
 
-      @Override
-      public boolean isStartRequired() {
-        return false;
-      }
+          @Override
+          public void onEnd(ReadableSpan span) {
+            resultSpan.set(span);
+          }
 
-      @Override
-      public void onEnd(ReadableSpan span) {
-        resultSpan.set(span);
-      }
+          @Override
+          public boolean isEndRequired() {
+            return true;
+          }
+        };
 
-      @Override
-      public boolean isEndRequired() {
-        return true;
-      }
-    };
+    try (OpenTelemetrySdk sdk =
+        OpenTelemetrySdk.builder()
+            .setTracerProvider(SdkTracerProvider.builder().addSpanProcessor(collecting).build())
+            .build()) {
 
-    try (OpenTelemetrySdk sdk = OpenTelemetrySdk.builder()
-        .setTracerProvider(SdkTracerProvider.builder().addSpanProcessor(collecting).build())
-        .build()) {
-
-      SpanBuilder builder = sdk.getTracer("my-tracer")
-          .spanBuilder(name);
+      SpanBuilder builder = sdk.getTracer("my-tracer").spanBuilder(name);
       spanCustomizer.accept(builder);
       builder.startSpan().end();
       return resultSpan.get();
