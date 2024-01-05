@@ -20,6 +20,7 @@ include("smoke-tests")
 include("smoke-tests:test-app")
 include("smoke-tests:test-app-war")
 include("testing:agent-for-testing")
+include("jvmti-access")
 
 dependencyResolutionManagement {
     versionCatalogs {
