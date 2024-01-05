@@ -63,7 +63,7 @@ public class ChainingSpanProcessorAutoConfigurationTest {
     AutoConfigA.delegate = mockConfig;
 
     try (AutoConfigTestProperties props =
-        new AutoConfigTestProperties().put("otel.traces.exporter", "NONE")) {
+        new AutoConfigTestProperties().put("otel.traces.exporter", "none")) {
 
       OpenTelemetry otel = GlobalOpenTelemetry.get();
       Tracer tracer = otel.getTracer("dummy-tracer");
