@@ -32,7 +32,7 @@ public class UniversalProfilingCorrelation {
 
 
   @Nullable
-  public static synchronized ByteBuffer getCurrentThreadStorage(boolean allocateIfRequired,
+  public static ByteBuffer getCurrentThreadStorage(boolean allocateIfRequired,
       int expectedCapacity) {
     if (isVirtual(Thread.currentThread())) {
       return null; //virtual threads are not supported yet
@@ -56,7 +56,7 @@ public class UniversalProfilingCorrelation {
     return buffer;
   }
 
-  public static synchronized void removeCurrentThreadStorage() {
+  public static void removeCurrentThreadStorage() {
     if (isVirtual(Thread.currentThread())) {
       return; //virtual threads are not supported yet
     }
