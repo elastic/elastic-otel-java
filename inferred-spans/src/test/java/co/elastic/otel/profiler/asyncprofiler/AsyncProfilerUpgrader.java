@@ -57,7 +57,7 @@ public class AsyncProfilerUpgrader {
   static final String COMMON_BINARY_FILE_NAME = "libasyncProfiler.so";
 
   static final String[] USED_ARTIFACTS = {
-    "linux-aarch64", "linux-arm", "linux-x64", "linux-x86", "macos-x64"
+      "linux-aarch64", "linux-arm", "linux-x64", "linux-x86", "macos-x64"
   };
 
   @Test
@@ -207,14 +207,15 @@ public class AsyncProfilerUpgrader {
   }
 
   private Path getBinariesResourceDir() throws URISyntaxException {
-    // <agent-repo-root>/apm-agent-plugins/apm-profiling-plugin/target/classes/asyncprofiler
+    // <repo-root>/inferred-spans/build/resources/main/asyncprofiler
     Path asyncProfilerTestResourcePath =
         Paths.get(AsyncProfilerUpgrader.class.getResource("/asyncprofiler").toURI());
-    // <agent-repo-root>/apm-agent-plugins/apm-profiling-plugin/target/classes/asyncprofiler
-    Path pluginRootDir = asyncProfilerTestResourcePath.getParent().getParent().getParent();
+    // <repo-root>/inferred-spans/build/resources/main/asyncprofiler
+    Path projectRootDir =
+        asyncProfilerTestResourcePath.getParent().getParent().getParent().getParent();
     // We are looking for //
-    // <agent-repo-root>/apm-agent-plugins/apm-profiling-plugin/src/main/resources/asyncprofiler
-    return pluginRootDir
+    // <<repo-root>/inferred-spans/src/main/resources/asyncprofiler
+    return projectRootDir
         .resolve("src")
         .resolve("main")
         .resolve("resources")

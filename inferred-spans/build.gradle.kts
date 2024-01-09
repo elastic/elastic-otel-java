@@ -12,7 +12,7 @@ dependencies {
   testCompileOnly(libs.findbugs.jsr305)
   testImplementation("io.opentelemetry:opentelemetry-sdk")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-  testImplementation(libs.assertJ.core)
+  testImplementation(libs.assertj.core)
   testImplementation(libs.awaitility)
   testImplementation("org.kohsuke:github-api:1.133")
   testImplementation("org.apache.commons:commons-compress:1.21")
