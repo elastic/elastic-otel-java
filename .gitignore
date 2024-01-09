@@ -12,3 +12,6 @@ examples/**/build/
 *.ipr
 *.iws
 out/
+
+# OS X
+**/.DS_Store
