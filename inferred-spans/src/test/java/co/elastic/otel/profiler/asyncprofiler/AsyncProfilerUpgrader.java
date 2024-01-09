@@ -57,7 +57,7 @@ public class AsyncProfilerUpgrader {
   static final String COMMON_BINARY_FILE_NAME = "libasyncProfiler.so";
 
   static final String[] USED_ARTIFACTS = {
-      "linux-aarch64", "linux-arm", "linux-x64", "linux-x86", "macos-x64"
+    "linux-aarch64", "linux-arm", "linux-x64", "linux-x86", "macos-x64"
   };
 
   @Test
