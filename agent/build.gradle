@@ -147,8 +147,8 @@ publishing {
 
   repositories {
     maven {
-      name = 'testRepo'
-      url = layout.buildDirectory.dir("repo")
+      name = "snapshots"
+      url = "https://oss.sonatype.org/content/repositories/snapshots"
     }
   }
 }
