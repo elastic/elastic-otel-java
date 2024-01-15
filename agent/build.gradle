@@ -125,8 +125,9 @@ tasks {
       attributes.put("Can-Redefine-Classes", "true")
       attributes.put("Can-Retransform-Classes", "true")
       attributes.put("Implementation-Vendor", "Elastic")
-      // TODO : add git hash to version for easier support
-      attributes.put("Implementation-Version", "elastic-${project.version}-otel-" + catalog.versions.opentelemetryJavaagent.get().toString())
+      attributes.put("Implementation-Title", "co.elastic.otel:elastic-otel-javaagent")
+      attributes.put("Implementation-Version", project.version)
+      // TODO : add git hash to version for easier support with SCM-Revision
     }
   }
 
@@ -138,8 +139,8 @@ tasks {
 publishing {
   publications {
     agentJar(MavenPublication) {
-      groupId = "co.elastic.observability"
-      artifactId = "javaagent"
+      groupId = 'co.elastic.otel'
+      artifactId = 'elastic-otel-javaagent'
       artifact shadowJar
     }
   }
