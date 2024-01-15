@@ -8,9 +8,11 @@ version '0.0.1-SNAPSHOT'
 defaultTasks("agent:assemble")
 
 subprojects {
+  group = rootProject.group
   version = rootProject.version
 
   apply plugin: "java"
+  apply plugin: "maven-publish" //Allows to run ./gradle publishToMavenLocal for easy local testing
   apply plugin: "com.diffplug.spotless"
 
   ext {
@@ -23,6 +25,7 @@ subprojects {
   }
 
   repositories {
+    mavenLocal()
     mavenCentral()
     maven {
       name = "sonatype"
@@ -32,9 +35,16 @@ subprojects {
 
   spotless {
     java {
-      googleJavaFormat()
-      licenseHeaderFile(rootProject.file("buildscripts/spotless.license.java"), "(package|import|public)")
       target("src/**/*.java")
+      googleJavaFormat()
+
+      licenseHeaderFile(rootProject.file("buildscripts/spotless.license.java"), "(package|import|public)")
+          .named("default")
+
+      licenseHeaderFile(rootProject.file("buildscripts/spotless.reallogic.license.java"), "(package|import|public)")
+          .named("reallogic")
+          .onlyIfContentMatches("package co.elastic.otel.profiler.collections;")
+
     }
   }
 
