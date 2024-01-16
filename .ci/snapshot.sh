@@ -31,4 +31,6 @@ else
     publishArg='publishAllPublicationsToSnapshotsRepository'
 fi
 
-./gradlew --console=plain clean ${publishArg} | tee snapshot.txt
+folder="$(readlink -f $(dirname $0))"
+
+./gradlew --console=plain -Psigning.gnupg.optionsFile=${folder}/gpg.conf clean ${publishArg} | tee snapshot.txt
