@@ -31,4 +31,4 @@ else
     echo "--- Deploy the snapshot :package:"
 fi
 
-./gradlew --console=plain ${dry_run_arg} clean assemble | tee snapshot.txt
+./gradlew --console=plain ${dry_run_arg} clean assemble publishAllPublicationsToSnapshotsRepository | tee snapshot.txt
