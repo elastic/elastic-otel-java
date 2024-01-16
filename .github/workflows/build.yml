@@ -37,13 +37,13 @@ jobs:
 
       - name: Store test results
         if: success() || failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: test-results
           path: '**/build/test-results/test/TEST-*.xml'
 
       - name: Agent artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: elastic-otel-javaagent
           path: |
