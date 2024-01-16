@@ -21,7 +21,7 @@ export SERVER_PASSWORD
 
 # Signing keys
 GPG_SECRET=kv/data/ci-shared/release-eng/team-release-secrets/otel/gpg
-vault read -field="keyring" $GPG_SECRET | base64 -d > $KEY_FILE
+vault kv get --field="keyring" $GPG_SECRET | base64 -d > $KEY_FILE
 ## NOTE: passphase is the name of the field.
 KEYPASS_SECRET=$(vault kv get --field="passphase" $GPG_SECRET)
 export KEYPASS_SECRET
