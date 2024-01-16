@@ -33,4 +33,8 @@ fi
 
 folder="$(readlink -f $(dirname $0))"
 
-./gradlew --console=plain -Psigning.gnupg.optionsFile=${folder}/gpg.conf clean ${publishArg} | tee snapshot.txt
+# make sure gpg does not warns about permissions
+chmod 700 ${folder}/gpg
+chmod 600 ${folder}/gpg/gpg.conf
+
+./gradlew --console=plain -Psigning.gnupg.optionsFile=${folder}/gpg/gpg.conf clean ${publishArg} | tee snapshot.txt
