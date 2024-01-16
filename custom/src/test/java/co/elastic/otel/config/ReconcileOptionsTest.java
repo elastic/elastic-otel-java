@@ -62,7 +62,7 @@ public class ReconcileOptionsTest {
       "https://repo1.maven.org/maven2/co/elastic/apm/elastic-apm-agent/";
 
   private static File V1ElasticAgentJarLocation;
-  private static List<ConfigurationOption<?>> AllOptionsFromV1ElasticAgentJar;
+  private static List<ConfigurationOption> AllOptionsFromV1ElasticAgentJar;
 
   @BeforeAll
   public static void getLatestV1ElasticAgentJarAndOptions() throws Exception {
@@ -78,42 +78,39 @@ public class ReconcileOptionsTest {
   @Test
   public void reconcileAllOptions() throws Exception {
     Configurations inst = new Configurations();
-    List<ConfigurationOption<?>> notInThisAgent = inV1ButNot(inst.getAllOptions());
+    List<ConfigurationOption> notInThisAgent = inV1ButNot(inst.getAllOptions());
     assertThat(notInThisAgent).isEmpty();
   }
 
   @Test
   public void reconcileWithoutOneOption() throws Exception {
     Configurations inst = new Configurations();
-    List<ConfigurationOption<?>> allOptionsLessOne = inst.getAllOptions();
+    List<ConfigurationOption> allOptionsLessOne = inst.getAllOptions();
     allOptionsLessOne.remove(allOptionsLessOne.size() - 1);
-    List<ConfigurationOption<?>> notInThisAgent = inV1ButNot(allOptionsLessOne);
+    List<ConfigurationOption> notInThisAgent = inV1ButNot(allOptionsLessOne);
     assertThat(notInThisAgent).hasSize(1);
   }
 
   @Test
   public void reconcileWithOneDifferentOption() throws Exception {
     Configurations inst = new Configurations();
-    List<ConfigurationOption<?>> allOptionsWithOneDifferent = inst.getAllOptions();
+    List<ConfigurationOption> allOptionsWithOneDifferent = inst.getAllOptions();
     allOptionsWithOneDifferent.remove(allOptionsWithOneDifferent.size() - 1);
-    allOptionsWithOneDifferent.add(
-        ConfigurationOption.unspecifiedOption()
-            .key("this_is_never_going_to_be_a_real_option_cvui")
-            .buildNotEnabled());
-    List<ConfigurationOption<?>> notInThisAgent = inV1ButNot(allOptionsWithOneDifferent);
+    allOptionsWithOneDifferent.add(new ConfigurationOption("this_is_never_going_to_be_a_real_option_cvui", null));
+    List<ConfigurationOption> notInThisAgent = inV1ButNot(allOptionsWithOneDifferent);
     assertThat(notInThisAgent).hasSize(1);
   }
 
-  private List<ConfigurationOption<?>> inV1ButNot(List<ConfigurationOption<?>> theseOptions)
+  private List<ConfigurationOption> inV1ButNot(List<ConfigurationOption> theseOptions)
       throws Exception {
-    Map<String, ConfigurationOption<?>> allThisAgentsOptionsByKey = new HashMap<>();
-    for (ConfigurationOption<?> option : theseOptions) {
+    Map<String, ConfigurationOption> allThisAgentsOptionsByKey = new HashMap<>();
+    for (ConfigurationOption option : theseOptions) {
       allThisAgentsOptionsByKey.put(option.getKey(), option);
     }
-    List<ConfigurationOption<?>> notInThisAgent = new ArrayList<>();
-    for (ConfigurationOption<?> v1Option : AllOptionsFromV1ElasticAgentJar) {
+    List<ConfigurationOption> notInThisAgent = new ArrayList<>();
+    for (ConfigurationOption v1Option : AllOptionsFromV1ElasticAgentJar) {
       if (allThisAgentsOptionsByKey.containsKey(v1Option.getKey())) {
-        ConfigurationOption<?> myOption = allThisAgentsOptionsByKey.get(v1Option.getKey());
+        ConfigurationOption myOption = allThisAgentsOptionsByKey.get(v1Option.getKey());
         if (myOption.isImplemented() && !myOption.reconcilesTo(v1Option)) {
           notInThisAgent.add(v1Option);
         }
@@ -124,7 +121,7 @@ public class ReconcileOptionsTest {
     return notInThisAgent;
   }
 
-  private static List<ConfigurationOption<?>> getAllOptionsFromV1ElasticAgentJar(
+  private static List<ConfigurationOption> getAllOptionsFromV1ElasticAgentJar(
       File v1ElasticAgentJarLocation) throws Exception {
     ShadedClassLoader cl =
         new ShadedClassLoader(
@@ -146,7 +143,7 @@ public class ReconcileOptionsTest {
                 configurationRegistry,
                 "getConfigurationOptionsByCategory",
                 new Object[0]);
-    List<ConfigurationOption<?>> allOptions = new ArrayList<>();
+    List<ConfigurationOption> allOptions = new ArrayList<>();
     for (Object object : configurationOptionsByCategory.values()) {
       for (Object object2 : (Iterable<?>) object) {
         allOptions.add(configurationOptionFrom(object2));
@@ -168,12 +165,12 @@ public class ReconcileOptionsTest {
     String description = (String) getField(clazz, obj, "description");
     Object defaultValue = getField(clazz, obj, "defaultValue");
     List<String> tags = (List<String>) getField(clazz, obj, "tags");
-    List<ConfigurationOption.Validator> validators = null;
-    List<ConfigurationOption.ChangeListener> changeListeners = null;
+//    List<ConfigurationOption.Validator> validators = null;
+//    List<ConfigurationOption.ChangeListener> changeListeners = null;
     boolean required = (boolean) getField(clazz, obj, "required");
     String defaultValueAsString = (String) getField(clazz, obj, "defaultValueAsString");
     String configurationCategory = (String) getField(clazz, obj, "configurationCategory");
-    ConfigurationOption.ValueConverter valueConverter = null;
+//    ConfigurationOption.ValueConverter valueConverter = null;
     Class valueType = (Class) getField(clazz, obj, "valueType");
     Map<String, String> validOptions = (Map<String, String>) getField(clazz, obj, "validOptions");
     String valueAsString = (String) getField(clazz, obj, "valueAsString");
@@ -184,25 +181,9 @@ public class ReconcileOptionsTest {
     String errorMessage = (String) getField(clazz, obj, "errorMessage");
     String usedKey = (String) getField(clazz, obj, "usedKey");
     return new ConfigurationOption(
-        dynamic,
-        sensitive,
         key,
-        label,
-        description,
-        defaultValue,
-        configurationCategory,
-        valueConverter,
-        valueType,
-        tags == null ? new ArrayList<String>() : Arrays.asList(tags),
-        required,
-        changeListeners == new ArrayList<ConfigurationOption.ChangeListener>()
-            ? null
-            : Arrays.asList(changeListeners),
-        validators == new ArrayList<ConfigurationOption.Validator>()
-            ? null
-            : Arrays.asList(validators),
-        aliasKeys == new ArrayList<String>() ? null : Arrays.asList(aliasKeys),
-        validOptions);
+        description
+    );
   }
 
   private static Object getField(Class<?> clazz, Object obj, String fieldName)
