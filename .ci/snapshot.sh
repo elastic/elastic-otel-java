@@ -23,12 +23,12 @@ echo $JAVA_HOME
 echo $PATH
 java -version
 
-dry_run_arg=''
+pulishArg=''
 if [[ "$dry_run" == "true" ]] ; then
-    dry_run_arg='--dry-run'
     echo "--- Deploy the snapshot :package: (dry-run)"
 else
     echo "--- Deploy the snapshot :package:"
+    publishArg='publishAllPublicationsToSnapshotsRepository'
 fi
 
-./gradlew --console=plain ${dry_run_arg} clean assemble publishAllPublicationsToSnapshotsRepository | tee snapshot.txt
+./gradlew --console=plain clean assemble ${publishArg} | tee snapshot.txt
