@@ -25,7 +25,7 @@ vault kv get --field="keyring" $GPG_SECRET | base64 -d > $KEY_FILE
 ## NOTE: passphase is the name of the field.
 KEYPASS_SECRET=$(vault kv get --field="passphase" $GPG_SECRET)
 export KEYPASS_SECRET
-KEY_ID=$(vault kv get -field="key_id" $GPG_SECRET)
+KEY_ID=$(vault kv get --field="key_id" $GPG_SECRET)
 KEY_ID_SECRET=${KEY_ID: -8}
 export KEY_ID_SECRET
 
