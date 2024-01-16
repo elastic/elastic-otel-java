@@ -18,16 +18,16 @@ clean_up () {
 }
 trap clean_up EXIT
 
-echo "--- Debug JDK installation :coffee:"
+echo "--- JDK installation info :coffee:"
 echo $JAVA_HOME
 echo $PATH
 java -version
 
 pulishArg=''
 if [[ "$dry_run" == "true" ]] ; then
-    echo "--- Deploy the snapshot :package: (dry-run)"
+    echo "--- Publish the snapshot :package: (dry-run)"
 else
-    echo "--- Deploy the snapshot :package:"
+    echo "--- Publish the snapshot :package:"
     publishArg='publishAllPublicationsToSnapshotsRepository'
 fi
 
