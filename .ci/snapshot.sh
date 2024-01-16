@@ -31,4 +31,4 @@ else
     publishArg='publishAllPublicationsToSnapshotsRepository'
 fi
 
-./gradlew --console=plain clean assemble ${publishArg} | tee snapshot.txt
+./gradlew --console=plain clean ${publishArg} | tee snapshot.txt
