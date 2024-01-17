@@ -28,7 +28,7 @@ if [[ "$dry_run" == "true" ]] ; then
     echo "--- Build and publish the snapshot :package: (dry-run)"
 else
     echo "--- Build and publish the snapshot :package:"
-    publishArg='publishToSonatype closeAndReleaseStagingRepositories'
+    publishArg='publishToSonatype closeAndReleaseStagingRepository'
 fi
 
 ./gradlew \
