@@ -36,7 +36,6 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -96,7 +95,8 @@ public class ReconcileOptionsTest {
     Configurations inst = new Configurations();
     List<ConfigurationOption> allOptionsWithOneDifferent = inst.getAllOptions();
     allOptionsWithOneDifferent.remove(allOptionsWithOneDifferent.size() - 1);
-    allOptionsWithOneDifferent.add(new ConfigurationOption("this_is_never_going_to_be_a_real_option_cvui", null));
+    allOptionsWithOneDifferent.add(
+        new ConfigurationOption("this_is_never_going_to_be_a_real_option_cvui", null));
     List<ConfigurationOption> notInThisAgent = inV1ButNot(allOptionsWithOneDifferent);
     assertThat(notInThisAgent).hasSize(1);
   }
@@ -165,12 +165,12 @@ public class ReconcileOptionsTest {
     String description = (String) getField(clazz, obj, "description");
     Object defaultValue = getField(clazz, obj, "defaultValue");
     List<String> tags = (List<String>) getField(clazz, obj, "tags");
-//    List<ConfigurationOption.Validator> validators = null;
-//    List<ConfigurationOption.ChangeListener> changeListeners = null;
+    //    List<ConfigurationOption.Validator> validators = null;
+    //    List<ConfigurationOption.ChangeListener> changeListeners = null;
     boolean required = (boolean) getField(clazz, obj, "required");
     String defaultValueAsString = (String) getField(clazz, obj, "defaultValueAsString");
     String configurationCategory = (String) getField(clazz, obj, "configurationCategory");
-//    ConfigurationOption.ValueConverter valueConverter = null;
+    //    ConfigurationOption.ValueConverter valueConverter = null;
     Class valueType = (Class) getField(clazz, obj, "valueType");
     Map<String, String> validOptions = (Map<String, String>) getField(clazz, obj, "validOptions");
     String valueAsString = (String) getField(clazz, obj, "valueAsString");
@@ -180,10 +180,7 @@ public class ReconcileOptionsTest {
         (String) getField(clazz, obj, "nameOfCurrentConfigurationSource");
     String errorMessage = (String) getField(clazz, obj, "errorMessage");
     String usedKey = (String) getField(clazz, obj, "usedKey");
-    return new ConfigurationOption(
-        key,
-        description
-    );
+    return new ConfigurationOption(key, description);
   }
 
   private static Object getField(Class<?> clazz, Object obj, String fieldName)

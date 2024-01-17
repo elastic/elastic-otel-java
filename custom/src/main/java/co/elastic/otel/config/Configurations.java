@@ -42,14 +42,30 @@ public class Configurations {
   }
 
   private void addAllOptions() {
-    addDocumentationOption("server_url", "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-server-url[server_url] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_endpoint[OTEL_EXPORTER_OTLP_ENDPOINT]");
-    addDocumentationOption("server_urls", "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-server-urls[server_urls] option has no equivalent OpenTelemetry option, you can only specify one endpoint (with https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_endpoint[OTEL_EXPORTER_OTLP_ENDPOINT])");
-    addDocumentationOption("secret_token", "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-secret-token[secret_token] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_headers[OTEL_EXPORTER_OTLP_HEADERS] and would be set as, for example, OTEL_EXPORTER_OTLP_HEADERS=\"Authorization=Bearer an_apm_secret_token\" or equivalent");
-    addDocumentationOption("api_key", "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-api-key[api_key] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_headers[OTEL_EXPORTER_OTLP_HEADERS] and would be set as, for example, OTEL_EXPORTER_OTLP_HEADERS=\"Authorization=ApiKey an_api_key\" or equivalent");
-    addDocumentationOption("service_name", "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-service-name[service_name] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_service_name[OTEL_SERVICE_NAME]. The service name value can also be set using https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes[OTEL_RESOURCE_ATTRIBUTES], eg with OTEL_RESOURCE_ATTRIBUTES=service.name=myservice - if OTEL_SERVICE_NAME is set, it takes precendence over the resource attribute");
-    addDocumentationOption("enabled", "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-enabled[enabled] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/languages/java/automatic/agent-config/#suppressing-specific-auto-instrumentation[OTEL_JAVAAGENT_ENABLED]");
-    addDocumentationOption("service_version", "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-service-version[service_version] option corresponds to setting the `service.version` key in https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes[OTEL_RESOURCE_ATTRIBUTES], eg with OTEL_RESOURCE_ATTRIBUTES=service.version=1.2.3");
-    addDocumentationOption("environment", "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-environment[environment] option corresponds to setting the `deployment.environment` key in https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes[OTEL_RESOURCE_ATTRIBUTES], eg with OTEL_RESOURCE_ATTRIBUTES=deployment.environment=testing");
+    addDocumentationOption(
+        "server_url",
+        "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-server-url[server_url] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_endpoint[OTEL_EXPORTER_OTLP_ENDPOINT]");
+    addDocumentationOption(
+        "server_urls",
+        "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-server-urls[server_urls] option has no equivalent OpenTelemetry option, you can only specify one endpoint (with https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_endpoint[OTEL_EXPORTER_OTLP_ENDPOINT])");
+    addDocumentationOption(
+        "secret_token",
+        "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-secret-token[secret_token] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_headers[OTEL_EXPORTER_OTLP_HEADERS] and would be set as, for example, OTEL_EXPORTER_OTLP_HEADERS=\"Authorization=Bearer an_apm_secret_token\" or equivalent");
+    addDocumentationOption(
+        "api_key",
+        "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-api-key[api_key] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_headers[OTEL_EXPORTER_OTLP_HEADERS] and would be set as, for example, OTEL_EXPORTER_OTLP_HEADERS=\"Authorization=ApiKey an_api_key\" or equivalent");
+    addDocumentationOption(
+        "service_name",
+        "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-service-name[service_name] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_service_name[OTEL_SERVICE_NAME]. The service name value can also be set using https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes[OTEL_RESOURCE_ATTRIBUTES], eg with OTEL_RESOURCE_ATTRIBUTES=service.name=myservice - if OTEL_SERVICE_NAME is set, it takes precendence over the resource attribute");
+    addDocumentationOption(
+        "enabled",
+        "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-enabled[enabled] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/languages/java/automatic/agent-config/#suppressing-specific-auto-instrumentation[OTEL_JAVAAGENT_ENABLED]");
+    addDocumentationOption(
+        "service_version",
+        "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-service-version[service_version] option corresponds to setting the `service.version` key in https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes[OTEL_RESOURCE_ATTRIBUTES], eg with OTEL_RESOURCE_ATTRIBUTES=service.version=1.2.3");
+    addDocumentationOption(
+        "environment",
+        "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-environment[environment] option corresponds to setting the `deployment.environment` key in https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes[OTEL_RESOURCE_ATTRIBUTES], eg with OTEL_RESOURCE_ATTRIBUTES=deployment.environment=testing");
     addUnspecifiedOption("log_level");
     addUnspecifiedOption("log_file");
     addUnspecifiedOption("log_file_size");

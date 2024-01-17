@@ -22,9 +22,8 @@ public class ConfigurationOption {
 
   String key;
   String description;
-  protected ConfigurationOption(
-      String key,
-      String description) {
+
+  protected ConfigurationOption(String key, String description) {
     this.key = key;
     this.description = description;
   }
@@ -40,5 +39,4 @@ public class ConfigurationOption {
   public boolean reconcilesTo(ConfigurationOption option) {
     return key.equals(option.key);
   }
-
 }
