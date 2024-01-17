@@ -21,11 +21,11 @@ package co.elastic.otel.profiler;
 import static java.util.logging.Level.FINE;
 import static java.util.logging.Level.WARNING;
 
+import co.elastic.otel.common.util.HexUtils;
 import co.elastic.otel.profiler.collections.LongHashSet;
 import co.elastic.otel.profiler.collections.LongList;
 import co.elastic.otel.profiler.pooling.ObjectPool;
 import co.elastic.otel.profiler.pooling.Recyclable;
-import co.elastic.otel.profiler.util.HexUtils;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;

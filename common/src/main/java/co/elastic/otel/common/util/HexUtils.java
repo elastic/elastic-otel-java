@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.profiler.util;
+package co.elastic.otel.common.util;
+
+import java.nio.ByteBuffer;
 
 public class HexUtils {
 
@@ -47,6 +49,17 @@ public class HexUtils {
 
   private static void appendHexChar(long value, StringBuilder sb) {
     sb.append(HEX_CHARS[(int) (value & 0x0F)]);
+  }
+
+  public static void writeHexAsBinary(CharSequence hex, int strOffset, ByteBuffer buffer,
+      int bufferPos, int numBytes) {
+    //TODO: add test
+    for (int i = 0; i < numBytes; i++) {
+      long upper = hexCharToBinary(hex.charAt(strOffset + i * 2));
+      long lower = hexCharToBinary(hex.charAt(strOffset + i * 2 + 1));
+      byte byteVal = (byte) (upper << 4 | lower);
+      buffer.put(bufferPos + i, byteVal);
+    }
   }
 
   public static long hexToLong(CharSequence hex, int offset) {
