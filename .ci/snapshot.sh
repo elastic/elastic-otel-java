@@ -37,4 +37,9 @@ folder="$(readlink -f $(dirname $0))"
 chmod 700 ${folder}/gpg
 chmod 600 ${folder}/gpg/gpg.conf
 
-./gradlew --console=plain -Psigning.gnupg.optionsFile=${folder}/gpg/gpg.conf clean ${publishArg} | tee snapshot.txt
+./gradlew \
+    --debug \
+    --console=plain \
+    -Psigning.gnupg.optionsFile=${folder}/gpg/gpg.conf \
+    clean ${publishArg} \
+    | tee snapshot.txt
