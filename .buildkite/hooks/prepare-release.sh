@@ -32,6 +32,12 @@ export KEY_ID_SECRET
 # Import the key into the keyring
 echo "$KEYPASS_SECRET" | gpg --batch --import "$KEY_FILE"
 
+# Export the key in ascii armored format
+gpg --enarmor ${KEY_FILE}
+SECRING_ASC="$(cat "$KEY_FILE.asc")"
+export SECRING_ASC
+
+
 echo "--- Configure git context :git:"
 # Configure the committer since the maven release requires to push changes to GitHub
 # This will help with the SLSA requirements.

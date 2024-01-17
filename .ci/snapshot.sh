@@ -41,6 +41,5 @@ chmod 600 ${folder}/gpg/gpg.conf
 ./gradlew \
     --debug \
     --console=plain \
-    -Psigning.gnupg.optionsFile=${folder}/gpg/gpg.conf \
     clean ${publishArg} \
     | tee snapshot.txt

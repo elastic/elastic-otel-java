@@ -154,7 +154,7 @@ publishing {
 }
 
 signing {
-  // use gpg agent
-  useGpgCmd()
+  // use in-memory ascii-armored key in enviroment variables
+  useInMemoryPgpKeys(System.getenv("KEY_ID_SECRET"), System.getenv("SECRING_ASC"), System.getenv("KEYPASS_SECRET"))
   sign publishing.publications.agentJar
 }
