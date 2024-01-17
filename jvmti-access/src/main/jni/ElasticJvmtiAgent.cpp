@@ -1,12 +1,4 @@
 #include "ElasticJvmtiAgent.h"
-#include <memory>
-#include <cstring>
-#include <array>
-#include <mutex>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <fcntl.h>
-#include <unistd.h>
 
 
 JNIEXPORT thread_local void* elastic_apm_profiling_correlation_tls_v1 = nullptr;

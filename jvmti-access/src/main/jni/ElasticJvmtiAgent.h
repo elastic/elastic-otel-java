@@ -2,7 +2,6 @@
 #define ELASTICJVMTIAGENT_H_
 
 #include <jvmti.h>
-#include <sstream>
 
 namespace elastic {
     namespace jvmti_agent {
