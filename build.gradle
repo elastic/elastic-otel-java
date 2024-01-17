@@ -77,10 +77,7 @@ subprojects {
 
 nexusPublishing {
   repositories {
-    sonatype {
-      username = System.getenv("SONATYPE_USERNAME") ?: ""
-      password = System.getenv("SONATYPE_PASSWORD") ?: ""
-    }
+    sonatype()
   }
 }
 
