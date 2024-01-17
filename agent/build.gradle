@@ -144,11 +144,13 @@ publishing {
       artifact shadowJar
     }
   }
+}
 
+nexusPublishing {
   repositories {
-    maven {
-      name = "snapshots"
-      url = "https://oss.sonatype.org/content/repositories/snapshots"
+    sonatype {
+      username = System.getenv("SONATYPE_USERNAME")
+      password = System.getenv("SONATYPE_PASSWORD")
     }
   }
 }

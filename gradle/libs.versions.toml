@@ -34,3 +34,4 @@ shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
 jib = { id = "com.google.cloud.tools.jib", version.ref = "jib" }
 spotless = { id = "com.diffplug.spotless:spotless", version.ref = "spotless" }
 taskinfo = { id = "org.barfuin.gradle.taskinfo", version = '2.1.0' }
+nexusPublish = { id = "io.github.gradle-nexus.publish-plugin", version = '1.3.0' }

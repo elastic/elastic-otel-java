@@ -23,15 +23,13 @@ echo $JAVA_HOME
 echo $PATH
 java -version
 
-pulishArg=''
+publishArg=''
 if [[ "$dry_run" == "true" ]] ; then
     echo "--- Build and publish the snapshot :package: (dry-run)"
 else
     echo "--- Build and publish the snapshot :package:"
-    publishArg='publishAllPublicationsToSnapshotsRepository'
+    publishArg='publishToSonatype closeAndReleaseStagingRepositories'
 fi
-
-folder="$(readlink -f $(dirname $0))"
 
 ./gradlew \
     --console=plain \
