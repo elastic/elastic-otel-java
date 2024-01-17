@@ -25,27 +25,28 @@ public class JvmtiAccessImpl {
   static native int destroy0();
 
   /**
-   * @param threadBuffer the buffer whose address will get stored in the native thread-local-storage for APM <-> profiling correlation
+   * @param threadBuffer the buffer whose address will get stored in the native thread-local-storage
+   *     for APM <-> profiling correlation
    */
   static native void setThreadProfilingCorrelationBuffer0(ByteBuffer threadBuffer);
 
   /**
-   * @param byteBuffer the buffer whose address will get stored in the native global variable for APM <-> profiling correlation
+   * @param byteBuffer the buffer whose address will get stored in the native global variable for
+   *     APM <-> profiling correlation
    */
   static native void setProcessProfilingCorrelationBuffer0(ByteBuffer byteBuffer);
 
   /**
-   * ONLY FOR TESTING!
-   * Creates a new bytebuffer for reading the currently configured thread local correlation buffer.
-   * This buffer points to the same memory address as the buffer configured via setThreadProfilingCorrelationBuffer0.
+   * ONLY FOR TESTING! Creates a new bytebuffer for reading the currently configured thread local
+   * correlation buffer. This buffer points to the same memory address as the buffer configured via
+   * setThreadProfilingCorrelationBuffer0.
    */
   static native ByteBuffer createThreadProfilingCorrelationBufferAlias(long capacity);
 
   /**
-   * ONLY FOR TESTING!
-   * Creates a new bytebuffer for reading the currently configured process local correlation buffer.
-   * This buffer points to the same memory address as the buffer configured via setProcessProfilingCorrelationBuffer0.
+   * ONLY FOR TESTING! Creates a new bytebuffer for reading the currently configured process local
+   * correlation buffer. This buffer points to the same memory address as the buffer configured via
+   * setProcessProfilingCorrelationBuffer0.
    */
   static native ByteBuffer createProcessProfilingCorrelationBufferAlias(long capacity);
-
 }
