@@ -14,7 +14,7 @@ plugins {
 
 dependencies {
   testImplementation(libs.assertj.core)
-  implementation(libs.jsr305)
+  implementation(libs.findbugs.jsr305)
 }
 
 // we use Java 7 for this project so that it can be reused in the old elastic-apm-agent
