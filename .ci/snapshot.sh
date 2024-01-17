@@ -25,9 +25,9 @@ java -version
 
 pulishArg=''
 if [[ "$dry_run" == "true" ]] ; then
-    echo "--- Publish the snapshot :package: (dry-run)"
+    echo "--- Build and publish the snapshot :package: (dry-run)"
 else
-    echo "--- Publish the snapshot :package:"
+    echo "--- Build and publish the snapshot :package:"
     publishArg='publishAllPublicationsToSnapshotsRepository'
 fi
 
