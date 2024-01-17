@@ -5,7 +5,7 @@ repositories {
 
     // maven central snapshots for upstream opentelemetry
     maven {
-        name = "sonatype"
+        name = "mavenCentralSnapshots"
         url = uri("https://oss.sonatype.org/content/repositories/snapshots")
     }
 }

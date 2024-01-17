@@ -30,7 +30,7 @@ subprojects {
     mavenLocal()
     mavenCentral()
     maven {
-      name = "sonatype"
+      name = "mavenCentralSnapshots"
       url = uri("https://oss.sonatype.org/content/repositories/snapshots")
     }
   }
@@ -78,14 +78,13 @@ subprojects {
 nexusPublishing {
   repositories {
     sonatype {
-        username = System.getenv("SONATYPE_USERNAME")
-        password = System.getenv("SONATYPE_PASSWORD")
+      username = System.getenv("SONATYPE_USERNAME") ?: ""
+      password = System.getenv("SONATYPE_PASSWORD") ?: ""
     }
   }
-
 }
 
-task copyGitHooks(type:Copy) {
+task copyGitHooks(type: Copy) {
   from layout.projectDirectory.dir(".githooks")
   into layout.projectDirectory.dir(".git").dir("hooks")
 }
