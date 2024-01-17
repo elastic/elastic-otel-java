@@ -22,14 +22,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
@@ -72,56 +71,49 @@ public class UniversalProfilingCorrelationTest {
 
     ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
-    List<? extends Future<?>> futures =
-        IntStream.range(1, numThreads + 1)
-            .mapToObj(
-                id ->
-                    executor.submit(
-                        () -> {
-                          // Ensure we don't allocate anything if specified to not allocate
-                          ByteBuffer buffer =
-                              UniversalProfilingCorrelation.getCurrentThreadStorage(false, 100);
-                          assertThat(buffer).isNull();
-                          assertThat(
-                                  JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(100))
-                              .isNull();
+    List<Future<?>> futures = new ArrayList<>();
+    for (int i = 0; i < numThreads; i++) {
+      int id = i;
+      futures.add(
+          executor.submit(
+              () -> {
+                // Ensure we don't allocate anything if specified to not allocate
+                ByteBuffer buffer =
+                    UniversalProfilingCorrelation.getCurrentThreadStorage(false, 100);
+                assertThat(buffer).isNull();
+                assertThat(JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(100))
+                    .isNull();
 
-                          buffer = UniversalProfilingCorrelation.getCurrentThreadStorage(true, 100);
-                          assertThat(buffer).isNotNull();
-                          assertThat(
-                                  JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(100))
-                              .isNotNull();
+                buffer = UniversalProfilingCorrelation.getCurrentThreadStorage(true, 100);
+                assertThat(buffer).isNotNull();
+                assertThat(JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(100))
+                    .isNotNull();
 
-                          // subsequent calls should return the same instance
-                          assertThat(
-                                  UniversalProfilingCorrelation.getCurrentThreadStorage(true, 100))
-                              .isSameAs(buffer);
+                // subsequent calls should return the same instance
+                assertThat(UniversalProfilingCorrelation.getCurrentThreadStorage(true, 100))
+                    .isSameAs(buffer);
 
-                          buffer.putInt(0, id);
+                buffer.putInt(0, id);
 
-                          try {
-                            threadsBarrier.await();
-                          } catch (Exception e) {
-                            throw new RuntimeException(e);
-                          }
+                try {
+                  threadsBarrier.await();
+                } catch (Exception e) {
+                  throw new RuntimeException(e);
+                }
 
-                          ByteBuffer alias =
-                              JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(100);
-                          alias.order(ByteOrder.nativeOrder());
+                ByteBuffer alias = JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(100);
+                alias.order(ByteOrder.nativeOrder());
 
-                          int readId = alias.getInt(0);
-                          assertThat(readId).isSameAs(id);
+                int readId = alias.getInt(0);
+                assertThat(readId).isSameAs(id);
 
-                          UniversalProfilingCorrelation.removeCurrentThreadStorage();
-                          assertThat(
-                                  UniversalProfilingCorrelation.getCurrentThreadStorage(false, 100))
-                              .isNull();
-                          assertThat(
-                                  JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(100))
-                              .isNull();
-                        }))
-            .collect(Collectors.toList());
-
+                UniversalProfilingCorrelation.removeCurrentThreadStorage();
+                assertThat(UniversalProfilingCorrelation.getCurrentThreadStorage(false, 100))
+                    .isNull();
+                assertThat(JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(100))
+                    .isNull();
+              }));
+    }
     for (Future<?> future : futures) {
       // Rethrows any assertion errors occurring on the threads
       future.get();
