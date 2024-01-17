@@ -33,13 +33,7 @@ fi
 
 folder="$(readlink -f $(dirname $0))"
 
-# make sure gpg does not warns about permissions
-chmod 700 ${folder}/gpg
-chmod 600 ${folder}/gpg/gpg.conf
-
-
 ./gradlew \
-    --debug \
     --console=plain \
     clean ${publishArg} \
     | tee snapshot.txt
