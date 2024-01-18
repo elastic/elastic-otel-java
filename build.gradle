@@ -7,6 +7,8 @@ plugins {
 group 'co.elastic.apm'
 version '0.0.1-SNAPSHOT'
 
+description = "Elastic OpenTelemetry java distribution"
+
 defaultTasks("agent:assemble")
 
 subprojects {

@@ -7,6 +7,8 @@ plugins {
   alias catalog.plugins.taskinfo
 }
 
+description = rootProject.description + " agent"
+
 base.archivesName.set("elastic-otel-javaagent")
 
 apply from: "$rootDir/gradle/shadow.gradle"
@@ -142,6 +144,29 @@ publishing {
       groupId = 'co.elastic.otel'
       artifactId = 'elastic-otel-javaagent'
       artifact shadowJar
+
+      pom {
+        name = project.description
+        description = project.description
+        url = "https://github.com/elastic/elastic-otel-java"
+        licenses {
+          license {
+            name = "The Apache License, Version 2.0"
+            url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+          }
+        }
+        developers {
+          developer {
+            name = "Elastic Inc."
+            url = "https://www.elastic.co"
+          }
+        }
+        scm {
+          connection = "scm:git:git@github.com:elastic/elastic-otel-java.git"
+          developerConnection = "scm:git:git@github.com:elastic/elastic-otel-java.git"
+          url = "https://github.com/elastic/elastic-otel-java"
+        }
+      }
     }
   }
   repositories {
@@ -153,6 +178,10 @@ publishing {
 }
 
 signing {
+  setRequired({
+    // only sign in CI
+    System.getenv("CI") == "true"
+  })
   // use in-memory ascii-armored key in enviroment variables
   useInMemoryPgpKeys(System.getenv("KEY_ID_SECRET"), System.getenv("SECRING_ASC"), System.getenv("KEYPASS_SECRET"))
   sign publishing.publications.agentJar
