@@ -21,7 +21,7 @@ package co.elastic.otel.config;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Configurations {
+public class LegacyConfigurations {
 
   private final List<ConfigurationOption> allOptions = new ArrayList<>();
 
@@ -37,7 +37,7 @@ public class Configurations {
     allOptions.add(new ConfigurationOption(configurationOption, description));
   }
 
-  public Configurations() {
+  public LegacyConfigurations() {
     addAllOptions();
   }
 

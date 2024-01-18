@@ -76,14 +76,14 @@ public class ReconcileOptionsTest {
 
   @Test
   public void reconcileAllOptions() throws Exception {
-    Configurations inst = new Configurations();
+    LegacyConfigurations inst = new LegacyConfigurations();
     List<ConfigurationOption> notInThisAgent = inV1ButNot(inst.getAllOptions());
     assertThat(notInThisAgent).isEmpty();
   }
 
   @Test
   public void reconcileWithoutOneOption() throws Exception {
-    Configurations inst = new Configurations();
+    LegacyConfigurations inst = new LegacyConfigurations();
     List<ConfigurationOption> allOptionsLessOne = inst.getAllOptions();
     allOptionsLessOne.remove(allOptionsLessOne.size() - 1);
     List<ConfigurationOption> notInThisAgent = inV1ButNot(allOptionsLessOne);
@@ -92,7 +92,7 @@ public class ReconcileOptionsTest {
 
   @Test
   public void reconcileWithOneDifferentOption() throws Exception {
-    Configurations inst = new Configurations();
+    LegacyConfigurations inst = new LegacyConfigurations();
     List<ConfigurationOption> allOptionsWithOneDifferent = inst.getAllOptions();
     allOptionsWithOneDifferent.remove(allOptionsWithOneDifferent.size() - 1);
     allOptionsWithOneDifferent.add(
