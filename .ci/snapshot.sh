@@ -26,6 +26,7 @@ java -version
 publishArg=''
 if [[ "$dry_run" == "true" ]] ; then
     echo "--- Build and publish the snapshot :package: (dry-run)"
+    publishArg='publishAllPublicationsToDryRunRepository'
 else
     echo "--- Build and publish the snapshot :package:"
     publishArg='publishToSonatype closeAndReleaseStagingRepository'
@@ -35,3 +36,7 @@ fi
     --console=plain \
     clean ${publishArg} \
     | tee snapshot.txt
+
+
+# for debugging produced files
+find ./agent/build/dry-run-maven-repo -type f

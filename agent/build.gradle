@@ -144,6 +144,12 @@ publishing {
       artifact shadowJar
     }
   }
+  repositories {
+    maven {
+      name = 'dryRun'
+      url = layout.buildDirectory.dir("dry-run-maven-repo")
+    }
+  }
 }
 
 signing {
