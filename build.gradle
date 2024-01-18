@@ -83,6 +83,15 @@ nexusPublishing {
   }
 }
 
+publishing {
+  repositories {
+    maven {
+      name = 'dryRun'
+      url = rootProject.layout.buildDirectory.dir("dry-run-maven-repo")
+    }
+  }
+}
+
 task copyGitHooks(type: Copy) {
   from layout.projectDirectory.dir(".githooks")
   into layout.projectDirectory.dir(".git").dir("hooks")

@@ -169,12 +169,6 @@ publishing {
       }
     }
   }
-  repositories {
-    maven {
-      name = 'dryRun'
-      url = layout.buildDirectory.dir("dry-run-maven-repo")
-    }
-  }
 }
 
 signing {
