@@ -37,3 +37,4 @@ fi
     clean ${publishArg} \
     | tee snapshot.txt
 
+find -type f ./build | tee snapshot.txt
