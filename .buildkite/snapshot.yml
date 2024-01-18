@@ -7,8 +7,8 @@ steps:
     commands: .ci/snapshot.sh
     artifact_paths:
       - "snapshot.txt"
-      - "./agent/build/libs/elastic-otel-javaagent-*.jar"
-      - "./agent/build/dry-run-maven-repo/**/*"
+      - "agent/build/libs/elastic-otel-javaagent-*.jar"
+      - "build/dry-run-maven-repo/**/*"
 
 notify:
   - slack: "#apm-agent-java"
