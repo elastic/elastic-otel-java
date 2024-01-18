@@ -37,6 +37,3 @@ fi
     clean ${publishArg} \
     | tee snapshot.txt
 
-
-# for debugging produced files
-find ./build/dry-run-maven-repo -type f
