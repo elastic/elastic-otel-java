@@ -39,4 +39,4 @@ fi
 
 
 # for debugging produced files
-find ./agent/build/dry-run-maven-repo -type f
+find ./build/dry-run-maven-repo -type f
