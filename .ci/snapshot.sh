@@ -39,4 +39,4 @@ ${folder}/../gradlew \
     clean ${publishArg} \
     | tee snapshot.txt
 
-find ${folder}/build -type f | tee snapshot.txt
+find ${folder}/../build -type f | tee snapshot.txt
