@@ -27,6 +27,12 @@ tasks {
   compileJava {
     options.release.set(7)
   }
+  javadocJar {
+    enabled = false
+  }
+  sourcesJar {
+    enabled = false
+  }
 }
 
 val jniSrcDir = file("src/main/jni")
