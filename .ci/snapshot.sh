@@ -32,9 +32,11 @@ else
     publishArg='publishToSonatype closeAndReleaseStagingRepository'
 fi
 
-./gradlew \
+folder="$(readlink -f "$(dirname $0)")"
+
+${folder}/../gradlew \
     --console=plain \
     clean ${publishArg} \
     | tee snapshot.txt
 
-find ./build -type f | tee snapshot.txt
+find ${folder}/build -type f | tee snapshot.txt
