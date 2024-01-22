@@ -3,6 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
   id "maven-publish"
   id "signing"
+  id "java"
   alias catalog.plugins.shadow
   alias catalog.plugins.taskinfo
 }
@@ -34,6 +35,10 @@ configurations {
 }
 
 dependencies {
+
+  // required to access OpenTelemetryAgent
+  compileOnly(catalog.opentelemetryJavaagentBootstrap)
+
   bootstrapLibs(project(":bootstrap"))
 
   javaagentLibs(project(":custom"))
@@ -62,6 +67,7 @@ CopySpec isolateClasses(Iterable<File> jars) {
 }
 
 tasks {
+
   jar {
     enabled = false
   }
@@ -121,9 +127,9 @@ tasks {
     relocatePackages(it)
 
     manifest {
-      attributes.put("Main-Class", "io.opentelemetry.javaagent.OpenTelemetryAgent")
-      attributes.put("Agent-Class", "io.opentelemetry.javaagent.OpenTelemetryAgent")
-      attributes.put("Premain-Class", "io.opentelemetry.javaagent.OpenTelemetryAgent")
+      attributes.put("Main-Class", "co.elastic.otel.agent.ElasticAgent")
+      attributes.put("Agent-Class", "co.elastic.otel.agent.ElasticAgent")
+      attributes.put("Premain-Class", "co.elastic.otel.agent.ElasticAgent")
       attributes.put("Can-Redefine-Classes", "true")
       attributes.put("Can-Retransform-Classes", "true")
       attributes.put("Implementation-Vendor", "Elastic")
@@ -134,7 +140,7 @@ tasks {
   }
 
   assemble {
-    dependsOn(shadowJar)
+    dependsOn(shadowJar, javadocJar, sourcesJar)
   }
 }
 
@@ -143,7 +149,7 @@ publishing {
     agentJar(MavenPublication) {
       groupId = 'co.elastic.otel'
       artifactId = 'elastic-otel-javaagent'
-      artifact shadowJar
+      artifacts = [ shadowJar, javadocJar, sourcesJar ]
 
       pom {
         name = project.description

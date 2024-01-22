@@ -28,6 +28,11 @@ subprojects {
     ]
   }
 
+  java {
+    withJavadocJar()
+    withSourcesJar()
+  }
+
   repositories {
     mavenLocal()
     mavenCentral()
