@@ -27,9 +27,8 @@ tasks {
   compileJava {
     options.release.set(7)
   }
-  javadocJar {
-    enabled = false
-  }
+  // TODO : sources jar disabled for now as it fails
+  // see https://github.com/elastic/elastic-otel-java/issues/78 for details
   sourcesJar {
     enabled = false
   }
