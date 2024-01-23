@@ -142,6 +142,7 @@ tasks {
   assemble {
     dependsOn(shadowJar, javadocJar, sourcesJar)
   }
+
 }
 
 publishing {
@@ -149,7 +150,10 @@ publishing {
     agentJar(MavenPublication) {
       groupId = 'co.elastic.otel'
       artifactId = 'elastic-otel-javaagent'
-      artifacts = [ shadowJar, javadocJar, sourcesJar ]
+
+      artifact shadowJar
+      artifact sourcesJar
+      artifact javadocJar
 
       pom {
         name = project.description

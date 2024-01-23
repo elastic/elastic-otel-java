@@ -80,20 +80,20 @@ subprojects {
       options.release.set(8)
     }
   }
+
+  publishing {
+    repositories {
+      maven {
+        name = 'dryRun'
+        url = rootProject.layout.buildDirectory.dir("dry-run-maven-repo")
+      }
+    }
+  }
 }
 
 nexusPublishing {
   repositories {
     sonatype()
-  }
-}
-
-publishing {
-  repositories {
-    maven {
-      name = 'dryRun'
-      url = rootProject.layout.buildDirectory.dir("dry-run-maven-repo")
-    }
   }
 }
 
