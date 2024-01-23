@@ -27,12 +27,6 @@ tasks {
   compileJava {
     options.release.set(7)
   }
-  javadocJar {
-    enabled = false
-  }
-  sourcesJar {
-    enabled = false
-  }
 }
 
 val jniSrcDir = file("src/main/jni")
@@ -80,6 +74,10 @@ val compileJniTask = task("compileJni")
 compileJniTask.group = "jni"
 tasks.processResources {
   dependsOn(compileJniTask)
+}
+tasks.sourcesJar {
+  //sources jar doesn't need the generated native libraries
+  exclude("elastic-jvmti")
 }
 
 nativeTargets.forEach {
