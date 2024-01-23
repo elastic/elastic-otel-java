@@ -27,11 +27,6 @@ tasks {
   compileJava {
     options.release.set(7)
   }
-  // TODO : sources jar disabled for now as it fails
-  // see https://github.com/elastic/elastic-otel-java/issues/78 for details
-  sourcesJar {
-    enabled = false
-  }
 }
 
 val jniSrcDir = file("src/main/jni")
@@ -79,6 +74,10 @@ val compileJniTask = task("compileJni")
 compileJniTask.group = "jni"
 tasks.processResources {
   dependsOn(compileJniTask)
+}
+tasks.sourcesJar {
+  //sources jar doesn't need the generated native libraries
+  exclude("elastic-jvmti")
 }
 
 nativeTargets.forEach {
