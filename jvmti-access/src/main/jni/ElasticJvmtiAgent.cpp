@@ -1,8 +1,10 @@
 #include "ElasticJvmtiAgent.h"
 
 
+// These two global variables have symbol names which will be recognized by
+// the elastic universal profiling host-agent. The host-agent will be able
+// to read their values and the memory they point to
 JNIEXPORT thread_local void* elastic_apm_profiling_correlation_tls_v1 = nullptr;
-
 JNIEXPORT void* elastic_apm_profiling_correlation_process_storage_v1 = nullptr;
 
 namespace elastic

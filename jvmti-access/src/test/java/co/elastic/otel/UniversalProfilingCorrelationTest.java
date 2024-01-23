@@ -64,7 +64,7 @@ public class UniversalProfilingCorrelationTest {
 
   @Test
   public void testPlatformThreadStorage() throws ExecutionException, InterruptedException {
-    JvmtiAccess.assertInitialized();
+    JvmtiAccess.ensureInitialized();
 
     int numThreads = 10;
     CyclicBarrier threadsBarrier = new CyclicBarrier(10);

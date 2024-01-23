@@ -31,6 +31,8 @@ tasks {
 }
 
 tasks.withType<Test>().configureEach {
+  // the check:jni flag helps unconver potential pitfalls in native code during runtime
+  // it is not required for running the tests, but it is very useful
   jvmArgs("-Xcheck:jni")
 }
 

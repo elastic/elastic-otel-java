@@ -41,16 +41,16 @@ public class JvmtiAccess {
   private static volatile State state = State.NOT_LOADED;
 
   static void setProfilingCorrelationProcessStorage(@Nullable ByteBuffer storage) {
-    assertInitialized();
+    ensureInitialized();
     JvmtiAccessImpl.setProcessProfilingCorrelationBuffer0(storage);
   }
 
   static void setProfilingCorrelationCurrentThreadStorage(@Nullable ByteBuffer storage) {
-    assertInitialized();
+    ensureInitialized();
     JvmtiAccessImpl.setThreadProfilingCorrelationBuffer0(storage);
   }
 
-  public static void assertInitialized() {
+  public static void ensureInitialized() {
     switch (state) {
       case NOT_LOADED:
       case LOADED:

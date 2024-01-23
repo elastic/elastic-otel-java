@@ -79,8 +79,11 @@ public class UniversalProfilingCorrelation {
     }
     ByteBuffer buffer = threadStorage.get();
     if (buffer != null) {
-      JvmtiAccess.setProfilingCorrelationCurrentThreadStorage(null);
-      threadStorage.remove();
+      try {
+        JvmtiAccess.setProfilingCorrelationCurrentThreadStorage(null);
+      } finally {
+        threadStorage.remove();
+      }
     }
   }
 
@@ -96,13 +99,17 @@ public class UniversalProfilingCorrelation {
     }
   }
 
+  /**
+   * Generates a method handle which checks if a given thread is a virtual thread. We need to do
+   * this via reflection (or MethodHandle as inline friendly alternative), because versions prior to
+   * Java 21 don't hava Thread.isVirtual().
+   */
   private static MethodHandle generateVirtualChecker() {
     Method isVirtual = null;
     try {
       isVirtual = Thread.class.getMethod("isVirtual");
-      isVirtual.invoke(
-          Thread.currentThread()); // invoke to ensure it does not throw exceptions for preview
-      // versions
+      // invoke to ensure it does not throw exceptions for preview versions
+      isVirtual.invoke(Thread.currentThread());
       return MethodHandles.lookup().unreflect(isVirtual);
     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
       // virtual threads are not supported, therefore no thread is virtual
