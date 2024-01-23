@@ -186,7 +186,7 @@ signing {
     // only sign in CI
     System.getenv("CI") == "true"
   })
-  // use in-memory ascii-armored key in enviroment variables
+  // use in-memory ascii-armored key in environment variables
   useInMemoryPgpKeys(System.getenv("KEY_ID_SECRET"), System.getenv("SECRING_ASC"), System.getenv("KEYPASS_SECRET"))
   sign publishing.publications.agentJar
 }
