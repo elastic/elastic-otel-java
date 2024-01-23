@@ -33,10 +33,8 @@ export KEY_ID_SECRET
 echo "$KEYPASS_SECRET" | gpg --batch --import "$KEY_FILE"
 
 # Export the key in ascii armored format
-gpg --enarmor ${KEY_FILE}
-SECRING_ASC="$(cat "$KEY_FILE.asc")"
+SECRING_ASC=$(gpg --pinentry-mode=loopback --passphrase "$KEYPASS_SECRET" --armor --export-secret-key "$KEY_ID_SECRET")
 export SECRING_ASC
-
 
 echo "--- Configure git context :git:"
 # Configure the committer since the maven release requires to push changes to GitHub
