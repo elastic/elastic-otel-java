@@ -33,3 +33,5 @@ dependencyResolutionManagement {
         }
     }
 }
+include("common")
+include("testing-common")

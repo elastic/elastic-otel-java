@@ -16,27 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.config;
+package co.elastic.otel.testing;
 
-public class ConfigurationOption {
+import javax.annotation.Nullable;
 
-  String key;
-  String description;
+public class AutoConfigTestProperties extends TemporaryProperties {
 
-  protected ConfigurationOption(String key, String description) {
-    this.key = key;
-    this.description = description;
+  public AutoConfigTestProperties() {
+    put("otel.java.global-autoconfigure.enabled", "true");
+    put("otel.traces.exporter", "logging");
+    put("otel.metrics.exporter", "logging");
+    put("otel.logs.exporter", "logging");
   }
 
-  public boolean isImplemented() {
-    return description != null;
-  }
-
-  public String getKey() {
-    return key;
-  }
-
-  public boolean reconcilesTo(ConfigurationOption option) {
-    return key.equals(option.key);
+  @Override
+  public AutoConfigTestProperties put(String key, @Nullable String value) {
+    super.put(key, value);
+    return this;
   }
 }

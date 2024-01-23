@@ -16,27 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.config;
+package co.elastic.otel.testing;
 
-public class ConfigurationOption {
+import java.util.ArrayList;
+import java.util.List;
 
-  String key;
-  String description;
+public class AssertionCollector {
 
-  protected ConfigurationOption(String key, String description) {
-    this.key = key;
-    this.description = description;
+  private final List<RuntimeException> collected = new ArrayList<>();
+
+  public void collect(Runnable task) {
+    try {
+      task.run();
+    } catch (RuntimeException e) {
+      collected.add(e);
+    }
   }
 
-  public boolean isImplemented() {
-    return description != null;
-  }
-
-  public String getKey() {
-    return key;
-  }
-
-  public boolean reconcilesTo(ConfigurationOption option) {
-    return key.equals(option.key);
+  public void rethrowFirst() {
+    if (!collected.isEmpty()) {
+      throw collected.get(0);
+    }
   }
 }

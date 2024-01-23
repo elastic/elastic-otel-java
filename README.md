@@ -74,5 +74,7 @@ if(ctx.numeric_labels != null && ctx.numeric_labels.elastic_span_self_time != nu
 }
 ```
 
+# Extending your own OpenTelemetry SDK
+TODO
 
 

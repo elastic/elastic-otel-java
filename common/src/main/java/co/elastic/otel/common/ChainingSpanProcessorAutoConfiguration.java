@@ -16,27 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.config;
+package co.elastic.otel.common;
 
-public class ConfigurationOption {
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 
-  String key;
-  String description;
+/**
+ * SPI for autoconfiguring chaining span processors (e.g. usually instances of {@link
+ * AbstractSimpleChainingSpanProcessor})
+ */
+public interface ChainingSpanProcessorAutoConfiguration {
 
-  protected ConfigurationOption(String key, String description) {
-    this.key = key;
-    this.description = description;
-  }
-
-  public boolean isImplemented() {
-    return description != null;
-  }
-
-  public String getKey() {
-    return key;
-  }
-
-  public boolean reconcilesTo(ConfigurationOption option) {
-    return key.equals(option.key);
-  }
+  void registerSpanProcessors(
+      ConfigProperties properties, ChainingSpanProcessorRegisterer registerer);
 }
