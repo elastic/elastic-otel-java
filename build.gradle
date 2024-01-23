@@ -4,7 +4,7 @@ plugins {
   alias(catalog.plugins.nexusPublish)
 }
 
-group 'co.elastic.apm'
+group 'co.elastic.otel'
 version '0.0.1-SNAPSHOT'
 
 description = "Elastic OpenTelemetry java distribution"

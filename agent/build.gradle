@@ -148,7 +148,6 @@ tasks {
 publishing {
   publications {
     agentJar(MavenPublication) {
-      groupId = 'co.elastic.otel'
       artifactId = 'elastic-otel-javaagent'
 
       artifact shadowJar
