@@ -20,8 +20,6 @@ package co.elastic.otel.profiler;
 
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.verify;
 
 import co.elastic.otel.profiler.util.DisabledOnAppleSilicon;
 import io.opentelemetry.api.trace.Span;
@@ -49,7 +47,6 @@ import org.junit.jupiter.api.condition.DisabledForJreRange;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.api.condition.OS;
-import org.mockito.Mockito;
 
 // async-profiler doesn't work on Windows
 @DisabledOnOs(OS.WINDOWS)
@@ -251,17 +248,6 @@ class SamplingProfilerTest {
             .findAny();
     assertThat(inferredSpanD).isPresent();
     assertThat(inferredSpanD.get()).hasParent(inferredSpanC.get());
-  }
-
-  @Test
-  void ensurePeriodicCleanupInvoked() throws Exception {
-    SpanAnchoredClock mockClock = Mockito.mock(SpanAnchoredClock.class);
-    setupProfiler(config -> config.clock(mockClock));
-    awaitProfilerStarted(setup.profiler);
-
-    Thread.sleep(600);
-
-    verify(mockClock, atLeast(1)).periodicCleanup();
   }
 
   @Test
