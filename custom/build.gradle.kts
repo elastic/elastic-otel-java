@@ -19,5 +19,8 @@ dependencies {
   testImplementation("io.opentelemetry.javaagent:opentelemetry-testing-common")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("org.assertj:assertj-core:3.24.2") // TODO : remove version for assertj
-
+  testImplementation("org.freemarker:freemarker:2.3.27-incubating")
+}
+tasks.withType<Test> {
+  systemProperty("elastic.otel.apm.overwrite.config.docs", project.properties["elastic.otel.apm.overwrite.config.docs"])
 }
