@@ -47,9 +47,6 @@ public class FixedClock extends SpanAnchoredClock {
     return recordedNanoTime;
   }
 
-  @Override
-  public void periodicCleanup() {}
-
   public void setNanoTime(long nanoTime) {
     this.nanoTime = nanoTime;
   }

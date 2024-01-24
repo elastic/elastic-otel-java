@@ -21,6 +21,7 @@ package co.elastic.otel.profiler;
 import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.WRITE;
 
+import co.elastic.otel.common.util.ExecutorUtils;
 import co.elastic.otel.profiler.asyncprofiler.AsyncProfiler;
 import co.elastic.otel.profiler.asyncprofiler.JfrParser;
 import co.elastic.otel.profiler.collections.Long2ObjectHashMap;
@@ -196,14 +197,9 @@ class SamplingProfiler implements Runnable {
       @Nullable File jfrFile) {
     this.config = config;
     this.tracerProvider = tracerProvider;
-    // TODO: replace with co.elastic.otel.util.ExecutorUtils
-    this.scheduler =
-        Executors.newSingleThreadScheduledExecutor(
-            runnable -> {
-              Thread result = new Thread(runnable);
-              result.setName("elastic-otel-inferred-spans");
-              return result;
-            });
+    this.scheduler = Executors.newSingleThreadScheduledExecutor(
+        ExecutorUtils.threadFactory("inferred-spans", true)
+    );
     this.clock = nanoClock;
     this.eventBuffer = createRingBuffer();
     this.sequence = new Sequence();
@@ -719,7 +715,6 @@ class SamplingProfiler implements Runnable {
   }
 
   public void start() {
-    scheduler.scheduleAtFixedRate(clock::periodicCleanup, 500, 500, TimeUnit.MILLISECONDS);
     scheduler.submit(this);
   }
 

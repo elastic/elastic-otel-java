@@ -18,13 +18,14 @@
  */
 package co.elastic.otel.profiler;
 
+import co.elastic.otel.common.WeakConcurrent;
 import com.blogspot.mydailyjava.weaklockfree.WeakConcurrentMap;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 
 public class SpanAnchoredClock {
-  private final WeakConcurrentMap<Span, Long> nanoTimeOffsetMap = new WeakConcurrentMap<>(false);
+  private final WeakConcurrentMap<Span, Long> nanoTimeOffsetMap = WeakConcurrent.createMap();
 
   public void onSpanStart(ReadWriteSpan started, Context parentContext) {
     Span parent = Span.fromContext(parentContext);
@@ -63,7 +64,4 @@ public class SpanAnchoredClock {
     return recordedNanoTime + anchor;
   }
 
-  public void periodicCleanup() {
-    nanoTimeOffsetMap.expungeStaleEntries();
-  }
 }
