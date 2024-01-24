@@ -7,10 +7,10 @@ Please only make changes in configuration.asciidoc.ftl
 == Configuration
 
 This section outlines the most similar configuration of the Elastic Opentelemetry
-distribution APM Java agent to the Elastic APM Java agent (link TBD).
+distribution APM Java agent to the https://www.elastic.co/guide/en/apm/agent/java/current/index.html[Elastic APM Java agent].
 
-The Elastic Opentelemetry distribution APM Java agent uses all the standard Opentelemetry
-Java agent configuration (link TBD).
+The Elastic Opentelemetry distribution APM Java agent uses all the standard
+https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/[Opentelemetry Java agent configuration].
 
 [horizontal]
 
@@ -20,7 +20,7 @@ Java agent configuration (link TBD).
 This is a list of all configuration options grouped by their category.
 Click on a key to get more information.
 
-* <<config-elastic-to-opentelemetry-config-mapping>>
+* <<config-elastic-to-opentelemetry-mapping>>
 ** <<config-server-url>>
 ** <<config-server-urls>>
 ** <<config-secret-token>>
@@ -30,11 +30,11 @@ Click on a key to get more information.
 ** <<config-service-version>>
 ** <<config-environment>>
 
-[[config-elastic-to-opentelemetry-config-mapping]]
-=== Elastic To Opentelemetry Config Mapping configuration options
+[[config-elastic-to-opentelemetry-mapping]]
+=== Elastic to Opentelemetry mapping configuration options
 
 ++++
-<titleabbrev>Elastic To Opentelemetry Config Mapping</titleabbrev>
+<titleabbrev>Elastic to Opentelemetry mapping</titleabbrev>
 ++++
 
 // This file is auto generated. Please make your changes in *Configuration.java (for example CoreConfiguration.java) and execute ConfigurationExporter
@@ -97,7 +97,7 @@ The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.h
 
 ----
 ############################################
-# Elastic To Opentelemetry Config Mapping  #
+# Elastic to Opentelemetry mapping         #
 ############################################
 
 ----
