@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+  implementation(project(":common"))
   compileOnly(project(":bootstrap"))
   compileOnly(project(":resources"))
   compileOnly("io.opentelemetry:opentelemetry-sdk")

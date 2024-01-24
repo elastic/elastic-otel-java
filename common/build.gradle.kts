@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     annotationProcessor(libs.autoservice.processor)
+    api("com.blogspot.mydailyjava:weak-lock-free:0.18")
     compileOnly(libs.autoservice.annotations)
     compileOnly("io.opentelemetry:opentelemetry-sdk")
     compileOnly(libs.findbugs.jsr305)
