@@ -18,8 +18,8 @@
  */
 package co.elastic.otel;
 
+import co.elastic.otel.common.util.ExecutorUtils;
 import co.elastic.otel.resources.ElasticResourceProvider;
-import co.elastic.otel.util.ExecutorUtils;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.context.ContextStorage;
 import io.opentelemetry.context.internal.shaded.WeakConcurrentMap;
