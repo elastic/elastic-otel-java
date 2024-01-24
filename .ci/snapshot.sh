@@ -33,6 +33,8 @@ else
 fi
 
 ./gradlew \
+    --debug \
+    --stacktrace \
     --console=plain \
     clean ${publishArg} \
     | tee snapshot.txt
