@@ -37,3 +37,7 @@ fi
     clean ${publishArg} \
     | tee snapshot.txt
 
+if [[ "$dry_run" == "true" ]] ; then
+    echo "--- Archive the dry-run repository :package: (dry-run)"
+    tar czvf ./build/dry-run-maven-repo.tgz -C ./build/dry-run-maven-repo/ . | tee snapshot.txt
+fi
