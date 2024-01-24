@@ -197,9 +197,9 @@ class SamplingProfiler implements Runnable {
       @Nullable File jfrFile) {
     this.config = config;
     this.tracerProvider = tracerProvider;
-    this.scheduler = Executors.newSingleThreadScheduledExecutor(
-        ExecutorUtils.threadFactory("inferred-spans", true)
-    );
+    this.scheduler =
+        Executors.newSingleThreadScheduledExecutor(
+            ExecutorUtils.threadFactory("inferred-spans", true));
     this.clock = nanoClock;
     this.eventBuffer = createRingBuffer();
     this.sequence = new Sequence();

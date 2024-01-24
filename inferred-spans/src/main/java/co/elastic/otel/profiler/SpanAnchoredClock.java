@@ -63,5 +63,4 @@ public class SpanAnchoredClock {
   public long toEpochNanos(long anchor, long recordedNanoTime) {
     return recordedNanoTime + anchor;
   }
-
 }
