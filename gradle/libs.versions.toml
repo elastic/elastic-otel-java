@@ -29,6 +29,7 @@ assertj-core = "org.assertj:assertj-core:3.25.2"
 awaitility = "org.awaitility:awaitility:4.2.0"
 findbugs-jsr305 = "com.google.code.findbugs:jsr305:3.0.0"
 testcontainers = "org.testcontainers:testcontainers:1.19.3"
+logback = "ch.qos.logback:logback-classic:1.4.14"
 
 spotlessPlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
 
