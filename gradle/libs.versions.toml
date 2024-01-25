@@ -8,7 +8,7 @@ autoservice = "1.1.1"
 opentelemetrySdk = "1.33.0"
 opentelemetryJavaagent = "1.32.0"
 opentelemetryJavaagentAlpha = "1.32.0-alpha"
-opentelemetryContribAlpha = "1.32.0-alpha"
+opentelemetryContribAlpha = "1.33.0-alpha-SNAPSHOT"
 
 [libraries]
 
