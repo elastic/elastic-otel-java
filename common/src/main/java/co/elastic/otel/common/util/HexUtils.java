@@ -53,7 +53,6 @@ public class HexUtils {
 
   public static void writeHexAsBinary(CharSequence hex, int strOffset, ByteBuffer buffer,
       int bufferPos, int numBytes) {
-    //TODO: add test
     for (int i = 0; i < numBytes; i++) {
       long upper = hexCharToBinary(hex.charAt(strOffset + i * 2));
       long lower = hexCharToBinary(hex.charAt(strOffset + i * 2 + 1));

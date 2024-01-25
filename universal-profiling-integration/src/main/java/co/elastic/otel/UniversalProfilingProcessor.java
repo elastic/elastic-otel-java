@@ -118,7 +118,7 @@ public class UniversalProfilingProcessor implements SpanProcessor {
       tls.putChar(TLS_MINOR_VERSION_OFFSET, (char) 1);
 
       SpanContext spanCtx = newSpan.getSpanContext();
-      if (spanCtx.isValid()) {
+      if (spanCtx.isValid() && !spanCtx.isRemote()) {
         tls.put(TLS_TRACE_PRESENT_OFFSET, (byte) 1);
         tls.put(TLS_TRACE_FLAGS_OFFSET, spanCtx.getTraceFlags().asByte());
         HexUtils.writeHexAsBinary(spanCtx.getTraceId(), 0, tls, TLS_TRACE_ID_OFFSET, 16);

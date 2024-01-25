@@ -1,5 +1,14 @@
 plugins {
     id("java-library")
+    alias(libs.plugins.jmh)
+}
+
+
+jmh {
+  fork = 1
+  iterations = 5
+  warmupIterations = 3
+  //profilers.add("jfr")
 }
 
 dependencies {
