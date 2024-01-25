@@ -28,7 +28,6 @@ import co.elastic.otel.testing.DisabledOnAppleSilicon;
 import co.elastic.otel.testing.OtelReflectionUtils;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.events.GlobalEventEmitterProvider;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
@@ -41,14 +40,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+
 public class InferredSpansAutoConfigTest {
 
   @BeforeEach
   @AfterEach
   public void resetGlobalOtel() {
     ProfilingActivationListener.ensureInitialized();
-    GlobalOpenTelemetry.resetForTest();
-    GlobalEventEmitterProvider.resetForTest();
+    OtelReflectionUtils.shutdownAndResetGlobalOtel();
   }
 
   @Test

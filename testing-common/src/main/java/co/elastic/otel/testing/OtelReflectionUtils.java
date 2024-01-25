@@ -18,8 +18,11 @@
  */
 package co.elastic.otel.testing;
 
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.events.GlobalEventEmitterProvider;
 import io.opentelemetry.api.trace.TracerProvider;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.lang.reflect.Field;
@@ -42,6 +45,23 @@ public class OtelReflectionUtils {
   public static List<SpanProcessor> flattenCompositeProcessors(SpanProcessor potentiallyComposite) {
     return flattenCompositeProcessor(potentiallyComposite, true);
   }
+
+  /**
+   * The global OpenTelemetry is not properly shutdown between tests by default.
+   * This method does this and resets {@link GlobalOpenTelemetry} to its inital state.
+   */
+  public static void shutdownAndResetGlobalOtel() {
+    OpenTelemetry otel = (OpenTelemetry) readField(GlobalOpenTelemetry.class, null,
+        "globalOpenTelemetry");
+    if (otel != null) {
+      //unwrap from obfuscated opentelemetry
+      OpenTelemetrySdk sdk = (OpenTelemetrySdk) readField(otel, "delegate");
+      sdk.close();
+      GlobalOpenTelemetry.resetForTest();
+      GlobalEventEmitterProvider.resetForTest();
+    }
+  }
+
 
   @SuppressWarnings("unchecked")
   private static List<SpanProcessor> flattenCompositeProcessor(
@@ -80,19 +100,23 @@ public class OtelReflectionUtils {
   }
 
   private static Object readField(Object instance, String fieldName) {
+    return readField(instance.getClass(), instance, fieldName);
+  }
+
+  private static Object readField(Class<?> clazz, Object instance, String fieldName) {
 
     List<Field> fields =
         ReflectionSupport.findFields(
-            instance.getClass(),
+            clazz,
             field -> field.getName().equals(fieldName),
             HierarchyTraversalMode.BOTTOM_UP);
 
     if (fields.isEmpty()) {
       throw new IllegalArgumentException(
-          instance.getClass().getName() + " does not have a field named '" + fieldName + "'");
+          clazz.getName() + " does not have a field named '" + fieldName + "'");
     } else if (fields.size() > 2) {
       throw new IllegalArgumentException(
-          instance.getClass().getName() + " has multiple fields named '" + fieldName + "'");
+          clazz.getName() + " has multiple fields named '" + fieldName + "'");
     }
 
     try {
