@@ -15,7 +15,7 @@ configurations {
 }
 
 dependencies {
-  testImplementation("org.testcontainers:testcontainers:1.19.1")
+  testImplementation(catalog.testcontainers)
   testImplementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
   testImplementation("com.google.protobuf:protobuf-java-util:3.24.2")
   testImplementation("com.squareup.okhttp3:okhttp:4.11.0")
