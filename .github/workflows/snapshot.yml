@@ -9,7 +9,7 @@ on:
     inputs:
       dry_run:
         description: If set, run a dry-run snapshot
-        default: true
+        default: false
         type: boolean
 
 jobs:
