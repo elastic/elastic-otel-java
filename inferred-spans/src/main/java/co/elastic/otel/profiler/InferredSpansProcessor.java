@@ -18,6 +18,7 @@
  */
 package co.elastic.otel.profiler;
 
+import co.elastic.otel.common.util.ExecutorUtils;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.api.trace.TracerProvider;
@@ -28,6 +29,7 @@ import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.io.File;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
@@ -89,8 +91,8 @@ public class InferredSpansProcessor implements SpanProcessor {
   public CompletableResultCode shutdown() {
     CompletableResultCode result = new CompletableResultCode();
     logger.fine("Stopping Inferred Spans Processor");
-    // TODO: Replace with co.elastic.otel.util.ExecutorUtils
-    Executors.newSingleThreadExecutor()
+    ThreadFactory threadFactory = ExecutorUtils.threadFactory("inferred-spans-shtudown", false);
+    Executors.newSingleThreadExecutor(threadFactory)
         .submit(
             () -> {
               try {

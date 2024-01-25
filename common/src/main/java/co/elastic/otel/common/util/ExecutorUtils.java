@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.util;
+package co.elastic.otel.common.util;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;

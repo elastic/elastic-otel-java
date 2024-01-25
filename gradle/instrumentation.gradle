@@ -25,7 +25,7 @@ dependencies {
   // test dependencies
   testImplementation("io.opentelemetry.javaagent:opentelemetry-testing-common")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-  testImplementation("org.assertj:assertj-core:3.24.2")
+  testImplementation(catalog.assertj.core)
 
   // TODO: this will fail as it does not refer to version from version catalog
   add("codegen", "io.opentelemetry.javaagent:opentelemetry-javaagent-tooling:${versions.opentelemetryJavaagentAlpha}")

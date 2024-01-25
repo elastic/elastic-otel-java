@@ -18,10 +18,12 @@
  */
 package co.elastic.otel;
 
+import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Nullable;
 
 public class JvmtiAccess {
 
@@ -38,12 +40,17 @@ public class JvmtiAccess {
 
   private static volatile State state = State.NOT_LOADED;
 
-  public static String sayHello() {
-    assertInitialized();
-    return JvmtiAccessImpl.sayHello();
+  static void setProfilingCorrelationProcessStorage(@Nullable ByteBuffer storage) {
+    ensureInitialized();
+    JvmtiAccessImpl.setProcessProfilingCorrelationBuffer0(storage);
   }
 
-  private static void assertInitialized() {
+  static void setProfilingCorrelationCurrentThreadStorage(@Nullable ByteBuffer storage) {
+    ensureInitialized();
+    JvmtiAccessImpl.setThreadProfilingCorrelationBuffer0(storage);
+  }
+
+  public static void ensureInitialized() {
     switch (state) {
       case NOT_LOADED:
       case LOADED:
@@ -81,12 +88,19 @@ public class JvmtiAccess {
     switch (state) {
       case INITIALIZED:
         try {
-          // TODO: Call a native descrutction method for cleaning up native resources
+          UniversalProfilingCorrelation.reset();
+          checkError(JvmtiAccessImpl.destroy0());
           state = State.LOADED;
         } catch (Throwable t) {
           logger.log(Level.SEVERE, "Failed to shutdown jvmti native library", t);
           state = State.DESTROY_FAILED;
         }
+    }
+  }
+
+  private static void checkError(int returnCode) {
+    if (returnCode < 0) {
+      throw new RuntimeException("Elastic JVMTI Agent returned error code " + returnCode);
     }
   }
 
