@@ -23,7 +23,6 @@ tasks.withType<Test>().all {
   jvmArgs("-Djava.util.logging.config.file="+sourceSets.test.get().output.resourcesDir+"/logging.properties")
 }
 
-
 publishing {
   publications {
     create<MavenPublication>("maven") {

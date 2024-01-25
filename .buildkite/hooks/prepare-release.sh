@@ -14,10 +14,10 @@ chmod -R 700 $TMP_WORKSPACE
 echo "--- Prepare keys context :key:"
 # Nexus credentials
 NEXUS_SECRET=kv/ci-shared/release-eng/team-release-secrets/otel/maven_central
-SERVER_USERNAME=$(vault kv get --field="username" $NEXUS_SECRET)
-export SERVER_USERNAME
-SERVER_PASSWORD=$(vault kv get --field="password" $NEXUS_SECRET)
-export SERVER_PASSWORD
+ORG_GRADLE_PROJECT_sonatypeUsername=$(vault kv get --field="username" $NEXUS_SECRET)
+export ORG_GRADLE_PROJECT_sonatypeUsername
+ORG_GRADLE_PROJECT_sonatypePassword=$(vault kv get --field="password" $NEXUS_SECRET)
+export ORG_GRADLE_PROJECT_sonatypePassword
 
 # Signing keys
 GPG_SECRET=kv/ci-shared/release-eng/team-release-secrets/otel/gpg
@@ -31,6 +31,10 @@ export KEY_ID_SECRET
 
 # Import the key into the keyring
 echo "$KEYPASS_SECRET" | gpg --batch --import "$KEY_FILE"
+
+# Export the key in ascii armored format
+SECRING_ASC=$(gpg --pinentry-mode=loopback --passphrase "$KEYPASS_SECRET" --armor --export-secret-key "$KEY_ID_SECRET")
+export SECRING_ASC
 
 echo "--- Configure git context :git:"
 # Configure the committer since the maven release requires to push changes to GitHub
