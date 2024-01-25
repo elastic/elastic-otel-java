@@ -47,21 +47,20 @@ public class OtelReflectionUtils {
   }
 
   /**
-   * The global OpenTelemetry is not properly shutdown between tests by default.
-   * This method does this and resets {@link GlobalOpenTelemetry} to its inital state.
+   * The global OpenTelemetry is not properly shutdown between tests by default. This method does
+   * this and resets {@link GlobalOpenTelemetry} to its inital state.
    */
   public static void shutdownAndResetGlobalOtel() {
-    OpenTelemetry otel = (OpenTelemetry) readField(GlobalOpenTelemetry.class, null,
-        "globalOpenTelemetry");
+    OpenTelemetry otel =
+        (OpenTelemetry) readField(GlobalOpenTelemetry.class, null, "globalOpenTelemetry");
     if (otel != null) {
-      //unwrap from obfuscated opentelemetry
+      // unwrap from obfuscated opentelemetry
       OpenTelemetrySdk sdk = (OpenTelemetrySdk) readField(otel, "delegate");
       sdk.close();
       GlobalOpenTelemetry.resetForTest();
       GlobalEventEmitterProvider.resetForTest();
     }
   }
-
 
   @SuppressWarnings("unchecked")
   private static List<SpanProcessor> flattenCompositeProcessor(
@@ -107,9 +106,7 @@ public class OtelReflectionUtils {
 
     List<Field> fields =
         ReflectionSupport.findFields(
-            clazz,
-            field -> field.getName().equals(fieldName),
-            HierarchyTraversalMode.BOTTOM_UP);
+            clazz, field -> field.getName().equals(fieldName), HierarchyTraversalMode.BOTTOM_UP);
 
     if (fields.isEmpty()) {
       throw new IllegalArgumentException(
