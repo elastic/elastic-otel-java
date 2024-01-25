@@ -24,7 +24,7 @@ dependencies {
 
   testImplementation("ch.qos.logback:logback-classic:1.4.11")
 
-  testImplementation("org.assertj:assertj-core:3.24.2")
+  testImplementation("org.assertj:assertj-core:3.25.2")
 
   testImplementation("io.opentelemetry.semconv:opentelemetry-semconv")
 
