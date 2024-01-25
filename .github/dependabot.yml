@@ -1,8 +1,6 @@
 ---
 version: 2
 
-registries:
-
 updates:
   # GitHub actions
   - package-ecosystem: "github-actions"
