@@ -28,6 +28,7 @@ autoservice-annotations = { group = "com.google.auto.service", name = "auto-serv
 assertj-core = "org.assertj:assertj-core:3.24.2"
 awaitility = "org.awaitility:awaitility:4.2.0"
 findbugs-jsr305 = "com.google.code.findbugs:jsr305:3.0.0"
+testcontainers = "org.testcontainers:testcontainers:1.19.3"
 
 [bundles]
 
