@@ -19,10 +19,6 @@ export ORG_GRADLE_PROJECT_sonatypeUsername
 ORG_GRADLE_PROJECT_sonatypePassword=$(vault kv get --field="password" $NEXUS_SECRET)
 export ORG_GRADLE_PROJECT_sonatypePassword
 
-# wip try invalid credentials to see if that makes a difference
-export ORG_GRADLE_PROJECT_sonatypeUsername=invalid
-export ORG_GRADLE_PROJECT_sonatypePassword=invalid
-
 # Signing keys
 GPG_SECRET=kv/ci-shared/release-eng/team-release-secrets/otel/gpg
 vault kv get --field="keyring" $GPG_SECRET | base64 -d > $KEY_FILE
