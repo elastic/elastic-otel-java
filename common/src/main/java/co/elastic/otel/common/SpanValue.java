@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReferenceArray;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 public class SpanValue<V> {
@@ -62,6 +63,14 @@ public class SpanValue<V> {
     return setIfNullImpl(span, value);
   }
 
+  public V computeIfNull(Span span, Supplier<V> valueInitializer) {
+    return computeIfNullImpl(span, valueInitializer);
+  }
+
+  public V computeIfNull(ReadableSpan span, Supplier<V> valueInitializer) {
+    return computeIfNullImpl(span, valueInitializer);
+  }
+
   public void clear(Span span) {
     clearImpl(span);
   }
@@ -91,6 +100,22 @@ public class SpanValue<V> {
     return null;
   }
 
+
+  private void setImpl(Object span, @Nullable V value) {
+    if (value == null) {
+      clearImpl(span);
+      return;
+    }
+    Span unwrapped = unwrap(span);
+    AtomicReferenceArray<Object> storage = getStorage(unwrapped, true);
+    if (storage.length() > index) {
+      storage.set(index, value);
+    } else {
+      Map<SpanValue<?>, Object> sparseStorage = getSparseValuesMap(storage, true);
+      sparseStorage.put(this, value);
+    }
+  }
+
   private boolean setIfNullImpl(Object span, @Nullable V value) {
     if (value == null) {
       return getImpl(span) == null; //setting to null if already null has no effect
@@ -105,18 +130,31 @@ public class SpanValue<V> {
     }
   }
 
-  private void setImpl(Object span, @Nullable V value) {
-    if (value == null) {
-      clearImpl(span);
-      return;
-    }
+
+  @SuppressWarnings("unchecked")
+  private V computeIfNullImpl(Object span, Supplier<V> valueInitializer) {
     Span unwrapped = unwrap(span);
     AtomicReferenceArray<Object> storage = getStorage(unwrapped, true);
+
     if (storage.length() > index) {
-      storage.set(index, value);
+      V currentValue = (V) storage.get(index);
+      if (currentValue != null) {
+        return currentValue;
+      }
+      storage.compareAndSet(index, null, valueInitializer.get());
+      return (V) storage.get(index);
     } else {
       Map<SpanValue<?>, Object> sparseStorage = getSparseValuesMap(storage, true);
-      sparseStorage.put(this, value);
+      V currentValue = (V) sparseStorage.get(this);
+      if (currentValue != null) {
+        return currentValue;
+      }
+      V newValue = valueInitializer.get();
+      if (newValue == null) {
+        return null;
+      }
+      sparseStorage.putIfAbsent(this, newValue);
+      return (V) sparseStorage.get(this);
     }
   }
 

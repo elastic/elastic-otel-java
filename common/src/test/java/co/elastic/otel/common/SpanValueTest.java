@@ -2,6 +2,9 @@ package co.elastic.otel.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
@@ -10,6 +13,7 @@ import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mockito;
 
 public class SpanValueTest {
 
@@ -39,6 +44,8 @@ public class SpanValueTest {
 
     // This span was created and has it's SpanValue storage initialized before
     // other dense SpanValue in tests are created
+    // as a result, the backing AtomicReferenceArray is not used for those and they should fall back
+    // to the map-based storage
     earlySpan = tracer.spanBuilder("early span").startSpan();
     SpanValue.createSparse().set(earlySpan, "foo");
   }
@@ -123,6 +130,29 @@ public class SpanValueTest {
   }
 
 
+  @ParameterizedTest
+  @MethodSource("testArgs")
+  @SuppressWarnings("unchecked")
+  public void checkComputeIfNull(ValueAccess<String> accessor) {
+    Supplier<String> initializer = (Supplier<String>) Mockito.mock(Supplier.class);
+    doReturn(null).when(initializer).get();
+
+    assertThat(accessor.computeIfNull(initializer)).isNull();
+    verify(initializer).get();
+    assertThat(accessor.get()).isNull();
+
+    doReturn("init1").when(initializer).get();
+    assertThat(accessor.computeIfNull(initializer)).isEqualTo("init1");
+    verify(initializer, times(2)).get();
+    assertThat(accessor.get()).isEqualTo("init1");
+
+    doReturn("init2").when(initializer).get();
+    assertThat(accessor.computeIfNull(initializer)).isEqualTo("init1");
+    verify(initializer, times(2)).get();
+    assertThat(accessor.get()).isEqualTo("init1");
+  }
+
+
   @Test
   public void testInvalidSpanDetected() {
     assertThatThrownBy(() -> SpanValue.createSparse().get(Span.getInvalid()))
@@ -168,6 +198,8 @@ public class SpanValueTest {
 
     boolean setIfNull(T val);
 
+    T computeIfNull(Supplier<T> initializer);
+
     void clear();
 
     static <T> ValueAccess<T> create(SpanValue<T> spanVal, Span span) {
@@ -185,6 +217,11 @@ public class SpanValueTest {
         @Override
         public boolean setIfNull(T val) {
           return spanVal.setIfNull(span, val);
+        }
+
+        @Override
+        public T computeIfNull(Supplier<T> initializer) {
+          return spanVal.computeIfNull(span, initializer);
         }
 
         @Override
@@ -209,6 +246,11 @@ public class SpanValueTest {
         @Override
         public boolean setIfNull(T val) {
           return spanVal.setIfNull(span, val);
+        }
+
+        @Override
+        public T computeIfNull(Supplier<T> initializer) {
+          return spanVal.computeIfNull(span, initializer);
         }
 
         @Override
