@@ -13,7 +13,7 @@ opentelemetryProto = "1.1.0-alpha"
 
 # otel agent, those two should be updated together
 opentelemetryJavaagent = "1.32.0"
-opentelemetryJavaagentAlpha = "1.32.0-alpha"
+opentelemetryJavaagentAlpha = "2.1.0-alpha-SNAPSHOT"
 
 # otel contrib
 opentelemetryContribAlpha = "1.32.0-alpha"
