@@ -113,6 +113,7 @@ public class UniversalProfilingProcessor implements SpanProcessor {
     ByteBuffer tls = UniversalProfilingCorrelation.getCurrentThreadStorage(true, TLS_STORAGE_SIZE);
     //tls might be null if unsupported or something went wrong on initialization
     if (tls != null) {
+      // the valid flag is used to signal the host-agent that it is reading incomplete data
       tls.put(TLS_VALID_OFFSET, (byte) 0);
       memoryStoreStoreBarrier();
       tls.putChar(TLS_MINOR_VERSION_OFFSET, (char) 1);
