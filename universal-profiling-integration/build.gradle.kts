@@ -21,6 +21,7 @@ dependencies {
   compileOnly(libs.findbugs.jsr305)
 
   testCompileOnly(libs.findbugs.jsr305)
+  testImplementation(project(":testing-common"))
   testImplementation("io.opentelemetry:opentelemetry-sdk")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation(libs.assertj.core)

@@ -21,9 +21,11 @@ package co.elastic.otel;
 import static co.elastic.otel.UniversalProfilingProcessor.TLS_STORAGE_SIZE;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import co.elastic.otel.testing.MapGetter;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
@@ -33,11 +35,41 @@ import io.opentelemetry.semconv.ResourceAttributes;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
+@DisabledOnOs(OS.WINDOWS)
 public class UniversalProfilingProcessorTest {
 
-  // TODO: add a test verifying that a context containing only a remote span is ignored
+  @Test
+  public void testRemoteSpanIgnored() {
+    try (OpenTelemetrySdk sdk = initSdk()) {
+
+      Map<String, String> headers = new HashMap<>();
+      headers.put("traceparent", "00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01");
+      Context remoteCtx =
+          W3CTraceContextPropagator.getInstance().extract(Context.root(), headers, new MapGetter());
+
+      assertThat(Span.fromContext(remoteCtx).getSpanContext().isRemote()).isTrue();
+
+      Tracer tracer = sdk.getTracer("test-tracer");
+
+      Span span = tracer.spanBuilder("first").startSpan();
+
+      checkTlsIs(Span.getInvalid());
+      try (Scope s1 = span.makeCurrent()) {
+        checkTlsIs(span);
+        try (Scope s2 = remoteCtx.makeCurrent()) {
+          checkTlsIs(Span.getInvalid());
+        }
+        checkTlsIs(span);
+      }
+    }
+  }
+
   @Test
   public void testNestedActivations() {
     try (OpenTelemetrySdk sdk = initSdk()) {
