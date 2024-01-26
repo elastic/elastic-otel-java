@@ -66,9 +66,9 @@ subprojects {
     implementation(platform(catalog.opentelemetryInstrumentationBom))
     implementation(platform(catalog.opentelemetryInstrumentationAlphaBom))
 
-    testImplementation("org.mockito:mockito-core:5.5.0")
+    testImplementation(catalog.mockito)
 
-    testImplementation(enforcedPlatform("org.junit:junit-bom:" + catalog.versions.junit.get().toString()))
+    testImplementation(enforcedPlatform(catalog.junitBom))
     testImplementation("org.junit.jupiter:junit-jupiter")
   }
 
