@@ -9,8 +9,7 @@ on:
     inputs:
       dry_run:
         description: If set, run a dry-run snapshot
-        # TODO default to dry-run for now
-        default: true
+        default: false
         type: boolean
 
 jobs:

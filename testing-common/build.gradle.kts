@@ -9,7 +9,7 @@ dependencies {
   implementation(libs.assertj.core)
   implementation("io.opentelemetry:opentelemetry-sdk-testing")
   implementation("io.opentelemetry:opentelemetry-exporter-logging")
-  implementation(enforcedPlatform("org.junit:junit-bom:" + catalog.versions.junit.get()))
+  implementation(enforcedPlatform(catalog.junitBom))
   implementation("org.junit.jupiter:junit-jupiter")
 
   compileOnly(libs.findbugs.jsr305)

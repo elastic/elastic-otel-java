@@ -82,6 +82,10 @@ compileJniTask.group = "jni"
 tasks.processResources {
   dependsOn(compileJniTask)
 }
+tasks.sourcesJar {
+  //sources jar doesn't need the generated native libraries
+  exclude("elastic-jvmti")
+}
 
 nativeTargets.forEach {
   val taskSuffix = it.getTaskSuffix();

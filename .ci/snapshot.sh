@@ -18,17 +18,26 @@ clean_up () {
 }
 trap clean_up EXIT
 
-echo "--- Debug JDK installation :coffee:"
+echo "--- JDK installation info :coffee:"
 echo $JAVA_HOME
 echo $PATH
 java -version
 
-set +x
-echo "--- Deploy the snapshot :package:"
+publishArg=''
+if [[ "$dry_run" == "true" ]] ; then
+    echo "--- Build and publish the snapshot :package: (dry-run)"
+    publishArg='publishAllPublicationsToDryRunRepository'
+else
+    echo "--- Build and publish the snapshot :package:"
+    publishArg='publishToSonatype closeAndReleaseStagingRepository'
+fi
 
-echo "---> no-op until plumbing is working as expected <---"
-#if [[ "$dry_run" == "true" ]] ; then
-#  echo './mvnw -V -s .ci/settings.xml -Pgpg clean deploy -DskipTests --batch-mode'
-#else
-#  ./mvnw -V -s .ci/settings.xml -Pgpg clean deploy -DskipTests --batch-mode | tee snapshot.txt
-#fi
+./gradlew \
+    --console=plain \
+    clean ${publishArg} \
+    | tee snapshot.txt
+
+if [[ "$dry_run" == "true" ]] ; then
+    echo "--- Archive the dry-run repository :package: (dry-run)"
+    tar czvf ./build/dry-run-maven-repo.tgz -C ./build/dry-run-maven-repo/ . | tee snapshot.txt
+fi
