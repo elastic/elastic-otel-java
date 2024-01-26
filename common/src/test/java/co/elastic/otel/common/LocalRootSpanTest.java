@@ -1,3 +1,21 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.otel.common;
 
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
@@ -21,7 +39,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-
 public class LocalRootSpanTest {
 
   private static OpenTelemetrySdk sdk;
@@ -29,32 +46,33 @@ public class LocalRootSpanTest {
 
   @BeforeAll
   static void init() {
-    sdk = OpenTelemetrySdk.builder()
-        .setTracerProvider(SdkTracerProvider.builder()
-            .addSpanProcessor(new SpanProcessor() {
-              @Override
-              public void onStart(Context parentContext, ReadWriteSpan span) {
-                LocalRootSpan.onSpanStart(span, parentContext);
-              }
+    sdk =
+        OpenTelemetrySdk.builder()
+            .setTracerProvider(
+                SdkTracerProvider.builder()
+                    .addSpanProcessor(
+                        new SpanProcessor() {
+                          @Override
+                          public void onStart(Context parentContext, ReadWriteSpan span) {
+                            LocalRootSpan.onSpanStart(span, parentContext);
+                          }
 
-              @Override
-              public boolean isStartRequired() {
-                return true;
-              }
+                          @Override
+                          public boolean isStartRequired() {
+                            return true;
+                          }
 
-              @Override
-              public void onEnd(ReadableSpan span) {
+                          @Override
+                          public void onEnd(ReadableSpan span) {}
 
-              }
-
-              @Override
-              public boolean isEndRequired() {
-                return false;
-              }
-            })
-            .build())
-        .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
-        .build();
+                          @Override
+                          public boolean isEndRequired() {
+                            return false;
+                          }
+                        })
+                    .build())
+            .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
+            .build();
     tracer = sdk.getTracer("test-tracer");
   }
 
@@ -67,12 +85,13 @@ public class LocalRootSpanTest {
   public void checkRemoteParent() {
     Map<String, String> headers = new HashMap<>();
     headers.put("traceparent", "00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01");
-    Context remoteParent = sdk.getPropagators()
-        .getTextMapPropagator()
-        .extract(Context.root(), headers, new MapGetter());
+    Context remoteParent =
+        sdk.getPropagators()
+            .getTextMapPropagator()
+            .extract(Context.root(), headers, new MapGetter());
 
-    ReadWriteSpan span = (ReadWriteSpan) tracer.spanBuilder("remote-parent").setParent(remoteParent)
-        .startSpan();
+    ReadWriteSpan span =
+        (ReadWriteSpan) tracer.spanBuilder("remote-parent").setParent(remoteParent).startSpan();
 
     Assertions.assertThat(span.toSpanData().getParentSpanContext().isRemote()).isTrue();
     assertThat(LocalRootSpan.getFor((ReadableSpan) span)).isSameAs(span);
@@ -87,18 +106,13 @@ public class LocalRootSpanTest {
 
       sp2 = tracer.spanBuilder("span2").startSpan();
       assertThat(LocalRootSpan.getFor(sp2)).isSameAs(sp1);
-
     }
 
     Span sp3 = tracer.spanBuilder("span3").startSpan();
     assertThat(LocalRootSpan.getFor(sp3)).isSameAs(sp3);
     try (Scope s1 = sp1.makeCurrent()) {
-      Span sp4 = tracer.spanBuilder("span4")
-          .setParent(Context.root().with(sp2))
-          .startSpan();
+      Span sp4 = tracer.spanBuilder("span4").setParent(Context.root().with(sp2)).startSpan();
       assertThat(LocalRootSpan.getFor(sp4)).isSameAs(sp1);
     }
   }
-
-
 }

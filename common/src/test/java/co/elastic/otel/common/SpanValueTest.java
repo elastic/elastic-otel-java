@@ -1,3 +1,21 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.otel.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,12 +52,14 @@ public class SpanValueTest {
 
   @BeforeAll
   static void initSdk() {
-    sdk = OpenTelemetrySdk.builder()
-        .setTracerProvider(SdkTracerProvider.builder()
-            //We need to register an exporter to force the SDK to be non-NoOp
-            .addSpanProcessor(SimpleSpanProcessor.create(InMemorySpanExporter.create()))
-            .build())
-        .build();
+    sdk =
+        OpenTelemetrySdk.builder()
+            .setTracerProvider(
+                SdkTracerProvider.builder()
+                    // We need to register an exporter to force the SDK to be non-NoOp
+                    .addSpanProcessor(SimpleSpanProcessor.create(InMemorySpanExporter.create()))
+                    .build())
+            .build();
     tracer = sdk.getTracer("test-tracer");
 
     // This span was created and has it's SpanValue storage initialized before
@@ -64,40 +84,41 @@ public class SpanValueTest {
   public static Stream<Arguments> testArgs() {
     return Stream.of(
         Arguments.of(
-            Named.of("Early Span, dense SpanValue",
-                ValueAccess.create(SpanValue.<String>createDense(), earlySpan)
-            )),
+            Named.of(
+                "Early Span, dense SpanValue",
+                ValueAccess.create(SpanValue.<String>createDense(), earlySpan))),
         Arguments.of(
-            Named.of("Early Span, sparse SpanValue",
-                ValueAccess.create(SpanValue.<String>createSparse(), earlySpan)
-            )),
+            Named.of(
+                "Early Span, sparse SpanValue",
+                ValueAccess.create(SpanValue.<String>createSparse(), earlySpan))),
         Arguments.of(
-            Named.of("Early ReadableSpan, dense SpanValue",
-                ValueAccess.create(SpanValue.<String>createDense(), (ReadableSpan) earlySpan)
-            )),
+            Named.of(
+                "Early ReadableSpan, dense SpanValue",
+                ValueAccess.create(SpanValue.<String>createDense(), (ReadableSpan) earlySpan))),
         Arguments.of(
-            Named.of("Early ReadableSpan, sparse SpanValue",
-                ValueAccess.create(SpanValue.<String>createSparse(), (ReadableSpan) earlySpan)
-            )),
+            Named.of(
+                "Early ReadableSpan, sparse SpanValue",
+                ValueAccess.create(SpanValue.<String>createSparse(), (ReadableSpan) earlySpan))),
         Arguments.of(
-            Named.of("New Span, dense SpanValue",
-                ValueAccess.create(SpanValue.<String>createDense(), newSpan())
-            )),
+            Named.of(
+                "New Span, dense SpanValue",
+                ValueAccess.create(SpanValue.<String>createDense(), newSpan()))),
         Arguments.of(
-            Named.of("New Span, sparse SpanValue",
-                ValueAccess.create(SpanValue.<String>createSparse(), newSpan())
-            )),
+            Named.of(
+                "New Span, sparse SpanValue",
+                ValueAccess.create(SpanValue.<String>createSparse(), newSpan()))),
         Arguments.of(
-            Named.of("MutableSpan, dense SpanValue",
-                ValueAccess.create(SpanValue.<String>createDense(),
-                    MutableSpan.makeMutable((ReadableSpan) newSpan()))
-            )),
+            Named.of(
+                "MutableSpan, dense SpanValue",
+                ValueAccess.create(
+                    SpanValue.<String>createDense(),
+                    MutableSpan.makeMutable((ReadableSpan) newSpan())))),
         Arguments.of(
-            Named.of("MutableSpan, sparse SpanValue",
-                ValueAccess.create(SpanValue.<String>createSparse(),
-                    MutableSpan.makeMutable((ReadableSpan) newSpan()))
-            ))
-    );
+            Named.of(
+                "MutableSpan, sparse SpanValue",
+                ValueAccess.create(
+                    SpanValue.<String>createSparse(),
+                    MutableSpan.makeMutable((ReadableSpan) newSpan())))));
   }
 
   @ParameterizedTest
@@ -111,7 +132,6 @@ public class SpanValueTest {
     accessor.set(null);
     assertThat(accessor.get()).isEqualTo(null);
   }
-
 
   @ParameterizedTest
   @MethodSource("testArgs")
@@ -128,7 +148,6 @@ public class SpanValueTest {
     assertThat(accessor.setIfNull("override")).isTrue();
     assertThat(accessor.get()).isEqualTo("override");
   }
-
 
   @ParameterizedTest
   @MethodSource("testArgs")
@@ -152,7 +171,6 @@ public class SpanValueTest {
     assertThat(accessor.get()).isEqualTo("init1");
   }
 
-
   @Test
   public void testInvalidSpanDetected() {
     assertThatThrownBy(() -> SpanValue.createSparse().get(Span.getInvalid()))
@@ -165,7 +183,7 @@ public class SpanValueTest {
     SpanValue<String> val = SpanValue.createSparse();
     ReadableSpan span = (ReadableSpan) newSpan();
     MutableSpan wrappedOnce = MutableSpan.makeMutable(span);
-    wrappedOnce.toSpanData(); //freeze MutableSpan to double-wrap
+    wrappedOnce.toSpanData(); // freeze MutableSpan to double-wrap
     MutableSpan wrappedTwice = MutableSpan.makeMutable(wrappedOnce);
     assertThat(wrappedOnce).isNotSameAs(wrappedTwice);
 
@@ -185,10 +203,9 @@ public class SpanValueTest {
     assertThat(val.get(wrappedTwice)).isEqualTo("wrapped2");
   }
 
-
   /**
-   * Utility for writing checks agnostic of whether {@link Span}
-   * or {@link io.opentelemetry.sdk.trace.ReadableSpan} is used.
+   * Utility for writing checks agnostic of whether {@link Span} or {@link
+   * io.opentelemetry.sdk.trace.ReadableSpan} is used.
    */
   public interface ValueAccess<T> {
 
@@ -259,7 +276,5 @@ public class SpanValueTest {
         }
       };
     }
-
   }
-
 }
