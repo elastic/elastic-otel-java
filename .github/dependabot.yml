@@ -22,3 +22,6 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
+    ignore:
+      - dependency-name: "com.squareup.okhttp3:okhttp"
+        versions: [ ">4.11.0" ]
