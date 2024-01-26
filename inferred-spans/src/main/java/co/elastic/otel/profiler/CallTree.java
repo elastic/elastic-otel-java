@@ -52,10 +52,10 @@ import javax.annotation.Nullable;
  * </pre>
  *
  * <p>It also stores information about which span is the parent of a particular call tree node,
- * based on which span has been {@linkplain ElasticApmTracer#getActive() active} at that time.
+ * based on which span has been active at that time.
  *
- * <p>This allows to {@linkplain Root#spanify() infer spans from the call tree} which have the
- * correct parent/child relationships with the regular spans.
+ * <p>This allows to infer spans from the call tree which have the correct parent/child
+ * relationships with the regular spans.
  */
 @SuppressWarnings("javadoc")
 public class CallTree implements Recyclable {
@@ -88,9 +88,6 @@ public class CallTree implements Recyclable {
   private boolean isSpan;
   private int depth;
 
-  /**
-   * @see co.elastic.apm.agent.impl.transaction.AbstractSpan#childIds
-   */
   @Nullable private LongList childIds;
 
   @Nullable private LongList maybeChildIds;
@@ -175,8 +172,7 @@ public class CallTree implements Recyclable {
    *
    * @param stackFrames the stack trace which is iterated over in reverse order
    * @param index the current index of {@code stackFrames}
-   * @param activeSpan the trace context of the currently {@linkplain ElasticApmTracer#getActive()}
-   *     active transaction/span
+   * @param activeSpan the trace context of the currently active span
    * @param activationTimestamp the timestamp of when {@code traceContext} has been activated
    * @param nanoTime the timestamp of when this stack trace has been recorded
    */
@@ -609,9 +605,9 @@ public class CallTree implements Recyclable {
   }
 
   /**
-   * When a regular span is activated, we want it's {@link TraceContext#getId() span.id} to be added
-   * to the call tree that represents the {@linkplain CallTree.Root#topOfStack top of the stack} to
-   * ensure correct parent/child relationships via re-parenting (See also {@link Span#childIds}).
+   * When a regular span is activated, we want it's {@code span.id} to be added to the call tree
+   * that represents the {@linkplain CallTree.Root#topOfStack top of the stack} to ensure correct
+   * parent/child relationships via re-parenting.
    *
    * <p>However, the {@linkplain CallTree.Root#topOfStack current top of the stack} may turn out to
    * not be the right target. Consider this example:
@@ -707,9 +703,9 @@ public class CallTree implements Recyclable {
     protected TraceContext rootContext;
 
     /**
-     * The context of the transaction or span which is currently {@link ElasticApmTracer#getActive()
-     * active}. This is lazily deserialized from {@link #activeSpanSerialized} if there's an actual
-     * {@linkplain #addStackTrace stack trace} for this activation.
+     * The context of the transaction or span which is currently active. This is lazily deserialized
+     * from {@link #activeSpanSerialized} if there's an actual {@linkplain #addStackTrace stack
+     * trace} for this activation.
      */
     @Nullable private TraceContext activeSpan;
 
@@ -717,8 +713,8 @@ public class CallTree implements Recyclable {
     private long activationTimestamp = -1;
 
     /**
-     * The context of the transaction or span which is currently {@link ElasticApmTracer#getActive()
-     * active}, in its {@linkplain TraceContext#serialize serialized} form.
+     * The context of the transaction or span which is currently active, in its {@linkplain
+     * TraceContext#serialize serialized} form.
      */
     private byte[] activeSpanSerialized = new byte[TraceContext.SERIALIZED_LENGTH];
 
@@ -860,13 +856,13 @@ public class CallTree implements Recyclable {
     /**
      * Creates spans for call tree nodes if they are either not a {@linkplain #isPillar() pillar} or
      * are a {@linkplain #isLeaf() leaf}. Nodes which are not converted to {@link Span}s are part of
-     * the {@link Span#stackFrames} for the nodes which do get converted to a span.
+     * the span stackframes for the nodes which do get converted to a span.
      *
      * <p>Parent/child relationships with the regular spans are maintained. One exception is that an
      * inferred span can't be the parent of a regular span. That is because the regular spans have
      * already been reported once the inferred spans are created. In the future, we might make it
-     * possible to update the {@link TraceContext#parentId} of a regular span so that it correctly
-     * reflects being a child of an inferred span.
+     * possible to update the parent ID of a regular span so that it correctly reflects being a
+     * child of an inferred span.
      */
     public int spanify(SpanAnchoredClock clock, Tracer tracer) {
       StringBuilder tempBuilder = new StringBuilder();

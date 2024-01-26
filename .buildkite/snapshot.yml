@@ -2,12 +2,13 @@ agents:
   provider: "gcp"
 
 steps:
-  - label: "Run the snapshot"
+  - label: "Build and publish snapshot"
     key: "release"
     commands: .ci/snapshot.sh
     artifact_paths:
       - "snapshot.txt"
-      - "./agent/build/libs/elastic-otel-javaagent-*.jar"
+      - "agent/build/libs/elastic-otel-javaagent-*.jar"
+      - "build/dry-run-maven-repo.tgz"
 
 notify:
   - slack: "#apm-agent-java"
