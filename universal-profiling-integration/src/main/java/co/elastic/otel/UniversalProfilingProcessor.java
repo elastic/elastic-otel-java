@@ -1,3 +1,21 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.otel;
 
 import co.elastic.otel.common.util.HexUtils;
@@ -52,7 +70,7 @@ public class UniversalProfilingProcessor implements SpanProcessor {
     buffer.order(ByteOrder.nativeOrder());
     buffer.position(0);
 
-    buffer.putChar((char) 1); //layout-minor-version
+    buffer.putChar((char) 1); // layout-minor-version
     String serviceName = serviceResource.getAttribute(ResourceAttributes.SERVICE_NAME);
     if (serviceName == null) {
       throw new IllegalStateException("A service name must be configured!");
@@ -60,7 +78,7 @@ public class UniversalProfilingProcessor implements SpanProcessor {
     writeUtf8Str(buffer, serviceName);
     String environment = serviceResource.getAttribute(ResourceAttributes.SERVICE_NAMESPACE);
     writeUtf8Str(buffer, environment == null ? "" : environment);
-    //TODO: implement socket connection
+    // TODO: implement socket connection
     writeUtf8Str(buffer, ""); // socket-file-path
 
     UniversalProfilingCorrelation.setProcessStorage(buffer);
@@ -73,8 +91,7 @@ public class UniversalProfilingProcessor implements SpanProcessor {
   }
 
   @Override
-  public void onStart(Context parentContext, ReadWriteSpan span) {
-  }
+  public void onStart(Context parentContext, ReadWriteSpan span) {}
 
   @Override
   public boolean isStartRequired() {
@@ -82,8 +99,7 @@ public class UniversalProfilingProcessor implements SpanProcessor {
   }
 
   @Override
-  public void onEnd(ReadableSpan span) {
-  }
+  public void onEnd(ReadableSpan span) {}
 
   @Override
   public boolean isEndRequired() {
@@ -111,7 +127,7 @@ public class UniversalProfilingProcessor implements SpanProcessor {
 
   private void updateThreadCorrelationStorage(Span newSpan) {
     ByteBuffer tls = UniversalProfilingCorrelation.getCurrentThreadStorage(true, TLS_STORAGE_SIZE);
-    //tls might be null if unsupported or something went wrong on initialization
+    // tls might be null if unsupported or something went wrong on initialization
     if (tls != null) {
       // the valid flag is used to signal the host-agent that it is reading incomplete data
       tls.put(TLS_VALID_OFFSET, (byte) 0);
@@ -124,7 +140,7 @@ public class UniversalProfilingProcessor implements SpanProcessor {
         tls.put(TLS_TRACE_FLAGS_OFFSET, spanCtx.getTraceFlags().asByte());
         HexUtils.writeHexAsBinary(spanCtx.getTraceId(), 0, tls, TLS_TRACE_ID_OFFSET, 16);
         HexUtils.writeHexAsBinary(spanCtx.getSpanId(), 0, tls, TLS_SPAN_ID_OFFSET, 8);
-        //TODO: write local root span ID here
+        // TODO: write local root span ID here
         HexUtils.writeHexAsBinary("0000000000000000", 0, tls, TLS_LOCAL_ROOT_SPAN_ID_OFFSET, 8);
       } else {
         tls.put(TLS_TRACE_PRESENT_OFFSET, (byte) 0);
@@ -152,12 +168,11 @@ public class UniversalProfilingProcessor implements SpanProcessor {
   private static class ActivationListener implements ContextStorage {
 
     static {
-      //Ensures that this wrapper is registered EXACTLY once
+      // Ensures that this wrapper is registered EXACTLY once
       ContextStorage.addWrapper(ActivationListener::new);
     }
 
-    @Nullable
-    private static volatile UniversalProfilingProcessor processor = null;
+    @Nullable private static volatile UniversalProfilingProcessor processor = null;
 
     private final ContextStorage delegate;
 
@@ -198,5 +213,4 @@ public class UniversalProfilingProcessor implements SpanProcessor {
       return delegate.current();
     }
   }
-
 }

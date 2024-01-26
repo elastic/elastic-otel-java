@@ -1,3 +1,21 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.otel;
 
 import io.opentelemetry.api.trace.Span;
@@ -26,7 +44,8 @@ public class UniversalProfilingIntegrationBenchmark {
 
   @Benchmark
   public void activateAndDeactivate(OtelState state, Blackhole bh) throws Exception {
-    //This benchmark performs four changes to the native memory: two span activations and two deactivations
+    // This benchmark performs four changes to the native memory: two span activations and two
+    // deactivations
     bh.consume(Context.current());
     try (io.opentelemetry.context.Scope s = state.rootSpanContext.makeCurrent()) {
       bh.consume(Context.current());
@@ -38,17 +57,14 @@ public class UniversalProfilingIntegrationBenchmark {
     bh.consume(Context.current());
   }
 
-
   @Benchmark
   public void contextSwitchWithoutSpanChange(OtelState state, Blackhole bh) throws Exception {
-    //This benchmark performs four changes to the native memory: two span activations and two deactivations
     bh.consume(Context.current());
     try (io.opentelemetry.context.Scope s = Context.root().makeCurrent()) {
       bh.consume(Context.current());
     }
     bh.consume(Context.current());
   }
-
 
   @State(Scope.Benchmark)
   public static class OtelState {
@@ -62,25 +78,21 @@ public class UniversalProfilingIntegrationBenchmark {
 
     @Setup(Level.Iteration)
     public void init(Blackhole blackhole) {
-      SdkTracerProviderBuilder builder = SdkTracerProvider.builder()
-          .addSpanProcessor(new BlackholeSpanProcessor(blackhole));
+      SdkTracerProviderBuilder builder =
+          SdkTracerProvider.builder().addSpanProcessor(new BlackholeSpanProcessor(blackhole));
       if (universalProfilerProcessorActive) {
-        Resource res = Resource.builder()
-            .put(ResourceAttributes.SERVICE_NAME, "benchmark-service")
-            .build();
+        Resource res =
+            Resource.builder().put(ResourceAttributes.SERVICE_NAME, "benchmark-service").build();
         builder.addSpanProcessor(new UniversalProfilingProcessor(res));
       }
       tracerProvider = builder.build();
 
       Tracer tracer = tracerProvider.get("benchmark-spans");
-      Span span = tracer.spanBuilder("root")
-          .startSpan();
+      Span span = tracer.spanBuilder("root").startSpan();
       span.end();
       rootSpanContext = Context.current().with(span);
 
-      Span child = tracer.spanBuilder("child")
-          .setParent(rootSpanContext)
-          .startSpan();
+      Span child = tracer.spanBuilder("child").setParent(rootSpanContext).startSpan();
       span.end();
       childSpanContext = rootSpanContext.with(child);
     }
@@ -89,7 +101,5 @@ public class UniversalProfilingIntegrationBenchmark {
     public void destroy() {
       tracerProvider.close();
     }
-
   }
-
 }

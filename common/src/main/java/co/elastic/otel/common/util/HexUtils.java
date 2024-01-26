@@ -51,8 +51,8 @@ public class HexUtils {
     sb.append(HEX_CHARS[(int) (value & 0x0F)]);
   }
 
-  public static void writeHexAsBinary(CharSequence hex, int strOffset, ByteBuffer buffer,
-      int bufferPos, int numBytes) {
+  public static void writeHexAsBinary(
+      CharSequence hex, int strOffset, ByteBuffer buffer, int bufferPos, int numBytes) {
     for (int i = 0; i < numBytes; i++) {
       long upper = hexCharToBinary(hex.charAt(strOffset + i * 2));
       long lower = hexCharToBinary(hex.charAt(strOffset + i * 2 + 1));
