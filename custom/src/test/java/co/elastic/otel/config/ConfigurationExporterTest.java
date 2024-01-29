@@ -64,8 +64,7 @@ public class ConfigurationExporterTest {
     if (Boolean.parseBoolean(
         System.getProperty("elastic.otel.overwrite.config.docs", Boolean.FALSE.toString()))) {
       // overwrite the current documentation when enabled
-      Files.write(
-          currentDocumentationPath, renderedDocumentation.getBytes(StandardCharsets.UTF_8));
+      Files.write(currentDocumentationPath, renderedDocumentation.getBytes(StandardCharsets.UTF_8));
     }
 
     assertThat(renderedDocumentation)
