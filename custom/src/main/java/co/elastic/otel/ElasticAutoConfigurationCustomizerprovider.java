@@ -60,6 +60,11 @@ public class ElasticAutoConfigurationCustomizerprovider
               Set<String> disabledConfig =
                   new HashSet<>(configProperties.getList(DISABLED_RESOURCE_PROVIDERS));
               disabledConfig.add(ElasticResourceProvider.class.getCanonicalName());
+
+              // disable upstream distro name & version provider
+              disabledConfig.add(
+                  "io.opentelemetry.javaagent.tooling.DistroVersionResourceProvider");
+
               config.put(DISABLED_RESOURCE_PROVIDERS, String.join(",", disabledConfig));
               return config;
             })
