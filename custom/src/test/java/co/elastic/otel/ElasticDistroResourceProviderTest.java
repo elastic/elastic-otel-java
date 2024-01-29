@@ -32,7 +32,7 @@ class ElasticDistroResourceProviderTest {
 
     assertThat(resource.getAttributes())
         .hasSize(2)
-        .containsEntry("telemetry.distro.name", "elastic-otel-java")
+        .containsEntry("telemetry.distro.name", "elastic")
         .containsKey("telemetry.distro.version");
   }
 }
