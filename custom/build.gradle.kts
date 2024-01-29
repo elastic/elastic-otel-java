@@ -22,5 +22,5 @@ dependencies {
   testImplementation("org.freemarker:freemarker:2.3.27-incubating")
 }
 tasks.withType<Test> {
-  systemProperty("elastic.otel.apm.overwrite.config.docs", project.properties["elastic.otel.apm.overwrite.config.docs"])
+  systemProperty("elastic.otel.overwrite.config.docs", project.properties["elastic.otel.overwrite.config.docs"])
 }

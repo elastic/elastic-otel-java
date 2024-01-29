@@ -39,18 +39,18 @@ import org.junit.jupiter.api.Test;
 
 public class ConfigurationExporterTest {
 
-  private Path renderedDocumentationPath;
+  private Path currentDocumentationPath;
 
   @BeforeEach
   void setUp() {
-    renderedDocumentationPath = Paths.get("../docs/configuration.asciidoc");
+    currentDocumentationPath = Paths.get("../docs/configuration.asciidoc");
   }
 
   /**
    * This test compares the current state of the configuration docs with the auto-generated
    * documentation and fails if there is a mismatch. As a side effect, it can overwrite the docs
    * with the generated ones, if this capability is enabled through the {@code
-   * elastic.apm.overwrite.config.docs} system property.
+   * elastic.overwrite.config.docs} system property.
    */
   @Test
   void testGeneratedConfigurationDocsAreUpToDate() throws IOException, TemplateException {
@@ -59,20 +59,20 @@ public class ConfigurationExporterTest {
     String renderedDocumentation =
         renderDocumentation(new LegacyConfigurations().getAllImplementedOptions());
     String currentDocumentation =
-        new String(Files.readAllBytes(this.renderedDocumentationPath), StandardCharsets.UTF_8);
+        new String(Files.readAllBytes(this.currentDocumentationPath), StandardCharsets.UTF_8);
 
     if (Boolean.parseBoolean(
-        System.getProperty("elastic.otel.apm.overwrite.config.docs", Boolean.FALSE.toString()))) {
+        System.getProperty("elastic.otel.overwrite.config.docs", Boolean.FALSE.toString()))) {
       // overwrite the current documentation when enabled
       Files.write(
-          renderedDocumentationPath, renderedDocumentation.getBytes(StandardCharsets.UTF_8));
+          currentDocumentationPath, renderedDocumentation.getBytes(StandardCharsets.UTF_8));
     }
 
     assertThat(renderedDocumentation)
         .withFailMessage(
             "The rendered configuration documentation (/docs/configuration.asciidoc) is not up-to-date.\n"
                 + "If you see this error, it means you have to execute the tests locally with overwrite enabled "
-                + "(gradlew.bat clean :custom:test --tests \"*ConfigurationExporterTest\" -Pelastic.otel.apm.overwrite.config.docs=true) "
+                + "(gradlew.bat clean :custom:test --tests \"*ConfigurationExporterTest\" -Pelastic.otel.overwrite.config.docs=true) "
                 + "which will update the rendered docs (and then you probably need to commit the change).\n")
         .isEqualTo(currentDocumentation);
   }
