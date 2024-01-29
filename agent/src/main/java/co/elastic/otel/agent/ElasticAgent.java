@@ -16,26 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel;
+package co.elastic.otel.agent;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import io.opentelemetry.javaagent.OpenTelemetryAgent;
+import java.lang.instrument.Instrumentation;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledOnOs;
-import org.junit.jupiter.api.condition.OS;
+/** Elastic agent entry point, delegates to OpenTelemetry agent */
+public class ElasticAgent {
 
-@EnabledOnOs({OS.LINUX, OS.MAC})
-public class JvmtiAccessTest {
-
-  @AfterEach
-  public void cleanUp() {
-    JvmtiAccess.destroy();
+  @SuppressWarnings("unused")
+  public static void premain(String agentArgs, Instrumentation inst) {
+    OpenTelemetryAgent.premain(agentArgs, inst);
   }
 
-  @Test
-  void checkHello() {
-    String s = JvmtiAccess.sayHello();
-    assertThat(s).isEqualTo("Hello from native");
+  public static void main(String[] args) {
+    OpenTelemetryAgent.main(args);
   }
 }

@@ -1,23 +1,34 @@
 [versions]
 shadow = "8.1.1"
 jib = "3.4.0"
-spotless = "6.21.0"
-junit = "5.10.0"
+spotless = "6.25.0"
+junit = "5.10.1"
 autoservice = "1.1.1"
 
-opentelemetrySdk = "1.33.0"
+# otel SDK and API
+opentelemetrySdk = "1.34.1"
+
+# otel protocol (OTLP)
+opentelemetryProto = "1.1.0-alpha"
+
+# otel agent, those two should be updated together
 opentelemetryJavaagent = "1.32.0"
 opentelemetryJavaagentAlpha = "1.32.0-alpha"
+
+# otel contrib
 opentelemetryContribAlpha = "1.32.0-alpha"
 
 [libraries]
 
 opentelemetryJavaagent = { group = "io.opentelemetry.javaagent", name = "opentelemetry-javaagent", version.ref = "opentelemetryJavaagent" }
+opentelemetryJavaagentBootstrap = { group = "io.opentelemetry.javaagent", name = "opentelemetry-javaagent-bootstrap", version.ref = "opentelemetryJavaagentAlpha" }
 opentelemetryJavaagentForTesting = { group = "io.opentelemetry.javaagent", name = "opentelemetry-agent-for-testing", version.ref = "opentelemetryJavaagentAlpha" }
 
 opentelemetryBom = { group = "io.opentelemetry", name = "opentelemetry-bom", version.ref = "opentelemetrySdk" }
 opentelemetryInstrumentationBom = { group = "io.opentelemetry.instrumentation", name = "opentelemetry-instrumentation-bom", version.ref = "opentelemetryJavaagent" }
 opentelemetryInstrumentationAlphaBom = { group = "io.opentelemetry.instrumentation", name = "opentelemetry-instrumentation-bom-alpha", version.ref = "opentelemetryJavaagentAlpha" }
+
+opentelemetryProto = { group = "io.opentelemetry.proto", name = "opentelemetry-proto", version.ref = "opentelemetryProto" }
 
 awsContribResources = { group = "io.opentelemetry.contrib", name = "opentelemetry-aws-resources", version.ref = "opentelemetryContribAlpha" }
 contribResources = { group = "io.opentelemetry.contrib", name = "opentelemetry-resource-providers", version.ref = "opentelemetryContribAlpha" }
@@ -25,9 +36,21 @@ contribResources = { group = "io.opentelemetry.contrib", name = "opentelemetry-r
 autoservice-processor = { group = "com.google.auto.service", name = "auto-service", version.ref = "autoservice" }
 autoservice-annotations = { group = "com.google.auto.service", name = "auto-service-annotations", version.ref = "autoservice" }
 
-assertj-core = "org.assertj:assertj-core:3.24.2"
+assertj-core = "org.assertj:assertj-core:3.25.2"
 awaitility = "org.awaitility:awaitility:4.2.0"
-findbugs-jsr305 = "com.google.code.findbugs:jsr305:3.0.0"
+findbugs-jsr305 = "com.google.code.findbugs:jsr305:3.0.2"
+testcontainers = "org.testcontainers:testcontainers:1.19.4"
+logback = "ch.qos.logback:logback-classic:1.4.14"
+# version 2.16.1 has been compiled with java 21, which is likely a release error, thus stick to 2.16.0 until fixed in 2.16.2 or later
+jackson = "com.fasterxml.jackson.core:jackson-databind:2.16.0"
+protobuf-util = "com.google.protobuf:protobuf-java-util:3.25.2"
+mockito = "org.mockito:mockito-core:5.10.0"
+
+junitBom = { group = "org.junit", name = "junit-bom", version.ref = "junit" }
+
+okhttp = "com.squareup.okhttp3:okhttp:4.12.0"
+
+spotlessPlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
 
 [bundles]
 
@@ -37,3 +60,4 @@ shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
 jib = { id = "com.google.cloud.tools.jib", version.ref = "jib" }
 spotless = { id = "com.diffplug.spotless:spotless", version.ref = "spotless" }
 taskinfo = { id = "org.barfuin.gradle.taskinfo", version = '2.1.0' }
+nexusPublish = { id = "io.github.gradle-nexus.publish-plugin", version = '1.3.0' }

@@ -8,12 +8,13 @@ import java.io.IOException
 import java.util.*
 
 plugins {
-    id("java")
+    id("java-library")
     id("com.bmuschko.docker-java-application") version "9.4.0"
 }
 
 dependencies {
   testImplementation(libs.assertj.core)
+  implementation(libs.findbugs.jsr305)
 }
 
 // we use Java 7 for this project so that it can be reused in the old elastic-apm-agent
@@ -27,6 +28,12 @@ tasks {
   compileJava {
     options.release.set(7)
   }
+}
+
+tasks.withType<Test>().configureEach {
+  // the check:jni flag helps unconver potential pitfalls in native code during runtime
+  // it is not required for running the tests, but it is very useful
+  jvmArgs("-Xcheck:jni")
 }
 
 val jniSrcDir = file("src/main/jni")
@@ -74,6 +81,10 @@ val compileJniTask = task("compileJni")
 compileJniTask.group = "jni"
 tasks.processResources {
   dependsOn(compileJniTask)
+}
+tasks.sourcesJar {
+  //sources jar doesn't need the generated native libraries
+  exclude("elastic-jvmti")
 }
 
 nativeTargets.forEach {

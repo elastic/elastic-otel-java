@@ -15,16 +15,16 @@ configurations {
 }
 
 dependencies {
-  testImplementation("org.testcontainers:testcontainers:1.19.1")
-  testImplementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
-  testImplementation("com.google.protobuf:protobuf-java-util:3.24.2")
-  testImplementation("com.squareup.okhttp3:okhttp:4.11.0")
-  testImplementation("io.opentelemetry.proto:opentelemetry-proto:1.0.0-alpha")
+  testImplementation(catalog.testcontainers)
+  testImplementation(catalog.jackson)
+  testImplementation(catalog.protobuf.util)
+  testImplementation(catalog.okhttp)
+  testImplementation(catalog.opentelemetryProto)
   testImplementation("io.opentelemetry:opentelemetry-api")
 
-  testImplementation("ch.qos.logback:logback-classic:1.4.11")
+  testImplementation(catalog.logback)
 
-  testImplementation("org.assertj:assertj-core:3.24.2")
+  testImplementation(catalog.assertj.core)
 
   testImplementation("io.opentelemetry.semconv:opentelemetry-semconv")
 

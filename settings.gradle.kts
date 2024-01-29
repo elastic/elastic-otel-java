@@ -2,7 +2,7 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         maven {
-            name = "sonatype"
+            name = "mavenCentralSnapshots"
             url = uri("https://oss.sonatype.org/content/repositories/snapshots")
         }
     }

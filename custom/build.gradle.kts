@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+  implementation(project(":common"))
   compileOnly(project(":bootstrap"))
   compileOnly(project(":resources"))
   compileOnly("io.opentelemetry:opentelemetry-sdk")
@@ -18,7 +19,7 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk")
   testImplementation("io.opentelemetry.javaagent:opentelemetry-testing-common")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-  testImplementation("org.assertj:assertj-core:3.24.2") // TODO : remove version for assertj
+  testImplementation(catalog.assertj.core)
   testImplementation("org.freemarker:freemarker:2.3.27-incubating")
 }
 tasks.withType<Test> {

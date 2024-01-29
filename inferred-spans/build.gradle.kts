@@ -7,7 +7,7 @@ dependencies {
   compileOnly(libs.findbugs.jsr305)
   implementation("com.lmax:disruptor:3.4.4")
   implementation("org.jctools:jctools-core:4.0.1")
-  implementation("com.blogspot.mydailyjava:weak-lock-free:0.18")
+  implementation(project(":common"))
 
   testCompileOnly(libs.findbugs.jsr305)
   testImplementation("io.opentelemetry:opentelemetry-sdk")
@@ -22,7 +22,6 @@ dependencies {
 tasks.withType<Test>().all {
   jvmArgs("-Djava.util.logging.config.file="+sourceSets.test.get().output.resourcesDir+"/logging.properties")
 }
-
 
 publishing {
   publications {
