@@ -17,6 +17,9 @@ dependencies {
 
   // test dependencies
   testImplementation("io.opentelemetry:opentelemetry-sdk")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
+  testImplementation("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
+
   testImplementation("io.opentelemetry.javaagent:opentelemetry-testing-common")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation(catalog.assertj.core)
