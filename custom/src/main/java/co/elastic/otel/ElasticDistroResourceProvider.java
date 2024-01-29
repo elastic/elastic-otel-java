@@ -18,13 +18,14 @@
  */
 package co.elastic.otel;
 
+import com.google.auto.service.AutoService;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.javaagent.tooling.AgentVersion;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
 
-// TODO : add auto-service registration
+@AutoService(ResourceProvider.class)
 public class ElasticDistroResourceProvider implements ResourceProvider {
 
   @Override

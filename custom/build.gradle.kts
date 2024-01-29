@@ -12,6 +12,9 @@ dependencies {
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
   compileOnly(catalog.opentelemetrySemconv)
 
+  annotationProcessor(libs.autoservice.processor)
+  compileOnly(libs.autoservice.annotations)
+
   // needs to be added in order to allow access to AgentListener interface
   // this is currently required because autoconfigure is currently not exposed to the extension API.
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
@@ -21,6 +24,9 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   testImplementation("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
   testImplementation(catalog.opentelemetrySemconv)
+
+  testAnnotationProcessor(libs.autoservice.processor)
+  testCompileOnly(libs.autoservice.annotations)
 
   testImplementation("io.opentelemetry.javaagent:opentelemetry-testing-common")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
