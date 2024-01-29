@@ -19,6 +19,7 @@
 package co.elastic.otel;
 
 import co.elastic.otel.resources.ElasticResourceProvider;
+import com.google.auto.service.AutoService;
 import io.opentelemetry.context.ContextStorage;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
@@ -27,6 +28,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@AutoService(AutoConfigurationCustomizerProvider.class)
 public class ElasticAutoConfigurationCustomizerprovider
     implements AutoConfigurationCustomizerProvider {
 
