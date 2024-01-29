@@ -18,6 +18,9 @@ opentelemetryJavaagentAlpha = "1.32.0-alpha"
 # otel contrib
 opentelemetryContribAlpha = "1.32.0-alpha"
 
+# otel semconv java generated bindings
+opentelemetrySemconv = "1.23.1-alpha"
+
 [libraries]
 
 opentelemetryJavaagent = { group = "io.opentelemetry.javaagent", name = "opentelemetry-javaagent", version.ref = "opentelemetryJavaagent" }
@@ -29,6 +32,8 @@ opentelemetryInstrumentationBom = { group = "io.opentelemetry.instrumentation", 
 opentelemetryInstrumentationAlphaBom = { group = "io.opentelemetry.instrumentation", name = "opentelemetry-instrumentation-bom-alpha", version.ref = "opentelemetryJavaagentAlpha" }
 
 opentelemetryProto = { group = "io.opentelemetry.proto", name = "opentelemetry-proto", version.ref = "opentelemetryProto" }
+
+opentelemetrySemconv = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv", version.ref = "opentelemetrySemconv" }
 
 awsContribResources = { group = "io.opentelemetry.contrib", name = "opentelemetry-aws-resources", version.ref = "opentelemetryContribAlpha" }
 contribResources = { group = "io.opentelemetry.contrib", name = "opentelemetry-resource-providers", version.ref = "opentelemetryContribAlpha" }

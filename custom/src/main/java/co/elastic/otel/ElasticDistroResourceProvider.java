@@ -18,21 +18,15 @@
  */
 package co.elastic.otel;
 
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.javaagent.tooling.AgentVersion;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.semconv.ResourceAttributes;
 
 // TODO : add auto-service registration
 public class ElasticDistroResourceProvider implements ResourceProvider {
-
-  // TODO: can we use semconv instead ?
-  private static final AttributeKey<String> TELEMETRY_DISTRO_NAME =
-      AttributeKey.stringKey("telemetry.distro.name");
-  private static final AttributeKey<String> TELEMETRY_DISTRO_VERSION =
-      AttributeKey.stringKey("telemetry.distro.version");
 
   @Override
   public Resource createResource(ConfigProperties configProperties) {
@@ -40,9 +34,9 @@ public class ElasticDistroResourceProvider implements ResourceProvider {
         ? Resource.empty()
         : Resource.create(
             Attributes.of(
-                TELEMETRY_DISTRO_NAME,
+                ResourceAttributes.TELEMETRY_DISTRO_NAME,
                 "elastic-otel-java",
-                TELEMETRY_DISTRO_VERSION,
+                ResourceAttributes.TELEMETRY_DISTRO_VERSION,
                 AgentVersion.VERSION));
   }
 }
