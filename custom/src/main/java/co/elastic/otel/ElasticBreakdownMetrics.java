@@ -31,7 +31,6 @@ import io.opentelemetry.sdk.common.Clock;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.data.SpanData;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -124,12 +123,11 @@ public class ElasticBreakdownMetrics {
       }
 
       // update direct parent span child durations for self-time
-      ChildDuration parentChildDuration =
-          elasticSpanData.get(span.getParentSpanContext()).childDuration;
-      if (parentChildDuration != null) {
+      BreakdownData breakdownData = elasticSpanData.get(span.getParentSpanContext());
+      if (breakdownData != null) {
+        ChildDuration parentChildDuration = breakdownData.childDuration;
         parentChildDuration.startChild(spanStart);
       }
-
       System.out.printf(
           "start of child span %s, parent = %s, root = %s%n",
           spanContext.getSpanId(),
@@ -160,7 +158,6 @@ public class ElasticBreakdownMetrics {
 
     // children duration for current span
     BreakdownData spanContextData = elasticSpanData.get(spanContext);
-    Objects.requireNonNull(spanContextData, "missing elastic span data");
 
     // update children duration for direct parent
     BreakdownData parentSpanContextData = elasticSpanData.get(span.getParentSpanContext());
@@ -169,28 +166,32 @@ public class ElasticBreakdownMetrics {
       parentSpanContextData.childDuration.endChild(spanData.getEndEpochNanos());
     }
 
-    long selfTime = spanContextData.childDuration.endSpan(spanData.getEndEpochNanos());
+    if (spanContextData != null) {
 
-    AttributesBuilder metricAttributes =
-        buildCounterAttributes(spanData.getAttributes())
-            .put(ElasticAttributes.LOCAL_ROOT_TYPE, spanContextData.getLocalRootSpanType())
-            .put(ElasticAttributes.LOCAL_ROOT_NAME, spanContextData.getLocalRootSpanName())
-            // put measured metric as span attribute to allow using an ingest pipeline to alter
-            // storage
-            // ingest pipelines do not have access to _source and thus can't read the metric as-is.
-            .put(ElasticAttributes.SELF_TIME, selfTime);
+      long selfTime = spanContextData.childDuration.endSpan(spanData.getEndEpochNanos());
 
-    // unfortunately here we get a read-only span that has already been ended, thus even a cast to
-    // ReadWriteSpan
-    // does not allow us from adding extra span attributes
-    if (spanExporter != null) {
-      spanContextData.setSelfTime(selfTime);
-      spanExporter.addAttribute(
-          spanContext, ElasticAttributes.SELF_TIME, spanContextData.getSelfTime());
+      AttributesBuilder metricAttributes =
+          buildCounterAttributes(spanData.getAttributes())
+              .put(ElasticAttributes.LOCAL_ROOT_TYPE, spanContextData.getLocalRootSpanType())
+              .put(ElasticAttributes.LOCAL_ROOT_NAME, spanContextData.getLocalRootSpanName())
+              // put measured metric as span attribute to allow using an ingest pipeline to alter
+              // storage
+              // ingest pipelines do not have access to _source and thus can't read the metric
+              // as-is.
+              .put(ElasticAttributes.SELF_TIME, selfTime);
+
+      // unfortunately here we get a read-only span that has already been ended, thus even a cast to
+      // ReadWriteSpan
+      // does not allow us from adding extra span attributes
+      if (spanExporter != null) {
+        spanContextData.setSelfTime(selfTime);
+        spanExporter.addAttribute(
+            spanContext, ElasticAttributes.SELF_TIME, spanContextData.getSelfTime());
+      }
+
+      breakDownCounter.add(selfTime, metricAttributes.build());
+      elasticSpanData.remove(spanContext);
     }
-
-    breakDownCounter.add(selfTime, metricAttributes.build());
-    elasticSpanData.remove(spanContext);
   }
 
   private static AttributesBuilder buildCounterAttributes(Attributes spanAttributes) {
