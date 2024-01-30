@@ -32,6 +32,9 @@ public class UniversalProfilingCorrelation {
 
   private static ThreadLocal<ByteBuffer> threadStorage;
 
+  // We hold a reference to the configured processStorage to make sure it is not GCed
+  private static ByteBuffer processStorage;
+
   static {
     reset();
   }
@@ -46,6 +49,7 @@ public class UniversalProfilingCorrelation {
       }
     }
     JvmtiAccess.setProfilingCorrelationProcessStorage(buffer);
+    processStorage = buffer;
   }
 
   @Nullable
@@ -89,6 +93,7 @@ public class UniversalProfilingCorrelation {
 
   static synchronized void reset() {
     threadStorage = new ThreadLocal<>();
+    processStorage = null;
   }
 
   private static boolean isVirtual(Thread thread) {
