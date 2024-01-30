@@ -14,6 +14,7 @@ plugins {
 
 dependencies {
   testImplementation(libs.assertj.core)
+  testImplementation(libs.awaitility)
   implementation(libs.findbugs.jsr305)
 }
 
