@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
   implementation(project(":common"))
+  implementation(project(":inferred-spans"))
   compileOnly(project(":bootstrap"))
   compileOnly(project(":resources"))
   compileOnly("io.opentelemetry:opentelemetry-sdk")

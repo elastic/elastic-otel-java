@@ -18,27 +18,21 @@
  */
 package co.elastic.otel.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+@RestController
+@RequestMapping("/inferred-spans")
+public class InferredSpansController {
 
-@SpringBootTest
-public class ProfilingControllerTest {
-
-  @Autowired private ProfilingController controller;
-
-  @BeforeEach
-  void contextLoads() {
-    assertThat(controller).isNotNull();
-  }
-
-  @ParameterizedTest
-  @ValueSource(ints = {1, 2, 3, 4})
-  void testScenarios(int id) {
-    assertThat(controller.scenario(id)).isEqualTo("scenario %d OK", id);
+  @GetMapping("/sleep")
+  public void doSleep(@RequestParam(defaultValue = "50") long millis) {
+    try {
+      Thread.sleep(millis);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

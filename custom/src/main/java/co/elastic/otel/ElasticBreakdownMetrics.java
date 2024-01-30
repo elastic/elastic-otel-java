@@ -112,34 +112,39 @@ public class ElasticBreakdownMetrics {
 
     } else {
       ReadableSpan parentSpan = getReadableSpanFromContext(parentContext);
-      Objects.requireNonNull(parentSpan);
+      if (parentSpan != null) {
+        // retrieve and store the local root span for later use
+        ReadableSpan localRoot = lookupLocalRootSpan(parentSpan);
+        if (localRoot != null) {
+          localRootSpanContext = localRoot.getSpanContext();
+          if (localRootSpanContext.isValid()) {
+            elasticSpanData.put(spanContext, new BreakdownData(localRoot, spanStart));
+          }
+        } else {
+          localRootSpanContext = Span.getInvalid().getSpanContext();
+        }
 
-      // retrieve and store the local root span for later use
-      ReadableSpan localRoot = lookupLocalRootSpan(parentSpan);
-      localRootSpanContext = localRoot.getSpanContext();
-      if (localRootSpanContext.isValid()) {
-        elasticSpanData.put(spanContext, new BreakdownData(localRoot, spanStart));
+        // update direct parent span child durations for self-time
+        ChildDuration parentChildDuration =
+            elasticSpanData.get(span.getParentSpanContext()).childDuration;
+        if (parentChildDuration != null) {
+          parentChildDuration.startChild(spanStart);
+        }
+
+        System.out.printf(
+            "start of child span %s, parent = %s, root = %s%n",
+            spanContext.getSpanId(),
+            span.getParentSpanContext().getSpanId(),
+            localRootSpanContext.getSpanId());
+
+        // we store extra attributes in span for later use, however we can't replace because we
+        // don't
+        // have access to the
+        // attributes of the parent span, only its span context or the write-only Span
+        span.setAttribute(ElasticAttributes.IS_LOCAL_ROOT, localRootSpanContext == spanContext);
+        span.setAttribute(ElasticAttributes.LOCAL_ROOT_ID, localRootSpanContext.getSpanId());
       }
-
-      // update direct parent span child durations for self-time
-      ChildDuration parentChildDuration =
-          elasticSpanData.get(span.getParentSpanContext()).childDuration;
-      if (parentChildDuration != null) {
-        parentChildDuration.startChild(spanStart);
-      }
-
-      System.out.printf(
-          "start of child span %s, parent = %s, root = %s%n",
-          spanContext.getSpanId(),
-          span.getParentSpanContext().getSpanId(),
-          localRootSpanContext.getSpanId());
     }
-
-    // we store extra attributes in span for later use, however we can't replace because we don't
-    // have access to the
-    // attributes of the parent span, only its span context or the write-only Span
-    span.setAttribute(ElasticAttributes.IS_LOCAL_ROOT, localRootSpanContext == spanContext);
-    span.setAttribute(ElasticAttributes.LOCAL_ROOT_ID, localRootSpanContext.getSpanId());
   }
 
   private static ReadableSpan getReadableSpanFromContext(Context context) {
@@ -214,7 +219,7 @@ public class ElasticBreakdownMetrics {
 
   private ReadableSpan lookupLocalRootSpan(ReadableSpan span) {
     BreakdownData spanContextData = elasticSpanData.get(span.getSpanContext());
-    return spanContextData != null ? spanContextData.localRoot : (ReadableSpan) Span.getInvalid();
+    return spanContextData != null ? spanContextData.localRoot : null;
   }
 
   private static boolean isRootSpanParent(SpanContext parentSpanContext) {
