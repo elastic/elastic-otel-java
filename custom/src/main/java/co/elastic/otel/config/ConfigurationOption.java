@@ -36,6 +36,10 @@ public class ConfigurationOption {
     return key;
   }
 
+  public String getDescription() {
+    return description;
+  }
+
   public boolean reconcilesTo(ConfigurationOption option) {
     return key.equals(option.key);
   }
