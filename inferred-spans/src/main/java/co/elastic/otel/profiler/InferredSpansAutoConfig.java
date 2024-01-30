@@ -35,21 +35,21 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
 
   private static final Logger log = Logger.getLogger(InferredSpansAutoConfig.class.getName());
 
-  static final String ENABLED_OPTION = "elastic.profiling.inferred.spans.enabled";
-  static final String LOGGING_OPTION = "elastic.profiling.inferred.spans.logging.enabled";
+  static final String ENABLED_OPTION = "elastic.otel.inferred.spans.enabled";
+  static final String LOGGING_OPTION = "elastic.otel.inferred.spans.logging.enabled";
   static final String DIAGNOSTIC_FILES_OPTION =
-      "elastic.profiling.inferred.spans.backup.diagnostic.files";
-  static final String SAFEMODE_OPTION = "elastic.async.profiler.safe.mode";
+      "elastic.otel.inferred.spans.backup.diagnostic.files";
+  static final String SAFEMODE_OPTION = "elastic.otel.inferred.spans.safe.mode";
   static final String POSTPROCESSING_OPTION =
-      "elastic.profiling.inferred.spans.post.processing.enabled";
+      "elastic.otel.inferred.spans.post.processing.enabled";
   static final String SAMPLING_INTERVAL_OPTION =
-      "elastic.profiling.inferred.spans.sampling.interval";
-  static final String MIN_DURATION_OPTION = "elastic.profiling.inferred.spans.min.duration";
-  static final String INCLUDED_CLASSES_OPTION = "elastic.profiling.inferred.spans.included.classes";
-  static final String EXCLUDED_CLASSES_OPTION = "elastic.profiling.inferred.spans.excluded.classes";
-  static final String INTERVAL_OPTION = "elastic.profiling.inferred.spans.interval";
-  static final String DURATION_OPTION = "elastic.profiling.inferred.spans.duration";
-  static final String LIB_DIRECTORY_OPTION = "elastic.profiling.inferred.spans.lib.directory";
+      "elastic.otel.inferred.spans.sampling.interval";
+  static final String MIN_DURATION_OPTION = "elastic.otel.inferred.spans.min.duration";
+  static final String INCLUDED_CLASSES_OPTION = "elastic.otel.inferred.spans.included.classes";
+  static final String EXCLUDED_CLASSES_OPTION = "elastic.otel.inferred.spans.excluded.classes";
+  static final String INTERVAL_OPTION = "elastic.otel.inferred.spans.interval";
+  static final String DURATION_OPTION = "elastic.otel.inferred.spans.duration";
+  static final String LIB_DIRECTORY_OPTION = "elastic.otel.inferred.spans.lib.directory";
 
   @Override
   public void customize(AutoConfigurationCustomizer config) {
