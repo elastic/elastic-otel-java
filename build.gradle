@@ -114,6 +114,10 @@ tasks.configure {
   }
 }
 
+generateLicenseReport.doFirst {
+  delete "$rootDir/licenses"
+}
+
 licenseReport {
   outputDir = "$projectDir/licenses"
   renderers = [new InventoryMarkdownReportRenderer("licenses.md")]
@@ -122,5 +126,11 @@ licenseReport {
         "io.opentelemetry:opentelemetry-bom-alpha",
         "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha"
   ]
-  filters = [new LicenseBundleNormalizer(bundlePath: "$projectDir/licenses/license-normalizer-bundle.json")]
+  filters = [new LicenseBundleNormalizer(bundlePath: "$projectDir/buildscripts/license-normalizer-bundle.json")]
+  projects = [rootProject, rootProject.project("agent"), rootProject.project("bootstrap"),
+              rootProject.project("common"), rootProject.project("custom"),
+              rootProject.project("inferred-spans"), rootProject.project("instrumentation"),
+              rootProject.project("resources"), project]
+  configurations = ['runtimeClasspath', 'compileClasspath']
+
 }
