@@ -57,27 +57,35 @@ public class InferredSpansSmokeTest extends TestAppSmokeTest {
 
     doRequest(getUrl("/inferred-spans/sleep?millis=50"), okResponse());
 
-    await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
-      List<ExportTraceServiceRequest> traces = waitForTraces();
-      List<Span> spans = getSpans(traces).toList();
+    await()
+        .atMost(Duration.ofSeconds(10))
+        .untilAsserted(
+            () -> {
+              List<ExportTraceServiceRequest> traces = waitForTraces();
+              List<Span> spans = getSpans(traces).toList();
 
-      String PARENT_SPAN_NAME = "InferredSpansController.doSleep";
-      // The name of the inferred span may vary based on timing, therefore we simply look for a span
-      // containing "#" in the name
+              String PARENT_SPAN_NAME = "InferredSpansController.doSleep";
+              // The name of the inferred span may vary based on timing, therefore we simply look
+              // for a span
+              // containing "#" in the name
 
-      assertThat(spans).anySatisfy(span -> assertThat(span.getName()).isEqualTo(PARENT_SPAN_NAME));
+              assertThat(spans)
+                  .anySatisfy(span -> assertThat(span.getName()).isEqualTo(PARENT_SPAN_NAME));
 
-      Span parent =
-          spans.stream().filter(span -> span.getName().equals(PARENT_SPAN_NAME)).findFirst().get();
+              Span parent =
+                  spans.stream()
+                      .filter(span -> span.getName().equals(PARENT_SPAN_NAME))
+                      .findFirst()
+                      .get();
 
-      assertThat(spans)
-          .anySatisfy(
-              child -> {
-                assertThat(child.getName()).contains("#");
-                assertThat(child.getTraceId()).isEqualTo(parent.getTraceId());
-                assertThat(child.getEndTimeUnixNano() - child.getStartTimeUnixNano())
-                    .isGreaterThan(30_000_000L);
-              });
-    });
+              assertThat(spans)
+                  .anySatisfy(
+                      child -> {
+                        assertThat(child.getName()).contains("#");
+                        assertThat(child.getTraceId()).isEqualTo(parent.getTraceId());
+                        assertThat(child.getEndTimeUnixNano() - child.getStartTimeUnixNano())
+                            .isGreaterThan(30_000_000L);
+                      });
+            });
   }
 }
