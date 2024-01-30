@@ -66,8 +66,7 @@ public class InferredSpansSmokeTest extends TestAppSmokeTest {
 
               String PARENT_SPAN_NAME = "InferredSpansController.doSleep";
               // The name of the inferred span may vary based on timing, therefore we simply look
-              // for a span
-              // containing "#" in the name
+              // for a span containing "#" in the name
 
               assertThat(spans)
                   .anySatisfy(span -> assertThat(span.getName()).isEqualTo(PARENT_SPAN_NAME));
