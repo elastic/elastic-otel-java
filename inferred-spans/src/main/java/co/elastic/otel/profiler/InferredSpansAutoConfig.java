@@ -40,10 +40,8 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
   static final String DIAGNOSTIC_FILES_OPTION =
       "elastic.otel.inferred.spans.backup.diagnostic.files";
   static final String SAFEMODE_OPTION = "elastic.otel.inferred.spans.safe.mode";
-  static final String POSTPROCESSING_OPTION =
-      "elastic.otel.inferred.spans.post.processing.enabled";
-  static final String SAMPLING_INTERVAL_OPTION =
-      "elastic.otel.inferred.spans.sampling.interval";
+  static final String POSTPROCESSING_OPTION = "elastic.otel.inferred.spans.post.processing.enabled";
+  static final String SAMPLING_INTERVAL_OPTION = "elastic.otel.inferred.spans.sampling.interval";
   static final String MIN_DURATION_OPTION = "elastic.otel.inferred.spans.min.duration";
   static final String INCLUDED_CLASSES_OPTION = "elastic.otel.inferred.spans.included.classes";
   static final String EXCLUDED_CLASSES_OPTION = "elastic.otel.inferred.spans.excluded.classes";
