@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.profiler.util;
+package co.elastic.otel.testing;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
