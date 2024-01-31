@@ -20,6 +20,7 @@ dependencies {
   testImplementation(catalog.protobuf.util)
   testImplementation(catalog.okhttp)
   testImplementation(catalog.opentelemetryProto)
+  testImplementation(catalog.awaitility)
   testImplementation("io.opentelemetry:opentelemetry-api")
 
   testImplementation(catalog.logback)

@@ -20,7 +20,6 @@ package co.elastic.otel;
 
 import co.elastic.otel.resources.ElasticResourceProvider;
 import com.google.auto.service.AutoService;
-import io.opentelemetry.context.ContextStorage;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import java.util.HashMap;
@@ -53,10 +52,6 @@ public class ElasticAutoConfigurationCustomizerprovider
                     ElasticExtension.INSTANCE.getSpanProcessor()))
         .addPropertiesCustomizer(
             configProperties -> {
-              // Wrap context storage when configuration is loaded,
-              // using properties customization as a hook
-              ContextStorage.addWrapper(ElasticExtension.INSTANCE::wrapContextStorage);
-
               // disabling our resource provider from SDK init
               Map<String, String> config = new HashMap<>();
               Set<String> disabledConfig =
