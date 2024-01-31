@@ -16,31 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.config;
+package co.elastic.otel.testing;
 
-public class ConfigurationOption {
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-  String key;
-  String description;
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@ExtendWith(DisabledOnAppleSiliconCondition.class)
+public @interface DisabledOnAppleSilicon {
 
-  protected ConfigurationOption(String key, String description) {
-    this.key = key;
-    this.description = description;
-  }
-
-  public boolean isImplemented() {
-    return description != null;
-  }
-
-  public String getKey() {
-    return key;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public boolean reconcilesTo(ConfigurationOption option) {
-    return key.equals(option.key);
-  }
+  /** The reason this annotated test class or test method is disabled. */
+  String value() default "";
 }

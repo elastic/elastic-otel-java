@@ -2,7 +2,7 @@
 shadow = "8.1.1"
 jib = "3.4.0"
 spotless = "6.25.0"
-junit = "5.10.0"
+junit = "5.10.1"
 autoservice = "1.1.1"
 
 # otel SDK and API
@@ -14,6 +14,9 @@ opentelemetryProto = "1.1.0-alpha"
 # otel agent, those two should be updated together
 opentelemetryJavaagent = "1.32.0"
 opentelemetryJavaagentAlpha = "1.32.0-alpha"
+
+# otel semconv java generated bindings, needs to be kept in sync with version in otel agent
+opentelemetrySemconv = "1.21.0-alpha"
 
 # otel contrib
 opentelemetryContribAlpha = "1.32.0-alpha"
@@ -30,6 +33,8 @@ opentelemetryInstrumentationAlphaBom = { group = "io.opentelemetry.instrumentati
 
 opentelemetryProto = { group = "io.opentelemetry.proto", name = "opentelemetry-proto", version.ref = "opentelemetryProto" }
 
+opentelemetrySemconv = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv", version.ref = "opentelemetrySemconv" }
+
 awsContribResources = { group = "io.opentelemetry.contrib", name = "opentelemetry-aws-resources", version.ref = "opentelemetryContribAlpha" }
 contribResources = { group = "io.opentelemetry.contrib", name = "opentelemetry-resource-providers", version.ref = "opentelemetryContribAlpha" }
 
@@ -41,8 +46,14 @@ awaitility = "org.awaitility:awaitility:4.2.0"
 findbugs-jsr305 = "com.google.code.findbugs:jsr305:3.0.2"
 testcontainers = "org.testcontainers:testcontainers:1.19.4"
 logback = "ch.qos.logback:logback-classic:1.4.14"
-jackson = "com.fasterxml.jackson.core:jackson-databind:2.16.1"
+# version 2.16.1 has been compiled with java 21, which is likely a release error, thus stick to 2.16.0 until fixed in 2.16.2 or later
+jackson = "com.fasterxml.jackson.core:jackson-databind:2.16.0"
 protobuf-util = "com.google.protobuf:protobuf-java-util:3.25.2"
+mockito = "org.mockito:mockito-core:5.10.0"
+
+junitBom = { group = "org.junit", name = "junit-bom", version.ref = "junit" }
+
+okhttp = "com.squareup.okhttp3:okhttp:4.12.0"
 
 spotlessPlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
 

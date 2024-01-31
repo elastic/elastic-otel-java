@@ -20,7 +20,7 @@ package co.elastic.otel.profiler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import co.elastic.otel.profiler.util.DisabledOnAppleSilicon;
+import co.elastic.otel.testing.DisabledOnAppleSilicon;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;

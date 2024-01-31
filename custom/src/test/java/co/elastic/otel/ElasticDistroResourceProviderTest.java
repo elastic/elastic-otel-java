@@ -16,21 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.profiler.util;
+package co.elastic.otel;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import org.junit.jupiter.api.extension.ExtendWith;
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@ExtendWith(DisabledOnAppleSiliconCondition.class)
-public @interface DisabledOnAppleSilicon {
+import io.opentelemetry.sdk.resources.Resource;
+import org.junit.jupiter.api.Test;
 
-  /** The reason this annotated test class or test method is disabled. */
-  String value() default "";
+class ElasticDistroResourceProviderTest {
+
+  @Test
+  void elasticDistroNameAndVersion() {
+    ElasticDistroResourceProvider provider = new ElasticDistroResourceProvider();
+    Resource resource = provider.createResource(null);
+
+    assertThat(resource.getAttributes())
+        .hasSize(2)
+        .containsEntry("telemetry.distro.name", "elastic")
+        .containsKey("telemetry.distro.version");
+  }
 }

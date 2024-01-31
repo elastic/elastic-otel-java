@@ -1,7 +1,11 @@
+import com.github.jk1.license.filter.LicenseBundleNormalizer
+import com.github.jk1.license.render.InventoryMarkdownReportRenderer
+
 plugins {
   id "idea"
   id "maven-publish"
   id "base" // required to get 'clean' task
+  id 'com.github.jk1.dependency-license-report' version '2.5'
   alias(catalog.plugins.nexusPublish)
 }
 
@@ -66,9 +70,9 @@ subprojects {
     implementation(platform(catalog.opentelemetryInstrumentationBom))
     implementation(platform(catalog.opentelemetryInstrumentationAlphaBom))
 
-    testImplementation("org.mockito:mockito-core:5.5.0")
+    testImplementation(catalog.mockito)
 
-    testImplementation(enforcedPlatform("org.junit:junit-bom:" + catalog.versions.junit.get().toString()))
+    testImplementation(enforcedPlatform(catalog.junitBom))
     testImplementation("org.junit.jupiter:junit-jupiter")
   }
 
@@ -108,4 +112,25 @@ tasks.configure {
   doLast {
     copyGitHooks
   }
+}
+
+generateLicenseReport.doFirst {
+  delete "$rootDir/licenses"
+}
+
+licenseReport {
+  outputDir = "$projectDir/licenses"
+  renderers = [new InventoryMarkdownReportRenderer("licenses.md")]
+  excludeBoms = true
+  excludes = [
+        "io.opentelemetry:opentelemetry-bom-alpha",
+        "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha"
+  ]
+  filters = [new LicenseBundleNormalizer(bundlePath: "$projectDir/buildscripts/license-normalizer-bundle.json")]
+  projects = [rootProject, rootProject.project("agent"), rootProject.project("bootstrap"),
+              rootProject.project("common"), rootProject.project("custom"),
+              rootProject.project("inferred-spans"), rootProject.project("instrumentation"),
+              rootProject.project("resources"), project]
+  configurations = ['runtimeClasspath', 'compileClasspath']
+
 }

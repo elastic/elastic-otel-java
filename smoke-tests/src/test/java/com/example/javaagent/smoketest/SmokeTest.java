@@ -385,6 +385,12 @@ abstract class SmokeTest {
     void accept(T t) throws IOException;
   }
 
+  protected static IOConsumer<Response> okResponse() {
+    return r -> {
+      assertThat(r.code()).isEqualTo(200);
+    };
+  }
+
   protected static IOConsumer<Response> okResponseBody(String body) {
     return r -> {
       assertThat(r.code()).isEqualTo(200);
