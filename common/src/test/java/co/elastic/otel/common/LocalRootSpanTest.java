@@ -98,6 +98,37 @@ public class LocalRootSpanTest {
   }
 
   @Test
+  public void checkInferredSpanDetected() {
+    Map<String, String> headers = new HashMap<>();
+    headers.put("traceparent", "00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01");
+    Context remoteParent =
+        sdk.getPropagators()
+            .getTextMapPropagator()
+            .extract(Context.root(), headers, new MapGetter());
+
+    ReadWriteSpan delayedInferred =
+        (ReadWriteSpan)
+            tracer
+                .spanBuilder("inferred span with remote parent")
+                .setParent(remoteParent)
+                .setAttribute(ElasticAttributes.IS_INFERRED, true)
+                .startSpan();
+
+    Assertions.assertThat(delayedInferred.toSpanData().getParentSpanContext().isRemote()).isTrue();
+    assertThat(LocalRootSpan.getFor((ReadableSpan) delayedInferred)).isNull();
+
+    Span root = tracer.spanBuilder("span1").startSpan();
+    Span syncInferred =
+        tracer
+            .spanBuilder("inferred span with known parent")
+            .setParent(Context.root().with(root))
+            .setAttribute(ElasticAttributes.IS_INFERRED, true)
+            .startSpan();
+
+    assertThat(LocalRootSpan.getFor(syncInferred)).isSameAs(root);
+  }
+
+  @Test
   public void checkNested() {
     Span sp1 = tracer.spanBuilder("span1").startSpan();
     Span sp2;

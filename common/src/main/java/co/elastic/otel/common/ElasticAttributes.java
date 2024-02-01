@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel;
+package co.elastic.otel.common;
 
 import io.opentelemetry.api.common.AttributeKey;
 
@@ -28,6 +28,12 @@ public interface ElasticAttributes {
   AttributeKey<Boolean> IS_LOCAL_ROOT = AttributeKey.booleanKey("elastic.span.is_local_root");
   AttributeKey<String> SPAN_TYPE = AttributeKey.stringKey("elastic.span.type");
   AttributeKey<String> SPAN_SUBTYPE = AttributeKey.stringKey("elastic.span.subtype");
+
+  /** Marker attribute for inferred spans. */
+  AttributeKey<Boolean> IS_INFERRED = AttributeKey.booleanKey("elastic.is_inferred");
+
+  /** Used as marker on span-links to override the parent-child relationship for inferred spans. */
+  AttributeKey<Boolean> IS_CHILD = AttributeKey.booleanKey("elastic.is_child");
 
   // TODO : replace this with semantic conventions v1.24.0 equivalent once released
   AttributeKey<String> SPAN_STACKTRACE = AttributeKey.stringKey("code.stacktrace");

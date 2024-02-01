@@ -23,6 +23,7 @@ import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
+import javax.annotation.Nullable;
 
 /**
  * Shared utility for getting the local root span for a given span. A local root span is a span
@@ -32,6 +33,12 @@ import io.opentelemetry.sdk.trace.ReadableSpan;
 public class LocalRootSpan {
 
   private static final Object LOCAL_ROOT_MARKER = new Object();
+
+  /**
+   * Used to mark that the span or one of its parents is a delayed, inferred span. Delayed inferred
+   * spans provide the parent as remote-parent, which means the actual span cannot be derived.
+   */
+  private static final Object INFERRED_SPAN_UNKNOWN_ROOT_MARKER = new Object();
 
   /**
    * Stores the local-root {@link Span} for a given Span. If the span itself is a local root, it
@@ -50,7 +57,7 @@ public class LocalRootSpan {
    * @param startedSpan the span which was just started
    * @param parentContext the context used as parent for the given span
    */
-  public static void onSpanStart(Span startedSpan, Context parentContext) {
+  public static void onSpanStart(ReadableSpan startedSpan, Context parentContext) {
     if (localRoot.get(startedSpan) != null) {
       // early out: this method might be called by very many SpanProcessors,
       // so it is likely good to have a fast early out check
@@ -58,8 +65,15 @@ public class LocalRootSpan {
     }
     Span parent = Span.fromContext(parentContext);
     SpanContext parentSpanCtx = parent.getSpanContext();
-    if (!parentSpanCtx.isValid() || parentSpanCtx.isRemote()) {
+    if (!parentSpanCtx.isValid()) {
       localRoot.set(startedSpan, LOCAL_ROOT_MARKER);
+    } else if (parentSpanCtx.isRemote()) {
+      Boolean isInferred = startedSpan.getAttribute(ElasticAttributes.IS_INFERRED);
+      if (isInferred != null && isInferred) {
+        localRoot.set(startedSpan, INFERRED_SPAN_UNKNOWN_ROOT_MARKER);
+      } else {
+        localRoot.set(startedSpan, LOCAL_ROOT_MARKER);
+      }
     } else {
       localRoot.set(startedSpan, getFor(parent));
     }
@@ -69,23 +83,40 @@ public class LocalRootSpan {
    * If the provided span is a local root span, itself is returned. Otherwise, returns the
    * (transitive) parent which is a local root.
    *
-   * <p>NOTE: This will only work if {@link #onSpanStart(Span, Context)} was called for the span and
-   * all its parents! Otherwise, null is returned.
+   * <p>NOTE: The returned value may be null in any of the following cases:
+   *
+   * <ul>
+   *   <li>{@link #onSpanStart(Span, Context)} was not called for the span and all its parents
+   *   <li>The provided span or one if its parents is a delayed inferred span where the parent was
+   *       provided as a remote span
+   * </ul>
    */
+  @Nullable
   public static Span getFor(Span span) {
-    Object rootSpan = localRoot.get(span);
-    return rootSpan == LOCAL_ROOT_MARKER ? span : (Span) rootSpan;
+    return resolveRoot(span, localRoot.get(span));
   }
 
   /** See {@link LocalRootSpan#getFor(Span)}. */
-  public static Span getFor(ReadWriteSpan span) {
-    return getFor((ReadableSpan) span);
-  }
-
-  /** See {@link LocalRootSpan#getFor(Span)}. */
+  @Nullable
   public static Span getFor(ReadableSpan span) {
-    Object rootSpan = localRoot.get(span);
-    return rootSpan == LOCAL_ROOT_MARKER ? (Span) span : (Span) rootSpan;
+    return resolveRoot(span, localRoot.get(span));
+  }
+
+  /** See {@link LocalRootSpan#getFor(Span)}. */
+  @Nullable
+  public static Span getFor(ReadWriteSpan span) {
+    return resolveRoot(span, localRoot.get(span));
+  }
+
+  @Nullable
+  private static Span resolveRoot(Object span, Object rootSpanVal) {
+    if (rootSpanVal == LOCAL_ROOT_MARKER) {
+      return (Span) span;
+    }
+    if (rootSpanVal == INFERRED_SPAN_UNKNOWN_ROOT_MARKER) {
+      return null;
+    }
+    return (Span) rootSpanVal;
   }
 
   private LocalRootSpan() {}
