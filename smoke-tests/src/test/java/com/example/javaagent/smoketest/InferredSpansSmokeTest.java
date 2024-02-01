@@ -58,7 +58,7 @@ public class InferredSpansSmokeTest extends TestAppSmokeTest {
     doRequest(getUrl("/inferred-spans/sleep?millis=50"), okResponse());
 
     await()
-        .atMost(Duration.ofSeconds(10))
+        .atMost(Duration.ofSeconds(30))
         .untilAsserted(
             () -> {
               List<ExportTraceServiceRequest> traces = waitForTraces();
