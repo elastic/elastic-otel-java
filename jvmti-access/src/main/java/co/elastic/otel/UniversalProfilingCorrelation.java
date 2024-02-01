@@ -93,7 +93,10 @@ public class UniversalProfilingCorrelation {
 
   static synchronized void reset() {
     threadStorage = new ThreadLocal<>();
-    processStorage = null;
+    if (processStorage != null) {
+      processStorage = null;
+      JvmtiAccess.setProfilingCorrelationProcessStorage(null);
+    }
   }
 
   private static boolean isVirtual(Thread thread) {
