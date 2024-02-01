@@ -122,14 +122,17 @@ public class UniversalProfilingProcessor implements SpanProcessor {
   private volatile int writeForMemoryBarrier = 0;
 
   /**
-   * This method ensures that all writes which happened prior to this method call
-   * are not moved after the method call due to reordering.
-   * <p>
-   * This is realized based on the Java Memory Model guarantess for volatile variables.
-   * Relevant resources:
+   * This method ensures that all writes which happened prior to this method call are not moved
+   * after the method call due to reordering.
+   *
+   * <p>This is realized based on the Java Memory Model guarantess for volatile variables. Relevant
+   * resources:
+   *
    * <ul>
-   *   <li><a href="https://stackoverflow.com/questions/17108541/happens-before-relationships-with-volatile-fields-and-synchronized-blocks-in-jav">StackOverflow topic</a></li>
-   *   <li><a href="https://gee.cs.oswego.edu/dl/jmm/cookbook.html">JSR Compiler Cookbook</a></li>
+   *   <li><a
+   *       href="https://stackoverflow.com/questions/17108541/happens-before-relationships-with-volatile-fields-and-synchronized-blocks-in-jav">StackOverflow
+   *       topic</a>
+   *   <li><a href="https://gee.cs.oswego.edu/dl/jmm/cookbook.html">JSR Compiler Cookbook</a>
    * </ul>
    */
   private void memoryStoreStoreBarrier() {
