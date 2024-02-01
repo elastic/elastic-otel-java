@@ -27,7 +27,6 @@ import co.elastic.otel.profiler.collections.LongHashSet;
 import co.elastic.otel.profiler.collections.LongList;
 import co.elastic.otel.profiler.pooling.ObjectPool;
 import co.elastic.otel.profiler.pooling.Recyclable;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
