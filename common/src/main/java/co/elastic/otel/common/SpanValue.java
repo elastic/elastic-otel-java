@@ -22,9 +22,6 @@ import com.blogspot.mydailyjava.weaklockfree.WeakConcurrentMap;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -44,9 +41,9 @@ import javax.annotation.Nullable;
  *
  * <ul>
  *   <li>dense SpanValues are stored as array entries in a backing array: This means they occupy
- *       space space on every span, even if the span doesn't have a value for the corresponding
- *       SpanValue. However, they are faster to access than sparse SpanValues and occupy less memory
- *       when most spans do have a value set due to not requiring a HashMap Node
+ *       space on every span, even if the span doesn't have a value for the corresponding SpanValue.
+ *       However, they are faster to access than sparse SpanValues and occupy less memory when most
+ *       spans do have a value set due to not requiring a HashMap Node
  *   <li>sparse SpanValues are stored as entries in a backing Map: They don't occupy space on spans
  *       which do not have a value for them, but are slower to access and require a HashMap Node
  *       when stored.
@@ -60,7 +57,8 @@ import javax.annotation.Nullable;
 public class SpanValue<V> {
   /*
   IMPLEMENTATION NOTES
-  We attach a single AtomicReferenceArray to spans which is used as storage for ALL SpanValues.
+  We attach a single AtomicReferenceArray (implemented via SpanValueStorage) to spans which is used
+  as storage for ALL SpanValues.
   The first entry in this array is always a Map<SpanValue, Object>: This map is used as storage for
    * sparse SpanValues
    * dense SpanValues which have been created AFTER the AtomicReferenceArray of the given span was initialized
@@ -69,7 +67,7 @@ public class SpanValue<V> {
   They directly use the array at the corresponding index for storage.
 
   The AtomicReferenceArray is initialized the first time a SpanValue is written on the given span.
-  It's size is the number of dense SpanValues pluse one (for the Map at index 0).
+  Its size is the number of dense SpanValues plus one (for the Map at index 0).
 
   So if the array on a span has been initialized before a given dense SpanValue, the
   dense SpanValue has no space in the array.
@@ -91,22 +89,17 @@ public class SpanValue<V> {
   // lookup!
   // In addition we wouldn't have a delayed garbage collection of values
   // like we do when using the WeakConcurrentMap
-  private static final WeakConcurrentMap<Span, AtomicReferenceArray<Object>> storageMap =
+  private static final WeakConcurrentMap<Span, SpanValueStorage> storageMap =
       WeakConcurrent.createMap();
 
-  // initialized with one because index zero is reserved for the map of sparse values
-  private static final AtomicInteger nextDenseSpanValueIndex = new AtomicInteger(1);
-
-  private static final int SPARSE_INDEX = Integer.MAX_VALUE;
-
   /**
-   * The index within the AtomicReferenceArray which is reserved for this particular SpanValue. We
-   * use the value {@link #SPARSE_INDEX} (=a very big int) for sparse SpanValues. This allows us to
-   * avoid special cases for sparse storage: If {@link AtomicReferenceArray#length()} < index => use
-   * the entry at index <br>
+   * The index within the {@link SpanValueStorage} which is reserved for this particular SpanValue.
+   * We use the {@link Integer#MAX_VALUE} for sparse SpanValues. This allows us to avoid special
+   * cases for sparse storage: If {@link AtomicReferenceArray#length()} < index => use the entry at
+   * index <br>
    * else => use the Map at index 0
    */
-  private final int index;
+  final int index;
 
   private SpanValue(int index) {
     this.index = index;
@@ -128,7 +121,7 @@ public class SpanValue<V> {
    * <p>See {@link SpanValue#createSparse()}
    */
   public static <V> SpanValue<V> createDense() {
-    return new SpanValue<>(nextDenseSpanValueIndex.getAndIncrement());
+    return new SpanValue<>(SpanValueStorage.allocateDenseIndex());
   }
 
   /**
@@ -137,7 +130,7 @@ public class SpanValue<V> {
    * SpanValue#createDense()} ) if applicable.
    */
   public static <V> SpanValue<V> createSparse() {
-    return new SpanValue<>(SPARSE_INDEX);
+    return new SpanValue<>(SpanValueStorage.allocateSparseIndex());
   }
 
   /** Reads the current value for the given span. */
@@ -239,22 +232,10 @@ public class SpanValue<V> {
     clearImpl(span);
   }
 
-  @SuppressWarnings("unchecked")
   private V getImpl(Object span) {
-    Span unwrapped = unwrap(span);
-    AtomicReferenceArray<Object> storage = getStorage(unwrapped, false);
+    SpanValueStorage storage = getStorage(span, false);
     if (storage != null) {
-      if (storage.length() > index) {
-        return (V) storage.get(index);
-      } else {
-        // This SpanValue is either a sparse SpanValue or the storage was allocated before
-        // this dense SpanValue was registered
-        // in both cases we use the map-backed mechanism at index 0
-        Map<SpanValue<?>, Object> sparseStorage = getSparseValuesMap(storage, false);
-        if (sparseStorage != null) {
-          return (V) sparseStorage.get(this);
-        }
-      }
+      return storage.get(this);
     }
     return null;
   }
@@ -264,90 +245,36 @@ public class SpanValue<V> {
       clearImpl(span);
       return;
     }
-    Span unwrapped = unwrap(span);
-    AtomicReferenceArray<Object> storage = getStorage(unwrapped, true);
-    if (storage.length() > index) {
-      storage.set(index, value);
-    } else {
-      Map<SpanValue<?>, Object> sparseStorage = getSparseValuesMap(storage, true);
-      sparseStorage.put(this, value);
-    }
+    SpanValueStorage storage = getStorage(span, true);
+    storage.set(this, value);
   }
 
   private boolean setIfNullImpl(Object span, @Nullable V value) {
     if (value == null) {
       return getImpl(span) == null; // setting to null if already null has no effect
     }
-    Span unwrapped = unwrap(span);
-    AtomicReferenceArray<Object> storage = getStorage(unwrapped, true);
-    if (storage.length() > index) {
-      return storage.compareAndSet(index, null, value);
-    } else {
-      Map<SpanValue<?>, Object> sparseStorage = getSparseValuesMap(storage, true);
-      return sparseStorage.putIfAbsent(this, value) == null;
-    }
+    SpanValueStorage storage = getStorage(span, true);
+    return storage.setIfNull(this, value);
   }
 
-  @SuppressWarnings("unchecked")
   private V computeIfNullImpl(Object span, Supplier<V> valueInitializer) {
-    Span unwrapped = unwrap(span);
-    AtomicReferenceArray<Object> storage = getStorage(unwrapped, true);
-
-    if (storage.length() > index) {
-      V currentValue = (V) storage.get(index);
-      if (currentValue != null) {
-        return currentValue;
-      }
-      storage.compareAndSet(index, null, valueInitializer.get());
-      return (V) storage.get(index);
-    } else {
-      Map<SpanValue<?>, Object> sparseStorage = getSparseValuesMap(storage, true);
-      V currentValue = (V) sparseStorage.get(this);
-      if (currentValue != null) {
-        return currentValue;
-      }
-      V newValue = valueInitializer.get();
-      if (newValue == null) {
-        return null;
-      }
-      sparseStorage.putIfAbsent(this, newValue);
-      return (V) sparseStorage.get(this);
-    }
+    SpanValueStorage storage = getStorage(span, true);
+    return storage.computeIfNull(this, valueInitializer);
   }
 
   private void clearImpl(Object span) {
-    Span unwrapped = unwrap(span);
-    AtomicReferenceArray<Object> storage = getStorage(unwrapped, false);
+    SpanValueStorage storage = getStorage(span, false);
     if (storage != null) {
-      if (storage.length() > index) {
-        storage.set(index, null);
-      } else {
-        Map<SpanValue<?>, Object> sparseStorage = getSparseValuesMap(storage, false);
-        if (sparseStorage != null) {
-          sparseStorage.remove(this);
-        }
-      }
+      storage.clear(this);
     }
   }
 
-  @SuppressWarnings("unchecked")
   @Nullable
-  private static Map<SpanValue<?>, Object> getSparseValuesMap(
-      AtomicReferenceArray<Object> storage, boolean initialize) {
-    Map<SpanValue<?>, Object> map = (Map<SpanValue<?>, Object>) storage.get(0);
-    if (map == null && initialize) {
-      storage.compareAndSet(0, null, new ConcurrentHashMap<>());
-      map = (Map<SpanValue<?>, Object>) storage.get(0);
-    }
-    return map;
-  }
-
-  @Nullable
-  private static AtomicReferenceArray<Object> getStorage(Object span, boolean initialize) {
+  private static SpanValueStorage getStorage(Object span, boolean initialize) {
     Span unwrapped = unwrap(span);
-    AtomicReferenceArray<Object> storage = storageMap.get(unwrapped);
+    SpanValueStorage storage = storageMap.get(unwrapped);
     if (storage == null && initialize) {
-      storage = new AtomicReferenceArray<>(nextDenseSpanValueIndex.get());
+      storage = new SpanValueStorage();
       storageMap.putIfAbsent(unwrapped, storage);
       storage = storageMap.get(unwrapped);
     }
