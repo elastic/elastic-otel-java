@@ -19,7 +19,7 @@
 package co.elastic.otel;
 
 import co.elastic.otel.resources.ElasticResourceProvider;
-import io.opentelemetry.context.ContextStorage;
+import com.google.auto.service.AutoService;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import java.util.HashMap;
@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@AutoService(AutoConfigurationCustomizerProvider.class)
 public class ElasticAutoConfigurationCustomizerprovider
     implements AutoConfigurationCustomizerProvider {
 
@@ -51,15 +52,16 @@ public class ElasticAutoConfigurationCustomizerprovider
                     ElasticExtension.INSTANCE.getSpanProcessor()))
         .addPropertiesCustomizer(
             configProperties -> {
-              // Wrap context storage when configuration is loaded,
-              // using properties customization as a hook
-              ContextStorage.addWrapper(ElasticExtension.INSTANCE::wrapContextStorage);
-
               // disabling our resource provider from SDK init
               Map<String, String> config = new HashMap<>();
               Set<String> disabledConfig =
                   new HashSet<>(configProperties.getList(DISABLED_RESOURCE_PROVIDERS));
               disabledConfig.add(ElasticResourceProvider.class.getCanonicalName());
+
+              // disable upstream distro name & version provider
+              disabledConfig.add(
+                  "io.opentelemetry.javaagent.tooling.DistroVersionResourceProvider");
+
               config.put(DISABLED_RESOURCE_PROVIDERS, String.join(",", disabledConfig));
               return config;
             })

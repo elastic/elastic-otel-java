@@ -22,7 +22,7 @@ import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.asser
 import static java.util.stream.Collectors.toMap;
 
 import co.elastic.otel.profiler.pooling.ObjectPool;
-import co.elastic.otel.profiler.util.DisabledOnAppleSilicon;
+import co.elastic.otel.testing.DisabledOnAppleSilicon;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.Tracer;

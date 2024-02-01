@@ -21,7 +21,6 @@ package co.elastic.otel;
 import co.elastic.otel.common.util.ExecutorUtils;
 import co.elastic.otel.resources.ElasticResourceProvider;
 import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.context.ContextStorage;
 import io.opentelemetry.context.internal.shaded.WeakConcurrentMap;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SpanProcessor;
@@ -41,8 +40,6 @@ public class ElasticExtension {
   private static final Logger logger = Logger.getLogger(ElasticExtension.class.getName());
 
   public static final ElasticExtension INSTANCE = new ElasticExtension();
-
-  private final ElasticProfiler profiler;
   private final ElasticBreakdownMetrics breakdownMetrics;
   private final ElasticSpanProcessor spanProcessor;
   private final ExecutorService asyncInitExecutor;
@@ -53,16 +50,14 @@ public class ElasticExtension {
   private Future<Resource> resourceFuture;
 
   private ElasticExtension() {
-    this.profiler = new ElasticProfiler();
     this.breakdownMetrics = new ElasticBreakdownMetrics();
-    this.spanProcessor = new ElasticSpanProcessor(profiler, breakdownMetrics);
+    this.spanProcessor = new ElasticSpanProcessor(breakdownMetrics);
 
     this.asyncInitExecutor =
         Executors.newSingleThreadExecutor(ExecutorUtils.threadFactory("resource-init", true));
   }
 
   public void registerOpenTelemetry(OpenTelemetry openTelemetry) {
-    profiler.registerOpenTelemetry(openTelemetry);
     breakdownMetrics.registerOpenTelemetry(openTelemetry);
   }
 
@@ -70,13 +65,7 @@ public class ElasticExtension {
     return spanProcessor;
   }
 
-  public ContextStorage wrapContextStorage(ContextStorage toWrap) {
-    return new ElasticContextStorage(toWrap, profiler);
-  }
-
   public SpanExporter wrapSpanExporter(SpanExporter toWrap) {
-    // make the sampling profiler directly use the original exporter
-    profiler.registerExporter(toWrap);
     spanExporter = new ElasticSpanExporter(toWrap);
     breakdownMetrics.registerSpanExporter(spanExporter);
     spanProcessor.registerSpanExporter(spanExporter);

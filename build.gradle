@@ -1,9 +1,18 @@
+import com.github.jk1.license.filter.LicenseBundleNormalizer
+import com.github.jk1.license.render.InventoryMarkdownReportRenderer
+
 plugins {
   id "idea"
+  id "maven-publish"
+  id "base" // required to get 'clean' task
+  id 'com.github.jk1.dependency-license-report' version '2.5'
+  alias(catalog.plugins.nexusPublish)
 }
 
-group 'co.elastic.apm'
+group 'co.elastic.otel'
 version '0.0.1-SNAPSHOT'
+
+description = "Elastic OpenTelemetry java distribution"
 
 defaultTasks("agent:assemble")
 
@@ -24,11 +33,16 @@ subprojects {
     ]
   }
 
+  java {
+    withJavadocJar()
+    withSourcesJar()
+  }
+
   repositories {
     mavenLocal()
     mavenCentral()
     maven {
-      name = "sonatype"
+      name = "mavenCentralSnapshots"
       url = uri("https://oss.sonatype.org/content/repositories/snapshots")
     }
   }
@@ -56,9 +70,9 @@ subprojects {
     implementation(platform(catalog.opentelemetryInstrumentationBom))
     implementation(platform(catalog.opentelemetryInstrumentationAlphaBom))
 
-    testImplementation("org.mockito:mockito-core:5.5.0")
+    testImplementation(catalog.mockito)
 
-    testImplementation(enforcedPlatform("org.junit:junit-bom:" + catalog.versions.junit.get().toString()))
+    testImplementation(enforcedPlatform(catalog.junitBom))
     testImplementation("org.junit.jupiter:junit-jupiter")
   }
 
@@ -71,9 +85,25 @@ subprojects {
       options.release.set(8)
     }
   }
+
+  publishing {
+    repositories {
+      // dry-run repository will be wiped on 'clean' task
+      maven {
+        name = 'dryRun'
+        url = rootProject.layout.buildDirectory.dir("dry-run-maven-repo")
+      }
+    }
+  }
 }
 
-task copyGitHooks(type:Copy) {
+nexusPublishing {
+  repositories {
+    sonatype()
+  }
+}
+
+task copyGitHooks(type: Copy) {
   from layout.projectDirectory.dir(".githooks")
   into layout.projectDirectory.dir(".git").dir("hooks")
 }
@@ -82,4 +112,25 @@ tasks.configure {
   doLast {
     copyGitHooks
   }
+}
+
+generateLicenseReport.doFirst {
+  delete "$rootDir/licenses"
+}
+
+licenseReport {
+  outputDir = "$projectDir/licenses"
+  renderers = [new InventoryMarkdownReportRenderer("licenses.md")]
+  excludeBoms = true
+  excludes = [
+        "io.opentelemetry:opentelemetry-bom-alpha",
+        "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha"
+  ]
+  filters = [new LicenseBundleNormalizer(bundlePath: "$projectDir/buildscripts/license-normalizer-bundle.json")]
+  projects = [rootProject, rootProject.project("agent"), rootProject.project("bootstrap"),
+              rootProject.project("common"), rootProject.project("custom"),
+              rootProject.project("inferred-spans"), rootProject.project("instrumentation"),
+              rootProject.project("resources"), project]
+  configurations = ['runtimeClasspath', 'compileClasspath']
+
 }

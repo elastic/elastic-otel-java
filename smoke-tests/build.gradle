@@ -17,9 +17,10 @@ configurations {
 dependencies {
   testImplementation(catalog.testcontainers)
   testImplementation(catalog.jackson)
-  testImplementation("com.google.protobuf:protobuf-java-util:3.24.2")
-  testImplementation("com.squareup.okhttp3:okhttp:4.11.0")
-  testImplementation("io.opentelemetry.proto:opentelemetry-proto:1.0.0-alpha")
+  testImplementation(catalog.protobuf.util)
+  testImplementation(catalog.okhttp)
+  testImplementation(catalog.opentelemetryProto)
+  testImplementation(catalog.awaitility)
   testImplementation("io.opentelemetry:opentelemetry-api")
 
   testImplementation(catalog.logback)

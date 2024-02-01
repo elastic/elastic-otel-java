@@ -37,7 +37,7 @@ public class ElasticSpanProcessorTest {
 
   static {
     ElasticSpanProcessor elasticSpanProcessor =
-        new ElasticSpanProcessor(mock(ElasticProfiler.class), mock(ElasticBreakdownMetrics.class));
+        new ElasticSpanProcessor(mock(ElasticBreakdownMetrics.class));
 
     testExporter = InMemorySpanExporter.create();
     ElasticSpanExporter elasticSpanExporter = new ElasticSpanExporter(testExporter);

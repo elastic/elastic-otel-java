@@ -14,6 +14,7 @@ plugins {
 
 dependencies {
   testImplementation(libs.assertj.core)
+  testImplementation(libs.awaitility)
   implementation(libs.findbugs.jsr305)
 }
 
@@ -81,6 +82,10 @@ val compileJniTask = task("compileJni")
 compileJniTask.group = "jni"
 tasks.processResources {
   dependsOn(compileJniTask)
+}
+tasks.sourcesJar {
+  //sources jar doesn't need the generated native libraries
+  exclude("elastic-jvmti")
 }
 
 nativeTargets.forEach {

@@ -19,9 +19,12 @@
 package co.elastic.otel;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
+import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CyclicBarrier;
@@ -60,6 +63,42 @@ public class UniversalProfilingCorrelationTest {
 
     UniversalProfilingCorrelation.setProcessStorage(null);
     assertThat(JvmtiAccessImpl.createProcessProfilingCorrelationBufferAlias(100)).isNull();
+  }
+
+  @Test
+  public void ensureProcessStorageBufferNotGCed() {
+    ByteBuffer gcMeEarly = ByteBuffer.allocateDirect(1000);
+    ByteBuffer buffer = ByteBuffer.allocateDirect(1000);
+    buffer.order(ByteOrder.nativeOrder());
+
+    UniversalProfilingCorrelation.setProcessStorage(buffer);
+
+    WeakReference weakGcMe = new WeakReference(gcMeEarly);
+    WeakReference weakBuf = new WeakReference(buffer);
+
+    gcMeEarly = null;
+    buffer = null;
+
+    await()
+        .atMost(Duration.ofSeconds(10))
+        .pollInterval(Duration.ofMillis(1))
+        .untilAsserted(
+            () -> {
+              System.gc();
+              assertThat(weakGcMe.get()).isNull();
+            });
+
+    assertThat(weakBuf.get()).isNotNull();
+    UniversalProfilingCorrelation.setProcessStorage(null);
+
+    await()
+        .atMost(Duration.ofSeconds(10))
+        .pollInterval(Duration.ofMillis(1))
+        .untilAsserted(
+            () -> {
+              System.gc();
+              assertThat(weakBuf.get()).isNull();
+            });
   }
 
   @Test
