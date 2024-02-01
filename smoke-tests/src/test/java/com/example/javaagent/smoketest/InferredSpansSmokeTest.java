@@ -83,10 +83,11 @@ public class InferredSpansSmokeTest extends TestAppSmokeTest {
                         assertThat(child.getName()).contains("#");
                         assertThat(child.getTraceId()).isEqualTo(parent.getTraceId());
                         assertThat(child.getAttributesList())
-                            .anySatisfy(attrib -> {
-                              assertThat(attrib.getKey()).isEqualTo("elastic.is_inferred");
-                              assertThat(attrib.getValue().getBoolValue()).isEqualTo(true);
-                            });
+                            .anySatisfy(
+                                attrib -> {
+                                  assertThat(attrib.getKey()).isEqualTo("elastic.is_inferred");
+                                  assertThat(attrib.getValue().getBoolValue()).isEqualTo(true);
+                                });
                         assertThat(child.getEndTimeUnixNano() - child.getStartTimeUnixNano())
                             .isGreaterThan(30_000_000L);
                       });
