@@ -66,17 +66,18 @@ public class UniversalProfilingProcessor implements SpanProcessor {
   }
 
   private void populateProcessCorrelationStorage(Resource serviceResource) {
+    String serviceName = serviceResource.getAttribute(ResourceAttributes.SERVICE_NAME);
+    if (serviceName == null) {
+      throw new IllegalStateException("A service name must be configured!");
+    }
+    String environment = serviceResource.getAttribute(ResourceAttributes.SERVICE_NAMESPACE);
+
     ByteBuffer buffer = ByteBuffer.allocateDirect(4096);
     buffer.order(ByteOrder.nativeOrder());
     buffer.position(0);
 
     buffer.putChar((char) 1); // layout-minor-version
-    String serviceName = serviceResource.getAttribute(ResourceAttributes.SERVICE_NAME);
-    if (serviceName == null) {
-      throw new IllegalStateException("A service name must be configured!");
-    }
     writeUtf8Str(buffer, serviceName);
-    String environment = serviceResource.getAttribute(ResourceAttributes.SERVICE_NAMESPACE);
     writeUtf8Str(buffer, environment == null ? "" : environment);
     // TODO: implement socket connection
     writeUtf8Str(buffer, ""); // socket-file-path
