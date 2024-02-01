@@ -50,10 +50,6 @@ public class JvmtiAccess {
     JvmtiAccessImpl.setThreadProfilingCorrelationBuffer0(storage);
   }
 
-  public static boolean isInitialized() {
-    return state == State.INITIALIZED;
-  }
-
   public static void ensureInitialized() {
     switch (state) {
       case NOT_LOADED:
