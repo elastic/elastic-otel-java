@@ -40,8 +40,8 @@ public class InferredSpansSmokeTest extends TestAppSmokeTest {
             jvmOptions = "";
           }
           jvmOptions += " -Delastic.otel.inferred.spans.enabled=true";
-          jvmOptions += " -Delastic.otel.inferred.spans.duration=500ms";
-          jvmOptions += " -Delastic.otel.inferred.spans.interval=500ms";
+          jvmOptions += " -Delastic.otel.inferred.spans.duration=2000ms";
+          jvmOptions += " -Delastic.otel.inferred.spans.interval=2000ms";
           jvmOptions += " -Delastic.otel.inferred.spans.sampling.interval=5ms";
           container.withEnv("JAVA_TOOL_OPTIONS", jvmOptions);
         });
@@ -53,8 +53,10 @@ public class InferredSpansSmokeTest extends TestAppSmokeTest {
   }
 
   @Test
-  void checkInferredSpansFunctional() {
+  void checkInferredSpansFunctional() throws Exception {
 
+    // sleep first to ensure that previous profiling sessions due to the health check have ended
+    Thread.sleep(3000);
     doRequest(getUrl("/inferred-spans/sleep?millis=50"), okResponse());
 
     await()
@@ -82,6 +84,12 @@ public class InferredSpansSmokeTest extends TestAppSmokeTest {
                       child -> {
                         assertThat(child.getName()).contains("#");
                         assertThat(child.getTraceId()).isEqualTo(parent.getTraceId());
+                        assertThat(child.getAttributesList())
+                            .anySatisfy(
+                                attrib -> {
+                                  assertThat(attrib.getKey()).isEqualTo("elastic.is_inferred");
+                                  assertThat(attrib.getValue().getBoolValue()).isEqualTo(true);
+                                });
                         assertThat(child.getEndTimeUnixNano() - child.getStartTimeUnixNano())
                             .isGreaterThan(30_000_000L);
                       });

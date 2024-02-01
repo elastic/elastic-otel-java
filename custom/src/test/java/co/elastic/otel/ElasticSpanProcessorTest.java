@@ -22,6 +22,7 @@ import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.asser
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.satisfies;
 import static org.mockito.Mockito.mock;
 
+import co.elastic.otel.common.ElasticAttributes;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
