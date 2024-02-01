@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.profiler.util;
+package co.elastic.otel.testing;
 
 import static org.junit.jupiter.api.extension.ConditionEvaluationResult.disabled;
 import static org.junit.jupiter.api.extension.ConditionEvaluationResult.enabled;

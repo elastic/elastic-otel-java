@@ -20,6 +20,7 @@ package co.elastic.otel.config;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class LegacyConfigurations {
 
@@ -27,6 +28,10 @@ public class LegacyConfigurations {
 
   protected List<ConfigurationOption> getAllOptions() {
     return allOptions;
+  }
+
+  protected List<ConfigurationOption> getAllImplementedOptions() {
+    return allOptions.stream().filter((o) -> o.isImplemented()).collect(Collectors.toList());
   }
 
   protected void addUnspecifiedOption(String configurationOption) {

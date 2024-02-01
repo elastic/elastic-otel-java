@@ -18,8 +18,9 @@ dependencies {
   testImplementation(catalog.testcontainers)
   testImplementation(catalog.jackson)
   testImplementation(catalog.protobuf.util)
-  testImplementation("com.squareup.okhttp3:okhttp:4.11.0")
+  testImplementation(catalog.okhttp)
   testImplementation(catalog.opentelemetryProto)
+  testImplementation(catalog.awaitility)
   testImplementation("io.opentelemetry:opentelemetry-api")
 
   testImplementation(catalog.logback)
