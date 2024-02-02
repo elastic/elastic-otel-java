@@ -18,6 +18,7 @@
  */
 package co.elastic.otel;
 
+import co.elastic.otel.common.LocalRootSpan;
 import co.elastic.otel.common.util.HexUtils;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
@@ -92,7 +93,9 @@ public class UniversalProfilingProcessor implements SpanProcessor {
   }
 
   @Override
-  public void onStart(Context parentContext, ReadWriteSpan span) {}
+  public void onStart(Context parentContext, ReadWriteSpan span) {
+    LocalRootSpan.onSpanStart(span, parentContext);
+  }
 
   @Override
   public boolean isStartRequired() {
@@ -151,12 +154,18 @@ public class UniversalProfilingProcessor implements SpanProcessor {
 
       SpanContext spanCtx = newSpan.getSpanContext();
       if (spanCtx.isValid() && !spanCtx.isRemote()) {
-        tls.put(TLS_TRACE_PRESENT_OFFSET, (byte) 1);
-        tls.put(TLS_TRACE_FLAGS_OFFSET, spanCtx.getTraceFlags().asByte());
-        HexUtils.writeHexAsBinary(spanCtx.getTraceId(), 0, tls, TLS_TRACE_ID_OFFSET, 16);
-        HexUtils.writeHexAsBinary(spanCtx.getSpanId(), 0, tls, TLS_SPAN_ID_OFFSET, 8);
-        // TODO: write local root span ID here
-        HexUtils.writeHexAsBinary("0000000000000000", 0, tls, TLS_LOCAL_ROOT_SPAN_ID_OFFSET, 8);
+        Span localRoot = LocalRootSpan.getFor(newSpan);
+        if (localRoot != null) {
+          tls.put(TLS_TRACE_PRESENT_OFFSET, (byte) 1);
+          tls.put(TLS_TRACE_FLAGS_OFFSET, spanCtx.getTraceFlags().asByte());
+          HexUtils.writeHexAsBinary(spanCtx.getTraceId(), 0, tls, TLS_TRACE_ID_OFFSET, 16);
+          HexUtils.writeHexAsBinary(spanCtx.getSpanId(), 0, tls, TLS_SPAN_ID_OFFSET, 8);
+          HexUtils.writeHexAsBinary(
+              localRoot.getSpanContext().getSpanId(), 0, tls, TLS_LOCAL_ROOT_SPAN_ID_OFFSET, 8);
+        } else {
+          tls.put(TLS_TRACE_PRESENT_OFFSET, (byte) 0);
+          log.log(Level.WARNING, "Cannot propagate trace with unknown local root: {0}", newSpan);
+        }
       } else {
         tls.put(TLS_TRACE_PRESENT_OFFSET, (byte) 0);
       }
