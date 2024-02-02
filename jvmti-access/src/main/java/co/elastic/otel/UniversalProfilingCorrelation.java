@@ -106,18 +106,18 @@ public class UniversalProfilingCorrelation {
     JvmtiAccess.startProfilerReturnChannelSocket(filepath);
   }
 
-  /**
-   * Stops and removes the socket created via {@link #stopProfilerReturnChannel()}.
-   */
+  /** Stops and removes the socket created via {@link #stopProfilerReturnChannel()}. */
   public static void stopProfilerReturnChannel() {
     JvmtiAccess.stopProfilerReturnChannelSocket();
   }
 
   /**
-   * Reads a message as bytearray from the profiler return channel socket into the provided bytebuffer.
+   * Reads a message as bytearray from the profiler return channel socket into the provided
+   * bytebuffer. If the provided buffer is smaller than the received message, the message will be
+   * truncated.
    *
-   * @param outputBuffer the buffer to read to. The position will be reset to 0 and the
-   *     limit will be set to the size of the received message.
+   * @param outputBuffer the buffer to read to. The position will be reset to 0 and the limit will
+   *     be set to the size of the received message.
    * @return true, if a message was available and received. False if no message is available
    */
   static boolean readProfilerReturnChannelMessageBytes(ByteBuffer outputBuffer) {
@@ -134,11 +134,11 @@ public class UniversalProfilingCorrelation {
   }
 
   /**
-   * Reads a message from the profiler return channel socket.
-   * If no message is available, null is returned.
-   * <p>
-   * The returned message is a singleton and will be reused on subsequent invocations.
-   * Therefore, the return value only remains valid until the next call of this method.
+   * Reads a message from the profiler return channel socket. If no message is available, null is
+   * returned.
+   *
+   * <p>The returned message is a singleton and will be reused on subsequent invocations. Therefore,
+   * the return value only remains valid until the next call of this method.
    */
   @Nullable
   public static synchronized ProfilerMessage readProfilerReturnChannelMessage() {

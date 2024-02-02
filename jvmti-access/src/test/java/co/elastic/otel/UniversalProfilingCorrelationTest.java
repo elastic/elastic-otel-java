@@ -153,8 +153,8 @@ public class UniversalProfilingCorrelationTest {
                     throw new RuntimeException(e);
                   }
 
-                  ByteBuffer alias = JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(
-                      100);
+                  ByteBuffer alias =
+                      JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(100);
                   alias.order(ByteOrder.nativeOrder());
 
                   int readId = alias.getInt(0);
@@ -177,14 +177,16 @@ public class UniversalProfilingCorrelationTest {
     @EnabledForJreRange(min = JRE.JAVA_21)
     public void testVirtualThreadsExcluded() throws Exception {
       ExecutorService exec =
-          (ExecutorService) Executors.class.getMethod("newVirtualThreadPerTaskExecutor")
-              .invoke(null);
+          (ExecutorService)
+              Executors.class.getMethod("newVirtualThreadPerTaskExecutor").invoke(null);
 
       exec.submit(
               () -> {
-                ByteBuffer buffer = UniversalProfilingCorrelation.getCurrentThreadStorage(true, 100);
+                ByteBuffer buffer =
+                    UniversalProfilingCorrelation.getCurrentThreadStorage(true, 100);
                 assertThat(buffer).isNull();
-                assertThat(JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(100)).isNull();
+                assertThat(JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(100))
+                    .isNull();
               })
           .get();
     }
@@ -207,7 +209,7 @@ public class UniversalProfilingCorrelationTest {
         name.append("abc");
       }
       assertThatThrownBy(
-          () -> UniversalProfilingCorrelation.startProfilerReturnChannel(name.toString()))
+              () -> UniversalProfilingCorrelation.startProfilerReturnChannel(name.toString()))
           .isInstanceOf(RuntimeException.class)
           .hasMessageContaining("filename");
     }
@@ -251,7 +253,7 @@ public class UniversalProfilingCorrelationTest {
       JvmtiAccessImpl.sendToProfilerReturnChannelSocket0(new byte[] {1, 2, 3, 4});
       JvmtiAccessImpl.sendToProfilerReturnChannelSocket0(new byte[] {5, 6});
 
-      //the first truncated message should not impact the second fitting one
+      // the first truncated message should not impact the second fitting one
       ByteBuffer receiveBuffer = createDirectBuffer(3);
       assertThat(UniversalProfilingCorrelation.readProfilerReturnChannelMessageBytes(receiveBuffer))
           .isTrue();
@@ -277,8 +279,8 @@ public class UniversalProfilingCorrelationTest {
 
       ByteBuffer dummyMessage = ByteBuffer.allocate(4);
       dummyMessage.order(ByteOrder.nativeOrder());
-      dummyMessage.putShort((short) 42); //message-type
-      dummyMessage.putShort((short) 1); //message-version
+      dummyMessage.putShort((short) 42); // message-type
+      dummyMessage.putShort((short) 1); // message-version
 
       JvmtiAccessImpl.sendToProfilerReturnChannelSocket0(dummyMessage.array());
 
@@ -300,8 +302,8 @@ public class UniversalProfilingCorrelationTest {
 
       ByteBuffer dummyMessage = ByteBuffer.allocate(38);
       dummyMessage.order(ByteOrder.nativeOrder());
-      dummyMessage.putShort((short) 1); //message-type
-      dummyMessage.putShort((short) 1); //message-version
+      dummyMessage.putShort((short) 1); // message-type
+      dummyMessage.putShort((short) 1); // message-version
       dummyMessage.put(traceId);
       dummyMessage.put(rootSpanId);
       dummyMessage.put(sampleId);
@@ -328,8 +330,8 @@ public class UniversalProfilingCorrelationTest {
 
       ByteBuffer dummyMessage = ByteBuffer.allocate(8);
       dummyMessage.order(ByteOrder.nativeOrder());
-      dummyMessage.putShort((short) 1); //message-type
-      dummyMessage.putShort((short) 1); //message-version
+      dummyMessage.putShort((short) 1); // message-type
+      dummyMessage.putShort((short) 1); // message-version
       dummyMessage.put(new byte[] {1, 2, 3, 4});
 
       JvmtiAccessImpl.sendToProfilerReturnChannelSocket0(dummyMessage.array());
@@ -345,8 +347,5 @@ public class UniversalProfilingCorrelationTest {
       result.order(ByteOrder.nativeOrder());
       return result;
     }
-
   }
-
-
 }

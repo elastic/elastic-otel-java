@@ -60,8 +60,8 @@ public class JvmtiAccessImpl {
   static native int readProfilerReturnChannelSocketMessage0(ByteBuffer outputDirectBuffer);
 
   /**
-   * ONLY FOR TESTING!
-   * Sends data to the socket which can be subsequently read via {@link #readProfilerReturnChannelSocketMessage0(ByteBuffer)}.
+   * ONLY FOR TESTING! Sends data to the socket which can be subsequently read via {@link
+   * #readProfilerReturnChannelSocketMessage0(ByteBuffer)}.
    *
    * @param data the message to send
    */
