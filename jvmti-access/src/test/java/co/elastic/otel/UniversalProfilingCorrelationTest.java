@@ -209,9 +209,9 @@ public class UniversalProfilingCorrelationTest {
         name.append("abc");
       }
       assertThatThrownBy(
-              () -> UniversalProfilingCorrelation.startProfilerReturnChannel(name.toString()))
+          () -> UniversalProfilingCorrelation.startProfilerReturnChannel(name.toString()))
           .isInstanceOf(RuntimeException.class)
-          .hasMessageContaining("filename");
+          .hasMessageContaining("filepath");
     }
 
     @ParameterizedTest

@@ -5,8 +5,9 @@ using elastic::jvmti_agent::ReturnCode;
 using elastic::jvmti_agent::toJint;
 
 
-JNIEXPORT jint JNICALL Java_co_elastic_otel_JvmtiAccessImpl_destroy0(JNIEnv* env, jclass) {
-    return toJint(elastic::jvmti_agent::destroy(env));
+JNIEXPORT jint JNICALL Java_co_elastic_otel_JvmtiAccessImpl_destroy0(JNIEnv*, jclass) {
+    elastic::jvmti_agent::destroy();
+    return toJint(ReturnCode::SUCCESS);
 }
 
 JNIEXPORT void JNICALL Java_co_elastic_otel_JvmtiAccessImpl_setThreadProfilingCorrelationBuffer0(JNIEnv* env, jclass, jobject bytebuffer) {

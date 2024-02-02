@@ -16,7 +16,7 @@ namespace elastic {
             return static_cast<jint>(rc);
         }
 
-        ReturnCode destroy(JNIEnv* jniEnv);
+        void destroy();
 
         void setThreadProfilingCorrelationBuffer(JNIEnv* jniEnv, jobject bytebuffer);
         void setProcessProfilingCorrelationBuffer(JNIEnv* jniEnv, jobject bytebuffer);
@@ -26,7 +26,6 @@ namespace elastic {
 
 
         ReturnCode createProfilerSocket(JNIEnv* jniEnv, jstring filepath);
-        ReturnCode closeProfilerSocketIfOpen(JNIEnv* jniEnv);
         ReturnCode closeProfilerSocket(JNIEnv* jniEnv);
 
         jint readProfilerSocketMessage(JNIEnv* jniEnv, jobject outputBuffer);
