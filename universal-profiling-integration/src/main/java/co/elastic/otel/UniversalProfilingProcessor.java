@@ -156,12 +156,12 @@ public class UniversalProfilingProcessor implements SpanProcessor {
       if (spanCtx.isValid() && !spanCtx.isRemote()) {
         Span localRoot = LocalRootSpan.getFor(newSpan);
         if (localRoot != null) {
+          String localRootSpanId = localRoot.getSpanContext().getSpanId();
           tls.put(TLS_TRACE_PRESENT_OFFSET, (byte) 1);
           tls.put(TLS_TRACE_FLAGS_OFFSET, spanCtx.getTraceFlags().asByte());
           HexUtils.writeHexAsBinary(spanCtx.getTraceId(), 0, tls, TLS_TRACE_ID_OFFSET, 16);
           HexUtils.writeHexAsBinary(spanCtx.getSpanId(), 0, tls, TLS_SPAN_ID_OFFSET, 8);
-          HexUtils.writeHexAsBinary(
-              localRoot.getSpanContext().getSpanId(), 0, tls, TLS_LOCAL_ROOT_SPAN_ID_OFFSET, 8);
+          HexUtils.writeHexAsBinary(localRootSpanId, 0, tls, TLS_LOCAL_ROOT_SPAN_ID_OFFSET, 8);
         } else {
           tls.put(TLS_TRACE_PRESENT_OFFSET, (byte) 0);
           log.log(Level.WARNING, "Cannot propagate trace with unknown local root: {0}", newSpan);
