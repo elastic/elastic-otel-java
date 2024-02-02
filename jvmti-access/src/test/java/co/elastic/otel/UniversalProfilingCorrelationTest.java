@@ -205,11 +205,11 @@ public class UniversalProfilingCorrelationTest {
     @Test
     public void tooLongFileName() {
       StringBuilder name = new StringBuilder();
-      for (int i = 0; i < 100; i++) {
+      for (int i = 0; i < 10_000; i++) {
         name.append("abc");
       }
       assertThatThrownBy(
-              () -> UniversalProfilingCorrelation.startProfilerReturnChannel(name.toString()))
+          () -> UniversalProfilingCorrelation.startProfilerReturnChannel(name.toString()))
           .isInstanceOf(RuntimeException.class)
           .hasMessageContaining("filename");
     }
