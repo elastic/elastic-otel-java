@@ -196,8 +196,8 @@ public class UniversalProfilingCorrelationTest {
   class ProfilerSocket {
 
     @Test
-    public void emptyFileName() {
-      assertThatThrownBy(() -> UniversalProfilingCorrelation.startProfilerReturnChannel(""))
+    public void badFileName() {
+      assertThatThrownBy(() -> UniversalProfilingCorrelation.startProfilerReturnChannel("/"))
           .isInstanceOf(RuntimeException.class)
           .hasMessageContaining("Could not bind socket");
     }
@@ -205,7 +205,7 @@ public class UniversalProfilingCorrelationTest {
     @Test
     public void tooLongFileName() {
       StringBuilder name = new StringBuilder();
-      for (int i = 0; i < 10_000; i++) {
+      for (int i = 0; i < 100; i++) {
         name.append("abc");
       }
       assertThatThrownBy(
