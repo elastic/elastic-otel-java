@@ -18,6 +18,7 @@
  */
 package co.elastic.otel;
 
+import co.elastic.otel.common.ElasticAttributes;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.AttributeType;
 import io.opentelemetry.api.common.Attributes;

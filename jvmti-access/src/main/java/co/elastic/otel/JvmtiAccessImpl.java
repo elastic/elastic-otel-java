@@ -41,14 +41,14 @@ public class JvmtiAccessImpl {
    * correlation buffer. This buffer points to the same memory address as the buffer configured via
    * setThreadProfilingCorrelationBuffer0.
    */
-  static native ByteBuffer createThreadProfilingCorrelationBufferAlias(long capacity);
+  public static native ByteBuffer createThreadProfilingCorrelationBufferAlias(long capacity);
 
   /**
    * ONLY FOR TESTING! Creates a new bytebuffer for reading the currently configured process local
    * correlation buffer. This buffer points to the same memory address as the buffer configured via
    * setProcessProfilingCorrelationBuffer0.
    */
-  static native ByteBuffer createProcessProfilingCorrelationBufferAlias(long capacity);
+  public static native ByteBuffer createProcessProfilingCorrelationBufferAlias(long capacity);
 
   static native int startProfilerReturnChannelSocket0(String socketFilePath);
 

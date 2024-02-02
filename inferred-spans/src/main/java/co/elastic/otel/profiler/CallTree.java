@@ -21,12 +21,12 @@ package co.elastic.otel.profiler;
 import static java.util.logging.Level.FINE;
 import static java.util.logging.Level.WARNING;
 
+import co.elastic.otel.common.ElasticAttributes;
+import co.elastic.otel.common.util.HexUtils;
 import co.elastic.otel.profiler.collections.LongHashSet;
 import co.elastic.otel.profiler.collections.LongList;
 import co.elastic.otel.profiler.pooling.ObjectPool;
 import co.elastic.otel.profiler.pooling.Recyclable;
-import co.elastic.otel.profiler.util.HexUtils;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
@@ -61,14 +61,10 @@ import javax.annotation.Nullable;
 public class CallTree implements Recyclable {
 
   private static final int INITIAL_CHILD_SIZE = 2;
-  static final AttributeKey<Boolean> IS_CHILD_ATTRIBUTE_KEY =
-      AttributeKey.booleanKey("elastic.is_child");
 
   private static final Attributes CHILD_LINK_ATTRIBUTES =
-      Attributes.builder().put(IS_CHILD_ATTRIBUTE_KEY, true).build();
+      Attributes.builder().put(ElasticAttributes.IS_CHILD, true).build();
 
-  static final AttributeKey<String> STACKTRACE_ATTRIBUTE_KEY =
-      AttributeKey.stringKey("code.stacktrace");
   @Nullable private CallTree parent;
   protected int count;
   private List<CallTree> children = new ArrayList<>(INITIAL_CHILD_SIZE);
@@ -504,6 +500,7 @@ public class CallTree implements Recyclable {
         tracer
             .spanBuilder(tempBuilder.toString())
             .setParent(parentOtelCtx)
+            .setAttribute(ElasticAttributes.IS_INFERRED, true)
             .setStartTimestamp(
                 clock.toEpochNanos(parentContext.getClockAnchor(), this.start),
                 TimeUnit.NANOSECONDS);
@@ -516,7 +513,7 @@ public class CallTree implements Recyclable {
       assert this.parent != null;
       tempBuilder.setLength(0);
       this.parent.fillStackTrace(tempBuilder);
-      spanBuilder.setAttribute(STACKTRACE_ATTRIBUTE_KEY, tempBuilder.toString());
+      spanBuilder.setAttribute(ElasticAttributes.SPAN_STACKTRACE, tempBuilder.toString());
     }
 
     Span span = spanBuilder.startSpan();

@@ -18,9 +18,9 @@
  */
 package co.elastic.otel.profiler;
 
+import co.elastic.otel.common.util.HexUtils;
 import co.elastic.otel.profiler.pooling.Recyclable;
 import co.elastic.otel.profiler.util.ByteUtils;
-import co.elastic.otel.profiler.util.HexUtils;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;

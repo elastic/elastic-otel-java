@@ -18,6 +18,7 @@
  */
 package co.elastic.otel;
 
+import co.elastic.otel.common.ElasticAttributes;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.javaagent.tooling.AgentVersion;
