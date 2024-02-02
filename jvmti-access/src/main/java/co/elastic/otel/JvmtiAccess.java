@@ -62,7 +62,11 @@ public class JvmtiAccess {
 
   static int receiveProfilerReturnChannelMessage(ByteBuffer outputBuffer) {
     ensureInitialized();
-    return JvmtiAccessImpl.readProfilerReturnChannelSocketMessage0(outputBuffer);
+    int numRead = JvmtiAccessImpl.readProfilerReturnChannelSocketMessage0(outputBuffer);
+    if (numRead < 0) {
+      throw new IllegalStateException("Native code returned error: " + numRead);
+    }
+    return numRead;
   }
 
   public static void ensureInitialized() {

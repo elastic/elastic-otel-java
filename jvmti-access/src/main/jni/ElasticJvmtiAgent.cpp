@@ -19,7 +19,7 @@ namespace elastic
 
         static int profilerSocket = -1;
         static std::string profilerSocketFile;
-        static std::recursive_mutex profilerMutex;
+        static std::recursive_mutex profilerSocketMutex;
 
         ReturnCode destroy(JNIEnv* jniEnv) {
             elastic_apm_profiling_correlation_process_storage_v1 = nullptr;
@@ -66,7 +66,7 @@ namespace elastic
         }
 
         ReturnCode createProfilerSocket(JNIEnv* jniEnv, jstring filepath) {
-            std::lock_guard<std::recursive_mutex> guard(profilerMutex);
+            std::lock_guard<std::recursive_mutex> guard(profilerSocketMutex);
             if(profilerSocket != -1) {
                 return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR, "Profiler socket already opened!");
             }
@@ -82,14 +82,14 @@ namespace elastic
             jniEnv->ReleaseStringUTFChars(filepath, pathCstr);
 
             size_t maxLen = sizeof(addr.sun_path) - 1;
-            if(pathStr.length() > maxLen) {
+            if (pathStr.length() > maxLen) {
                 return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR, "The provided filename '", pathStr,"' is too long, max allowed character count is ", maxLen);
             }
             strncpy(addr.sun_path, pathStr.c_str(), maxLen);
 
             int fd = socket(PF_UNIX, SOCK_DGRAM, 0);
             if (fd == -1) {
-                return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR, "Could not create SOCK_DGRAM socket, error is ", errno);
+                return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR, "Could not create SOCK_DGRAM domain socket, error is ", errno);
             }
 
             int flags = fcntl(fd, F_GETFL, 0);
@@ -100,13 +100,13 @@ namespace elastic
             }
 
             int fnctlResult = fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-            if(fnctlResult != 0){
+            if (fnctlResult != 0){
                 auto error = errno;
                 close(fd);
                 return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR, "Could not configure socket to be non-blocking, error is ", error);                
             }
 
-            if (bind(fd, (sockaddr*)&addr, sizeof(addr) ) != 0) {
+            if (bind(fd, (sockaddr*)&addr, sizeof(addr)) != 0) {
                 auto error = errno;
                 close(fd);
                 return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR, "Could not bind socket to the given filepath, error is ", error);    
@@ -119,16 +119,16 @@ namespace elastic
 
 
         ReturnCode closeProfilerSocketIfOpen(JNIEnv* jniEnv) {
-            std::lock_guard<std::recursive_mutex> guard(profilerMutex);
-            if(profilerSocket != -1) {
+            std::lock_guard<std::recursive_mutex> guard(profilerSocketMutex);
+            if (profilerSocket != -1) {
                 return closeProfilerSocket(jniEnv);
             }
             return ReturnCode::SUCCESS;
         }
 
         ReturnCode closeProfilerSocket(JNIEnv* jniEnv) {
-            std::lock_guard<std::recursive_mutex> guard(profilerMutex);
-            if(profilerSocket == -1) {
+            std::lock_guard<std::recursive_mutex> guard(profilerSocketMutex);
+            if (profilerSocket == -1) {
                 return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR, "No profiler socket active!");
             }
             close(profilerSocket);
@@ -139,11 +139,11 @@ namespace elastic
         }
 
         jint readProfilerSocketMessage(JNIEnv* jniEnv, jobject outputBuffer) {
-            std::lock_guard<std::recursive_mutex> guard(profilerMutex);
-            if(profilerSocket == -1) {
+            std::lock_guard<std::recursive_mutex> guard(profilerSocketMutex);
+            if (profilerSocket == -1) {
                 return raiseExceptionAndReturn(jniEnv, -1, "No profiler socket active!");
             }
-            if(outputBuffer == nullptr) {
+            if (outputBuffer == nullptr) {
                 return raiseExceptionAndReturn(jniEnv, -1, "No profiler socket active!");
             }
 
@@ -166,15 +166,15 @@ namespace elastic
 
         //ONLY FOR TESTING!
         ReturnCode writeProfilerSocketMessage(JNIEnv* jniEnv, jbyteArray message) {
-            std::lock_guard<std::recursive_mutex> guard(profilerMutex);
-            if(profilerSocket == -1) {
+            std::lock_guard<std::recursive_mutex> guard(profilerSocketMutex);
+            if (profilerSocket == -1) {
                 return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR, "No profiler socket active!");
             }
 
             jboolean isCopy;
             jsize numBytes = jniEnv->GetArrayLength(message);
             jbyte* data = jniEnv->GetByteArrayElements(message, &isCopy);
-            if(data == nullptr) {
+            if (data == nullptr) {
                 return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR, "Could not get array data");
             }
             
@@ -186,7 +186,7 @@ namespace elastic
             auto errorNum = errno;
 
             jniEnv->ReleaseByteArrayElements(message, data, 0);
-            if(result != numBytes) {
+            if (result != numBytes) {
                 return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR, "Could not send to socket, return value is ", result," errno is ", errorNum);
             }
 
