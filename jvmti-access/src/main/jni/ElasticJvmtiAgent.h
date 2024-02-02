@@ -2,7 +2,7 @@
 #define ELASTICJVMTIAGENT_H_
 
 #include <jvmti.h>
-#include <sstream>
+#include <string>
 
 namespace elastic {
     namespace jvmti_agent {
@@ -32,13 +32,21 @@ namespace elastic {
         ReturnCode writeProfilerSocketMessage(JNIEnv* jniEnv, jbyteArray message);
 
 
+        template <typename T>
+        typename std::enable_if<
+            false == std::is_convertible<T, std::string>::value,
+            std::string>::type toStr (T&& val) {
+                return std::to_string(val); 
+        }
+        inline std::string toStr(std::string const & val) { return val; }
+
         template< class... Args >
         void raiseExceptionType(JNIEnv* env, const char* exceptionClass, Args&&... messageParts) {
             jclass clazz = env->FindClass(exceptionClass);
             if(clazz != NULL) {
-                std::stringstream fmt;
-                ([&]{ fmt << messageParts; }(), ...);
-                env->ThrowNew(clazz, fmt.str().c_str());
+                std::string fmt;
+                ([&]{ fmt += toStr(messageParts); }(), ...);
+                env->ThrowNew(clazz, fmt.c_str());
             }
         }
 
