@@ -48,7 +48,7 @@ sourceSets {
   }
 }
 
-val sharedCompilerArgs = "-std=c++20 -O2 -ftls-model=global-dynamic -fPIC -Wall -Werror -Wextra -shared"
+val sharedCompilerArgs = "-std=c++17 -fno-rtti -fno-exceptions -O2 -ftls-model=global-dynamic -fPIC -Wall -Werror -Wextra -shared"
 val nativeTargets = listOf(
   NativeTarget(
     "darwin-arm64.so",
@@ -60,15 +60,16 @@ val nativeTargets = listOf(
     "jni_darwin.Dockerfile",
     "-arch x86_64 $sharedCompilerArgs"
   ),
+  //On linux we statically link libstdc++ and libgcc to maximize portability
   NativeTarget(
     "linux-arm64.so",
     "jni_linux_arm64.Dockerfile",
-    "-mtls-dialect=desc $sharedCompilerArgs"
+    "-static-libstdc++ -static-libgcc -mtls-dialect=desc $sharedCompilerArgs"
   ),
   NativeTarget(
     "linux-x64.so",
     "jni_linux_x64.Dockerfile",
-    "-mtls-dialect=gnu2 $sharedCompilerArgs"
+    "-static-libstdc++ -static-libgcc -mtls-dialect=gnu2 $sharedCompilerArgs"
   )
 )
 
