@@ -560,7 +560,7 @@ class SamplingProfiler implements Runnable {
       processActivationEventsUpTo(System.nanoTime(), event, eof);
     } finally {
       if (logger.isLoggable(Level.FINE)) {
-        logger.log(Level.FINE, "Processing traces took {0}µs", (System.nanoTime() - start) / 1000);
+        logger.log(Level.FINE, "Processing traces took {0}us", (System.nanoTime() - start) / 1000);
       }
       jfrParser.resetState();
       resetActivationEventBuffer();

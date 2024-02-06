@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.profiler;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 import co.elastic.otel.profiler.config.WildcardMatcher;
@@ -143,9 +143,13 @@ public class InferredSpansAutoConfigTest {
                   assertThat(AutoConfiguredDataCapture.getSpans())
                       .hasSizeGreaterThanOrEqualTo(2)
                       .anySatisfy(
-                          span ->
-                              assertThat(span.getName())
-                                  .startsWith("InferredSpansAutoConfigTest#")));
+                          span -> {
+                            assertThat(span.getName()).startsWith("InferredSpansAutoConfigTest#");
+                            assertThat(span.getInstrumentationScopeInfo().getName()).isEqualTo(
+                                InferredSpansProcessor.TRACER_NAME);
+                            assertThat(
+                                span.getInstrumentationScopeInfo().getVersion()).isNotBlank();
+                          }));
     }
   }
 
