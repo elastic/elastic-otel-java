@@ -47,8 +47,8 @@ public class InferredSpansProcessor implements SpanProcessor {
   private static final String TRACER_VERSION = readTracerVersion();
 
   private static String readTracerVersion() {
-    try (InputStream is = InferredSpansProcessor.class.getResourceAsStream(
-        "inferred-spans-version.txt")) {
+    try (InputStream is =
+        InferredSpansProcessor.class.getResourceAsStream("inferred-spans-version.txt")) {
       return new BufferedReader(new InputStreamReader(is)).readLine();
     } catch (IOException e) {
       throw new IllegalStateException("Failed to read version", e);

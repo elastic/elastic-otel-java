@@ -145,10 +145,10 @@ public class InferredSpansAutoConfigTest {
                       .anySatisfy(
                           span -> {
                             assertThat(span.getName()).startsWith("InferredSpansAutoConfigTest#");
-                            assertThat(span.getInstrumentationScopeInfo().getName()).isEqualTo(
-                                InferredSpansProcessor.TRACER_NAME);
-                            assertThat(
-                                span.getInstrumentationScopeInfo().getVersion()).isNotBlank();
+                            assertThat(span.getInstrumentationScopeInfo().getName())
+                                .isEqualTo(InferredSpansProcessor.TRACER_NAME);
+                            assertThat(span.getInstrumentationScopeInfo().getVersion())
+                                .isNotBlank();
                           }));
     }
   }
