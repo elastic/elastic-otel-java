@@ -44,16 +44,7 @@ public class InferredSpansProcessor implements SpanProcessor {
 
   public static final String TRACER_NAME = "elastic-inferred-spans";
 
-  private static final String TRACER_VERSION = readTracerVersion();
-
-  private static String readTracerVersion() {
-    try (InputStream is =
-        InferredSpansProcessor.class.getResourceAsStream("inferred-spans-version.txt")) {
-      return new BufferedReader(new InputStreamReader(is)).readLine();
-    } catch (IOException e) {
-      throw new IllegalStateException("Failed to read version", e);
-    }
-  }
+  private static final String TRACER_VERSION = readInferredSpansVersion();
 
   // Visible for testing
   final SamplingProfiler profiler;
@@ -130,5 +121,14 @@ public class InferredSpansProcessor implements SpanProcessor {
       }
     }
     return tracer;
+  }
+
+  private static String readInferredSpansVersion() {
+    try (InputStream is =
+        InferredSpansProcessor.class.getResourceAsStream("inferred-spans-version.txt")) {
+      return new BufferedReader(new InputStreamReader(is)).readLine();
+    } catch (IOException e) {
+      throw new IllegalStateException("Failed to read version", e);
+    }
   }
 }
