@@ -82,7 +82,18 @@ public class ChainingSpanProcessorAutoConfigurationTest {
         (props, registerer) ->
             registerer.register(
                 next -> {
-                  chainingProcessor.set(new AbstractSimpleChainingSpanProcessor(next) {});
+                  chainingProcessor.set(
+                      new AbstractSimpleChainingSpanProcessor(next) {
+                        @Override
+                        protected boolean requiresEnd() {
+                          return false;
+                        }
+
+                        @Override
+                        protected boolean requiresStart() {
+                          return false;
+                        }
+                      });
                   return chainingProcessor.get();
                 });
 
@@ -143,6 +154,11 @@ public class ChainingSpanProcessorAutoConfigurationTest {
                     }
 
                     @Override
+                    protected boolean requiresStart() {
+                      return true;
+                    }
+
+                    @Override
                     protected ReadableSpan doOnEnd(ReadableSpan readableSpan) {
                       int cnt = endCountA.incrementAndGet();
                       assertionCollector.collect(
@@ -152,6 +168,11 @@ public class ChainingSpanProcessorAutoConfigurationTest {
                             assertThat(AutoConfiguredDataCapture.getSpans()).hasSize(cnt - 1);
                           });
                       return readableSpan;
+                    }
+
+                    @Override
+                    protected boolean requiresEnd() {
+                      return true;
                     }
                   },
               ChainingSpanProcessorRegisterer.ORDER_FIRST);
@@ -170,6 +191,11 @@ public class ChainingSpanProcessorAutoConfigurationTest {
                     }
 
                     @Override
+                    protected boolean requiresStart() {
+                      return true;
+                    }
+
+                    @Override
                     protected ReadableSpan doOnEnd(ReadableSpan readableSpan) {
                       int cnt = endCountC.incrementAndGet();
                       assertionCollector.collect(
@@ -179,6 +205,11 @@ public class ChainingSpanProcessorAutoConfigurationTest {
                             assertThat(AutoConfiguredDataCapture.getSpans()).hasSize(cnt - 1);
                           });
                       return readableSpan;
+                    }
+
+                    @Override
+                    protected boolean requiresEnd() {
+                      return true;
                     }
                   },
               ChainingSpanProcessorRegisterer.ORDER_LAST);
@@ -200,6 +231,11 @@ public class ChainingSpanProcessorAutoConfigurationTest {
                     }
 
                     @Override
+                    protected boolean requiresStart() {
+                      return true;
+                    }
+
+                    @Override
                     protected ReadableSpan doOnEnd(ReadableSpan readableSpan) {
                       int cnt = endCountB.incrementAndGet();
                       assertionCollector.collect(
@@ -209,6 +245,11 @@ public class ChainingSpanProcessorAutoConfigurationTest {
                             assertThat(AutoConfiguredDataCapture.getSpans()).hasSize(cnt - 1);
                           });
                       return readableSpan;
+                    }
+
+                    @Override
+                    protected boolean requiresEnd() {
+                      return true;
                     }
                   },
               ChainingSpanProcessorRegisterer.ORDER_DEFAULT);
