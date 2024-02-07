@@ -18,7 +18,7 @@
  */
 package co.elastic.otel;
 
-import static co.elastic.otel.UniversalProfilingProcessor.TLS_STORAGE_SIZE;
+import static co.elastic.otel.ProfilerSharedMemoryWriter.TLS_STORAGE_SIZE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import co.elastic.otel.testing.MapGetter;
@@ -30,19 +30,30 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.SpanProcessor;
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.semconv.ResourceAttributes;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
 @DisabledOnOs(OS.WINDOWS)
 public class UniversalProfilingProcessorTest {
+
+  private InMemorySpanExporter spans;
+
+  @BeforeEach
+  public void initSpanExporter() {
+    spans = InMemorySpanExporter.create();
+  }
 
   @Test
   public void testRemoteSpanIgnored() {
@@ -170,17 +181,18 @@ public class UniversalProfilingProcessorTest {
     }
   }
 
-  private static OpenTelemetrySdk initSdk() {
+  private OpenTelemetrySdk initSdk() {
     Resource res = Resource.builder().put(ResourceAttributes.SERVICE_NAME, "my-service").build();
     return initSdk(res);
   }
 
-  private static OpenTelemetrySdk initSdk(Resource res) {
+  private OpenTelemetrySdk initSdk(Resource res) {
+    SpanProcessor exporter = SimpleSpanProcessor.create(spans);
     return OpenTelemetrySdk.builder()
         .setTracerProvider(
             SdkTracerProvider.builder()
                 .addResource(res)
-                .addSpanProcessor(new UniversalProfilingProcessor(res))
+                .addSpanProcessor(UniversalProfilingProcessor.builder(exporter, res).build())
                 .build())
         .build();
   }

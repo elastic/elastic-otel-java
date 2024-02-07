@@ -142,8 +142,8 @@ public class UniversalProfilingCorrelation {
    * <p>The returned message is a singleton and will be reused on subsequent invocations. Therefore,
    * the return value only remains valid until the next call of this method.
    *
-   * @throws DecodeException if anything went wrong decoding the current message. This exception
-   *     indicates that the call can be retried to fetch the next message.
+   * @throws DecodeException if anything went wrong decoding the current message. This
+   *     exception indicates that the call can be retried to fetch the next message.
    */
   @Nullable
   public static synchronized ProfilerMessage readProfilerReturnChannelMessage()
