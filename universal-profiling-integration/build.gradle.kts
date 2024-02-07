@@ -25,4 +25,5 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation(libs.assertj.core)
+  testImplementation(libs.awaitility)
 }
