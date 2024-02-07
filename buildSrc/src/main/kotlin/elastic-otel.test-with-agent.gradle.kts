@@ -9,8 +9,8 @@ dependencies {
   testImplementation("io.opentelemetry.javaagent:opentelemetry-testing-common")
 }
 
-tasks.test {
-  dependsOn(":testing:agent-for-testing:assemble")
+tasks.withType<Test>() {
+  dependsOn(agentForTesting)
   useJUnitPlatform()
   jvmArgs("-javaagent:${agentForTesting.singleFile.absoluteFile}")
 }

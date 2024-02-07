@@ -123,7 +123,7 @@ tasks {
     }
   }
 
-  assemble {
+  jar {
     dependsOn(shadowJar)
   }
 }
