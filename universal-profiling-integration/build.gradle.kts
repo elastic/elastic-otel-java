@@ -15,7 +15,7 @@ dependencies {
   implementation(project(":jvmti-access"))
   implementation(project(":common"))
   implementation("io.opentelemetry.semconv:opentelemetry-semconv")
-
+  implementation(libs.disruptor)
 
   compileOnly("io.opentelemetry:opentelemetry-sdk")
   compileOnly(libs.findbugs.jsr305)

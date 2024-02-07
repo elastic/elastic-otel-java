@@ -50,6 +50,7 @@ logback = "ch.qos.logback:logback-classic:1.4.14"
 jackson = "com.fasterxml.jackson.core:jackson-databind:2.16.0"
 protobuf-util = "com.google.protobuf:protobuf-java-util:3.25.2"
 mockito = "org.mockito:mockito-core:5.10.0"
+disruptor = "com.lmax:disruptor:3.4.4"
 
 junitBom = { group = "org.junit", name = "junit-bom", version.ref = "junit" }
 

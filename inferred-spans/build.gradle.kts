@@ -8,7 +8,7 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-sdk")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   compileOnly(libs.findbugs.jsr305)
-  implementation("com.lmax:disruptor:3.4.4")
+  implementation(libs.disruptor)
   implementation("org.jctools:jctools-core:4.0.1")
   implementation(project(":common"))
 
