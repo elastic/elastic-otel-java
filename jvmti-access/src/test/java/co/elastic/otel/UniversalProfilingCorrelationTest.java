@@ -209,7 +209,7 @@ public class UniversalProfilingCorrelationTest {
         name.append("abc");
       }
       assertThatThrownBy(
-              () -> UniversalProfilingCorrelation.startProfilerReturnChannel(name.toString()))
+          () -> UniversalProfilingCorrelation.startProfilerReturnChannel(name.toString()))
           .isInstanceOf(RuntimeException.class)
           .hasMessageContaining("filepath");
     }
@@ -298,9 +298,9 @@ public class UniversalProfilingCorrelationTest {
 
       byte[] traceId = new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
       byte[] rootSpanId = new byte[] {17, 18, 19, 20, 21, 22, 23, 24};
-      byte[] sampleId = new byte[] {25, 26, 27, 28, 29, 30, 31, 32};
+      byte[] sampleId = new byte[] {25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40};
 
-      ByteBuffer dummyMessage = ByteBuffer.allocate(38);
+      ByteBuffer dummyMessage = ByteBuffer.allocate(46);
       dummyMessage.order(ByteOrder.nativeOrder());
       dummyMessage.putShort((short) 1); // message-type
       dummyMessage.putShort((short) 1); // message-version

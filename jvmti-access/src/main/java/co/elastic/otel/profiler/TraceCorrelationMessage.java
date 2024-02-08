@@ -25,7 +25,7 @@ public class TraceCorrelationMessage implements ProfilerMessage {
   static final int TYPE_ID = 1;
   final byte[] traceId = new byte[16];
   final byte[] localRootSpanId = new byte[8];
-  final byte[] stackTraceId = new byte[8];
+  final byte[] stackTraceId = new byte[16];
   int sampleCount;
 
   /**
