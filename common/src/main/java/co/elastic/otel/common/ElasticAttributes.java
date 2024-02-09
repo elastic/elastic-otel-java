@@ -36,8 +36,8 @@ public interface ElasticAttributes {
   /** Used as marker on span-links to override the parent-child relationship for inferred spans. */
   AttributeKey<Boolean> IS_CHILD = AttributeKey.booleanKey("elastic.is_child");
 
-  AttributeKey<List<String>> PROFILER_STACK_TRACE_IDS = AttributeKey.stringArrayKey(
-      "elastic.profiler_stack_trace_ids");
+  AttributeKey<List<String>> PROFILER_STACK_TRACE_IDS =
+      AttributeKey.stringArrayKey("elastic.profiler_stack_trace_ids");
 
   // TODO : replace this with semantic conventions v1.24.0 equivalent once released
   AttributeKey<String> SPAN_STACKTRACE = AttributeKey.stringKey("code.stacktrace");

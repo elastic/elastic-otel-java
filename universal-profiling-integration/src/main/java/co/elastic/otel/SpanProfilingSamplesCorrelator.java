@@ -1,3 +1,21 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.otel;
 
 import co.elastic.otel.common.ElasticAttributes;
@@ -20,10 +38,11 @@ import java.util.logging.Logger;
 
 public class SpanProfilingSamplesCorrelator {
 
-  private static final Logger logger = Logger.getLogger(
-      SpanProfilingSamplesCorrelator.class.getName());
+  private static final Logger logger =
+      Logger.getLogger(SpanProfilingSamplesCorrelator.class.getName());
 
-  private static final SpanValue<FreezableList<String>> profilerStackTraceIds = SpanValue.createSparse();
+  private static final SpanValue<FreezableList<String>> profilerStackTraceIds =
+      SpanValue.createSparse();
 
   private final SpanByIdSet spansById = new SpanByIdSet();
 
@@ -43,8 +62,7 @@ public class SpanProfilingSamplesCorrelator {
       int bufferCapacity,
       LongSupplier nanoClock,
       long spanDelayNanos,
-      Consumer<ReadableSpan> sendSpan
-  ) {
+      Consumer<ReadableSpan> sendSpan) {
     this.nanoClock = nanoClock;
     this.spanDelayNanos = spanDelayNanos;
     this.sendSpan = sendSpan;
@@ -52,8 +70,9 @@ public class SpanProfilingSamplesCorrelator {
     bufferCapacity = nextPowerOf2(bufferCapacity);
     // We use a wait strategy which doesn't involve signaling via condition variables
     // because we never block anyway (we use polling)
-    delayedSpans = RingBuffer.createMultiProducer(DelayedSpan::new, bufferCapacity,
-        new YieldingWaitStrategy());
+    delayedSpans =
+        RingBuffer.createMultiProducer(
+            DelayedSpan::new, bufferCapacity, new YieldingWaitStrategy());
     EventPoller<DelayedSpan> nonPeekingPoller = delayedSpans.newPoller();
     delayedSpans.addGatingSequences(nonPeekingPoller.getSequence());
 
@@ -63,7 +82,6 @@ public class SpanProfilingSamplesCorrelator {
   public void onSpanStart(ReadableSpan span, Context parentCtx) {
     boolean sampled = span.getSpanContext().getTraceFlags().isSampled();
     boolean isLocalRoot = LocalRootSpan.getFor(span) == span;
-
     if (sampled && isLocalRoot) {
       spansById.add(span);
     }
@@ -83,13 +101,18 @@ public class SpanProfilingSamplesCorrelator {
         return;
       }
 
-      boolean couldPublish = delayedSpans.tryPublishEvent((event, idx, sp, timestamp) -> {
-        event.span = sp;
-        event.endNanoTimestamp = timestamp;
-      }, span, nanoClock.getAsLong());
+      boolean couldPublish =
+          delayedSpans.tryPublishEvent(
+              (event, idx, sp, timestamp) -> {
+                event.span = sp;
+                event.endNanoTimestamp = timestamp;
+              },
+              span,
+              nanoClock.getAsLong());
 
       if (!couldPublish) {
-        logger.log(Level.WARNING,
+        logger.log(
+            Level.WARNING,
             "The following span could not be delayed for correlation due to a full buffer, it will be sent immediately, {0}",
             span);
         correlateAndSendSpan(span);
@@ -97,11 +120,10 @@ public class SpanProfilingSamplesCorrelator {
     } finally {
       publishExitCounter.incrementAndGet();
     }
-
   }
 
-  public void correlate(String traceId, String localRootSpanId, CharSequence stackTraceId,
-      int count) {
+  public void correlate(
+      String traceId, String localRootSpanId, CharSequence stackTraceId, int count) {
     ReadableSpan span = spansById.get(traceId, localRootSpanId);
     if (span != null) {
       FreezableList<String> list = profilerStackTraceIds.computeIfNull(span, FreezableList::new);
@@ -114,15 +136,16 @@ public class SpanProfilingSamplesCorrelator {
 
   public synchronized void flushPendingDelayedSpans() {
     try {
-      delayedSpansPoller.poll(delayedSpan -> {
-        long elapsed = nanoClock.getAsLong() - delayedSpan.endNanoTimestamp;
-        if (elapsed >= spanDelayNanos) {
-          return false; //span is not yet ready to be sent
-        }
-        correlateAndSendSpan(delayedSpan.span);
-        delayedSpan.clear();
-        return true;
-      });
+      delayedSpansPoller.poll(
+          delayedSpan -> {
+            long elapsed = nanoClock.getAsLong() - delayedSpan.endNanoTimestamp;
+            if (elapsed >= spanDelayNanos) {
+              correlateAndSendSpan(delayedSpan.span);
+              delayedSpan.clear();
+              return true;
+            }
+            return false; // span is not yet ready to be sent
+          });
     } catch (Exception e) {
       throw new IllegalStateException(e);
     }
@@ -130,7 +153,7 @@ public class SpanProfilingSamplesCorrelator {
   }
 
   public synchronized void shutdownAndFlushAll() {
-    spanDelayNanos = 0L; //This will cause spans to not be buffered anymore
+    spanDelayNanos = 0L; // This will cause new ended spans to not be buffered anymore
 
     // avoid race condition: we wait until we are
     // sure that no more spans will be added to the ringbuffer
@@ -138,7 +161,7 @@ public class SpanProfilingSamplesCorrelator {
     while (publishExitCounter.get() < waitFor) {
       Thread.yield();
     }
-    //every span is now pending because the desired delay is zero
+    // every span is now pending because the desired delay is zero
     flushPendingDelayedSpans();
   }
 
@@ -179,5 +202,4 @@ public class SpanProfilingSamplesCorrelator {
     }
     return result;
   }
-
 }

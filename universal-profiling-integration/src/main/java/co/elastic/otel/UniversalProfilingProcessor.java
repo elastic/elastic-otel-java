@@ -35,8 +35,12 @@ import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Base64;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -50,20 +54,25 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
 
   private static final Logger log = Logger.getLogger(UniversalProfilingProcessor.class.getName());
   private static final long POLL_FREQUENCY_MS = 20;
-
   private static boolean anyInstanceActive = false;
 
   private final SpanProfilingSamplesCorrelator correlator;
-
   private final ScheduledExecutorService messagePollAndSpanFlushExecutor;
+
+  // Visibile for testing
+  String socketPath;
+
+  public static UniversalProfilingProcessorBuilder builder(SpanProcessor next, Resource resource) {
+    return new UniversalProfilingProcessorBuilder(next, resource);
+  }
 
   UniversalProfilingProcessor(
       SpanProcessor next,
       Resource serviceResource,
       int bufferSize,
       Duration spanDelay,
-      LongSupplier nanoClock
-  ) {
+      String socketDir,
+      LongSupplier nanoClock) {
     super(next);
     synchronized (UniversalProfilingProcessor.class) {
       if (anyInstanceActive) {
@@ -71,30 +80,61 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
             "Another instance has already been started and not stopped yet."
                 + " There must be at most one processor of this type active at a time!");
       }
+
+      correlator =
+          new SpanProfilingSamplesCorrelator(
+              bufferSize, nanoClock, spanDelay.toNanos(), this.next::onEnd);
+
+      socketPath = openProfilerSocket(socketDir);
+      try {
+        ByteBuffer buff =
+            ProfilerSharedMemoryWriter.generateProcessCorrelationStorage(
+                serviceResource, socketPath);
+        UniversalProfilingCorrelation.setProcessStorage(buff);
+
+        ThreadFactory threadFac =
+            ExecutorUtils.threadFactory("elastic-profiler-correlation-", true);
+        messagePollAndSpanFlushExecutor = Executors.newSingleThreadScheduledExecutor(threadFac);
+        messagePollAndSpanFlushExecutor.scheduleWithFixedDelay(
+            this::pollMessageAndFlushPendingSpans,
+            POLL_FREQUENCY_MS,
+            POLL_FREQUENCY_MS,
+            TimeUnit.MILLISECONDS);
+
+        ActivationListener.setProcessor(this);
+      } catch (Exception e) {
+        UniversalProfilingCorrelation.stopProfilerReturnChannel();
+        throw e;
+      }
       anyInstanceActive = true;
     }
-
-    correlator = new SpanProfilingSamplesCorrelator(
-        bufferSize,
-        nanoClock,
-        spanDelay.toNanos(),
-        this.next::onEnd
-    );
-
-    ByteBuffer buff = ProfilerSharedMemoryWriter
-        .generateProcessCorrelationStorage(serviceResource, "");
-    UniversalProfilingCorrelation.setProcessStorage(buff);
-    ActivationListener.setProcessor(this);
-
-    ThreadFactory threadFac = ExecutorUtils.threadFactory("elastic-profiler-correlation-", true);
-    messagePollAndSpanFlushExecutor = Executors.newSingleThreadScheduledExecutor(threadFac);
-    messagePollAndSpanFlushExecutor.scheduleWithFixedDelay(this::pollMessageAndFlushPendingSpans,
-        POLL_FREQUENCY_MS, POLL_FREQUENCY_MS, TimeUnit.MILLISECONDS);
-
   }
 
-  public static UniversalProfilingProcessorBuilder builder(SpanProcessor next, Resource resource) {
-    return new UniversalProfilingProcessorBuilder(next, resource);
+  private String openProfilerSocket(String socketDir) {
+    Path dir = Paths.get(socketDir);
+    if (!Files.exists(dir) && !dir.toFile().mkdirs()) {
+      throw new IllegalArgumentException("Could not create directory '" + socketDir + "'");
+    }
+    Path socketFile;
+    do {
+      socketFile = dir.resolve(randomSocketFileName());
+    } while (Files.exists(socketFile));
+
+    String absolutePath = socketFile.toAbsolutePath().toString();
+    log.log(Level.FINE, "Opening profiler correlation socket '{0}'", absolutePath);
+    UniversalProfilingCorrelation.startProfilerReturnChannel(absolutePath);
+    return absolutePath;
+  }
+
+  private String randomSocketFileName() {
+    StringBuilder name = new StringBuilder("essock");
+    String allowedChars = "abcdefghijklmonpqrstuvwxzyABCDEFGHIJKLMONPQRSTUVWXYZ0123456789";
+    Random rnd = new Random();
+    for (int i = 0; i < 8; i++) {
+      int idx = rnd.nextInt(allowedChars.length());
+      name.append(allowedChars.charAt(idx));
+    }
+    return name.toString();
   }
 
   @Override
@@ -108,20 +148,25 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
     correlator.sendOrBufferSpan(readableSpan);
   }
 
-
   @Override
   protected CompletableResultCode doShutdown() {
-    ActivationListener.setProcessor(null);
-    UniversalProfilingCorrelation.reset();
-    anyInstanceActive = false;
-    messagePollAndSpanFlushExecutor.shutdown();
     try {
-      messagePollAndSpanFlushExecutor.awaitTermination(10, TimeUnit.SECONDS);
-    } catch (InterruptedException e) {
-      log.log(Level.WARNING, "Could not wait for executor termination", e);
+      ActivationListener.setProcessor(null);
+      UniversalProfilingCorrelation.reset();
+      anyInstanceActive = false;
+      messagePollAndSpanFlushExecutor.shutdown();
+      try {
+        messagePollAndSpanFlushExecutor.awaitTermination(10, TimeUnit.SECONDS);
+      } catch (InterruptedException e) {
+        log.log(Level.WARNING, "Could not wait for executor termination", e);
+      }
+      // Consume remaining messages
+      consumeProfilerMessages();
+      correlator.shutdownAndFlushAll();
+      return CompletableResultCode.ofSuccess();
+    } finally {
+      UniversalProfilingCorrelation.stopProfilerReturnChannel();
     }
-    correlator.shutdownAndFlushAll();
-    return CompletableResultCode.ofSuccess();
   }
 
   @Override
@@ -154,7 +199,8 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
     return Span.fromContext(context);
   }
 
-  private synchronized void pollMessageAndFlushPendingSpans() {
+  // visible for testing
+  synchronized void pollMessageAndFlushPendingSpans() {
     // Order is important: we only want to flush spans after we have consumed all pending messages
     // otherwise the data for the spans to be flushed might be incomplete
     consumeProfilerMessages();
@@ -163,20 +209,25 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
 
   private void consumeProfilerMessages() {
     StringBuilder tempBuffer = new StringBuilder();
-    while (true) {
-      try {
-        ProfilerMessage message = UniversalProfilingCorrelation.readProfilerReturnChannelMessage();
-        if (message == null) {
-          break;
-        } else if (message instanceof TraceCorrelationMessage) {
-          handleMessage((TraceCorrelationMessage) message, tempBuffer);
+    try {
+      while (true) {
+        try {
+          ProfilerMessage message =
+              UniversalProfilingCorrelation.readProfilerReturnChannelMessage();
+          if (message == null) {
+            break;
+          } else if (message instanceof TraceCorrelationMessage) {
+            handleMessage((TraceCorrelationMessage) message, tempBuffer);
+          } else {
+            log.log(Level.FINE, "Received unknown message type from profiler: {0}", message);
+          }
+        } catch (DecodeException e) {
+          log.log(Level.WARNING, "Failed to read profiler message", e);
+          // intentionally no
         }
-      } catch (DecodeException e) {
-        log.log(Level.WARNING, "Failed to read profiler message", e);
-      } catch (Exception e) {
-        log.log(Level.SEVERE, "Cannot read from profiler socket", e);
-        break;
       }
+    } catch (Exception e) {
+      log.log(Level.SEVERE, "Cannot read from profiler socket", e);
     }
   }
 
@@ -189,10 +240,10 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
     HexUtils.appendAsHex(message.getLocalRootSpanId(), tempBuffer);
     String localRootSpanId = tempBuffer.toString();
 
-    String stackTraceId = Base64.getUrlEncoder().encodeToString(message.getStackTraceId());
+    String stackTraceId =
+        Base64.getUrlEncoder().withoutPadding().encodeToString(message.getStackTraceId());
     correlator.correlate(traceId, localRootSpanId, stackTraceId, message.getSampleCount());
   }
-
 
   private static class ActivationListener implements ContextStorage {
 
