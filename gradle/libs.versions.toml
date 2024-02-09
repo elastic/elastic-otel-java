@@ -56,12 +56,12 @@ junitBom = { group = "org.junit", name = "junit-bom", version.ref = "junit" }
 okhttp = "com.squareup.okhttp3:okhttp:4.12.0"
 
 spotlessPlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
+shadowPlugin = { group = "com.github.johnrengelman", name = "shadow", version.ref = "shadow" }
 
 [bundles]
 
 [plugins]
 
-shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
 jib = { id = "com.google.cloud.tools.jib", version.ref = "jib" }
 spotless = { id = "com.diffplug.spotless:spotless", version.ref = "spotless" }
 taskinfo = { id = "org.barfuin.gradle.taskinfo", version = '2.2.0' }
