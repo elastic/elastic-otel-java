@@ -11,26 +11,19 @@ This project is the Elastic distribution of OpenTelemetry Java agent.
 Execute `gradle assemble`, the agent binary will be in `./agent/build/libs/elastic-otel-javaagent-${VERSION}.jar`
 where `${VERSION}` is the current project version.
 
-### Project structure
-
-- `agent`: packaged java agent
-- `bootstrap`: for classes that are injected into bootstrap CL (currently empty)
-- `custom`: distribution specific code
-- `instrumentation`: distribution specific instrumentations (currently empty)
-- `smoke-tests`: smoke tests
-
 ## Run
 
 Use the `-javaagent:` JVM argument with the path to agent jar.
 
-  ```bash
-  java -javaagent:/path/to/agent.jar \
-  -jar myapp.jar
-     ```
+```bash
+java -javaagent:/path/to/agent.jar \
+-jar myapp.jar
+```
 
 ## Setup
 
 Breakdown metrics currently require a custom Elasticsearch ingest pipeline
+
 ```
 PUT _ingest/pipeline/metrics-apm.app@custom
 {
@@ -73,9 +66,6 @@ if(ctx.numeric_labels != null && ctx.numeric_labels.elastic_span_self_time != nu
   ]
 }
 ```
-
-# Extending your own OpenTelemetry SDK
-TODO
 
 # License
 
