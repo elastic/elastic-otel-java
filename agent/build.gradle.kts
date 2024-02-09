@@ -26,9 +26,9 @@ tasks {
 
     //TODO: The agent-for-testing should also use our custom entrypoint
     manifest {
-      attributes.put("Main-Class", "co.elastic.otel.agent.ElasticAgent")
-      attributes.put("Agent-Class", "co.elastic.otel.agent.ElasticAgent")
-      attributes.put("Premain-Class", "co.elastic.otel.agent.ElasticAgent")
+      attributes["Main-Class"] = "co.elastic.otel.agent.ElasticAgent"
+      attributes["Agent-Class"] = "co.elastic.otel.agent.ElasticAgent"
+      attributes["Premain-Class"] = "co.elastic.otel.agent.ElasticAgent"
     }
   }
 
