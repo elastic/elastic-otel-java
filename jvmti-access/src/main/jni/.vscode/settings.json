@@ -71,6 +71,7 @@
         "variant": "cpp",
         "vector": "cpp",
         "algorithm": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "__verbose_abort": "cpp"
     }
 }
