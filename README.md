@@ -67,9 +67,6 @@ if(ctx.numeric_labels != null && ctx.numeric_labels.elastic_span_self_time != nu
 }
 ```
 
-# Extending your own OpenTelemetry SDK
-TODO
-
 # License
 
 Elastic Otel Java Distribution is licensed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.html).
