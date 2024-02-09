@@ -11,14 +11,6 @@ This project is the Elastic distribution of OpenTelemetry Java agent.
 Execute `gradle assemble`, the agent binary will be in `./agent/build/libs/elastic-otel-javaagent-${VERSION}.jar`
 where `${VERSION}` is the current project version.
 
-### Project structure
-
-- `agent`: packaged java agent
-- `bootstrap`: for classes that are injected into bootstrap CL (currently empty)
-- `custom`: distribution specific code
-- `instrumentation`: distribution specific instrumentations (currently empty)
-- `smoke-tests`: smoke tests
-
 ## Run
 
 Use the `-javaagent:` JVM argument with the path to agent jar.
