@@ -24,15 +24,19 @@ public class MessageDecoder {
   private final TraceCorrelationMessage traceCorrelationMessage = new TraceCorrelationMessage();
   private final UnknownMessage unknownMessage = new UnknownMessage();
 
-  public ProfilerMessage decode(ByteBuffer data) {
-    int messageType = data.getShort();
-    data.getShort(); // message version, not used currently
-    switch (messageType) {
-      case TraceCorrelationMessage.TYPE_ID:
-        return decode(traceCorrelationMessage, data);
-      default:
-        unknownMessage.messageType = messageType;
-        return unknownMessage;
+  public ProfilerMessage decode(ByteBuffer data) throws DecodeException {
+    try {
+      int messageType = data.getShort();
+      data.getShort(); // message version, not used currently
+      switch (messageType) {
+        case TraceCorrelationMessage.TYPE_ID:
+          return decode(traceCorrelationMessage, data);
+        default:
+          unknownMessage.messageType = messageType;
+          return unknownMessage;
+      }
+    } catch (Exception e) {
+      throw new DecodeException("Failed to decode message", e);
     }
   }
 

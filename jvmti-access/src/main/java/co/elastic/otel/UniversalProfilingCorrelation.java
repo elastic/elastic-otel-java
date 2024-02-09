@@ -18,6 +18,7 @@
  */
 package co.elastic.otel;
 
+import co.elastic.otel.profiler.DecodeException;
 import co.elastic.otel.profiler.MessageDecoder;
 import co.elastic.otel.profiler.ProfilerMessage;
 import java.lang.invoke.MethodHandle;
@@ -37,10 +38,11 @@ public class UniversalProfilingCorrelation {
   // We hold a reference to the configured processStorage to make sure it is not GCed
   private static ByteBuffer processStorage;
 
-  private static final ByteBuffer messageBuffer = ByteBuffer.allocateDirect(1024);
+  private static final ByteBuffer messageBuffer;
   private static final MessageDecoder messageDecoder = new MessageDecoder();
 
   static {
+    messageBuffer = ByteBuffer.allocateDirect(1024);
     messageBuffer.order(ByteOrder.nativeOrder());
     reset();
   }
@@ -139,9 +141,13 @@ public class UniversalProfilingCorrelation {
    *
    * <p>The returned message is a singleton and will be reused on subsequent invocations. Therefore,
    * the return value only remains valid until the next call of this method.
+   *
+   * @throws DecodeException if anything went wrong decoding the current message. This exception
+   *     indicates that the call can be retried to fetch the next message.
    */
   @Nullable
-  public static synchronized ProfilerMessage readProfilerReturnChannelMessage() {
+  public static synchronized ProfilerMessage readProfilerReturnChannelMessage()
+      throws DecodeException {
     if (readProfilerReturnChannelMessageBytes(messageBuffer)) {
       return messageDecoder.decode(messageBuffer);
     }

@@ -22,11 +22,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 
+import co.elastic.otel.profiler.DecodeException;
 import co.elastic.otel.profiler.ProfilerMessage;
 import co.elastic.otel.profiler.TraceCorrelationMessage;
 import co.elastic.otel.profiler.UnknownMessage;
 import java.lang.ref.WeakReference;
-import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
@@ -273,7 +273,7 @@ public class UniversalProfilingCorrelationTest {
     }
 
     @Test
-    public void receiveUnknownMessage(@TempDir Path tempDir) {
+    public void receiveUnknownMessage(@TempDir Path tempDir) throws Exception {
       String socketFile = tempDir.resolve("socketfile").toAbsolutePath().toString();
       UniversalProfilingCorrelation.startProfilerReturnChannel(socketFile);
 
@@ -292,7 +292,7 @@ public class UniversalProfilingCorrelationTest {
     }
 
     @Test
-    public void receiveTraceCorrelationMessage(@TempDir Path tempDir) {
+    public void receiveTraceCorrelationMessage(@TempDir Path tempDir) throws Exception {
       String socketFile = tempDir.resolve("socketfile").toAbsolutePath().toString();
       UniversalProfilingCorrelation.startProfilerReturnChannel(socketFile);
 
@@ -324,7 +324,7 @@ public class UniversalProfilingCorrelationTest {
     }
 
     @Test
-    public void decodeTruncatedMessage(@TempDir Path tempDir) {
+    public void decodeTruncatedMessage(@TempDir Path tempDir) throws Exception {
       String socketFile = tempDir.resolve("socketfile").toAbsolutePath().toString();
       UniversalProfilingCorrelation.startProfilerReturnChannel(socketFile);
 
@@ -337,7 +337,7 @@ public class UniversalProfilingCorrelationTest {
       JvmtiAccessImpl.sendToProfilerReturnChannelSocket0(dummyMessage.array());
 
       assertThatThrownBy(UniversalProfilingCorrelation::readProfilerReturnChannelMessage)
-          .isInstanceOf(BufferUnderflowException.class);
+          .isInstanceOf(DecodeException.class);
 
       assertThat(UniversalProfilingCorrelation.readProfilerReturnChannelMessage()).isNull();
     }
