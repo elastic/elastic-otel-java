@@ -23,14 +23,15 @@ where `${VERSION}` is the current project version.
 
 Use the `-javaagent:` JVM argument with the path to agent jar.
 
-  ```bash
-  java -javaagent:/path/to/agent.jar \
-  -jar myapp.jar
-     ```
+```bash
+java -javaagent:/path/to/agent.jar \
+-jar myapp.jar
+```
 
 ## Setup
 
 Breakdown metrics currently require a custom Elasticsearch ingest pipeline
+
 ```
 PUT _ingest/pipeline/metrics-apm.app@custom
 {
