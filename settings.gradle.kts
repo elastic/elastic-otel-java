@@ -22,6 +22,10 @@ include("smoke-tests:test-app")
 include("smoke-tests:test-app-war")
 include("testing:agent-for-testing")
 include("jvmti-access")
+include("common")
+include("testing-common")
+include("universal-profiling-integration")
+include("testing:integration-tests:inferred-spans-test")
 
 dependencyResolutionManagement {
     versionCatalogs {
@@ -33,5 +37,3 @@ dependencyResolutionManagement {
         }
     }
 }
-include("common")
-include("testing-common")

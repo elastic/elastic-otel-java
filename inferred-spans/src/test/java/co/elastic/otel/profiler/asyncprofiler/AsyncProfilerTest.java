@@ -21,7 +21,7 @@ package co.elastic.otel.profiler.asyncprofiler;
 import static co.elastic.otel.profiler.asyncprofiler.AsyncProfiler.SAFEMODE_SYSTEM_PROPERTY_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import co.elastic.otel.profiler.util.DisabledOnAppleSilicon;
+import co.elastic.otel.testing.DisabledOnAppleSilicon;
 import java.io.File;
 import java.io.FilenameFilter;
 import org.junit.jupiter.api.BeforeEach;

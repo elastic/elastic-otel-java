@@ -18,6 +18,7 @@
  */
 package co.elastic.otel;
 
+import co.elastic.otel.common.ElasticAttributes;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
@@ -28,18 +29,15 @@ import java.io.StringWriter;
 
 public class ElasticSpanProcessor implements SpanProcessor {
 
-  private final ElasticProfiler profiler;
   private final ElasticBreakdownMetrics breakdownMetrics;
   private ElasticSpanExporter spanExporter;
 
-  public ElasticSpanProcessor(ElasticProfiler profiler, ElasticBreakdownMetrics breakdownMetrics) {
-    this.profiler = profiler;
+  public ElasticSpanProcessor(ElasticBreakdownMetrics breakdownMetrics) {
     this.breakdownMetrics = breakdownMetrics;
   }
 
   @Override
   public void onStart(Context parentContext, ReadWriteSpan span) {
-    profiler.onSpanStart(parentContext, span);
     breakdownMetrics.onSpanStart(parentContext, span);
   }
 
@@ -50,7 +48,6 @@ public class ElasticSpanProcessor implements SpanProcessor {
 
   @Override
   public void onEnd(ReadableSpan span) {
-    profiler.onSpanEnd(span);
     breakdownMetrics.onSpanEnd(span);
 
     captureStackTrace(span);
@@ -63,7 +60,6 @@ public class ElasticSpanProcessor implements SpanProcessor {
 
   @Override
   public CompletableResultCode shutdown() {
-    profiler.shutdown();
     return CompletableResultCode.ofSuccess();
   }
 

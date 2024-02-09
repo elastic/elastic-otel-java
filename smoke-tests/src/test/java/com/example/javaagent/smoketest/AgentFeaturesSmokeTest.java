@@ -23,9 +23,7 @@ import static org.assertj.core.api.Assertions.tuple;
 
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.trace.v1.Span;
-import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -64,84 +62,5 @@ class AgentFeaturesSmokeTest extends TestAppSmokeTest {
                   "elastic.span.self_time",
                   "code.stacktrace");
         });
-  }
-
-  @Test
-  void profiling1() throws IOException, InterruptedException {
-    profilingScenario(1, 3);
-  }
-
-  @Test
-  void profiling2() throws IOException, InterruptedException {
-    profilingScenario(2, 6);
-  }
-
-  @Test
-  void profiling3() throws IOException, InterruptedException {
-    profilingScenario(3, 10);
-  }
-
-  @Test
-  void profiling4() throws IOException, InterruptedException {
-    profilingScenario(4, 3);
-  }
-
-  private void profilingScenario(int id, int expectedRegularSpans)
-      throws IOException, InterruptedException {
-    List<Span> spans = profilingScenario(id);
-    Span rootSpan =
-        spans.stream()
-            .filter(span -> span.getKind().equals(Span.SpanKind.SPAN_KIND_SERVER))
-            .findFirst()
-            .orElseThrow();
-
-    assertThat(getAttributes(rootSpan.getAttributesList()))
-        .containsEntry("elastic.span.is_local_root", attributeValue(true))
-        .containsEntry(
-            "elastic.span.local_root.id",
-            attributeValue(bytesToHex(rootSpan.getSpanId().toByteArray())));
-
-    List<Span> inferred =
-        spans.stream().filter(span -> span.getName().startsWith("inferred")).toList();
-
-    inferred.forEach(
-        span -> {
-          assertThat(getAttributes(span.getAttributesList()))
-              .containsKey("elastic.span.inferred_samples");
-        });
-
-    List<Span> regularSpans =
-        spans.stream().filter(span -> !span.getName().startsWith("inferred")).toList();
-
-    assertThat(
-            regularSpans.stream()
-                .map(s -> s.getName() + " " + bytesToHex(s.getSpanId().toByteArray())))
-        .hasSize(expectedRegularSpans);
-
-    regularSpans.stream()
-        .filter(span -> !span.getSpanId().equals(rootSpan.getSpanId()))
-        .forEach(
-            span -> {
-              assertThat(getAttributes(span.getAttributesList()))
-                  .containsEntry("elastic.span.is_local_root", attributeValue(false))
-                  .containsEntry(
-                      "elastic.span.local_root.id",
-                      attributeValue(bytesToHex(rootSpan.getSpanId().toByteArray())));
-            });
-  }
-
-  private List<Span> profilingScenario(int id) {
-    doRequest(
-        getUrl("/profiling/scenario/" + id), okResponseBody(String.format("scenario %d OK", id)));
-
-    List<ExportTraceServiceRequest> traces = waitForTraces();
-    List<Span> spans = getSpans(traces).collect(Collectors.toList());
-    assertThat(spans)
-        .extracting("name", "kind")
-        .contains(
-            tuple("GET /profiling/scenario/{id}", Span.SpanKind.SPAN_KIND_SERVER),
-            tuple("ProfilingController.scenario", Span.SpanKind.SPAN_KIND_INTERNAL));
-
-    return spans;
   }
 }

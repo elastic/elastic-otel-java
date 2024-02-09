@@ -21,8 +21,9 @@ package co.elastic.otel.profiler;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static java.util.stream.Collectors.toMap;
 
+import co.elastic.otel.common.ElasticAttributes;
 import co.elastic.otel.profiler.pooling.ObjectPool;
-import co.elastic.otel.profiler.util.DisabledOnAppleSilicon;
+import co.elastic.otel.testing.DisabledOnAppleSilicon;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.Tracer;
@@ -936,7 +937,7 @@ class CallTreeTest {
             .describedAs("Unexpected duration for span %s", span)
             .isEqualTo(durationMs * 1_000_000L);
 
-        String actualStacktrace = span.getAttributes().get(CallTree.STACKTRACE_ATTRIBUTE_KEY);
+        String actualStacktrace = span.getAttributes().get(ElasticAttributes.SPAN_STACKTRACE);
         if (stackTrace == null || stackTrace.isEmpty()) {
           assertThat(actualStacktrace).isBlank();
         } else {
@@ -966,7 +967,7 @@ class CallTreeTest {
       return true;
     }
     for (LinkData link : parent.getLinks()) {
-      Boolean isChild = link.getAttributes().get(CallTree.IS_CHILD_ATTRIBUTE_KEY);
+      Boolean isChild = link.getAttributes().get(ElasticAttributes.IS_CHILD);
       if (isChild != null && isChild) {
         SpanContext linkSpanCtx = link.getSpanContext();
         if (linkSpanCtx.getTraceId().equals(expectedChild.getTraceId())

@@ -22,6 +22,7 @@ import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.asser
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.satisfies;
 import static org.mockito.Mockito.mock;
 
+import co.elastic.otel.common.ElasticAttributes;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -37,7 +38,7 @@ public class ElasticSpanProcessorTest {
 
   static {
     ElasticSpanProcessor elasticSpanProcessor =
-        new ElasticSpanProcessor(mock(ElasticProfiler.class), mock(ElasticBreakdownMetrics.class));
+        new ElasticSpanProcessor(mock(ElasticBreakdownMetrics.class));
 
     testExporter = InMemorySpanExporter.create();
     ElasticSpanExporter elasticSpanExporter = new ElasticSpanExporter(testExporter);

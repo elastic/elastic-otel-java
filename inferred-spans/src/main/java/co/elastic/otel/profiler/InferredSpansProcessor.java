@@ -27,7 +27,11 @@ import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SpanProcessor;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
@@ -39,6 +43,8 @@ public class InferredSpansProcessor implements SpanProcessor {
   private static final Logger logger = Logger.getLogger(InferredSpansProcessor.class.getName());
 
   public static final String TRACER_NAME = "elastic-inferred-spans";
+
+  private static final String TRACER_VERSION = readInferredSpansVersion();
 
   // Visible for testing
   final SamplingProfiler profiler;
@@ -66,7 +72,7 @@ public class InferredSpansProcessor implements SpanProcessor {
    *     lazily.
    */
   public synchronized void setTracerProvider(TracerProvider provider) {
-    tracer = provider.get(TRACER_NAME);
+    tracer = provider.get(TRACER_NAME, TRACER_VERSION);
   }
 
   @Override
@@ -115,5 +121,14 @@ public class InferredSpansProcessor implements SpanProcessor {
       }
     }
     return tracer;
+  }
+
+  private static String readInferredSpansVersion() {
+    try (InputStream is =
+        InferredSpansProcessor.class.getResourceAsStream("inferred-spans-version.txt")) {
+      return new BufferedReader(new InputStreamReader(is)).readLine();
+    } catch (IOException e) {
+      throw new IllegalStateException("Failed to read version", e);
+    }
   }
 }

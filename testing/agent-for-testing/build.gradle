@@ -1,5 +1,8 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
+//TODO: This file needs to be kept in sync with /agent/build.gradle manually at the moment
+// We should replace the builds with kotlin buildscripts and use a shared plugin in /buildSrc for the common logic
+
 plugins {
   alias(catalog.plugins.shadow)
 }
@@ -28,6 +31,8 @@ configurations {
 
 dependencies {
   bootstrapLibs(project(":bootstrap"))
+  javaagentLibs(project(":custom"))
+  javaagentLibs(project(":resources"))
   // and finally include everything from otel agent for testing
   upstreamAgent(catalog.opentelemetryJavaagentForTesting)
 }
@@ -118,7 +123,7 @@ tasks {
     }
   }
 
-  assemble {
+  jar {
     dependsOn(shadowJar)
   }
 }
