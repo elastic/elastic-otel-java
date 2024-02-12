@@ -5,7 +5,7 @@ plugins {
   id "idea"
   id "maven-publish"
   id "base" // required to get 'clean' task
-  id 'com.github.jk1.dependency-license-report' version '2.5'
+  alias(catalog.plugins.licenseReport)
   alias(catalog.plugins.nexusPublish)
 }
 
