@@ -27,6 +27,7 @@ import com.google.protobuf.util.JsonFormat;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
+import io.opentelemetry.proto.resource.v1.Resource;
 import io.opentelemetry.proto.trace.v1.ResourceSpans;
 import io.opentelemetry.proto.trace.v1.Span;
 import java.io.IOException;
@@ -118,6 +119,8 @@ abstract class SmokeTest {
             .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
             // batch span processor: very short delay for testing
             .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
+            // use grpc endpoint as default is now http/protobuf with agent 2.x
+            .withEnv("OTEL_EXPORTER_OTLP_PROTOCOL", "grpc")
             .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
             .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://backend:8080");
 
@@ -233,10 +236,19 @@ abstract class SmokeTest {
 
   protected static void checkTracesResources(
       ResourceAttributesCheck check, List<ExportTraceServiceRequest> traces) {
-    traces.stream()
-        .flatMap(t -> t.getResourceSpansList().stream())
-        .map(ResourceSpans::getResource)
-        .forEach(resource -> check.verify(assertThat(getAttributes(resource.getAttributesList()))));
+
+    assertThat(traces).describedAs("at least one exported trace expected").isNotEmpty();
+
+    List<Resource> resources =
+        traces.stream()
+            .flatMap(t -> t.getResourceSpansList().stream())
+            .map(ResourceSpans::getResource)
+            .collect(Collectors.toList());
+
+    assertThat(resources).describedAs("traces resources must not be empty").isNotEmpty();
+
+    resources.forEach(
+        resource -> check.verify(assertThat(getAttributes(resource.getAttributesList()))));
   }
 
   protected interface ResourceAttributesCheck {
@@ -308,13 +320,13 @@ abstract class SmokeTest {
     long previousSize = 0;
     long deadline = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(30);
     String content = "[]";
+
+    Request request =
+        new Request.Builder()
+            .url(String.format("http://localhost:%d/get-traces", backend.getMappedPort(8080)))
+            .build();
+
     while (System.currentTimeMillis() < deadline) {
-
-      Request request =
-          new Request.Builder()
-              .url(String.format("http://localhost:%d/get-traces", backend.getMappedPort(8080)))
-              .build();
-
       try (ResponseBody body = client.newCall(request).execute().body()) {
         content = body.string();
       } catch (IOException e) {

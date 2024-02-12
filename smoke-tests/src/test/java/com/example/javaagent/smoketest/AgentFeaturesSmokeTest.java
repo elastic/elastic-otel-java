@@ -47,11 +47,9 @@ class AgentFeaturesSmokeTest extends TestAppSmokeTest {
     List<ExportTraceServiceRequest> traces = waitForTraces();
     List<Span> spans = getSpans(traces).toList();
     assertThat(spans)
-        .hasSize(2)
+        .hasSize(1)
         .extracting("name", "kind")
-        .containsOnly(
-            tuple("GET /health", Span.SpanKind.SPAN_KIND_SERVER),
-            tuple("HealthController.healthcheck", Span.SpanKind.SPAN_KIND_INTERNAL));
+        .containsOnly(tuple("GET /health", Span.SpanKind.SPAN_KIND_SERVER));
 
     spans.forEach(
         span -> {
