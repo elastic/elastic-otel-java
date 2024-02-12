@@ -119,10 +119,9 @@ abstract class SmokeTest {
             .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
             // batch span processor: very short delay for testing
             .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
-            .withEnv("OTEL_EXPORTER_OTLP_PROTOCOL", "grpc")
-            .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
             // use grpc endpoint as default is now http/protobuf with agent 2.x
             .withEnv("OTEL_EXPORTER_OTLP_PROTOCOL", "grpc")
+            .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
             .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://backend:8080");
 
     StringBuilder jvmArgs = new StringBuilder();
