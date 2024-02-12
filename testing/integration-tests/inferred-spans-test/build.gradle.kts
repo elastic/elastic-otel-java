@@ -1,5 +1,5 @@
 plugins {
-    id("elastic-otel.test-with-agent-convention")
+    id("elastic-otel.test-with-agent-conventions")
 }
 
 dependencies {

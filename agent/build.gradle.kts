@@ -3,7 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
   id("maven-publish")
   id("signing")
-  id("elastic-otel.agent-packaging-convention")
+  id("elastic-otel.agent-packaging-conventions")
   alias(catalog.plugins.taskinfo)
 }
 
