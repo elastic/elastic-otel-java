@@ -1,5 +1,5 @@
 plugins {
-  alias(catalog.plugins.shadow)
+  id("com.github.johnrengelman.shadow")
   alias(catalog.plugins.jib)
   alias(catalog.plugins.taskinfo)
 }

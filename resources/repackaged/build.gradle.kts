@@ -1,6 +1,6 @@
 plugins {
   java
-  alias(catalog.plugins.shadow)
+  id("com.github.johnrengelman.shadow")
   alias(catalog.plugins.taskinfo)
 }
 
