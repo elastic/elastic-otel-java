@@ -1,10 +1,16 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.github.jengelman.gradle.plugins.shadow.transformers.TransformerContext
+import org.apache.tools.zip.ZipEntry
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.Opcodes
+import java.util.jar.JarFile
 
 plugins {
   id("java")
   id("com.github.johnrengelman.shadow")
 }
-
 
 // This plugin holds the logic of how the distribution is packaged into the final javaagent jar
 // This is used at two places: For packaging the actual agent and the agent-for-testing
@@ -51,6 +57,65 @@ fun relocatePackages( shadowJar : ShadowJar) {
   // by the instrumentation modules that use them
   shadowJar.relocate("io.opentelemetry.extension.aws", "io.opentelemetry.javaagent.shaded.io.opentelemetry.extension.aws")
   shadowJar.relocate("io.opentelemetry.extension.kotlin", "io.opentelemetry.javaagent.shaded.io.opentelemetry.extension.kotlin")
+}
+
+val injectSpanValueFieldTransformer = object: com.github.jengelman.gradle.plugins.shadow.transformers.Transformer {
+
+  @Internal
+  val SDK_SPAN_CLASS_FILE = "inst/io/opentelemetry/sdk/trace/SdkSpan.classdata"
+  @Internal
+  val FIELD_NAME = "\$elasticSpanValues"
+
+  @Internal
+  var bytecode : ByteArray? = null;
+
+  override fun getName(): String {
+    return "SpanValue field injector into Otel SdkSpan"
+  }
+
+  override fun canTransformResource(element: FileTreeElement): Boolean {
+    return element.name.equals(SDK_SPAN_CLASS_FILE)
+  }
+
+  override fun transform(context: TransformerContext) {
+    if(bytecode != null) {
+      throw IllegalStateException("Multiple SdkSpan classes detected")
+    }
+
+    val inputStream = context.getIs()
+    val reader = ClassReader(inputStream)
+    val writer = ClassWriter(reader, 0)
+    val visitor = object : ClassVisitor(Opcodes.ASM9, writer) {
+      override fun visitEnd() {
+        val flags = Opcodes.ACC_VOLATILE //package-private visibility
+        val fv = writer.visitField(flags , FIELD_NAME, "Ljava/lang/Object;", null ,null)
+        fv.visitEnd()
+        super.visitEnd()
+      }
+    }
+    reader.accept(visitor, 0);
+    bytecode = writer.toByteArray()
+    inputStream.close()
+  }
+
+  override fun hasTransformedResource(): Boolean {
+    return true;
+  }
+
+  override fun modifyOutputStream(
+    os: org.apache.tools.zip.ZipOutputStream,
+    preserveFileTimestamps: Boolean
+  ) {
+    if(bytecode == null) {
+      throw IllegalStateException("Failed to find SdkSpan class, was it moved? Searched for $SDK_SPAN_CLASS_FILE")
+    }
+
+    val entry = ZipEntry(SDK_SPAN_CLASS_FILE)
+    entry.time = TransformerContext.getEntryTimestamp(preserveFileTimestamps, entry.time)
+    os.putNextEntry(entry)
+    os.write(bytecode)
+  }
+
 }
 
 tasks {
@@ -121,6 +186,7 @@ tasks {
     }
     exclude("**/module-info.class")
     relocatePackages(this)
+    transform(injectSpanValueFieldTransformer)
 
     manifest {
       attributes["Main-Class"] = "io.opentelemetry.javaagent.OpenTelemetryAgent"

@@ -16,6 +16,8 @@ repositories {
 dependencies {
     implementation(catalog.spotlessPlugin)
     implementation(catalog.shadowPlugin)
+    implementation("org.apache.ant:ant:1.10.13")
+    implementation("org.ow2.asm:asm:9.6")
     // TODO : for now we have to disable it because it transitively imports an older apache httpclient
     // that makes the transitive one from jib fail see https://github.com/elastic/elastic-otel-java/issues/9 for details
     // implementation("io.opentelemetry.instrumentation:gradle-plugins:1.30.0-alpha-SNAPSHOT")

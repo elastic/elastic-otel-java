@@ -18,7 +18,6 @@
  */
 package co.elastic.otel.common;
 
-import com.blogspot.mydailyjava.weaklockfree.WeakConcurrentMap;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
@@ -74,23 +73,7 @@ public class SpanValue<V> {
   In this case we simply fall back to the Map at index zero for storage.
    */
 
-  private static final Class<?> SDK_SPAN_CLASS = getSdkSpanClass();
-
-  // TODO: When used in agent, replace map with a field injected into SdkSpan
-  // In our agent-distribution, we provide our own copy of the OTel-SDK
-  // This means we could at build time add a new field to the SdkSpanClass
-  // via the bytebuddy gradle plugin:
-  // private volatile AtomicReferenceArray<Object> $$elasticSpanValueStore = null
-  // As a result we could get entirely rid of this map in this case and just use the field for
-  // storage:
-  //  * Use a static final MethodHandle to read the field efficiently
-  //  * Use a AtomicReferenceFieldUpdater to safely initialize the field
-  // With this implementation, reading a dense SpanValue would be just a field access and a array
-  // lookup!
-  // In addition we wouldn't have a delayed garbage collection of values
-  // like we do when using the WeakConcurrentMap
-  private static final WeakConcurrentMap<Span, SpanValueStorage> storageMap =
-      WeakConcurrent.createMap();
+  private static final SpanValueStorageProvider storageProvider = SpanValueStorageProvider.get();
 
   /**
    * The index within the {@link SpanValueStorage} which is reserved for this particular SpanValue.
@@ -272,18 +255,12 @@ public class SpanValue<V> {
   @Nullable
   private static SpanValueStorage getStorage(Object span, boolean initialize) {
     Span unwrapped = unwrap(span);
-    SpanValueStorage storage = storageMap.get(unwrapped);
-    if (storage == null && initialize) {
-      storage = new SpanValueStorage();
-      storageMap.putIfAbsent(unwrapped, storage);
-      storage = storageMap.get(unwrapped);
-    }
-    return storage;
+    return storageProvider.get(unwrapped, initialize);
   }
 
   /** Provides the underlying {@link SdkSpan} instance in case the given span is wrapped. */
   private static Span unwrap(Object span) {
-    if (span.getClass() == SDK_SPAN_CLASS) {
+    if (span.getClass() == SpanValueStorageProvider.SDK_SPAN_CLASS) {
       if (!((Span) span).getSpanContext().isValid()) {
         throw new IllegalArgumentException("SpanValues don't work with invalid spans!");
       }
@@ -298,11 +275,4 @@ public class SpanValue<V> {
     throw new IllegalStateException("unknown span type: " + span.getClass().getName());
   }
 
-  private static Class<?> getSdkSpanClass() {
-    try {
-      return Class.forName("io.opentelemetry.sdk.trace.SdkSpan");
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException("Expected class to exist", e);
-    }
-  }
 }

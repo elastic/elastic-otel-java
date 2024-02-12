@@ -19,6 +19,7 @@
 package co.elastic.otel;
 
 import co.elastic.otel.common.ElasticAttributes;
+import co.elastic.otel.common.LocalRootSpan;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
@@ -38,6 +39,7 @@ public class ElasticSpanProcessor implements SpanProcessor {
 
   @Override
   public void onStart(Context parentContext, ReadWriteSpan span) {
+    LocalRootSpan.onSpanStart(span, parentContext);
     breakdownMetrics.onSpanStart(parentContext, span);
   }
 
