@@ -86,7 +86,7 @@ abstract class SmokeTest {
   static void setupSpec() {
     backend =
         new GenericContainer<>(
-            "ghcr.io/open-telemetry/opentelemetry-java-instrumentation/smoke-test-fake-backend:20221127.3559314891")
+                "ghcr.io/open-telemetry/opentelemetry-java-instrumentation/smoke-test-fake-backend:20221127.3559314891")
             .withExposedPorts(8080)
             .waitingFor(Wait.forHttp("/health").forPort(8080))
             .withNetwork(network)
@@ -168,8 +168,7 @@ abstract class SmokeTest {
   }
 
   protected static GenericContainer<?> startMockServer() {
-    return startMockServer((container) -> {
-    });
+    return startMockServer((container) -> {});
   }
 
   protected static GenericContainer<?> startMockServer(

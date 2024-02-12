@@ -32,8 +32,7 @@ class AgentFeaturesSmokeTest extends TestAppSmokeTest {
 
   @BeforeAll
   public static void start() {
-    startTestApp((container) -> {
-    });
+    startTestApp((container) -> {});
   }
 
   @AfterAll
@@ -50,8 +49,7 @@ class AgentFeaturesSmokeTest extends TestAppSmokeTest {
     assertThat(spans)
         .hasSize(1)
         .extracting("name", "kind")
-        .containsOnly(
-            tuple("GET /health", Span.SpanKind.SPAN_KIND_SERVER));
+        .containsOnly(tuple("GET /health", Span.SpanKind.SPAN_KIND_SERVER));
 
     spans.forEach(
         span -> {
