@@ -1,5 +1,5 @@
 #include "ElasticJvmtiAgent.h"
-
+#include "ProfilerSocket.h"
 
 // These two global variables have symbol names which will be recognized by
 // the elastic universal profiling host-agent. The host-agent will be able
@@ -12,9 +12,11 @@ namespace elastic
     namespace jvmti_agent
     {
 
-        ReturnCode destroy() {
+        static ProfilerSocket profilerSocket;
+
+        void destroy() {
             elastic_apm_profiling_correlation_process_storage_v1 = nullptr;
-            return ReturnCode::SUCCESS;
+            profilerSocket.destroy();
         }
 
         void setThreadProfilingCorrelationBuffer(JNIEnv* jniEnv, jobject bytebuffer) {
@@ -49,6 +51,23 @@ namespace elastic
             } else {
                 return jniEnv->NewDirectByteBuffer(elastic_apm_profiling_correlation_process_storage_v1, capacity);
             }
+        }
+
+        ReturnCode createProfilerSocket(JNIEnv* jniEnv, jstring filepath) {
+            return profilerSocket.openSocket(jniEnv, filepath);
+        }
+
+        ReturnCode closeProfilerSocket(JNIEnv* jniEnv) {
+            return profilerSocket.closeSocket(jniEnv);
+        }
+
+        jint readProfilerSocketMessage(JNIEnv* jniEnv, jobject outputBuffer) {
+            return profilerSocket.readMessage(jniEnv, outputBuffer);
+        }
+
+        //ONLY FOR TESTING!
+        ReturnCode writeProfilerSocketMessage(JNIEnv* jniEnv, jbyteArray message) {
+            return profilerSocket.writeMessage(jniEnv, message);
         }
 
     } // namespace jvmti_agent
