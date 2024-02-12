@@ -3,7 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
   id("maven-publish")
   id("signing")
-  id("elastic-otel.agent-packaging")
+  id("elastic-otel.agent-packaging-convention")
   alias(catalog.plugins.taskinfo)
 }
 
@@ -20,8 +20,7 @@ dependencies {
 
 tasks {
 
-  // 3. the relocated and isolated javaagent libs are merged together with the bootstrap libs (which undergo relocation
-  // in this task) and the upstream javaagent jar; duplicates are removed
+  // We override the agent entrypoints defined in elastic-otel.agent-packaging-convention
   shadowJar {
 
     //TODO: The agent-for-testing should also use our custom entrypoint

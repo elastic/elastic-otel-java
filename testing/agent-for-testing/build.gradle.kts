@@ -1,5 +1,5 @@
 plugins {
-  id("elastic-otel.agent-packaging")
+  id("elastic-otel.agent-packaging-convention")
 }
 
 dependencies {
