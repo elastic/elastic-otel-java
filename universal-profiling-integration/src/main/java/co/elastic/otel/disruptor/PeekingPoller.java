@@ -22,9 +22,9 @@ import com.lmax.disruptor.EventPoller;
 import java.util.function.Supplier;
 
 /**
- * Wrapper around {@link EventPoller} which allows to "peek" elements.
- * The provided event handling callback can decide to not handle an event.
- * In that case, the event will be provided again as first element on the next call to {@link #poll(Handler)}.
+ * Wrapper around {@link EventPoller} which allows to "peek" elements. The provided event handling
+ * callback can decide to not handle an event. In that case, the event will be provided again as
+ * first element on the next call to {@link #poll(Handler)}.
  */
 public class PeekingPoller<Event extends MoveableEvent<Event>> {
 

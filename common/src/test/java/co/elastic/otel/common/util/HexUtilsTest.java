@@ -49,5 +49,4 @@ public class HexUtilsTest {
 
     assertThat(result.toString()).isEqualTo("01abff");
   }
-
 }

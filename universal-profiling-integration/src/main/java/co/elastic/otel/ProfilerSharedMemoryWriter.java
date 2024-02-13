@@ -18,6 +18,7 @@
  */
 package co.elastic.otel;
 
+import co.elastic.otel.common.LocalRootSpan;
 import co.elastic.otel.common.util.HexUtils;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
@@ -26,8 +27,12 @@ import io.opentelemetry.semconv.ResourceAttributes;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ProfilerSharedMemoryWriter {
+
+  private static final Logger log = Logger.getLogger(ProfilerSharedMemoryWriter.class.getName());
 
   private static final int TLS_MINOR_VERSION_OFFSET = 0;
   private static final int TLS_VALID_OFFSET = 2;
@@ -94,12 +99,18 @@ public class ProfilerSharedMemoryWriter {
 
       SpanContext spanCtx = newSpan.getSpanContext();
       if (spanCtx.isValid() && !spanCtx.isRemote()) {
-        tls.put(TLS_TRACE_PRESENT_OFFSET, (byte) 1);
-        tls.put(TLS_TRACE_FLAGS_OFFSET, spanCtx.getTraceFlags().asByte());
-        HexUtils.writeHexAsBinary(spanCtx.getTraceId(), 0, tls, TLS_TRACE_ID_OFFSET, 16);
-        HexUtils.writeHexAsBinary(spanCtx.getSpanId(), 0, tls, TLS_SPAN_ID_OFFSET, 8);
-        // TODO: write local root span ID here
-        HexUtils.writeHexAsBinary("0000000000000000", 0, tls, TLS_LOCAL_ROOT_SPAN_ID_OFFSET, 8);
+        Span localRoot = LocalRootSpan.getFor(newSpan);
+        if (localRoot != null) {
+          String localRootSpanId = localRoot.getSpanContext().getSpanId();
+          tls.put(TLS_TRACE_PRESENT_OFFSET, (byte) 1);
+          tls.put(TLS_TRACE_FLAGS_OFFSET, spanCtx.getTraceFlags().asByte());
+          HexUtils.writeHexAsBinary(spanCtx.getTraceId(), 0, tls, TLS_TRACE_ID_OFFSET, 16);
+          HexUtils.writeHexAsBinary(spanCtx.getSpanId(), 0, tls, TLS_SPAN_ID_OFFSET, 8);
+          HexUtils.writeHexAsBinary(localRootSpanId, 0, tls, TLS_LOCAL_ROOT_SPAN_ID_OFFSET, 8);
+        } else {
+          tls.put(TLS_TRACE_PRESENT_OFFSET, (byte) 0);
+          log.log(Level.WARNING, "Cannot propagate trace with unknown local root: {0}", newSpan);
+        }
       } else {
         tls.put(TLS_TRACE_PRESENT_OFFSET, (byte) 0);
       }

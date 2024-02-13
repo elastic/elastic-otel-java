@@ -84,8 +84,7 @@ public class UniversalProfilingProcessorTest {
   }
 
   private OpenTelemetrySdk initSdk() {
-    return initSdk(builder -> {
-    });
+    return initSdk(builder -> {});
   }
 
   private OpenTelemetrySdk initSdk(Consumer<UniversalProfilingProcessorBuilder> customizer) {
@@ -159,16 +158,16 @@ public class UniversalProfilingProcessorTest {
 
         Span span = tracer.spanBuilder("first").startSpan();
 
-      checkTlsIs(Span.getInvalid(), null);
-      try (Scope s1 = span.makeCurrent()) {
-        checkTlsIs(span, span);
-        try (Scope s2 = remoteCtx.makeCurrent()) {
-          checkTlsIs(Span.getInvalid(), null);
+        checkTlsIs(Span.getInvalid(), null);
+        try (Scope s1 = span.makeCurrent()) {
+          checkTlsIs(span, span);
+          try (Scope s2 = remoteCtx.makeCurrent()) {
+            checkTlsIs(Span.getInvalid(), null);
+          }
+          checkTlsIs(span, span);
         }
-        checkTlsIs(span, span);
       }
     }
-  }
 
     @Test
     public void testNestedActivations() {
@@ -181,28 +180,28 @@ public class UniversalProfilingProcessorTest {
         Span third =
             tracer.spanBuilder("third").setParent(Context.current().with(second)).startSpan();
 
-      checkTlsIs(Span.getInvalid(), null);
-      try (Scope s1 = first.makeCurrent()) {
-        checkTlsIs(first, first);
-        try (Scope nested = first.makeCurrent()) {
+        checkTlsIs(Span.getInvalid(), null);
+        try (Scope s1 = first.makeCurrent()) {
+          checkTlsIs(first, first);
+          try (Scope nested = first.makeCurrent()) {
+            checkTlsIs(first, first);
+          }
+          try (Scope s2 = second.makeCurrent()) {
+            checkTlsIs(second, second);
+            try (Scope s3 = third.makeCurrent()) {
+              checkTlsIs(third, second);
+              try (Scope reactivation = first.makeCurrent()) {
+                checkTlsIs(first, first);
+              }
+              checkTlsIs(third, second);
+            }
+            checkTlsIs(second, second);
+          }
           checkTlsIs(first, first);
         }
-        try (Scope s2 = second.makeCurrent()) {
-          checkTlsIs(second, second);
-          try (Scope s3 = third.makeCurrent()) {
-            checkTlsIs(third, second);
-            try (Scope reactivation = first.makeCurrent()) {
-              checkTlsIs(first, first);
-            }
-            checkTlsIs(third, second);
-          }
-          checkTlsIs(second, second);
-        }
-        checkTlsIs(first, first);
+        checkTlsIs(Span.getInvalid(), null);
       }
-      checkTlsIs(Span.getInvalid(), null);
     }
-  }
 
     @Test
     public void testProcessStoragePopulated() {
@@ -211,15 +210,13 @@ public class UniversalProfilingProcessorTest {
               .put(ResourceAttributes.SERVICE_NAME, "service Ä 1")
               .put(ResourceAttributes.SERVICE_NAMESPACE, "my nameßspace")
               .build();
-      try (OpenTelemetrySdk sdk = initSdk(withNamespace, b -> {
-      }, Sampler.alwaysOn())) {
+      try (OpenTelemetrySdk sdk = initSdk(withNamespace, b -> {}, Sampler.alwaysOn())) {
         checkProcessStorage("service Ä 1", "my nameßspace");
       }
 
       Resource withoutNamespace =
           Resource.builder().put(ResourceAttributes.SERVICE_NAME, "service Ä 2").build();
-      try (OpenTelemetrySdk sdk = initSdk(withoutNamespace, b -> {
-      }, Sampler.alwaysOn())) {
+      try (OpenTelemetrySdk sdk = initSdk(withoutNamespace, b -> {}, Sampler.alwaysOn())) {
         checkProcessStorage("service Ä 2", "");
       }
     }
@@ -243,13 +240,14 @@ public class UniversalProfilingProcessorTest {
       return new String(serviceUtf8, StandardCharsets.UTF_8);
     }
 
-  private void checkTlsIs(Span span, Span localRoot) {
-    ByteBuffer tls = JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(TLS_STORAGE_SIZE);
-    if (tls != null) {
-      tls.order(ByteOrder.nativeOrder());
-      assertThat(tls.getChar(0)).isEqualTo((char) 1); // layout-minor-version
-      assertThat(tls.get(2)).isEqualTo((byte) 1); // valid byte
-    }
+    private void checkTlsIs(Span span, Span localRoot) {
+      ByteBuffer tls =
+          JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(TLS_STORAGE_SIZE);
+      if (tls != null) {
+        tls.order(ByteOrder.nativeOrder());
+        assertThat(tls.getChar(0)).isEqualTo((char) 1); // layout-minor-version
+        assertThat(tls.get(2)).isEqualTo((byte) 1); // valid byte
+      }
 
       SpanContext ctx = span.getSpanContext();
       if (ctx.isValid()) {
@@ -257,20 +255,21 @@ public class UniversalProfilingProcessorTest {
         assertThat(tls.get(3)).isEqualTo((byte) 1); // trace-present-flag
         assertThat(tls.get(4)).isEqualTo(ctx.getTraceFlags().asByte()); // trace-flags
 
-      byte[] traceId = new byte[16];
-      byte[] spanId = new byte[8];
-      byte[] localRootSpanId = new byte[8];
-      tls.position(5);
-      tls.get(traceId);
-      assertThat(traceId).containsExactly(ctx.getTraceIdBytes());
-      tls.position(21);
-      tls.get(spanId);
-      assertThat(spanId).containsExactly(ctx.getSpanIdBytes());
-      tls.position(29);
-      tls.get(localRootSpanId);
-      assertThat(localRootSpanId).containsExactly(localRoot.getSpanContext().getSpanIdBytes());
-    } else if (tls != null) {
-      assertThat(tls.get(3)).isEqualTo((byte) 0); // trace-present-flag
+        byte[] traceId = new byte[16];
+        byte[] spanId = new byte[8];
+        byte[] localRootSpanId = new byte[8];
+        tls.position(5);
+        tls.get(traceId);
+        assertThat(traceId).containsExactly(ctx.getTraceIdBytes());
+        tls.position(21);
+        tls.get(spanId);
+        assertThat(spanId).containsExactly(ctx.getSpanIdBytes());
+        tls.position(29);
+        tls.get(localRootSpanId);
+        assertThat(localRootSpanId).containsExactly(localRoot.getSpanContext().getSpanIdBytes());
+      } else if (tls != null) {
+        assertThat(tls.get(3)).isEqualTo((byte) 0); // trace-present-flag
+      }
     }
   }
 
@@ -330,7 +329,7 @@ public class UniversalProfilingProcessorTest {
                           .findFirst()
                           .get();
                   assertThat(
-                      sp1Data.getAttributes().get(ElasticAttributes.PROFILER_STACK_TRACE_IDS))
+                          sp1Data.getAttributes().get(ElasticAttributes.PROFILER_STACK_TRACE_IDS))
                       .containsExactlyInAnyOrder(base64(st1), base64(st3), base64(st3));
 
                   SpanData sp2Data =
@@ -339,7 +338,7 @@ public class UniversalProfilingProcessorTest {
                           .findFirst()
                           .get();
                   assertThat(
-                      sp2Data.getAttributes().get(ElasticAttributes.PROFILER_STACK_TRACE_IDS))
+                          sp2Data.getAttributes().get(ElasticAttributes.PROFILER_STACK_TRACE_IDS))
                       .containsExactlyInAnyOrder(
                           base64(st2), base64(st2), base64(st2), base64(st3));
                 });
@@ -473,10 +472,9 @@ public class UniversalProfilingProcessorTest {
       String absPath = notADir.toAbsolutePath().toString();
 
       assertThatThrownBy(
-          () -> {
-            try (OpenTelemetrySdk sdk = initSdk(builder -> builder.socketDir(absPath))) {
-            }
-          })
+              () -> {
+                try (OpenTelemetrySdk sdk = initSdk(builder -> builder.socketDir(absPath))) {}
+              })
           .hasMessageContaining("socket");
 
       // Ensure no garbage is left behind, we can cleanly start again with good settings
