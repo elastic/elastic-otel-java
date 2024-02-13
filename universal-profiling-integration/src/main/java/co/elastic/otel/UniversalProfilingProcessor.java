@@ -114,7 +114,7 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
             ExecutorUtils.threadFactory("elastic-profiler-correlation-", true);
         messagePollAndSpanFlushExecutor = Executors.newSingleThreadScheduledExecutor(threadFac);
         messagePollAndSpanFlushExecutor.scheduleWithFixedDelay(
-            this::pollMessageAndFlushPendingSpans,
+            this::pollMessagesAndFlushPendingSpans,
             POLL_FREQUENCY_MS,
             POLL_FREQUENCY_MS,
             TimeUnit.MILLISECONDS);
@@ -218,7 +218,7 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
   }
 
   // visible for testing
-  synchronized void pollMessageAndFlushPendingSpans() {
+  synchronized void pollMessagesAndFlushPendingSpans() {
     // Order is important: we only want to flush spans after we have consumed all pending messages
     // otherwise the data for the spans to be flushed might be incomplete
     consumeProfilerMessages();

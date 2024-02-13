@@ -301,7 +301,7 @@ public class UniversalProfilingProcessorTest {
         sendMsg(span2, st2, 2);
 
         // ensure that the messages are processed now
-        processor.pollMessageAndFlushPendingSpans();
+        processor.pollMessagesAndFlushPendingSpans();
 
         span1.end();
         span2.end();
@@ -379,7 +379,7 @@ public class UniversalProfilingProcessorTest {
         sendMsg(span1, randomStackTraceId(1), 1);
 
         // ensure that the messages are processed now
-        processor.pollMessageAndFlushPendingSpans();
+        processor.pollMessagesAndFlushPendingSpans();
         span1.end();
 
         assertThat(spans.getFinishedSpanItems())
@@ -406,7 +406,7 @@ public class UniversalProfilingProcessorTest {
         sendMsg(child, randomStackTraceId(1), 1);
 
         // ensure that the messages are processed now
-        processor.pollMessageAndFlushPendingSpans();
+        processor.pollMessagesAndFlushPendingSpans();
         child.end();
 
         assertThat(spans.getFinishedSpanItems())
