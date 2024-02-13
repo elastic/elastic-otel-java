@@ -46,9 +46,13 @@ public class ConfigurationOption {
 
   @Override
   public String toString() {
-    return "ConfigurationOption{" +
-        "key='" + key + '\'' +
-        ", description='" + description + '\'' +
-        '}';
+    return "ConfigurationOption{"
+        + "key='"
+        + key
+        + '\''
+        + ", description='"
+        + description
+        + '\''
+        + '}';
   }
 }
