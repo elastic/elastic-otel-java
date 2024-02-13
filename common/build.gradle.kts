@@ -1,6 +1,16 @@
 plugins {
-    id("java-library")
+  id("java-library")
+  alias(libs.plugins.jmh)
 }
+
+
+jmh {
+  fork = 1
+  iterations = 3
+  warmupIterations = 2
+  //profilers.add("jfr")
+}
+
 
 dependencies {
     annotationProcessor(libs.autoservice.processor)
