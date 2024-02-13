@@ -30,11 +30,11 @@ import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.YieldingWaitStrategy;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.ReadableSpan;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.HdrHistogram.WriterReaderPhaser;
 
 public class SpanProfilingSamplesCorrelator {
 
@@ -55,8 +55,7 @@ public class SpanProfilingSamplesCorrelator {
 
   private volatile long spanDelayNanos;
 
-  private final AtomicLong publishEnterCounter = new AtomicLong();
-  private final AtomicLong publishExitCounter = new AtomicLong();
+  private final WriterReaderPhaser shutdownPhaser = new WriterReaderPhaser();
 
   public SpanProfilingSamplesCorrelator(
       int bufferCapacity,
@@ -94,7 +93,7 @@ public class SpanProfilingSamplesCorrelator {
       return;
     }
 
-    publishEnterCounter.incrementAndGet();
+    long criticalPhaseVal = shutdownPhaser.writerCriticalSectionEnter();
     try {
       if (spanDelayNanos == 0) {
         correlateAndSendSpan(span);
@@ -118,7 +117,7 @@ public class SpanProfilingSamplesCorrelator {
         correlateAndSendSpan(span);
       }
     } finally {
-      publishExitCounter.incrementAndGet();
+      shutdownPhaser.writerCriticalSectionExit(criticalPhaseVal);
     }
   }
 
@@ -157,10 +156,7 @@ public class SpanProfilingSamplesCorrelator {
 
     // avoid race condition: we wait until we are
     // sure that no more spans will be added to the ringbuffer
-    long waitFor = publishEnterCounter.get();
-    while (publishExitCounter.get() < waitFor) {
-      Thread.yield();
-    }
+    shutdownPhaser.flipPhase();
     // every span is now pending because the desired delay is zero
     flushPendingDelayedSpans();
   }

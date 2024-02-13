@@ -50,10 +50,28 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
+/**
+ * This processor correlates traces collected with CPU profiling data from the elastic universal
+ * profiler.
+ *
+ * <ul>
+ *   <li>The trace context and service information are provided to the profiler via native memory
+ *   <li>This processor receives profiling data from the profiler via an unix domain socket
+ *   <li>Local root spans will be delayed until their profiling data has arrived, the data will be
+ *       added to them as the {@link
+ *       co.elastic.otel.common.ElasticAttributes#PROFILER_STACK_TRACE_IDS} attribute
+ * </ul>
+ */
 public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
 
   private static final Logger log = Logger.getLogger(UniversalProfilingProcessor.class.getName());
+
+  /**
+   * The frequency at which the processor polls the unix domain socket for new messages from the
+   * profiler.
+   */
   private static final long POLL_FREQUENCY_MS = 20;
+
   private static boolean anyInstanceActive = false;
 
   private final SpanProfilingSamplesCorrelator correlator;

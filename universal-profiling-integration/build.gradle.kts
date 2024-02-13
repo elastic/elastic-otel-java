@@ -16,6 +16,7 @@ dependencies {
   implementation(project(":common"))
   implementation("io.opentelemetry.semconv:opentelemetry-semconv")
   implementation(libs.disruptor)
+  implementation(libs.hdrhistogram) //only used for the WriterReaderPhaser
 
   compileOnly("io.opentelemetry:opentelemetry-sdk")
   compileOnly(libs.findbugs.jsr305)
