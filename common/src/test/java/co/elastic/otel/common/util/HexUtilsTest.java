@@ -40,4 +40,14 @@ public class HexUtilsTest {
 
     assertThat(data).containsExactly(42, 0x00, 0x05, 0xab, 0xf1, 42);
   }
+
+  @Test
+  public void bytesToHexString() {
+    StringBuilder result = new StringBuilder();
+
+    HexUtils.appendAsHex(new byte[] {0x01, (byte) 0xAB, (byte) 0xFF}, result);
+
+    assertThat(result.toString()).isEqualTo("01abff");
+  }
+
 }
