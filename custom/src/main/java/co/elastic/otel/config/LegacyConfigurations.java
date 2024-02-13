@@ -188,5 +188,7 @@ public class LegacyConfigurations {
     addUnspecifiedOption("jms_listener_packages");
     addUnspecifiedOption("elasticsearch_capture_body_urls");
     addUnspecifiedOption("context_propagation_only");
+    addUnspecifiedOption("rabbitmq_naming_mode");
+    addUnspecifiedOption("jmx_failed_retry_interval");
   }
 }
