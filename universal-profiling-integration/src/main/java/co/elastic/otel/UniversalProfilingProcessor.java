@@ -154,7 +154,7 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
     } while (Files.exists(socketFile));
 
     String absolutePath = socketFile.toAbsolutePath().toString();
-    log.log(Level.FINE, "Opening profiler correlation socket '{0}'", absolutePath);
+    log.log(Level.FINE, "Opening profiler correlation socket {0}", new Object[] {absolutePath});
     UniversalProfilingCorrelation.startProfilerReturnChannel(absolutePath);
     return absolutePath;
   }
