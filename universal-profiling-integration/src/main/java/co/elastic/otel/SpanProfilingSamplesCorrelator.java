@@ -152,11 +152,16 @@ public class SpanProfilingSamplesCorrelator {
   }
 
   public synchronized void shutdownAndFlushAll() {
-    spanDelayNanos = 0L; // This will cause new ended spans to not be buffered anymore
+    shutdownPhaser.readerLock();
+    try {
+      spanDelayNanos = 0L; // This will cause new ended spans to not be buffered anymore
 
-    // avoid race condition: we wait until we are
-    // sure that no more spans will be added to the ringbuffer
-    shutdownPhaser.flipPhase();
+      // avoid race condition: we wait until we are
+      // sure that no more spans will be added to the ringbuffer
+      shutdownPhaser.flipPhase();
+    } finally {
+      shutdownPhaser.readerUnlock();
+    }
     // every span is now pending because the desired delay is zero
     flushPendingDelayedSpans();
   }
