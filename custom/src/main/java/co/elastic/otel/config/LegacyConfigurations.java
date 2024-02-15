@@ -190,5 +190,6 @@ public class LegacyConfigurations {
     addUnspecifiedOption("context_propagation_only");
     addUnspecifiedOption("rabbitmq_naming_mode");
     addUnspecifiedOption("jmx_failed_retry_interval");
+    addUnspecifiedOption("safe_exceptions");
   }
 }
