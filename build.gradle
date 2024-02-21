@@ -1,5 +1,8 @@
 import com.github.jk1.license.filter.LicenseBundleNormalizer
-import com.github.jk1.license.render.InventoryMarkdownReportRenderer
+import com.github.jk1.license.render.TextReportRenderer
+
+import java.nio.file.Files
+import java.nio.file.StandardOpenOption
 
 plugins {
   id "idea"
@@ -118,9 +121,25 @@ generateLicenseReport.doFirst {
   delete "$rootDir/licenses"
 }
 
+generateLicenseReport.doLast {
+  // assemble the generated notice with Elastic header
+  var licences = rootDir.toPath().resolve("licenses")
+  var dest = rootDir.toPath().resolve("NOTICE")
+  Files.write(dest, Arrays.asList(
+      "Elastic OTel Java Distribution",
+      String.format("          Copyright 2023-%d Elasticsearch B.V.", Calendar.getInstance().get(Calendar.YEAR)),
+      "",
+      "This project is licensed under the Apache License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0",
+      "",
+      "###############################################################################"))
+
+  def depsNotice = Files.readAllLines(licences.resolve("NOTICE_dependencies"))
+  Files.write(dest, depsNotice, StandardOpenOption.APPEND)
+}
+
 licenseReport {
   outputDir = "$projectDir/licenses"
-  renderers = [new InventoryMarkdownReportRenderer("licenses.md")]
+  renderers = [new TextReportRenderer("NOTICE_dependencies")]
   excludeBoms = true
   excludes = [
         "io.opentelemetry:opentelemetry-bom-alpha",
