@@ -12,7 +12,7 @@ opentelemetrySdk = "1.35.0"
 opentelemetryProto = "1.1.0-alpha"
 
 # otel agent, those two should be updated together
-opentelemetryJavaagent = "2.0.0"
+opentelemetryJavaagent = "2.1.0"
 opentelemetryJavaagentAlpha = "2.2.0-alpha-SNAPSHOT"
 
 # otel semconv java generated bindings, needs to be kept in sync with version in otel agent
