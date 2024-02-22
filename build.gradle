@@ -108,6 +108,33 @@ task copyGitHooks(type: Copy) {
   into layout.projectDirectory.dir(".git").dir("hooks")
 }
 
+task currentVersion {
+  doLast {
+    println project.version
+  }
+}
+
+task setVersion {
+  doLast {
+    def buildFile = file('build.gradle')
+    def pattern = /version '\d+\.\d+\.\d+(-SNAPSHOT)?'/
+    buildFile.text = buildFile.text.replaceFirst(pattern) { match ->
+      "version '${newVersion}'"
+    }
+  }
+}
+
+task setNextVersion {
+  doLast {
+    def buildFile = file('build.gradle')
+    def pattern = /version '(\d+\.\d+\.\d+)(-SNAPSHOT)?'/
+    buildFile.text = buildFile.text.replaceFirst(pattern) { match, version, suffix ->
+      def (major, minor, patch) = version.split(/\./).collect { it as int }
+      "version '${major}.${minor + 1}.0-SNAPSHOT'"
+    }
+  }
+}
+
 tasks.configure {
   doLast {
     copyGitHooks

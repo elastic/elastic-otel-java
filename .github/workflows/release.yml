@@ -1,22 +1,71 @@
 ---
-name: release
+
+name: Release
 
 on:
   workflow_dispatch:
     inputs:
+      ref:
+          description: 'Branch or tag ref to run the workflow on'
+          required: true
+          default: "main"
+      version:
+        description: 'The version to release (e.g. 1.2.3). This workflow will automatically perform the required version bumps'
+        required: true
       dry_run:
         description: If set, run a dry-run release
         default: false
         type: boolean
+      skip_maven_deploy:
+        description: |
+          If enabled, the deployment to maven central will be skipped.
+          Select this if the deployment job for this release failed in a previous version but the release was actually published.
+          Check manually on maven central beforehand!
+        type: boolean
+        required: true
+        default: false
 
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}
+  
+env:
+  RELEASE_VERSION: ${{ inputs.version }}
+  
 jobs:
+  validate-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+      - name: Validate tag does not exist on current commit
+        uses: ./.github/workflows/validate-tag
+        with:
+          tag: v${{ env.RELEASE_VERSION }}
+      - name: Validate tag match current version
+        run: |
+          if [ "$(./gradlew -q currentVersion)" != "${{ env.RELEASE_VERSION }}" ]; then
+            echo "Tag should match build.gradle project.version"
+            exit 1
+          fi
+      - name: Validate version is a release version
+        run: |
+          if [[ "$(./gradlew -q currentVersion)" =~ "-SNAPSHOT" ]]; then
+            echo "This is a snapshot version"
+            exit 1
+          fi
+
   release:
     name: Release
     runs-on: ubuntu-latest
-
+    if: ${{ ! inputs.skip_maven_deploy }}
+    needs:
+      - validate-tag
     steps:
       - id: buildkite
         name: Run Release
@@ -29,6 +78,7 @@ jobs:
           waitFor: true
           printBuildLogs: false
           buildEnvVars: |
+            ref=${{ inputs.ref }}
             dry_run=${{ inputs.dry_run || 'false' }}
 
       - if: ${{ success() && ! inputs.dry_run }}
@@ -52,14 +102,28 @@ jobs:
             :ghost: [${{ github.repository }}] Release *${{ github.ref_name }}* didn't get triggered in Buildkite.
             Build: (<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|here>)
 
-  post_release:
-    name: Post Release
-    needs: release
+  await-maven-central-artifact:
     runs-on: ubuntu-latest
+    name: Wait for release to be available on maven-central
+    needs:
+      - release
+    steps:
+      - uses: elastic/apm-pipeline-library/.github/actions/await-maven-artifact@current
+        with:
+          groupid: 'co.elastic.otel'
+          artifactid: 'elastic-otel-java'
+          version: ${{ inputs.version }}
+
+  post-release:
+    name: "Bump versions and create PR"
+    needs:
+      - await-maven-central-artifact
+    uses: ./.github/workflows/pre-post-release.yml
     permissions:
       contents: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - if: ${{ ! inputs.dry_run }}
-        run: echo "TODO"
+    if: inputs.dry_run == false
+    with:
+      ref: ${{ inputs.ref }}
+      version: ${{ inputs.version }}
+      phase: 'post'
+    secrets: inherit
