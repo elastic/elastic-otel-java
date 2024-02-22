@@ -73,6 +73,8 @@ public class SpanValue<V> {
   In this case we simply fall back to the Map at index zero for storage.
    */
 
+  private static final Class<?> SDK_SPAN_CLASS = getSdkSpanClass();
+
   private static final SpanValueStorageProvider storageProvider = SpanValueStorageProvider.get();
 
   /**
@@ -260,7 +262,7 @@ public class SpanValue<V> {
 
   /** Provides the underlying {@link SdkSpan} instance in case the given span is wrapped. */
   private static Span unwrap(Object span) {
-    if (span.getClass() == SpanValueStorageProvider.SDK_SPAN_CLASS) {
+    if (span.getClass() == SDK_SPAN_CLASS) {
       if (!((Span) span).getSpanContext().isValid()) {
         throw new IllegalArgumentException("SpanValues don't work with invalid spans!");
       }
@@ -275,4 +277,11 @@ public class SpanValue<V> {
     throw new IllegalStateException("unknown span type: " + span.getClass().getName());
   }
 
+  private static Class<?> getSdkSpanClass() {
+    try {
+      return Class.forName("io.opentelemetry.sdk.trace.SdkSpan");
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException("Expected class to exist", e);
+    }
+  }
 }

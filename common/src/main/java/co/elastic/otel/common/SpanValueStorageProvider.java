@@ -26,8 +26,6 @@ import javax.annotation.Nullable;
 
 public interface SpanValueStorageProvider {
 
-  Class<?> SDK_SPAN_CLASS = getSdkSpanClass();
-
   static SpanValueStorageProvider get() {
     return FieldBackedSpanValueStorageProvider.INSTANCE != null
         ? FieldBackedSpanValueStorageProvider.INSTANCE : new MapBacked();
@@ -55,11 +53,4 @@ public interface SpanValueStorageProvider {
     }
   }
 
-  static Class<?> getSdkSpanClass() {
-    try {
-      return Class.forName("io.opentelemetry.sdk.trace.SdkSpan");
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException("Expected class to exist", e);
-    }
-  }
 }
