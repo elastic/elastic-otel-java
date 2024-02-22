@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-##  This script runs the snapshot given the different environment variables
+##  This script runs the release given the different environment variables
 ##    dry_run
 ##
 ##  It relies on the .buildkite/hooks/pre-command so the Vault and other tooling
@@ -24,19 +24,20 @@ java -version
 
 publishArg=''
 if [[ "$dry_run" == "true" ]] ; then
-    echo "--- Build and publish the snapshot :package: (dry-run)"
+    echo "--- Build and publish the release :package: (dry-run)"
     publishArg='publishAllPublicationsToDryRunRepository'
 else
-    echo "--- Build and publish the snapshot :package:"
-    publishArg='publishToSonatype closeAndReleaseStagingRepository'
+    echo "--- Build and publish the release :package:"
+    ### TODO: changeme
+    publishArg='assemble'
 fi
 
 ./gradlew \
     --console=plain \
     clean ${publishArg} \
-    | tee snapshot.txt
+    | tee release.txt
 
 if [[ "$dry_run" == "true" ]] ; then
     echo "--- Archive the dry-run repository :package: (dry-run)"
-    tar czvf ./build/dry-run-maven-repo.tgz -C ./build/dry-run-maven-repo/ . | tee snapshot.txt
+    tar czvf ./build/dry-run-maven-repo.tgz -C ./build/dry-run-maven-repo/ . | tee release.txt
 fi

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 echo "--- Install JDK17 :java:"
-# JDK version is defined in two different locations, here and .github/workflows/maven-goal/action.yml
+# JDK version is defined in two different locations, here and .github/workflows/build.yml
 JAVA_URL=https://jvm-catalog.elastic.co/jdk
 JAVA_HOME=$(pwd)/.openjdk17
 JAVA_PKG="$JAVA_URL/latest_openjdk_17_linux.tar.gz"
