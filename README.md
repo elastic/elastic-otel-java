@@ -1,15 +1,13 @@
-# Disclamer
+# Elastic OpenTelemetry Java distribution
 
-This is currently a work-in-progress project.
+This project is the Elastic distribution of the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation).
 
-# Elastic OpenTelemetry Java agent
-
-This project is the Elastic distribution of OpenTelemetry Java agent.
+This is currently an early alpha release and should be used mostly for testing.
 
 ## Build
 
 Execute `gradle assemble`, the agent binary will be in `./agent/build/libs/elastic-otel-javaagent-${VERSION}.jar`
-where `${VERSION}` is the current project version.
+where `${VERSION}` is the current project version set in `version.properties`.
 
 ## Run
 
@@ -20,9 +18,17 @@ java -javaagent:/path/to/agent.jar \
 -jar myapp.jar
 ```
 
-## Setup
+## Features
 
-Breakdown metrics currently require a custom Elasticsearch ingest pipeline
+### Inferred spans
+
+Set `ELASTIC_OTEL_INFERRED_SPANS_ENABLED=true` to enable.
+
+See [inferred spans](./inferred-spans/README.md) for more details
+
+### Breakdown metrics
+
+Breakdown metrics currently require a custom Elasticsearch ingest pipeline.
 
 ```
 PUT _ingest/pipeline/metrics-apm.app@custom
