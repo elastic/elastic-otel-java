@@ -1,5 +1,3 @@
-import java.io.FileInputStream
-import java.util.*
 
 pluginManagement {
     repositories {
