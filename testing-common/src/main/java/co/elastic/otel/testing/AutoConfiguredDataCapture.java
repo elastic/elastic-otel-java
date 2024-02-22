@@ -52,4 +52,9 @@ public class AutoConfiguredDataCapture implements AutoConfigurationCustomizerPro
           return spanExporter;
         });
   }
+
+  @Override
+  public int order() {
+    return Integer.MIN_VALUE;
+  }
 }
