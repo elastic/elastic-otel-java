@@ -29,7 +29,7 @@ if [[ "$dry_run" == "true" ]] ; then
 else
     echo "--- Build and publish the release :package:"
     ### TODO: changeme
-    publishArg='build'
+    publishArg='assemble'
 fi
 
 ./gradlew \
