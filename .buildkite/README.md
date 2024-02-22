@@ -4,7 +4,9 @@ This README provides an overview of the Buildkite pipeline to automate the build
 
 ## Release pipeline
 
-TODO: not implemented yet
+The Buildkite pipeline is for building and publishing releases. It will create a Pull Request
+with the next version.
+
 
 ## Snapshot pipeline
 
