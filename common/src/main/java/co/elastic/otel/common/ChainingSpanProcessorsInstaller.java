@@ -36,7 +36,9 @@ public class ChainingSpanProcessorsInstaller implements AutoConfigurationCustomi
   @Override
   public void customize(AutoConfigurationCustomizer autoConfigurationCustomizer) {
     List<ChainingSpanProcessorAutoConfiguration> autoConfigs = new ArrayList<>();
-    ServiceLoader.load(ChainingSpanProcessorAutoConfiguration.class)
+    ServiceLoader.load(
+            ChainingSpanProcessorAutoConfiguration.class,
+            ChainingSpanProcessorsInstaller.class.getClassLoader())
         .iterator()
         .forEachRemaining(autoConfigs::add);
     if (!autoConfigs.isEmpty()) {

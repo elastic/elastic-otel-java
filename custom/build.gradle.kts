@@ -6,7 +6,7 @@ dependencies {
   implementation(project(":common"))
   implementation(project(":inferred-spans"))
   compileOnly(project(":bootstrap"))
-  compileOnly(project(":resources"))
+  implementation(project(":resources"))
   compileOnly("io.opentelemetry:opentelemetry-sdk")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-extension-api")
@@ -21,6 +21,7 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
 
   // test dependencies
+  testImplementation(project(":testing-common"))
   testImplementation("io.opentelemetry:opentelemetry-sdk")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   testImplementation("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
