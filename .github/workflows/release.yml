@@ -31,6 +31,16 @@ jobs:
           buildEnvVars: |
             dry_run=${{ inputs.dry_run || 'false' }}
 
+      - if: ${{ success() && ! inputs.dry_run }}
+        uses: elastic/apm-pipeline-library/.github/actions/slack-message@current
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          roleId: ${{ secrets.VAULT_ROLE_ID }}
+          secretId: ${{ secrets.VAULT_SECRET_ID }}
+          channel: "#apm-agent-java"
+          message: |
+            :runner: [${{ github.repository }}] Release *${{ github.ref_name }}* has been triggered in Buildkite: (<${{ steps.buildkite.outputs.build }}|build>)
+
       - if: ${{ failure() && ! inputs.dry_run }}
         uses: elastic/apm-pipeline-library/.github/actions/slack-message@current
         with:
