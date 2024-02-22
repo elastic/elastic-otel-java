@@ -118,23 +118,41 @@ tasks.configure {
 }
 
 generateLicenseReport.doFirst {
-  delete "$rootDir/licenses"
+  Files.list(rootDir.toPath().resolve("licenses"))
+      .filter { f -> f.getFileName().endsWith(".jar") || f.getFileName().startsWith("NOTICE_") }
+      .forEach { f ->
+        delete f.toString()
+      }
 }
 
 generateLicenseReport.doLast {
   // assemble the generated notice with Elastic header
   var licences = rootDir.toPath().resolve("licenses")
-  var dest = rootDir.toPath().resolve("NOTICE")
-  Files.write(dest, Arrays.asList(
+
+
+  var lines = new ArrayList<String>()
+  lines.addAll(Arrays.asList(
       "Elastic OTel Java Distribution",
       String.format("          Copyright 2023-%d Elasticsearch B.V.", Calendar.getInstance().get(Calendar.YEAR)),
       "",
       "This project is licensed under the Apache License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0",
+      "An embedded copy of the Apache License, Version 2.0 is provided below.",
       "",
-      "###############################################################################"))
+      "This project depends on ASM which is licensed under the 3-Clause BSD License - https://opensource.org/licenses/BSD-3-Clause",
+      "An embedded copy of the ASM license (3-Clause BSD License) is provided below.",
+      ""))
 
-  def depsNotice = Files.readAllLines(licences.resolve("NOTICE_dependencies"))
-  Files.write(dest, depsNotice, StandardOpenOption.APPEND)
+  lines.addAll(Arrays.asList("","###### Apache License, Version 2.0", ""))
+  lines.addAll(Files.readAllLines(rootDir.toPath().resolve("LICENSE")))
+
+  lines.addAll(Arrays.asList("","###### ASM 3-Clause BSD License", ""))
+  lines.addAll(Files.readAllLines(licences.resolve("asm_bsd-3-clause")))
+
+  lines.addAll(Arrays.asList("","###############################################################################"))
+
+  lines.addAll(Files.readAllLines(licences.resolve("NOTICE_dependencies")))
+
+  Files.write(rootDir.toPath().resolve("NOTICE"), lines)
 }
 
 licenseReport {
