@@ -80,7 +80,6 @@ public class SpanStackTraceProcessorAutoConfigTest {
 
       List<SpanData> spans = AutoConfiguredDataCapture.getSpans();
       assertThat(spans).hasSize(0);
-      ;
     }
   }
 }
