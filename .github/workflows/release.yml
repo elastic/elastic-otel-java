@@ -111,7 +111,7 @@ jobs:
     name: Wait for release to be available on maven-central
     if: inputs.dry_run == false
     needs:
-      - release
+      - validate-tag
     steps:
       - uses: elastic/apm-pipeline-library/.github/actions/await-maven-artifact@current
         with:
