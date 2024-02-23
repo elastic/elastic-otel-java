@@ -21,7 +21,7 @@ java -javaagent:/path/to/agent.jar \
 ## Build
 
 Execute `./gradlew assemble`, the agent binary will be in `./agent/build/libs/elastic-otel-javaagent-${VERSION}.jar`
-where `${VERSION}` is the current project version set in [`version.properties`](./version.properties).
+where `${VERSION}` is the current project version set in [`version.properties`](version.properties).
 
 ## Features
 
