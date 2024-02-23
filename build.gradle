@@ -119,21 +119,18 @@ task currentVersion {
 
 task setVersion {
   doLast {
-    def buildFile = file('build.gradle')
-    def pattern = /version '\d+\.\d+\.\d+(-SNAPSHOT)?'/
-    buildFile.text = buildFile.text.replaceFirst(pattern) { match ->
-      "version '${newVersion}'"
-    }
+    def versionFile = file('version.properties')
+    versionFile.text = "version=${newVersion}\n"
   }
 }
 
 task setNextVersion {
   doLast {
-    def buildFile = file('build.gradle')
-    def pattern = /version '(\d+\.\d+\.\d+)(-SNAPSHOT)?'/
-    buildFile.text = buildFile.text.replaceFirst(pattern) { match, version, suffix ->
+    def versionFile = file('version.properties')
+    def pattern = /version=(\d+\.\d+\.\d+)(-SNAPSHOT)?/
+    versionFile.text = versionFile.text.replaceFirst(pattern) { match, version, suffix ->
       def (major, minor, patch) = version.split(/\./).collect { it as int }
-      "version '${major}.${minor + 1}.0-SNAPSHOT'"
+      "version=${major}.${minor}.${patch + 1}-SNAPSHOT"
     }
   }
 }
