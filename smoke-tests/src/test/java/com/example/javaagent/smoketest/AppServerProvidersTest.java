@@ -19,6 +19,7 @@
 package com.example.javaagent.smoketest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.awaitility.Awaitility.await;
 
 import java.nio.file.Path;
@@ -73,7 +74,8 @@ public class AppServerProvidersTest extends SmokeTest {
         .atMost(Duration.ofSeconds(30))
         .untilAsserted(
             () -> {
-              doRequest(getUrl("/app/"), okResponseBody("home sweet home"));
+              assertThatNoException()
+                  .isThrownBy(() -> doRequest(getUrl("/app/"), okResponseBody("home sweet home")));
             });
 
     checkTracesResources(

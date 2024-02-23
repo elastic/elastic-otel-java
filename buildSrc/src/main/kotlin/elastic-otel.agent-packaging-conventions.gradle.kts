@@ -26,7 +26,6 @@ dependencies {
   bootstrapLibs(project(":bootstrap"))
 
   javaagentLibs(project(":custom"))
-  javaagentLibs(project(":resources"))
 }
 
 fun relocatePackages( shadowJar : ShadowJar) {

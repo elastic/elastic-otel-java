@@ -1,6 +1,9 @@
 plugins {
   `java-library`
+  id("signing")
 }
+
+description = rootProject.description + " inferred-spans"
 
 dependencies {
   annotationProcessor(libs.autoservice.processor)
@@ -48,7 +51,9 @@ tasks.withType<Test>().all {
 publishing {
   publications {
     create<MavenPublication>("maven") {
+
       from(components["java"])
+
       versionMapping {
         usage("java-api") {
           fromResolutionOf("runtimeClasspath")
@@ -57,6 +62,39 @@ publishing {
           fromResolutionResult()
         }
       }
+
+      pom {
+        name.set(project.description)
+        description.set(project.description)
+        url.set("https://github.com/elastic/elastic-otel-java")
+        licenses {
+          license {
+            name.set("The Apache License, Version 2.0")
+            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+          }
+        }
+        developers {
+          developer {
+            name.set("Elastic Inc.")
+            url.set("https://www.elastic.co")
+          }
+        }
+        scm {
+          connection.set("scm:git:git@github.com:elastic/elastic-otel-java.git")
+          developerConnection.set("scm:git:git@github.com:elastic/elastic-otel-java.git")
+          url.set("https://github.com/elastic/elastic-otel-java")
+        }
+      }
     }
   }
+}
+
+signing {
+  setRequired({
+    // only sign in CI
+    System.getenv("CI") == "true"
+  })
+  // use in-memory ascii-armored key in environment variables
+  useInMemoryPgpKeys(System.getenv("KEY_ID_SECRET"), System.getenv("SECRING_ASC"), System.getenv("KEYPASS_SECRET"))
+  sign(publishing.publications["maven"])
 }

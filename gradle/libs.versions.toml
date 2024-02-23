@@ -12,8 +12,8 @@ opentelemetrySdk = "1.35.0"
 opentelemetryProto = "1.1.0-alpha"
 
 # otel agent, those two should be updated together
-opentelemetryJavaagent = "2.0.0"
-opentelemetryJavaagentAlpha = "2.0.0-alpha"
+opentelemetryJavaagent = "2.1.0"
+opentelemetryJavaagentAlpha = "2.2.0-alpha-SNAPSHOT"
 
 # otel semconv java generated bindings, needs to be kept in sync with version in otel agent
 opentelemetrySemconv = "1.23.1-alpha"
@@ -45,10 +45,10 @@ assertj-core = "org.assertj:assertj-core:3.25.3"
 awaitility = "org.awaitility:awaitility:4.2.0"
 findbugs-jsr305 = "com.google.code.findbugs:jsr305:3.0.2"
 testcontainers = "org.testcontainers:testcontainers:1.19.5"
-logback = "ch.qos.logback:logback-classic:1.4.14"
+logback = "ch.qos.logback:logback-classic:1.5.0"
 # version 2.16.1 has been compiled with java 21, which is likely a release error, thus stick to 2.16.0 until fixed in 2.16.2 or later
 jackson = "com.fasterxml.jackson.core:jackson-databind:2.16.0"
-protobuf-util = "com.google.protobuf:protobuf-java-util:3.25.2"
+protobuf-util = "com.google.protobuf:protobuf-java-util:3.25.3"
 mockito = "org.mockito:mockito-core:5.10.0"
 disruptor = "com.lmax:disruptor:3.4.4"
 hdrhistogram = "org.hdrhistogram:HdrHistogram:2.1.12"
