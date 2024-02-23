@@ -109,6 +109,7 @@ jobs:
   await-maven-central-artifact:
     runs-on: ubuntu-latest
     name: Wait for release to be available on maven-central
+    if: inputs.dry_run == false
     needs:
       - release
     steps:
