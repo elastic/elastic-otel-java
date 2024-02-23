@@ -111,7 +111,7 @@ jobs:
       - uses: elastic/apm-pipeline-library/.github/actions/await-maven-artifact@current
         with:
           groupid: 'co.elastic.otel'
-          artifactid: 'elastic-otel-java'
+          artifactid: 'elastic-otel-javaagent'
           version: ${{ inputs.version }}
 
   post-release:
