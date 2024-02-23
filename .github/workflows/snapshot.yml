@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Validate version is a release version
+      - name: Validate version is a snapshot version
         run: |
           output=false
           if [[ "$(./gradlew -q currentVersion)" =~ "-SNAPSHOT" ]]; then
