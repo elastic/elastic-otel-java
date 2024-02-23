@@ -28,8 +28,7 @@ if [[ "$dry_run" == "true" ]] ; then
     publishArg='publishAllPublicationsToDryRunRepository'
 else
     echo "--- Build and publish the release :package:"
-    ### TODO: changeme
-    publishArg='assemble'
+    publishArg='publishToSonatype closeAndReleaseStagingRepository'
 fi
 
 ./gradlew \
