@@ -10,7 +10,10 @@ plugins {
 }
 
 group 'co.elastic.otel'
-version '0.0.1-SNAPSHOT'
+
+Properties versionProperties = new Properties()
+versionProperties.load(new FileInputStream(file('version.properties')))
+version = versionProperties.get("version")
 
 description = "Elastic OpenTelemetry java distribution"
 
