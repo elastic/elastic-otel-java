@@ -47,14 +47,14 @@ jobs:
         uses: ./.github/workflows/gradle-goal
         with:
           command: "./gradlew -q currentVersion"
-      - name: Validate tag does not exist on current commit
+      - name: Validate release tag does not exist in repo
         uses: ./.github/workflows/validate-tag
         with:
           tag: v${{ env.RELEASE_VERSION }}
       - name: Validate tag match current version
         run: |
           if [ "$(./gradlew -q currentVersion)" != "${{ env.RELEASE_VERSION }}" ]; then
-            echo "Tag should match build.gradle project.version"
+            echo "Tag should match version set in 'version.properties'"
             exit 1
           fi
       - name: Validate version is a release version

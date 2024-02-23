@@ -34,7 +34,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Validate tag does not exist on current commit
+      - name: Validate release tag does not exist in repo
         uses: ./.github/workflows/validate-tag
         with:
           tag: v${{ env.RELEASE_VERSION }}
