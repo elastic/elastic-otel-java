@@ -93,3 +93,5 @@ jobs:
   
       - name: Create the ${{ inputs.phase }} release PR
         run: gh pr create --title="${{ inputs.phase }} release v${{ env.RELEASE_VERSION }}" --base main --head ${{ env.BRANCH_NAME }} -b "${{ inputs.phase }} release v${{ env.RELEASE_VERSION }}"
+        env:
+          GH_TOKEN: ${{ env.GITHUB_TOKEN }}
