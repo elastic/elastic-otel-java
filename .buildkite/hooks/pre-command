@@ -15,13 +15,9 @@ if [[ "$BUILDKITE_COMMAND" =~ .*"upload".* ]]; then
 fi
 
 if [ "$BUILDKITE_PIPELINE_SLUG" == "elastic-otel-java-snapshot" ]; then
-    source .buildkite/hooks/prepare-release.sh
+  source .buildkite/hooks/prepare-release.sh
 fi
 
 if [ "$BUILDKITE_PIPELINE_SLUG" == "elastic-otel-java-release" ]; then
-    source .buildkite/hooks/prepare-release.sh
+  source .buildkite/hooks/prepare-release.sh
 fi
-
-# Run always
-source .buildkite/hooks/prepare-common.sh
-
