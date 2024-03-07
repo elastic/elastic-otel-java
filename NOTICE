@@ -625,7 +625,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
 
 ###############################################################################
 
-Dependency License Report for elastic-otel-java 0.0.1-SNAPSHOT
+Dependency License Report for elastic-otel-java 0.0.2-SNAPSHOT
 
 1. Group: com.blogspot.mydailyjava  Name: weak-lock-free  Version: 0.18
 
@@ -2547,5 +2547,5 @@ POM License: The 3-Clause BSD License - https://opensource.org/licenses/BSD-3-Cl
 --------------------------------------------------------------------------------
 
 
-This report was generated at Thu Feb 22 10:24:41 CET 2024.
+This report was generated at Thu Mar 07 16:45:31 CET 2024.
 
