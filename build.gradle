@@ -159,8 +159,8 @@ generateLicenseReport.doLast{
 
   var lines = new ArrayList<String>()
   lines.addAll(Arrays.asList(
-      "Elastic OTel Java Distribution",
-      String.format("          Copyright 2023-%d Elasticsearch B.V.", Calendar.getInstance().get(Calendar.YEAR)),
+      "Elastic OpenTelemetry Java Distribution",
+      String.format("Copyright 2023-%d Elasticsearch B.V.", Calendar.getInstance().get(Calendar.YEAR)),
       "",
       "This project is licensed under the Apache License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0",
       "An embedded copy of the Apache License, Version 2.0 is provided below.",
