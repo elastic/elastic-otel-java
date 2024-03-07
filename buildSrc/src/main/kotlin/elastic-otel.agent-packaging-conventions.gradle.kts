@@ -132,5 +132,9 @@ tasks {
       attributes["Implementation-Version"] = project.version
       // TODO : add git hash to version for easier support with SCM-Revision
     }
+
+    from("${rootDir}/LICENSE").into("META-INF")
+    from("${rootDir}/NOTICE").into("META-INF")
+
   }
 }
