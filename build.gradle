@@ -152,7 +152,7 @@ generateLicenseReport.doFirst {
       }
 }
 
-generateLicenseReport.doLast {
+generateLicenseReport.doLast{
   // assemble the generated notice with Elastic header
   var licences = rootDir.toPath().resolve("licenses")
 
@@ -167,6 +167,9 @@ generateLicenseReport.doLast {
       "",
       "This project depends on ASM which is licensed under the 3-Clause BSD License - https://opensource.org/licenses/BSD-3-Clause",
       "An embedded copy of the ASM license (3-Clause BSD License) is provided below.",
+      "",
+      "This project depends on okhttp, which contains 'publicsuffixes.gz' that is licensed under the Mozilla Public License, v. 2.0 - https://mozilla.org/MPL/2.0/",
+      "An embedded copy of the publicsuffixes.gz license (Mozilla Public License, v. 2.0) is provided below.",
       ""))
 
   lines.addAll(Arrays.asList("","###### Apache License, Version 2.0", ""))
@@ -174,6 +177,9 @@ generateLicenseReport.doLast {
 
   lines.addAll(Arrays.asList("","###### ASM 3-Clause BSD License", ""))
   lines.addAll(Files.readAllLines(licences.resolve("asm_bsd-3-clause")))
+
+  lines.addAll(Arrays.asList("","###### publicsuffixes.gz Mozilla Public License, v. 2.0", ""))
+  lines.addAll(Files.readAllLines(licences.resolve("publicsuffixes_mpl-2")))
 
   lines.addAll(Arrays.asList("","###############################################################################"))
 
