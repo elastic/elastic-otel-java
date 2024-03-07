@@ -21,3 +21,15 @@ fi
 if [ "$BUILDKITE_PIPELINE_SLUG" == "elastic-otel-java-release" ]; then
   source .buildkite/hooks/prepare-release.sh
 fi
+
+# Configure the java version
+VERSION=$(cat .java-version)
+## TODO: Elasticsearch team uses JAVA_HOME="$HOME/.java/$ES_BUILD_JAVA"
+##       maybe we can use the same path.
+JAVA_HOME="/usr/java/openjdk$VERSION"
+export JAVA_HOME
+PATH=$JAVA_HOME/bin:$PATH
+export PATH
+
+# Validate the java version
+java -version
