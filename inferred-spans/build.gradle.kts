@@ -1,6 +1,7 @@
 plugins {
   `java-library`
   id("signing")
+  id("elastic-otel.library-packaging-conventions")
 }
 
 description = rootProject.description + " inferred-spans"

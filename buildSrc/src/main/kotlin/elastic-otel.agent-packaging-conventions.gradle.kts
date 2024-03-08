@@ -106,6 +106,7 @@ tasks {
   // 3. the relocated and isolated javaagent libs are merged together with the bootstrap libs (which undergo relocation
   // in this task) and the upstream javaagent jar; duplicates are removed
   shadowJar {
+
     dependsOn(isolateJavaagentLibs)
     configurations = listOf(bootstrapLibs, upstreamAgent)
 
@@ -132,5 +133,7 @@ tasks {
       attributes["Implementation-Version"] = project.version
       // TODO : add git hash to version for easier support with SCM-Revision
     }
+
+
   }
 }
