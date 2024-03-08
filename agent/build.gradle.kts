@@ -42,6 +42,15 @@ tasks {
 
     dependsOn(named("updateLicensesAndNotice"))
 
+    // include licenses and notices in jar
+    from(rootDir) {
+      into("META-INF")
+
+      include("LICENSE")
+      include("NOTICE")
+      include("licenses/**")
+    }
+
     //TODO: The agent-for-testing should also use our custom entrypoint
     manifest {
       attributes["Main-Class"] = "co.elastic.otel.agent.ElasticAgent"

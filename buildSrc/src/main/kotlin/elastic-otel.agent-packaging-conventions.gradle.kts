@@ -110,15 +110,6 @@ tasks {
     dependsOn(isolateJavaagentLibs)
     configurations = listOf(bootstrapLibs, upstreamAgent)
 
-    // include licenses and notices in jar
-    from("${rootDir}") {
-      into("META-INF")
-
-      include("LICENSE")
-      include("NOTICE")
-      include("licenses/**")
-    }
-
     from(isolateJavaagentLibs.get().outputs)
 
     archiveClassifier.set("")
