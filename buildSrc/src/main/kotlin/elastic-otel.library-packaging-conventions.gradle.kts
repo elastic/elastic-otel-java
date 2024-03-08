@@ -5,9 +5,14 @@ plugins {
 tasks {
 
   jar {
-    // ensure jar artifacts have a copy of license and notice
-    from("${rootDir}/LICENSE").into("META-INF")
-    from("${rootDir}/NOTICE").into("META-INF")
+    // include licenses and notices in jar
+    from("${rootDir}") {
+      into("META-INF")
+
+      include("LICENSE")
+      include("NOTICE")
+      include("licenses/**")
+    }
   }
 
 }

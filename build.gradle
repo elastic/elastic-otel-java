@@ -1,14 +1,7 @@
-import com.github.jk1.license.filter.LicenseBundleNormalizer
-import com.github.jk1.license.render.TextReportRenderer
-
-import java.nio.file.Files
-import java.nio.file.StandardOpenOption
-
 plugins {
   id "idea"
   id "maven-publish"
   id "base" // required to get 'clean' task
-  alias(catalog.plugins.licenseReport)
   alias(catalog.plugins.nexusPublish)
 }
 
@@ -142,65 +135,4 @@ tasks.configure {
   doLast {
     copyGitHooks
   }
-}
-
-generateLicenseReport.doFirst {
-  Files.list(rootDir.toPath().resolve("licenses"))
-      .filter { f -> f.getFileName().endsWith(".jar") || f.getFileName().startsWith("NOTICE_") }
-      .forEach { f ->
-        delete f.toString()
-      }
-}
-
-generateLicenseReport.doLast{
-  // assemble the generated notice with Elastic header
-  var licences = rootDir.toPath().resolve("licenses")
-
-
-  var lines = new ArrayList<String>()
-  lines.addAll(Arrays.asList(
-      "Elastic OpenTelemetry Java Distribution",
-      String.format("Copyright 2023-%d Elasticsearch B.V.", Calendar.getInstance().get(Calendar.YEAR)),
-      "",
-      "This project is licensed under the Apache License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0",
-      "An embedded copy of the Apache License, Version 2.0 is provided below.",
-      "",
-      "This project depends on ASM which is licensed under the 3-Clause BSD License - https://opensource.org/licenses/BSD-3-Clause",
-      "An embedded copy of the ASM license (3-Clause BSD License) is provided below.",
-      "",
-      "This project depends on okhttp, which contains 'publicsuffixes.gz' that is licensed under the Mozilla Public License, v. 2.0 - https://mozilla.org/MPL/2.0/",
-      "An embedded copy of the publicsuffixes.gz license (Mozilla Public License, v. 2.0) is provided below.",
-      ""))
-
-  lines.addAll(Arrays.asList("","###### Apache License, Version 2.0", ""))
-  lines.addAll(Files.readAllLines(rootDir.toPath().resolve("LICENSE")))
-
-  lines.addAll(Arrays.asList("","###### ASM 3-Clause BSD License", ""))
-  lines.addAll(Files.readAllLines(licences.resolve("asm_bsd-3-clause")))
-
-  lines.addAll(Arrays.asList("","###### publicsuffixes.gz Mozilla Public License, v. 2.0", ""))
-  lines.addAll(Files.readAllLines(licences.resolve("publicsuffixes_mpl-2")))
-
-  lines.addAll(Arrays.asList("","###############################################################################"))
-
-  lines.addAll(Files.readAllLines(licences.resolve("NOTICE_dependencies")))
-
-  Files.write(rootDir.toPath().resolve("NOTICE"), lines)
-}
-
-licenseReport {
-  outputDir = "$projectDir/licenses"
-  renderers = [new TextReportRenderer("NOTICE_dependencies")]
-  excludeBoms = true
-  excludes = [
-        "io.opentelemetry:opentelemetry-bom-alpha",
-        "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha"
-  ]
-  filters = [new LicenseBundleNormalizer(bundlePath: "$projectDir/buildscripts/license-normalizer-bundle.json")]
-  projects = [rootProject, rootProject.project("agent"), rootProject.project("bootstrap"),
-              rootProject.project("common"), rootProject.project("custom"),
-              rootProject.project("inferred-spans"), rootProject.project("instrumentation"),
-              rootProject.project("resources"), project]
-  configurations = ['runtimeClasspath', 'compileClasspath']
-
 }

@@ -106,8 +106,18 @@ tasks {
   // 3. the relocated and isolated javaagent libs are merged together with the bootstrap libs (which undergo relocation
   // in this task) and the upstream javaagent jar; duplicates are removed
   shadowJar {
+
     dependsOn(isolateJavaagentLibs)
     configurations = listOf(bootstrapLibs, upstreamAgent)
+
+    // include licenses and notices in jar
+    from("${rootDir}") {
+      into("META-INF")
+
+      include("LICENSE")
+      include("NOTICE")
+      include("licenses/**")
+    }
 
     from(isolateJavaagentLibs.get().outputs)
 
@@ -133,8 +143,6 @@ tasks {
       // TODO : add git hash to version for easier support with SCM-Revision
     }
 
-    from("${rootDir}/LICENSE").into("META-INF")
-    from("${rootDir}/NOTICE").into("META-INF")
 
   }
 }
