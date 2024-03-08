@@ -26,18 +26,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Gradle JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-          cache: gradle
-
       - name: Gradle build, test and check
-        uses: gradle/gradle-build-action@v3
+        uses: ./.github/workflows/gradle-goal
         with:
-          arguments: check
+          command: "./gradlew check"
 
+      - name: Warmup gradle wrapper
+        uses: ./.github/workflows/gradle-goal
+        with:
+          command: "./gradlew check"
       - name: Store test results
         if: success() || failure()
         uses: actions/upload-artifact@v3

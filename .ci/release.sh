@@ -23,12 +23,12 @@ echo $PATH
 java -version
 
 publishArg=''
-if [[ "$dry_run" == "true" ]] ; then
-    echo "--- Build and publish the release :package: (dry-run)"
-    publishArg='publishAllPublicationsToDryRunRepository'
-else
+if [[ "$dry_run" == "false" ]] ; then
     echo "--- Build and publish the release :package:"
     publishArg='publishToSonatype closeAndReleaseStagingRepository'
+else
+    echo "--- Build and publish the release :package: (dry-run)"
+    publishArg='publishAllPublicationsToDryRunRepository'
 fi
 
 ./gradlew \
