@@ -64,7 +64,7 @@ tasks {
   }
 
   val licensesDir = rootDir.toPath().resolve("licenses")
-  var licenseFile = "more-licences.md"
+  val licenseFile = "more-licences.md"
 
   licenseReport {
     outputDir = licensesDir.toString()
@@ -109,7 +109,7 @@ tasks {
 
       Files.write(rootDir.toPath().resolve("NOTICE"), lines)
 
-      // update the generated license report idempotent by removing the date
+      // make the generated license report idempotent by removing the date
       val licenseReport = licensesDir.resolve(licenseFile)
       var newLicenseLines = Files.readAllLines(licenseReport)
         .stream()
