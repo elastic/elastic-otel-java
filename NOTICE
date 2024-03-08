@@ -5,7 +5,7 @@ This project is licensed under the Apache License, Version 2.0 - https://www.apa
 A copy of the Apache License, Version 2.0 is provided in the 'LICENSE' file.
 
 This project depends on ASM which is licensed under the 3-Clause BSD License - https://opensource.org/licenses/BSD-3-Clause
-A copy of the ASM license (3-Clause BSD License) is provided in the 'licenses/LICENSE_bsd-3-clause' file.
+A copy of the ASM license (3-Clause BSD License) is provided in the 'licenses/LICENSE_asm_bsd-3-clause' file.
 
 This project depends on okhttp, which contains 'publicsuffixes.gz' that is licensed under the Mozilla Public License, v. 2.0 - https://mozilla.org/MPL/2.0/
 A copy of the publicsuffixes.gz license (Mozilla Public License, v. 2.0) is provided in the 'licenses/LICENSE_mpl-2' file.
