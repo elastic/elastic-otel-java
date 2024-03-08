@@ -1,7 +1,9 @@
 import com.github.jk1.license.filter.LicenseBundleNormalizer
 import com.github.jk1.license.render.InventoryMarkdownReportRenderer
 import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.*
+import java.util.stream.Collectors
 import kotlin.collections.ArrayList
 
 plugins {
@@ -38,6 +40,8 @@ tasks {
   // We override the agent entrypoints defined in elastic-otel.agent-packaging-convention
   shadowJar {
 
+    dependsOn(named("updateLicensesAndNotice"))
+
     //TODO: The agent-for-testing should also use our custom entrypoint
     manifest {
       attributes["Main-Class"] = "co.elastic.otel.agent.ElasticAgent"
@@ -50,9 +54,12 @@ tasks {
     dependsOn(javadocJar, sourcesJar)
   }
 
+  val licensesDir = rootDir.toPath().resolve("licenses")
+  var licenseFile = "more-licences.md"
+
   licenseReport {
-    outputDir = "${rootProject.rootDir}/licenses"
-    renderers = arrayOf(InventoryMarkdownReportRenderer("more-licences.md"))
+    outputDir = licensesDir.toString()
+    renderers = arrayOf(InventoryMarkdownReportRenderer(licenseFile))
     excludeBoms = true
     excludes = arrayOf(
       "io.opentelemetry:opentelemetry-bom-alpha",
@@ -67,17 +74,15 @@ tasks {
     configurations = arrayOf("runtimeClasspath", "compileClasspath")
   }
 
-  register("update-licenses-and-notice") {
+  register("updateLicensesAndNotice") {
     dependsOn(generateLicenseReport)
     doLast {
 
+      var year = Calendar.getInstance().get(Calendar.YEAR)
       var lines = ArrayList<String>(
         listOf(
           "Elastic OpenTelemetry Java Distribution",
-          String.format(
-            "Copyright 2023-%d Elasticsearch B.V.",
-            Calendar.getInstance().get(Calendar.YEAR)
-          ),
+          "Copyright 2023-${year} Elasticsearch B.V.",
           "",
           "This project is licensed under the Apache License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0",
           "A copy of the Apache License, Version 2.0 is provided in the 'LICENSE' file.",
@@ -94,6 +99,14 @@ tasks {
       )
 
       Files.write(rootDir.toPath().resolve("NOTICE"), lines)
+
+      // update the generated license report idempotent by removing the date
+      val licenseReport = licensesDir.resolve(licenseFile)
+      var newLicenseLines = Files.readAllLines(licenseReport)
+        .stream()
+        .map { l -> if (l.startsWith("_$year")) "" else l }
+        .collect(Collectors.toList())
+      Files.write(licenseReport, newLicenseLines)
     }
   }
 
