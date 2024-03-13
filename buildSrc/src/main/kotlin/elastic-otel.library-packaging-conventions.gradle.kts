@@ -11,7 +11,6 @@ tasks {
 
       include("LICENSE")
       include("NOTICE")
-      include("licenses/**")
     }
   }
 

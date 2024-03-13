@@ -7,9 +7,8 @@ import java.util.stream.Collectors
 import kotlin.collections.ArrayList
 
 plugins {
-  id("maven-publish")
-  id("signing")
   id("elastic-otel.agent-packaging-conventions")
+  id("elastic-otel.sign-and-publish-conventions")
   alias(catalog.plugins.taskinfo)
   alias(catalog.plugins.licenseReport)
 }
@@ -17,6 +16,12 @@ plugins {
 description = rootProject.description + " agent"
 
 base.archivesName.set("elastic-otel-javaagent")
+
+publishingConventions {
+  artifactTasks.add(tasks.shadowJar)
+  artifactTasks.add(tasks.javadocJar)
+  artifactTasks.add(tasks.sourcesJar)
+}
 
 dependencies {
   // required to access OpenTelemetryAgent
@@ -118,51 +123,5 @@ tasks {
       Files.write(licenseReport, newLicenseLines)
     }
   }
-
 }
 
-publishing {
-  publications {
-    register("agentJar", MavenPublication::class) {
-      artifactId = "elastic-otel-javaagent"
-
-      artifact(tasks.shadowJar.get())
-      artifact(tasks.sourcesJar.get())
-      artifact(tasks.javadocJar.get())
-
-      pom {
-        name.set(project.description)
-        description.set(project.description)
-        url.set("https://github.com/elastic/elastic-otel-java")
-        licenses {
-          license {
-            name.set("The Apache License, Version 2.0")
-            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-          }
-        }
-        developers {
-          developer {
-            name.set("Elastic Inc.")
-            url.set("https://www.elastic.co")
-          }
-        }
-        scm {
-          connection.set("scm:git:git@github.com:elastic/elastic-otel-java.git")
-          developerConnection.set("scm:git:git@github.com:elastic/elastic-otel-java.git")
-          url.set("https://github.com/elastic/elastic-otel-java")
-        }
-      }
-    }
-  }
-}
-
-
-signing {
-  setRequired({
-    // only sign in CI
-    System.getenv("CI") == "true"
-  })
-  // use in-memory ascii-armored key in environment variables
-  useInMemoryPgpKeys(System.getenv("KEY_ID_SECRET"), System.getenv("SECRING_ASC"), System.getenv("KEYPASS_SECRET"))
-  sign(publishing.publications["agentJar"])
-}

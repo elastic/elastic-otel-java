@@ -1,5 +1,7 @@
 plugins {
-    id("java-library")
+  id("java-library")
+  id("elastic-otel.library-packaging-conventions")
+  id("elastic-otel.sign-and-publish-conventions")
 }
 
 dependencies {
