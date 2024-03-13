@@ -6,20 +6,23 @@ junit = "5.10.2"
 autoservice = "1.1.1"
 
 # otel SDK and API
+# updated from upstream agent with .ci/update-upstream.sh
 opentelemetrySdk = "1.35.0"
 
 # otel protocol (OTLP)
 opentelemetryProto = "1.1.0-alpha"
 
 # otel agent, those two should be updated together
+# updated from upstream agent with .ci/update-upstream.sh
 opentelemetryJavaagent = "2.1.0"
-opentelemetryJavaagentAlpha = "2.2.0-alpha-SNAPSHOT"
+opentelemetryJavaagentAlpha = "2.1.0-alpha"
 
 # otel semconv java generated bindings, needs to be kept in sync with version in otel agent
 opentelemetrySemconv = "1.23.1-alpha"
 
 # otel contrib
-opentelemetryContribAlpha = "1.34.0-alpha-SNAPSHOT"
+# updated from upstream agent with .ci/update-upstream.sh
+opentelemetryContribAlpha = "1.33.0-alpha"
 
 [libraries]
 
