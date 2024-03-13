@@ -34,7 +34,7 @@ jobs:
             echo "This is a snapshot version"
             output=true
           fi
-          echo "is-snapshot=${output}" >> "${GITHUB_OUTPUT}"
+          echo "is-snapshot=${output}" >> "$GITHUB_OUTPUT"
 
   deploy:
     name: Deploy
