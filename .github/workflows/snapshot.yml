@@ -23,6 +23,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Warmup gradle wrapper
+        uses: ./.github/workflows/gradle-goal
+        with:
+          command: "./gradlew -q currentVersion"
       - name: Validate version is a snapshot version
         run: |
           output=false
