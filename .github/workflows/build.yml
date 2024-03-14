@@ -32,17 +32,6 @@ jobs:
           # We also compile the test-classes, even though we are skipping the tests
           command: "./gradlew build testClasses -x test"
 
-      - name: Warmup gradle wrapper
-        uses: ./.github/workflows/gradle-goal
-        with:
-          command: "./gradlew check"
-      - name: Store test results
-        if: success() || failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results
-          path: '**/build/test-results/test/TEST-*.xml'
-
       - name: Cache working directory with build results
         uses: actions/upload-artifact@v3
         with:
