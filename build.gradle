@@ -1,6 +1,5 @@
 plugins {
   id "idea"
-  id "maven-publish"
   id "base" // required to get 'clean' task
   alias(catalog.plugins.nexusPublish)
 }
@@ -85,15 +84,6 @@ subprojects {
     }
   }
 
-  publishing {
-    repositories {
-      // dry-run repository will be wiped on 'clean' task
-      maven {
-        name = 'dryRun'
-        url = rootProject.layout.buildDirectory.dir("dry-run-maven-repo")
-      }
-    }
-  }
 }
 
 nexusPublishing {
