@@ -52,4 +52,12 @@ public class AutoConfiguredDataCapture implements AutoConfigurationCustomizerPro
           return spanExporter;
         });
   }
+
+  @Override
+  public int order() {
+    // There might be other autoconfigurations wrapping SpanExporters,
+    // which can result in us failing to detect it
+    // We avoid this by ensuring that we run first
+    return Integer.MIN_VALUE;
+  }
 }

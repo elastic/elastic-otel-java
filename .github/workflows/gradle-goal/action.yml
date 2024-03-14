@@ -1,0 +1,33 @@
+---
+
+name: gradle-goal
+description: Install specific JDK and run a command
+  
+inputs:
+  java-version-file:
+    description: 'The path to the .java-version file'
+    required: false
+    default: '.java-version'
+  distribution:
+    description: 'Java distribution'
+    required: true
+    default: 'temurin'
+  command:
+    description: 'Command to execute'
+    required: true
+  shell:
+    description: 'Default shell'
+    default: 'bash'
+    required: false
+  
+runs:
+  using: "composite"
+  steps:
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version-file: ${{ inputs.java-version-file }}
+        distribution: ${{ inputs.distribution }}
+        cache: 'gradle'
+    - run: ${{ inputs.command }}
+      shell: ${{ inputs.shell }}

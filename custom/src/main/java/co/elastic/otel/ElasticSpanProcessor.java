@@ -18,15 +18,11 @@
  */
 package co.elastic.otel;
 
-import co.elastic.otel.common.ElasticAttributes;
-import co.elastic.otel.common.LocalRootSpan;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SpanProcessor;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 public class ElasticSpanProcessor implements SpanProcessor {
 
@@ -39,7 +35,6 @@ public class ElasticSpanProcessor implements SpanProcessor {
 
   @Override
   public void onStart(Context parentContext, ReadWriteSpan span) {
-    LocalRootSpan.onSpanStart(span, parentContext);
     breakdownMetrics.onSpanStart(parentContext, span);
   }
 
@@ -51,8 +46,6 @@ public class ElasticSpanProcessor implements SpanProcessor {
   @Override
   public void onEnd(ReadableSpan span) {
     breakdownMetrics.onSpanEnd(span);
-
-    captureStackTrace(span);
   }
 
   @Override
@@ -67,25 +60,5 @@ public class ElasticSpanProcessor implements SpanProcessor {
 
   public void registerSpanExporter(ElasticSpanExporter spanExporter) {
     this.spanExporter = spanExporter;
-  }
-
-  private void captureStackTrace(ReadableSpan span) {
-    if (spanExporter == null) {
-      return;
-    }
-
-    // do not overwrite stacktrace if present
-    if (span.getAttribute(ElasticAttributes.SPAN_STACKTRACE) == null) {
-      Throwable exception = new Throwable();
-      StringWriter stringWriter = new StringWriter();
-      try (PrintWriter printWriter = new PrintWriter(stringWriter)) {
-        exception.printStackTrace(printWriter);
-      }
-
-      // TODO should we filter-out the calling code that is within the agent: at least onEnd +
-      // captureStackTrace will be included here
-      spanExporter.addAttribute(
-          span.getSpanContext(), ElasticAttributes.SPAN_STACKTRACE, stringWriter.toString());
-    }
   }
 }

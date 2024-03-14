@@ -1,16 +1,10 @@
 plugins {
   id("java-library")
-  alias(libs.plugins.jmh)
+  id("elastic-otel.library-packaging-conventions")
+  id("elastic-otel.sign-and-publish-conventions")
 }
 
-
-jmh {
-  fork = 1
-  iterations = 3
-  warmupIterations = 2
-  //profilers.add("jfr")
-}
-
+description = "Elastic OpenTelemetry common utilities"
 
 dependencies {
     annotationProcessor(libs.autoservice.processor)

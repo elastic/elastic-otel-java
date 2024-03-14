@@ -59,13 +59,13 @@ public class UniversalProfilingProcessorTest {
 
       Span span = tracer.spanBuilder("first").startSpan();
 
-      checkTlsIs(Span.getInvalid());
+      checkTlsIs(Span.getInvalid(), null);
       try (Scope s1 = span.makeCurrent()) {
-        checkTlsIs(span);
+        checkTlsIs(span, span);
         try (Scope s2 = remoteCtx.makeCurrent()) {
-          checkTlsIs(Span.getInvalid());
+          checkTlsIs(Span.getInvalid(), null);
         }
-        checkTlsIs(span);
+        checkTlsIs(span, span);
       }
     }
   }
@@ -81,26 +81,26 @@ public class UniversalProfilingProcessorTest {
       Span third =
           tracer.spanBuilder("third").setParent(Context.current().with(second)).startSpan();
 
-      checkTlsIs(Span.getInvalid());
+      checkTlsIs(Span.getInvalid(), null);
       try (Scope s1 = first.makeCurrent()) {
-        checkTlsIs(first);
+        checkTlsIs(first, first);
         try (Scope nested = first.makeCurrent()) {
-          checkTlsIs(first);
+          checkTlsIs(first, first);
         }
         try (Scope s2 = second.makeCurrent()) {
-          checkTlsIs(second);
+          checkTlsIs(second, second);
           try (Scope s3 = third.makeCurrent()) {
-            checkTlsIs(third);
+            checkTlsIs(third, second);
             try (Scope reactivation = first.makeCurrent()) {
-              checkTlsIs(first);
+              checkTlsIs(first, first);
             }
-            checkTlsIs(third);
+            checkTlsIs(third, second);
           }
-          checkTlsIs(second);
+          checkTlsIs(second, second);
         }
-        checkTlsIs(first);
+        checkTlsIs(first, first);
       }
-      checkTlsIs(Span.getInvalid());
+      checkTlsIs(Span.getInvalid(), null);
     }
   }
 
@@ -139,7 +139,7 @@ public class UniversalProfilingProcessorTest {
     return new String(serviceUtf8, StandardCharsets.UTF_8);
   }
 
-  private void checkTlsIs(Span span) {
+  private void checkTlsIs(Span span, Span localRoot) {
     ByteBuffer tls = JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(TLS_STORAGE_SIZE);
     if (tls != null) {
       tls.order(ByteOrder.nativeOrder());
@@ -164,7 +164,7 @@ public class UniversalProfilingProcessorTest {
       assertThat(spanId).containsExactly(ctx.getSpanIdBytes());
       tls.position(29);
       tls.get(localRootSpanId);
-      assertThat(localRootSpanId).containsExactly(0, 0, 0, 0, 0, 0, 0, 0);
+      assertThat(localRootSpanId).containsExactly(localRoot.getSpanContext().getSpanIdBytes());
     } else if (tls != null) {
       assertThat(tls.get(3)).isEqualTo((byte) 0); // trace-present-flag
     }

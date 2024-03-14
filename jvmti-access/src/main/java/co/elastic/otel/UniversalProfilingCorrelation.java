@@ -18,6 +18,9 @@
  */
 package co.elastic.otel;
 
+import co.elastic.otel.profiler.DecodeException;
+import co.elastic.otel.profiler.MessageDecoder;
+import co.elastic.otel.profiler.ProfilerMessage;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
@@ -35,7 +38,12 @@ public class UniversalProfilingCorrelation {
   // We hold a reference to the configured processStorage to make sure it is not GCed
   private static ByteBuffer processStorage;
 
+  private static final ByteBuffer messageBuffer;
+  private static final MessageDecoder messageDecoder = new MessageDecoder();
+
   static {
+    messageBuffer = ByteBuffer.allocateDirect(1024);
+    messageBuffer.order(ByteOrder.nativeOrder());
     reset();
   }
 
@@ -89,6 +97,61 @@ public class UniversalProfilingCorrelation {
         threadStorage.remove();
       }
     }
+  }
+
+  /**
+   * Starts and binds a unix socket at the given filepath to receive messages from the profiler.
+   *
+   * @param filepath the file to use for binding the socket
+   */
+  public static void startProfilerReturnChannel(String filepath) {
+    JvmtiAccess.startProfilerReturnChannelSocket(filepath);
+  }
+
+  /** Stops and removes the socket created via {@link #stopProfilerReturnChannel()}. */
+  public static void stopProfilerReturnChannel() {
+    JvmtiAccess.stopProfilerReturnChannelSocket();
+  }
+
+  /**
+   * Reads a message as bytearray from the profiler return channel socket into the provided
+   * bytebuffer. If the provided buffer is smaller than the received message, the message will be
+   * truncated.
+   *
+   * @param outputBuffer the buffer to read to. The position will be reset to 0 and the limit will
+   *     be set to the size of the received message.
+   * @return true, if a message was available and received. False if no message is available
+   */
+  static boolean readProfilerReturnChannelMessageBytes(ByteBuffer outputBuffer) {
+    if (!outputBuffer.isDirect()) {
+      throw new IllegalArgumentException("The provided bytebuffer is not direct");
+    }
+    if (outputBuffer.order() != ByteOrder.nativeOrder()) {
+      throw new IllegalArgumentException("The provided bytebuffer does not have native byteorder");
+    }
+    int numBytesRead = JvmtiAccess.receiveProfilerReturnChannelMessage(outputBuffer);
+    outputBuffer.position(0);
+    outputBuffer.limit(numBytesRead);
+    return numBytesRead > 0;
+  }
+
+  /**
+   * Reads a message from the profiler return channel socket. If no message is available, null is
+   * returned.
+   *
+   * <p>The returned message is a singleton and will be reused on subsequent invocations. Therefore,
+   * the return value only remains valid until the next call of this method.
+   *
+   * @throws DecodeException if anything went wrong decoding the current message. This exception
+   *     indicates that the call can be retried to fetch the next message.
+   */
+  @Nullable
+  public static synchronized ProfilerMessage readProfilerReturnChannelMessage()
+      throws DecodeException {
+    if (readProfilerReturnChannelMessageBytes(messageBuffer)) {
+      return messageDecoder.decode(messageBuffer);
+    }
+    return null;
   }
 
   static synchronized void reset() {

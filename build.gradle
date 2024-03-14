@@ -1,16 +1,14 @@
-import com.github.jk1.license.filter.LicenseBundleNormalizer
-import com.github.jk1.license.render.InventoryMarkdownReportRenderer
-
 plugins {
   id "idea"
-  id "maven-publish"
   id "base" // required to get 'clean' task
-  id 'com.github.jk1.dependency-license-report' version '2.5'
   alias(catalog.plugins.nexusPublish)
 }
 
 group 'co.elastic.otel'
-version '0.0.1-SNAPSHOT'
+
+Properties versionProperties = new Properties()
+versionProperties.load(new FileInputStream(file('version.properties')))
+version = versionProperties.get("version")
 
 description = "Elastic OpenTelemetry java distribution"
 
@@ -86,15 +84,6 @@ subprojects {
     }
   }
 
-  publishing {
-    repositories {
-      // dry-run repository will be wiped on 'clean' task
-      maven {
-        name = 'dryRun'
-        url = rootProject.layout.buildDirectory.dir("dry-run-maven-repo")
-      }
-    }
-  }
 }
 
 nexusPublishing {
@@ -108,29 +97,32 @@ task copyGitHooks(type: Copy) {
   into layout.projectDirectory.dir(".git").dir("hooks")
 }
 
+task currentVersion {
+  doLast {
+    println project.version
+  }
+}
+
+task setVersion {
+  doLast {
+    def versionFile = file('version.properties')
+    versionFile.text = "version=${newVersion}\n"
+  }
+}
+
+task setNextVersion {
+  doLast {
+    def versionFile = file('version.properties')
+    def pattern = /version=(\d+\.\d+\.\d+)(-SNAPSHOT)?/
+    versionFile.text = versionFile.text.replaceFirst(pattern) { match, version, suffix ->
+      def (major, minor, patch) = version.split(/\./).collect { it as int }
+      "version=${major}.${minor}.${patch + 1}-SNAPSHOT"
+    }
+  }
+}
+
 tasks.configure {
   doLast {
     copyGitHooks
   }
-}
-
-generateLicenseReport.doFirst {
-  delete "$rootDir/licenses"
-}
-
-licenseReport {
-  outputDir = "$projectDir/licenses"
-  renderers = [new InventoryMarkdownReportRenderer("licenses.md")]
-  excludeBoms = true
-  excludes = [
-        "io.opentelemetry:opentelemetry-bom-alpha",
-        "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha"
-  ]
-  filters = [new LicenseBundleNormalizer(bundlePath: "$projectDir/buildscripts/license-normalizer-bundle.json")]
-  projects = [rootProject, rootProject.project("agent"), rootProject.project("bootstrap"),
-              rootProject.project("common"), rootProject.project("custom"),
-              rootProject.project("inferred-spans"), rootProject.project("instrumentation"),
-              rootProject.project("resources"), project]
-  configurations = ['runtimeClasspath', 'compileClasspath']
-
 }

@@ -86,7 +86,8 @@ public class LocalRootSpan {
    * <p>NOTE: The returned value may be null in any of the following cases:
    *
    * <ul>
-   *   <li>{@link #onSpanStart(Span, Context)} was not called for the span and all its parents
+   *   <li>{@link #onSpanStart(ReadableSpan, Context)} was not called for the span and all its
+   *       parents
    *   <li>The provided span or one if its parents is a delayed inferred span where the parent was
    *       provided as a remote span
    * </ul>

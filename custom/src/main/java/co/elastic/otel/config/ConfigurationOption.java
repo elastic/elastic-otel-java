@@ -43,4 +43,16 @@ public class ConfigurationOption {
   public boolean reconcilesTo(ConfigurationOption option) {
     return key.equals(option.key);
   }
+
+  @Override
+  public String toString() {
+    return "ConfigurationOption{"
+        + "key='"
+        + key
+        + '\''
+        + ", description='"
+        + description
+        + '\''
+        + '}';
+  }
 }

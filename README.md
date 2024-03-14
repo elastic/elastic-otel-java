@@ -1,15 +1,14 @@
-# Disclamer
+# Elastic OpenTelemetry Java distribution
 
-This is currently a work-in-progress project.
+This project is the Elastic distribution of the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation).
 
-# Elastic OpenTelemetry Java agent
+This is currently an early alpha release and should be used mostly for testing.
 
-This project is the Elastic distribution of OpenTelemetry Java agent.
+## Download
 
-## Build
+Latest release: [![Maven Central](https://img.shields.io/maven-central/v/co.elastic.otel/elastic-otel-javaagent?label=elastic-otel-javaagent)](https://mvnrepository.com/artifact/co.elastic.otel/elastic-otel-javaagent/latest)
 
-Execute `gradle assemble`, the agent binary will be in `./agent/build/libs/elastic-otel-javaagent-${VERSION}.jar`
-where `${VERSION}` is the current project version.
+Latest snapshot: [![Sonatype Nexus](https://img.shields.io/nexus/s/co.elastic.otel/elastic-otel-javaagent?server=https%3A%2F%2Foss.sonatype.org&label=elastic-otel-javaagent)](https://oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=co.elastic.otel&a=elastic-otel-javaagent&v=LATEST)
 
 ## Run
 
@@ -19,10 +18,22 @@ Use the `-javaagent:` JVM argument with the path to agent jar.
 java -javaagent:/path/to/agent.jar \
 -jar myapp.jar
 ```
+## Build
 
-## Setup
+Execute `./gradlew assemble`, the agent binary will be in `./agent/build/libs/elastic-otel-javaagent-${VERSION}.jar`
+where `${VERSION}` is the current project version set in [`version.properties`](version.properties).
 
-Breakdown metrics currently require a custom Elasticsearch ingest pipeline
+## Features
+
+### Inferred spans
+
+Set `ELASTIC_OTEL_INFERRED_SPANS_ENABLED=true` to enable.
+
+See [inferred spans](./inferred-spans/README.md) for more details
+
+### Breakdown metrics
+
+Breakdown metrics currently require a custom Elasticsearch ingest pipeline.
 
 ```
 PUT _ingest/pipeline/metrics-apm.app@custom

@@ -1,6 +1,10 @@
 plugins {
   `java-library`
+  id("elastic-otel.library-packaging-conventions")
+  id("elastic-otel.sign-and-publish-conventions")
 }
+
+description = "Elastic OpenTelemetry Inferred Spans extension"
 
 dependencies {
   annotationProcessor(libs.autoservice.processor)
@@ -43,20 +47,4 @@ tasks.processResources {
 
 tasks.withType<Test>().all {
   jvmArgs("-Djava.util.logging.config.file="+sourceSets.test.get().output.resourcesDir+"/logging.properties")
-}
-
-publishing {
-  publications {
-    create<MavenPublication>("maven") {
-      from(components["java"])
-      versionMapping {
-        usage("java-api") {
-          fromResolutionOf("runtimeClasspath")
-        }
-        usage("java-runtime") {
-          fromResolutionResult()
-        }
-      }
-    }
-  }
 }

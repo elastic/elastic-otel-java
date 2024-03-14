@@ -49,4 +49,21 @@ public class JvmtiAccessImpl {
    * setProcessProfilingCorrelationBuffer0.
    */
   public static native ByteBuffer createProcessProfilingCorrelationBufferAlias(long capacity);
+
+  static native int startProfilerReturnChannelSocket0(String socketFilePath);
+
+  static native int stopProfilerReturnChannelSocket0();
+
+  /**
+   * @return the message size, if a message was read. 0 if no message was received.
+   */
+  static native int readProfilerReturnChannelSocketMessage0(ByteBuffer outputDirectBuffer);
+
+  /**
+   * ONLY FOR TESTING! Sends data to the socket which can be subsequently read via {@link
+   * #readProfilerReturnChannelSocketMessage0(ByteBuffer)}.
+   *
+   * @param data the message to send
+   */
+  public static native int sendToProfilerReturnChannelSocket0(byte[] data);
 }
