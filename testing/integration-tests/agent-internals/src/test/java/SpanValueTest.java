@@ -26,7 +26,7 @@ import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import org.junit.jupiter.api.Test;
 
-public class SpanValuesTest {
+public class SpanValueTest {
   @Test
   @SuppressWarnings("unchecked")
   public void ensureStoredAsFields() throws Exception {

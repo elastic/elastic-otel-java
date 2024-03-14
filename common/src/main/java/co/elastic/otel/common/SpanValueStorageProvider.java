@@ -31,23 +31,19 @@ public interface SpanValueStorageProvider {
         ? FieldBackedSpanValueStorageProvider.INSTANCE : MapBacked.getInstance();
   }
 
-
   @Nullable
   SpanValueStorage get(Span span, boolean initialize);
-
 
   class MapBacked implements SpanValueStorageProvider {
 
     private static MapBacked INSTANCE;
 
-    public static MapBacked getInstance() {
-      synchronized (MapBacked.class) {
-        // Lazy initialization to avoid unnecessary creation of the backing map
-        if (INSTANCE == null) {
-          INSTANCE = new MapBacked();
-        }
-        return INSTANCE;
+    public static synchronized MapBacked getInstance() {
+      // Lazy initialization to avoid unnecessary creation of the backing map
+      if (INSTANCE == null) {
+        INSTANCE = new MapBacked();
       }
+      return INSTANCE;
     }
 
     private final WeakConcurrentMap<Span, SpanValueStorage> storageMap =
