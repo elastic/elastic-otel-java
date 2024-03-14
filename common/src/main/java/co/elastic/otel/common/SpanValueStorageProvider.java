@@ -18,7 +18,6 @@
  */
 package co.elastic.otel.common;
 
-
 import com.blogspot.mydailyjava.weaklockfree.WeakConcurrentMap;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.sdk.trace.FieldBackedSpanValueStorageProvider;
@@ -28,7 +27,8 @@ public interface SpanValueStorageProvider {
 
   static SpanValueStorageProvider get() {
     return FieldBackedSpanValueStorageProvider.INSTANCE != null
-        ? FieldBackedSpanValueStorageProvider.INSTANCE : MapBacked.getInstance();
+        ? FieldBackedSpanValueStorageProvider.INSTANCE
+        : MapBacked.getInstance();
   }
 
   @Nullable
@@ -46,8 +46,7 @@ public interface SpanValueStorageProvider {
       return INSTANCE;
     }
 
-    private final WeakConcurrentMap<Span, SpanValueStorage> storageMap =
-        WeakConcurrent.createMap();
+    private final WeakConcurrentMap<Span, SpanValueStorage> storageMap = WeakConcurrent.createMap();
 
     @Override
     public SpanValueStorage get(Span span, boolean initialize) {
@@ -60,5 +59,4 @@ public interface SpanValueStorageProvider {
       return storage;
     }
   }
-
 }

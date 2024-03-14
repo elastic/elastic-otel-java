@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
@@ -37,27 +36,27 @@ public class SpanValueTest {
     Tracer tracer = GlobalOpenTelemetry.get().getTracer("my-tracer");
     Span bridgeSpan = tracer.spanBuilder("s1").startSpan();
 
-    //Move from the bridged span to the agent internal Span instance (of the Agent's SDK).
+    // Move from the bridged span to the agent internal Span instance (of the Agent's SDK).
     Object agentSpan = readFieldValue(bridgeSpan, "agentSpan");
     assertThat(agentSpan.getClass().getSimpleName()).isEqualTo("SdkSpan");
 
-    //From that Classloader we should be able to find and create SpanValues
-    Class<?> SpanValueClass = Class.forName(
-        "co.elastic.otel.common.SpanValue", true, agentSpan.getClass().getClassLoader());
-    Class<?> ReadableSpanInterface = Class.forName(
-        "io.opentelemetry.sdk.trace.ReadableSpan", true, agentSpan.getClass().getClassLoader()
-    );
+    // From that Classloader we should be able to find and create SpanValues
+    Class<?> SpanValueClass =
+        Class.forName(
+            "co.elastic.otel.common.SpanValue", true, agentSpan.getClass().getClassLoader());
+    Class<?> ReadableSpanInterface =
+        Class.forName(
+            "io.opentelemetry.sdk.trace.ReadableSpan", true, agentSpan.getClass().getClassLoader());
     Object denseSpanValue = SpanValueClass.getMethod("createDense").invoke(null);
 
-    //create a new span which has a space for our newly created SpanValue allocated
+    // create a new span which has a space for our newly created SpanValue allocated
 
     Span bridgeSpan2 = tracer.spanBuilder("s2").startSpan();
     Object agentSpan2 = readFieldValue(bridgeSpan2, "agentSpan");
 
-    SpanValueClass
-        .getMethod("set", ReadableSpanInterface, Object.class)
+    SpanValueClass.getMethod("set", ReadableSpanInterface, Object.class)
         .invoke(denseSpanValue, agentSpan2, "foo");
-    //Setting the value should initialize the backing AtomicReferenceArray on the span
+    // Setting the value should initialize the backing AtomicReferenceArray on the span
     AtomicReferenceArray<Object> storage =
         (AtomicReferenceArray<Object>) readFieldValue(agentSpan2, "$elasticSpanValues");
 
@@ -74,9 +73,7 @@ public class SpanValueTest {
     storage.set(storageIndex, "bar");
 
     Object value =
-        SpanValueClass
-            .getMethod("get", ReadableSpanInterface)
-            .invoke(denseSpanValue, agentSpan2);
+        SpanValueClass.getMethod("get", ReadableSpanInterface).invoke(denseSpanValue, agentSpan2);
 
     assertThat(value).isEqualTo("bar");
   }
@@ -86,5 +83,4 @@ public class SpanValueTest {
     fieldRef.setAccessible(true);
     return fieldRef.get(instance);
   }
-
 }

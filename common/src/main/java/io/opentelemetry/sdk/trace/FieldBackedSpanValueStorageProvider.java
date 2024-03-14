@@ -1,3 +1,21 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package io.opentelemetry.sdk.trace;
 
 import co.elastic.otel.common.SpanValueStorage;
@@ -12,12 +30,12 @@ import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
 /**
- * This class enables {@link co.elastic.otel.common.SpanValue}s to be stored directly as fields on spans.
- * The field ($elasticSpanValues) is injected at packaging time via the shadow plugin to our agent distro.
- * <p>
- * This class needs to live in the same package as the OpenTelemetry SdkSpan,
- * otherwise it is not possible to create an {@link AtomicReferenceFieldUpdater} for safely
- * initializing the field.
+ * This class enables {@link co.elastic.otel.common.SpanValue}s to be stored directly as fields on
+ * spans. The field ($elasticSpanValues) is injected at packaging time via the shadow plugin to our
+ * agent distro.
+ *
+ * <p>This class needs to live in the same package as the OpenTelemetry SdkSpan, otherwise it is not
+ * possible to create an {@link AtomicReferenceFieldUpdater} for safely initializing the field.
  */
 @SuppressWarnings("unchecked")
 public class FieldBackedSpanValueStorageProvider implements SpanValueStorageProvider {
@@ -48,7 +66,8 @@ public class FieldBackedSpanValueStorageProvider implements SpanValueStorageProv
       resultInstance = new FieldBackedSpanValueStorageProvider();
 
     } catch (NoSuchFieldException e) {
-      logger.log(Level.FINE,
+      logger.log(
+          Level.FINE,
           "Using map-backed storage for SpanValues because Field '{0}' does not exist on SdkSpan",
           FIELD_NAME);
     } catch (Exception e) {
@@ -76,7 +95,7 @@ public class FieldBackedSpanValueStorageProvider implements SpanValueStorageProv
 
   private static SpanValueStorage getFieldValue(SdkSpan sdkSpan) {
     try {
-      //double cast is required here because invokeExact is signature polymorphic
+      // double cast is required here because invokeExact is signature polymorphic
       return (SpanValueStorage) (Object) spanFieldGetter.invokeExact(sdkSpan);
     } catch (Throwable e) {
       throw new IllegalStateException(e);
