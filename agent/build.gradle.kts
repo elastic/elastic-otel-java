@@ -13,7 +13,7 @@ plugins {
   alias(catalog.plugins.licenseReport)
 }
 
-description = rootProject.description + " agent"
+description = "Elastic OpenTelemetry java distribution agent"
 
 base.archivesName.set("elastic-otel-javaagent")
 

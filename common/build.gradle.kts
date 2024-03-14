@@ -4,6 +4,8 @@ plugins {
   id("elastic-otel.sign-and-publish-conventions")
 }
 
+description = "Elastic OpenTelemetry common utilities"
+
 dependencies {
     annotationProcessor(libs.autoservice.processor)
     api("com.blogspot.mydailyjava:weak-lock-free:0.18")

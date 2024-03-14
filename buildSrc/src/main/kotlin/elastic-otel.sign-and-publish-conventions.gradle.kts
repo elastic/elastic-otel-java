@@ -19,6 +19,10 @@ publishingConventions.artifactTasks.convention(listOf())
 
 afterEvaluate {
 
+  if (project.description == null || project.description!!.isBlank()) {
+    throw GradleException("Project description must be set to publish the project to maven central!")
+  }
+
   publishing {
 
     repositories {
@@ -53,6 +57,7 @@ afterEvaluate {
         }
 
         pom {
+
           name.set(project.description)
           description.set(project.description)
           url.set("https://github.com/elastic/elastic-otel-java")

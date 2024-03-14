@@ -4,7 +4,7 @@ plugins {
   id("elastic-otel.sign-and-publish-conventions")
 }
 
-description = rootProject.description + " inferred-spans"
+description = "Elastic OpenTelemetry Inferred Spans extension"
 
 dependencies {
   annotationProcessor(libs.autoservice.processor)
