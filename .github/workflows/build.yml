@@ -33,13 +33,13 @@ jobs:
           command: "./gradlew build testClasses -x test"
 
       - name: Create working dir archive
-        run: "tar --exclude='./working-dir-build-cache.tar.gz' -czf ./working-dir-build-cache.tar.gz ."
+        run: "mkdir ./wdarch && tar --exclude='./wdarch' -czf ./wdarch/working-dir-build-cache.tar.gz ."
 
       - name: Cache working directory with build results
         uses: actions/upload-artifact@v3
         with:
           name: working-dir-build-cache
-          path: ./working-dir-build-cache.tar.gz
+          path: ./wdarch/working-dir-build-cache.tar.gz
 
       - name: Agent artifact
         uses: actions/upload-artifact@v3
