@@ -16,6 +16,11 @@ repositories {
 dependencies {
     implementation(catalog.spotlessPlugin)
     implementation(catalog.shadowPlugin)
+    // The ant dependency is required to add custom transformers for the shadow plugin
+    // but it is unfortunately not exposed as transitive dependency
+    implementation("org.apache.ant:ant:1.10.13")
+    // ASM is used for compile-time code modification to inject a field for backing SpanValues
+    implementation("org.ow2.asm:asm:9.6")
     // TODO : for now we have to disable it because it transitively imports an older apache httpclient
     // that makes the transitive one from jib fail see https://github.com/elastic/elastic-otel-java/issues/9 for details
     // implementation("io.opentelemetry.instrumentation:gradle-plugins:1.30.0-alpha-SNAPSHOT")

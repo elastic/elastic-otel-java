@@ -28,7 +28,7 @@ public interface SpanValueStorageProvider {
 
   static SpanValueStorageProvider get() {
     return FieldBackedSpanValueStorageProvider.INSTANCE != null
-        ? FieldBackedSpanValueStorageProvider.INSTANCE : new MapBacked();
+        ? FieldBackedSpanValueStorageProvider.INSTANCE : MapBacked.getInstance();
   }
 
 
@@ -37,6 +37,18 @@ public interface SpanValueStorageProvider {
 
 
   class MapBacked implements SpanValueStorageProvider {
+
+    private static MapBacked INSTANCE;
+
+    public static MapBacked getInstance() {
+      synchronized (MapBacked.class) {
+        // Lazy initialization to avoid unnecessary creation of the backing map
+        if (INSTANCE == null) {
+          INSTANCE = new MapBacked();
+        }
+        return INSTANCE;
+      }
+    }
 
     private final WeakConcurrentMap<Span, SpanValueStorage> storageMap =
         WeakConcurrent.createMap();

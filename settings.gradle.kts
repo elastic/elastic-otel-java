@@ -27,6 +27,7 @@ include("common")
 include("testing-common")
 include("universal-profiling-integration")
 include("testing:integration-tests:inferred-spans-test")
+include("testing:integration-tests:agent-internals")
 
 dependencyResolutionManagement {
     versionCatalogs {

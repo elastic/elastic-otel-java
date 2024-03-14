@@ -10,6 +10,10 @@ dependencies {
 
 tasks.test {
   jvmArgs(
-    //"-Dotel.javaagent.debug=true"
+    //"-Dotel.javaagent.debug=true",
+    "-Delastic.otel.inferred.spans.enabled=true",
+    "-Delastic.otel.inferred.spans.duration=2000ms",
+    "-Delastic.otel.inferred.spans.interval=2000ms",
+    "-Delastic.otel.inferred.spans.sampling.interval=5ms"
   )
 }
