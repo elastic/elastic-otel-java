@@ -52,6 +52,7 @@ jobs:
           vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
           vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
           pipeline: elastic-otel-java-snapshot
+          pipelineCommit: ${{ github.ref_name }}
           waitFor: false
           printBuildLogs: false
           buildEnvVars: |
