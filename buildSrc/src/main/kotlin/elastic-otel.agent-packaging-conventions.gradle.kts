@@ -110,6 +110,9 @@ tasks {
   }
 
 
+  // This transformer injects a new Field into the Opentelemetry SdkSpan class to be used
+  // as efficient storage for co.elastic.otel.common.SpanValues
+  // Check the FieldBackedSpanValueStorageProvider for details
   val injectSpanValueFieldTransformer = object: com.github.jengelman.gradle.plugins.shadow.transformers.Transformer {
 
     @Internal

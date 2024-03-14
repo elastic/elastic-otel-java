@@ -11,6 +11,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
+/**
+ * This class enables {@link co.elastic.otel.common.SpanValue}s to be stored directly as fields on spans.
+ * The field ($elasticSpanValues) is injected at packaging time via the shadow plugin to our agent distro.
+ * <p>
+ * This class needs to live in the same package as the OpenTelemetry SdkSpan,
+ * otherwise it is not possible to create an {@link AtomicReferenceFieldUpdater} for safely
+ * initializing the field.
+ */
 @SuppressWarnings("unchecked")
 public class FieldBackedSpanValueStorageProvider implements SpanValueStorageProvider {
 
