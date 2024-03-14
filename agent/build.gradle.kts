@@ -22,7 +22,8 @@ dependencies {
   // required to access OpenTelemetryAgent
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-bootstrap")
 
-  upstreamAgent(catalog.opentelemetryJavaagent)
+  upstreamAgent(platform(catalog.opentelemetryInstrumentationAlphaBom))
+  upstreamAgent("io.opentelemetry.javaagent:opentelemetry-javaagent")
 }
 
 

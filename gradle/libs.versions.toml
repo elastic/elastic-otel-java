@@ -10,7 +10,6 @@ opentelemetryProto = "1.1.0-alpha"
 
 # otel agent, we rely on the '*-alpha' and get the non-alpha dependencies transitively
 # updated from upstream agent with .ci/update-upstream.sh
-opentelemetryJavaagent = "2.1.0"
 opentelemetryJavaagentAlpha = "2.1.0-alpha"
 
 # otel contrib
@@ -18,10 +17,6 @@ opentelemetryJavaagentAlpha = "2.1.0-alpha"
 opentelemetryContribAlpha = "1.33.0-alpha"
 
 [libraries]
-
-# For now those aren't resolved from bom for 'upstreamAgent', thus we have to keep them explicit
-opentelemetryJavaagent = { group = "io.opentelemetry.javaagent", name = "opentelemetry-javaagent", version.ref = "opentelemetryJavaagent" }
-opentelemetryJavaagentForTesting = { group = "io.opentelemetry.javaagent", name = "opentelemetry-agent-for-testing", version.ref = "opentelemetryJavaagentAlpha" }
 
 # transitively provides 'opentelemetry-instrumentation-bom' (non-alpha)
 opentelemetryInstrumentationAlphaBom = { group = "io.opentelemetry.instrumentation", name = "opentelemetry-instrumentation-bom-alpha", version.ref = "opentelemetryJavaagentAlpha" }

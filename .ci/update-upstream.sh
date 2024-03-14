@@ -18,11 +18,9 @@ upstream_version() {
     set -e
 }
 
-upstreamAgentVersion="$(upstream_version 'version.gradle.kts' stableVersion)"
 upstreamAgentAlphaVersion="$(upstream_version 'version.gradle.kts' alphaVersion)"
 upstreamContribVersion="$(upstream_version 'dependencyManagement/build.gradle.kts' otelContribVersion)"
 
-sed -i "s/^opentelemetryJavaagent = \".*/opentelemetryJavaagent = \"${upstreamAgentVersion}\"/" "${project_root}/gradle/libs.versions.toml"
 sed -i "s/^opentelemetryJavaagentAlpha = \".*/opentelemetryJavaagentAlpha = \"${upstreamAgentAlphaVersion}\"/" "${project_root}/gradle/libs.versions.toml"
 sed -i "s/^opentelemetryContribAlpha = \".*/opentelemetryContribAlpha = \"${upstreamContribVersion}\"/" "${project_root}/gradle/libs.versions.toml"
 
