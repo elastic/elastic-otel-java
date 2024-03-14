@@ -19,7 +19,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     outputs:
-      is-snapshot: ${{ steps.validate.outputs.is-snapshot }}
+      is-snapshot: ${{ steps.validate-step.outputs.is-snapshot }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,6 +28,7 @@ jobs:
         with:
           command: "./gradlew -q currentVersion"
       - name: Validate version is a snapshot version
+        id: validate-step
         run: |
           output=false
           if [[ "$(./gradlew -q currentVersion)" =~ "-SNAPSHOT" ]]; then
