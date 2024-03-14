@@ -92,23 +92,23 @@
 > - **POM Project URL**: [https://github.com/open-telemetry/opentelemetry-java](https://github.com/open-telemetry/opentelemetry-java)
 > - **POM License**: Apache License, Version 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-**20** **Group:** `io.opentelemetry.contrib` **Name:** `opentelemetry-aws-resources` **Version:** `1.34.0-alpha-SNAPSHOT` 
+**20** **Group:** `io.opentelemetry.contrib` **Name:** `opentelemetry-aws-resources` **Version:** `1.33.0-alpha` 
 > - **POM Project URL**: [https://github.com/open-telemetry/opentelemetry-java-contrib](https://github.com/open-telemetry/opentelemetry-java-contrib)
 > - **POM License**: Apache License, Version 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-**21** **Group:** `io.opentelemetry.contrib` **Name:** `opentelemetry-resource-providers` **Version:** `1.34.0-alpha-SNAPSHOT` 
+**21** **Group:** `io.opentelemetry.contrib` **Name:** `opentelemetry-resource-providers` **Version:** `1.33.0-alpha` 
 > - **POM Project URL**: [https://github.com/open-telemetry/opentelemetry-java-contrib](https://github.com/open-telemetry/opentelemetry-java-contrib)
 > - **POM License**: Apache License, Version 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-**22** **Group:** `io.opentelemetry.javaagent` **Name:** `opentelemetry-javaagent-bootstrap` **Version:** `2.2.0-alpha-SNAPSHOT` 
+**22** **Group:** `io.opentelemetry.javaagent` **Name:** `opentelemetry-javaagent-bootstrap` **Version:** `2.1.0-alpha` 
 > - **POM Project URL**: [https://github.com/open-telemetry/opentelemetry-java-instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation)
 > - **POM License**: Apache License, Version 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-**23** **Group:** `io.opentelemetry.javaagent` **Name:** `opentelemetry-javaagent-extension-api` **Version:** `2.2.0-alpha-SNAPSHOT` 
+**23** **Group:** `io.opentelemetry.javaagent` **Name:** `opentelemetry-javaagent-extension-api` **Version:** `2.1.0-alpha` 
 > - **POM Project URL**: [https://github.com/open-telemetry/opentelemetry-java-instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation)
 > - **POM License**: Apache License, Version 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-**24** **Group:** `io.opentelemetry.javaagent` **Name:** `opentelemetry-javaagent-tooling` **Version:** `2.2.0-alpha-SNAPSHOT` 
+**24** **Group:** `io.opentelemetry.javaagent` **Name:** `opentelemetry-javaagent-tooling` **Version:** `2.1.0-alpha` 
 > - **POM Project URL**: [https://github.com/open-telemetry/opentelemetry-java-instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation)
 > - **POM License**: Apache License, Version 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
@@ -116,10 +116,10 @@
 > - **POM Project URL**: [https://github.com/open-telemetry/semantic-conventions-java](https://github.com/open-telemetry/semantic-conventions-java)
 > - **POM License**: Apache License, Version 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-**26** **Group:** `net.bytebuddy` **Name:** `byte-buddy-dep` **Version:** `1.14.12` 
+**26** **Group:** `net.bytebuddy` **Name:** `byte-buddy-dep` **Version:** `1.14.11` 
 > - **POM License**: Apache License, Version 2.0 - [https://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0)
-> - **Embedded license files**: [byte-buddy-dep-1.14.12.jar/META-INF/LICENSE](byte-buddy-dep-1.14.12.jar/META-INF/LICENSE) 
-    - [byte-buddy-dep-1.14.12.jar/META-INF/NOTICE](byte-buddy-dep-1.14.12.jar/META-INF/NOTICE)
+> - **Embedded license files**: [byte-buddy-dep-1.14.11.jar/META-INF/LICENSE](byte-buddy-dep-1.14.11.jar/META-INF/LICENSE) 
+    - [byte-buddy-dep-1.14.11.jar/META-INF/NOTICE](byte-buddy-dep-1.14.11.jar/META-INF/NOTICE)
 
 **27** **Group:** `org.jctools` **Name:** `jctools-core` **Version:** `4.0.1` 
 > - **Manifest License**: Apache License, Version 2.0 (Not Packaged)

@@ -20,7 +20,7 @@ base.archivesName.set("elastic-otel-javaagent")
 
 dependencies {
   // required to access OpenTelemetryAgent
-  compileOnly(catalog.opentelemetryJavaagentBootstrap)
+  compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-bootstrap")
 
   upstreamAgent(catalog.opentelemetryJavaagent)
 }
