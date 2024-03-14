@@ -62,10 +62,6 @@ subprojects {
 
   dependencies {
 
-    implementation(platform(catalog.opentelemetryBom))
-
-    // these serve as a test of the instrumentation boms
-    implementation(platform(catalog.opentelemetryInstrumentationBom))
     implementation(platform(catalog.opentelemetryInstrumentationAlphaBom))
 
     testImplementation(catalog.mockito)

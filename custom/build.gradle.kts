@@ -11,7 +11,7 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-extension-api")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
-  compileOnly(catalog.opentelemetrySemconv)
+  compileOnly("io.opentelemetry.semconv:opentelemetry-semconv")
 
   annotationProcessor(libs.autoservice.processor)
   compileOnly(libs.autoservice.annotations)
@@ -25,7 +25,7 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   testImplementation("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
-  testImplementation(catalog.opentelemetrySemconv)
+  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv")
 
   testAnnotationProcessor(libs.autoservice.processor)
   testCompileOnly(libs.autoservice.annotations)
