@@ -32,11 +32,14 @@ jobs:
           # We also compile the test-classes, even though we are skipping the tests
           command: "./gradlew build testClasses -x test"
 
+      - name: Create working dir archive
+        run: "tar --exclude='./working-dir-build-cache.tar.gz' -czf ./working-dir-build-cache.tar.gz ."
+
       - name: Cache working directory with build results
         uses: actions/upload-artifact@v3
         with:
           name: working-dir-build-cache
-          path: ./
+          path: ./working-dir-build-cache.tar.gz
 
       - name: Agent artifact
         uses: actions/upload-artifact@v3
@@ -55,6 +58,8 @@ jobs:
         with:
           name: working-dir-build-cache
           path: ./
+      - name: Untar cached build working directory
+        run: "tar -xvf working-dir-build-cache.tar.gz"
       - name: Run tests
         uses: ./.github/workflows/gradle-goal
         with:
