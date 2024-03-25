@@ -187,6 +187,7 @@ public class SpanProfilingSamplesCorrelator {
     public void moveInto(DelayedSpan other) {
       other.span = span;
       other.endNanoTimestamp = endNanoTimestamp;
+      clear();
     }
 
     @Override
