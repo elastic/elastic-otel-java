@@ -33,17 +33,17 @@ jobs:
           command: "./gradlew build testClasses -x test"
 
       # We first tar the working directory and then upload it
-      # We do this because uploading directories with many files directly as artifacts is very slow
+      # We do this because the upload-artifact action doesn't preserve file permissions
       - name: Create working dir archive
         run: "mkdir ./wdarch && tar --exclude='./wdarch' -czf ./wdarch/working-dir-build-cache.tar.gz ."
       - name: Cache working directory with build results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: working-dir-build-cache
           path: ./wdarch/working-dir-build-cache.tar.gz
 
       - name: Agent artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: elastic-otel-javaagent
           path: |
@@ -56,7 +56,7 @@ jobs:
     steps:
       # We use the cached working directory so that we don't have to recompile everything
       - name: Download cached build working directory
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: working-dir-build-cache
           path: ./
