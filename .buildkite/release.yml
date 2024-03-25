@@ -1,5 +1,6 @@
 agents:
   provider: "gcp"
+  image: "family/elastic-otel-java-ubuntu-2204"
 
 steps:
   - label: "Build and publish release"

@@ -19,18 +19,23 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     outputs:
-      is-snapshot: ${{ steps.validate.outputs.is-snapshot }}
+      is-snapshot: ${{ steps.validate-step.outputs.is-snapshot }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Warmup gradle wrapper
+        uses: ./.github/workflows/gradle-goal
+        with:
+          command: "./gradlew -q currentVersion"
       - name: Validate version is a snapshot version
+        id: validate-step
         run: |
           output=false
           if [[ "$(./gradlew -q currentVersion)" =~ "-SNAPSHOT" ]]; then
             echo "This is a snapshot version"
             output=true
           fi
-          echo "is-snapshot=${output}" >> "${GITHUB_OUTPUT}"
+          echo "is-snapshot=${output}" >> "$GITHUB_OUTPUT"
 
   deploy:
     name: Deploy
@@ -47,6 +52,7 @@ jobs:
           vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
           vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
           pipeline: elastic-otel-java-snapshot
+          pipelineCommit: ${{ github.ref_name }}
           waitFor: false
           printBuildLogs: false
           buildEnvVars: |
