@@ -41,6 +41,7 @@ jobs:
         with:
           name: working-dir-build-cache
           path: ./wdarch/working-dir-build-cache.tar.gz
+          retention-days: 1 # No need to waste space when this artifact is only used as part of the build process
 
       - name: Agent artifact
         uses: actions/upload-artifact@v4
