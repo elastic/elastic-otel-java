@@ -32,22 +32,14 @@ jobs:
           # We also compile the test-classes, even though we are skipping the tests
           command: "./gradlew build testClasses -x test"
 
-      - name: Test upload v4 performance
+      - name: Cache working directory with build results
         uses: actions/upload-artifact@v4
         with:
-          name: wd-upload-perf-test
-          path: ./
-      # We first tar the working directory and then upload it
-      # We do this because uploading directories with many files directly as artifacts is very slow
-      - name: Create working dir archive
-        run: "mkdir ./wdarch && tar --exclude='./wdarch' -czf ./wdarch/working-dir-build-cache.tar.gz ."
-      - name: Cache working directory with build results
-        uses: actions/upload-artifact@v3
-        with:
           name: working-dir-build-cache
-          path: ./wdarch/working-dir-build-cache.tar.gz
+          path: ./
+          retention-days: 1 # No need to waste space when this artifact is only used as part of the build process
       - name: Agent artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: elastic-otel-javaagent
           path: |
@@ -60,12 +52,10 @@ jobs:
     steps:
       # We use the cached working directory so that we don't have to recompile everything
       - name: Download cached build working directory
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: working-dir-build-cache
           path: ./
-      - name: Untar cached build working directory
-        run: "tar -xvf working-dir-build-cache.tar.gz"
       - name: Run tests
         uses: ./.github/workflows/gradle-goal
         with:
