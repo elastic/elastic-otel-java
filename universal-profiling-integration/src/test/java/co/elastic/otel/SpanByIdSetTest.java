@@ -103,11 +103,15 @@ public class SpanByIdSetTest {
     assertThat(set.get(sp1Ctx.getTraceId(), sp1Ctx.getSpanId())).isNull();
     assertThat(set.get(sp2Ctx.getTraceId(), sp2Ctx.getSpanId())).isSameAs(span2);
 
-    set.expungeStaleEntries();
+    // Test failureshave shown that the weak references are not necessarily
+    // added to the queue immediately, so we retry for a limited amount of time
+    await().atMost(Duration.ofSeconds(5)).untilAsserted(() -> {
+      set.expungeStaleEntries();
 
-    assertThat(set.size()).isEqualTo(1);
-    assertThat(set.get(sp1Ctx.getTraceId(), sp1Ctx.getSpanId())).isNull();
-    assertThat(set.get(sp2Ctx.getTraceId(), sp2Ctx.getSpanId())).isSameAs(span2);
+      assertThat(set.size()).isEqualTo(1);
+      assertThat(set.get(sp1Ctx.getTraceId(), sp1Ctx.getSpanId())).isNull();
+      assertThat(set.get(sp2Ctx.getTraceId(), sp2Ctx.getSpanId())).isSameAs(span2);
+    });
   }
 
   private static void waitToBeGCed(WeakReference<ReadableSpan> weakSp1) {
