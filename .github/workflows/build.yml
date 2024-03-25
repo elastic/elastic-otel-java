@@ -32,6 +32,11 @@ jobs:
           # We also compile the test-classes, even though we are skipping the tests
           command: "./gradlew build testClasses -x test"
 
+      - name: Test upload v4 performance
+        uses: actions/upload-artifact@v4
+        with:
+          name: wd-upload-perf-test
+          path: ./
       # We first tar the working directory and then upload it
       # We do this because uploading directories with many files directly as artifacts is very slow
       - name: Create working dir archive
@@ -41,7 +46,6 @@ jobs:
         with:
           name: working-dir-build-cache
           path: ./wdarch/working-dir-build-cache.tar.gz
-
       - name: Agent artifact
         uses: actions/upload-artifact@v3
         with:
