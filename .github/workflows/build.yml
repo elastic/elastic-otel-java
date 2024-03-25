@@ -32,9 +32,10 @@ jobs:
           # We also compile the test-classes, even though we are skipping the tests
           command: "./gradlew build testClasses -x test"
 
+      # We first tar the working directory and then upload it
+      # We do this because uploading directories with many files directly as artifacts is very slow
       - name: Create working dir archive
         run: "mkdir ./wdarch && tar --exclude='./wdarch' -czf ./wdarch/working-dir-build-cache.tar.gz ."
-
       - name: Cache working directory with build results
         uses: actions/upload-artifact@v3
         with:
@@ -53,6 +54,7 @@ jobs:
     needs:
       - build
     steps:
+      # We use the cached working directory so that we don't have to recompile everything
       - name: Download cached build working directory
         uses: actions/download-artifact@v3
         with:
@@ -63,7 +65,11 @@ jobs:
       - name: Run tests
         uses: ./.github/workflows/gradle-goal
         with:
-          command: "./gradlew test"
+          # We manually skip the compileJni task because we know it is up-to-date in the cached
+          # working directory. The up-to-date check of this task checks for the presence of docker
+          # images used for compiling the native library, which do not exist because we are in a new
+          # environment.
+          command: "./gradlew test -x compileJni"
       - name: Store test results
         if: success() || failure()
         uses: actions/upload-artifact@v3
