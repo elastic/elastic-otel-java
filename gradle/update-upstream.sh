@@ -21,6 +21,6 @@ upstream_version() {
 upstreamAgentAlphaVersion="$(upstream_version 'version.gradle.kts' alphaVersion)"
 upstreamContribVersion="$(upstream_version 'dependencyManagement/build.gradle.kts' otelContribVersion)"
 
-sed -i "s/^opentelemetryJavaagentAlpha = \".*/opentelemetryJavaagentAlpha = \"${upstreamAgentAlphaVersion}\"/" "${folder}/libs.versions.toml"
-sed -i "s/^opentelemetryContribAlpha = \".*/opentelemetryContribAlpha = \"${upstreamContribVersion}\"/" "${folder}/libs.versions.toml"
+sed -i '' -e "s/^opentelemetryJavaagentAlpha = \".*/opentelemetryJavaagentAlpha = \"${upstreamAgentAlphaVersion}\"/" "${folder}/libs.versions.toml"
+sed -i '' -e "s/^opentelemetryContribAlpha = \".*/opentelemetryContribAlpha = \"${upstreamContribVersion}\"/" "${folder}/libs.versions.toml"
 

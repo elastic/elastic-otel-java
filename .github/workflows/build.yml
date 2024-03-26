@@ -17,34 +17,63 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: gradle/wrapper-validation-action@v2.1.1
+      - uses: gradle/wrapper-validation-action@v2.1.2
 
-  gradle:
+  build:
     runs-on: ubuntu-latest
     steps:
 
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Gradle build, test and check
+      - name: Gradle build without tests
         uses: ./.github/workflows/gradle-goal
         with:
-          command: "./gradlew check"
+          # We also compile the test-classes, even though we are skipping the tests
+          command: "./gradlew build testClasses -x test"
 
-      - name: Warmup gradle wrapper
+      # We first tar the working directory and then upload it
+      # We do this because the upload-artifact action doesn't preserve file permissions
+      - name: Create working dir archive
+        run: "mkdir ./wdarch && tar --exclude='./wdarch' -czf ./wdarch/working-dir-build-cache.tar.gz ."
+      - name: Cache working directory with build results
+        uses: actions/upload-artifact@v4
+        with:
+          name: working-dir-build-cache
+          path: ./wdarch/working-dir-build-cache.tar.gz
+          retention-days: 1 # No need to waste space when this artifact is only used as part of the build process
+
+      - name: Agent artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: elastic-otel-javaagent
+          path: |
+            ./agent/build/libs/elastic-otel-javaagent-*.jar
+
+  test:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      # We use the cached working directory so that we don't have to recompile everything
+      - name: Download cached build working directory
+        uses: actions/download-artifact@v4
+        with:
+          name: working-dir-build-cache
+          path: ./
+      - name: Untar cached build working directory
+        run: "tar -xvf working-dir-build-cache.tar.gz"
+      - name: Run tests
         uses: ./.github/workflows/gradle-goal
         with:
-          command: "./gradlew check"
+          # We manually skip the compileJni task because we know it is up-to-date in the cached
+          # working directory. The up-to-date check of this task checks for the presence of docker
+          # images used for compiling the native library, which do not exist because we are in a new
+          # environment.
+          command: "./gradlew test -x compileJni"
       - name: Store test results
         if: success() || failure()
         uses: actions/upload-artifact@v3
         with:
           name: test-results
           path: '**/build/test-results/test/TEST-*.xml'
-
-      - name: Agent artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: elastic-otel-javaagent
-          path: |
-            ./agent/build/libs/elastic-otel-javaagent-*.jar
