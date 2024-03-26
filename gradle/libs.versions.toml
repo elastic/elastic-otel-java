@@ -30,7 +30,7 @@ autoservice-processor = { group = "com.google.auto.service", name = "auto-servic
 autoservice-annotations = { group = "com.google.auto.service", name = "auto-service-annotations", version.ref = "autoservice" }
 
 assertj-core = "org.assertj:assertj-core:3.25.3"
-awaitility = "org.awaitility:awaitility:4.2.0"
+awaitility = "org.awaitility:awaitility:4.2.1"
 findbugs-jsr305 = "com.google.code.findbugs:jsr305:3.0.2"
 testcontainers = "org.testcontainers:testcontainers:1.19.7"
 logback = "ch.qos.logback:logback-classic:1.5.3"
