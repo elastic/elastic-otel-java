@@ -78,7 +78,7 @@ public class ElasticAutoConfigurationCustomizerprovider
                   "io.opentelemetry.javaagent.tooling.DistroVersionResourceProvider");
 
               Map<String, String> config = new HashMap<>();
-              config.put(DISABLED_RESOURCE_PROVIDERS, String.join(",", config));
+              config.put(DISABLED_RESOURCE_PROVIDERS, String.join(",", disabledConfig));
 
               // disable loading expensive resource providers when invoked
               config.put(ElasticResourceProvider.SKIP_EXPENSIVE_RESOURCE_PROVIDERS, "true");
