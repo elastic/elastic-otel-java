@@ -23,6 +23,7 @@ import io.opentelemetry.contrib.aws.resource.Ec2ResourceProvider;
 import io.opentelemetry.contrib.aws.resource.EcsResourceProvider;
 import io.opentelemetry.contrib.aws.resource.EksResourceProvider;
 import io.opentelemetry.contrib.aws.resource.LambdaResourceProvider;
+import io.opentelemetry.contrib.gcp.resource.GCPResourceProvider;
 import io.opentelemetry.contrib.resourceproviders.AppServerServiceNameProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
@@ -69,6 +70,7 @@ public class ElasticResourceProvider implements ResourceProvider {
   public Resource getExtraResource() {
     List<ResourceProvider> providers =
         Arrays.asList(
+            // -- AWS --
             // ec2 relies on http calls without pre-checks
             new Ec2ResourceProvider(),
             // beanstalk relies on json config file parsing
@@ -78,7 +80,9 @@ public class ElasticResourceProvider implements ResourceProvider {
             // relies on http call with url provided through env var used as pre-check
             new EcsResourceProvider(),
             // relies on env variables only
-            new LambdaResourceProvider());
+            new LambdaResourceProvider(),
+            // -- GCP --
+            new GCPResourceProvider());
     Resource resource = Resource.empty();
     for (ResourceProvider provider : providers) {
       resource = resource.merge(invokeResourceProvider(provider));
