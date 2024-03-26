@@ -94,16 +94,15 @@ public class ConfigurationExporterTest {
             + "////\n");
     final Map<String, List<ConfigurationOption>> optionsByCategory = new HashMap<>();
     optionsByCategory.put("Elastic to Opentelemetry mapping", configurationRegistry);
-    temp.process(
-        Map.of(
-            "config",
-            optionsByCategory,
-            "keys",
-            configurationRegistry.stream()
-                .map(ConfigurationOption::getKey)
-                .sorted()
-                .collect(Collectors.toList())),
-        tempRenderedFile);
+    Map<String, Object> map = new HashMap<>();
+    map.put("config", optionsByCategory);
+    map.put(
+        "keys",
+        configurationRegistry.stream()
+            .map(ConfigurationOption::getKey)
+            .sorted()
+            .collect(Collectors.toList()));
+    temp.process(map, tempRenderedFile);
 
     return tempRenderedFile.toString();
   }
