@@ -31,7 +31,7 @@ import java.util.Set;
 public class ElasticAutoConfigurationCustomizerprovider
     implements AutoConfigurationCustomizerProvider {
 
-  public static final String DISABLED_RESOURCE_PROVIDERS = "otel.java.disabled.resource.providers";
+  private static final String DISABLED_RESOURCE_PROVIDERS = "otel.java.disabled.resource.providers";
 
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
@@ -41,8 +41,10 @@ public class ElasticAutoConfigurationCustomizerprovider
             (resource, configProperties) -> {
               // create the resource provider ourselves we can store a reference to it
               // and that will only get "fast" resources attributes when invoked
-              ElasticResourceProvider resourceProvider = new ElasticResourceProvider(false);
-              ElasticExtension.INSTANCE.registerResourceProvider(resourceProvider);
+              ElasticResourceProvider resourceProvider = new ElasticResourceProvider();
+
+              ElasticExtension.INSTANCE.registerResourceProvider(
+                  resourceProvider, configProperties);
               return resource.merge(resourceProvider.createResource(configProperties));
             })
         .addTracerProviderCustomizer(
@@ -52,17 +54,34 @@ public class ElasticAutoConfigurationCustomizerprovider
                     ElasticExtension.INSTANCE.getSpanProcessor()))
         .addPropertiesCustomizer(
             configProperties -> {
-              // disabling our resource provider from SDK init
-              Map<String, String> config = new HashMap<>();
               Set<String> disabledConfig =
                   new HashSet<>(configProperties.getList(DISABLED_RESOURCE_PROVIDERS));
-              disabledConfig.add(ElasticResourceProvider.class.getCanonicalName());
+
+              // disabling embedded resource providers
+
+              // App server, loaded through SPI by default
+              disabledConfig.add(
+                  "io.opentelemetry.contrib.resourceproviders.AppServerServiceNameProvider");
+
+              // GCP, SPI loading disabled but ensures disabled even if configured otherwise
+              disabledConfig.add("io.opentelemetry.contrib.gcp.resource.GCPResourceProvider");
+
+              // AWS, SPI loading disabled but ensures disabled even if configured otherwise
+              disabledConfig.add("io.opentelemetry.contrib.aws.resource.BeanstalkResourceProvider");
+              disabledConfig.add("io.opentelemetry.contrib.aws.resource.Ec2ResourceProvider");
+              disabledConfig.add("io.opentelemetry.contrib.aws.resource.EcsResourceProvider");
+              disabledConfig.add("io.opentelemetry.contrib.aws.resource.EksResourceProvider");
+              disabledConfig.add("io.opentelemetry.contrib.aws.resource.LambdaResourceProvider");
 
               // disable upstream distro name & version provider
               disabledConfig.add(
                   "io.opentelemetry.javaagent.tooling.DistroVersionResourceProvider");
 
-              config.put(DISABLED_RESOURCE_PROVIDERS, String.join(",", disabledConfig));
+              Map<String, String> config = new HashMap<>();
+              config.put(DISABLED_RESOURCE_PROVIDERS, String.join(",", config));
+
+              // disable loading expensive resource providers when invoked
+              config.put(ElasticResourceProvider.SKIP_EXPENSIVE_RESOURCE_PROVIDERS, "true");
               return config;
             })
         .addSpanExporterCustomizer(
