@@ -54,6 +54,24 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build
+    strategy:
+      fail-fast: false #Even if the tests fail on one JDK we want to know if it also fails on others
+      matrix:
+        include:
+          - version: 8
+            vm: 'hotspot'
+          - version: 11
+            vm: 'hotspot'
+          - version: 17
+            vm: 'hotspot'
+          - version: 21
+            vm: 'hotspot'
+          - version: 22
+            vm: 'hotspot'
+          - version: 8
+            vm: 'openj9'
+          - version: 21
+            vm: 'openj9'
     steps:
       # We use the cached working directory so that we don't have to recompile everything
       - name: Download cached build working directory
@@ -70,10 +88,10 @@ jobs:
           # working directory. The up-to-date check of this task checks for the presence of docker
           # images used for compiling the native library, which do not exist because we are in a new
           # environment.
-          command: "./gradlew test -x compileJni"
+          command: "./gradlew test -x compileJni -PtestJavaVersion=${{ matrix.version }} -PtestJavaVM=${{ matrix.vm }}"
       - name: Store test results
         if: success() || failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: test-results-${{ matrix.version }}-${{ matrix.vm }}
           path: '**/build/test-results/test/TEST-*.xml'
