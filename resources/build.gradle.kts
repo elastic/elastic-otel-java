@@ -10,5 +10,6 @@ dependencies {
 
   compileOnly(catalog.gcpContribResources)
   compileOnly(catalog.awsContribResources)
-  compileOnly(catalog.contribResources)
+
+  implementation(catalog.contribResources)
 }
