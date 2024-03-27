@@ -18,8 +18,11 @@
  */
 package co.elastic.otel.profiler;
 
+/**
+ * Indicates that a message could not be decoded. Possible reasons are for example the message was
+ * smaller than it should be or contained malformed content.
+ */
 public class DecodeException extends Exception {
-
   public DecodeException(String message, Throwable cause) {
     super(message, cause);
   }

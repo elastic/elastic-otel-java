@@ -32,9 +32,9 @@ public class SpanByIdSet {
   /**
    * The value of an entry is always the same as the key in this map (=it is a set). We just use a
    * map to allow a lookup of the original {@link WeakSpanWithId} via a {@link LookupKey}. While the
-   * type of this map is {@link TraceIdKeyed}, it only stores {@link WeakSpanWithId}s.
+   * key type of this map is {@link TraceIdKeyed}, it only stores {@link WeakSpanWithId}s.
    */
-  private final Map<TraceIdKeyed, TraceIdKeyed> spansById = new ConcurrentHashMap<>();
+  private final Map<TraceIdKeyed, WeakSpanWithId> spansById = new ConcurrentHashMap<>();
 
   private final ReferenceQueue<ReadableSpan> collectedSpansQueue = new ReferenceQueue<>();
 
