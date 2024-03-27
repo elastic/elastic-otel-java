@@ -54,6 +54,27 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build
+    strategy:
+      # Even if the tests fail on one JDK we want to know if it also fails on others
+      fail-fast: false 
+      matrix:
+        # The JVMs for testing will be automatically downloaded by gradle using the toolchains-feature
+        # We use the following plugin to download them: https://github.com/gradle/foojay-toolchains
+        # We should make sure to always add the latest releases here when they are GA
+        # non LTS-releases should be removed if a newer version is GA
+        include:
+          - version: 8
+            vm: 'hotspot'
+          - version: 11
+            vm: 'hotspot'
+          - version: 17
+            vm: 'hotspot'
+          - version: 21
+            vm: 'hotspot'
+          - version: 11
+            vm: 'openj9'
+          - version: 21
+            vm: 'openj9'
     steps:
       # We use the cached working directory so that we don't have to recompile everything
       - name: Download cached build working directory
@@ -70,10 +91,11 @@ jobs:
           # working directory. The up-to-date check of this task checks for the presence of docker
           # images used for compiling the native library, which do not exist because we are in a new
           # environment.
-          command: "./gradlew test -x compileJni"
+          command: "./gradlew test -x compileJni -PtestJavaVersion=${{ matrix.version }} -PtestJavaVM=${{ matrix.vm }}"
       - name: Store test results
         if: success() || failure()
+        # The test reporting workflow only supports the @v3 artifact mechanism
         uses: actions/upload-artifact@v3
         with:
-          name: test-results
+          name: test-results-${{ matrix.version }}-${{ matrix.vm }}
           path: '**/build/test-results/test/TEST-*.xml'

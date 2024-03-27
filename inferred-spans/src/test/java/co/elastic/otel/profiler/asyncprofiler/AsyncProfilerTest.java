@@ -22,6 +22,7 @@ import static co.elastic.otel.profiler.asyncprofiler.AsyncProfiler.SAFEMODE_SYST
 import static org.assertj.core.api.Assertions.assertThat;
 
 import co.elastic.otel.testing.DisabledOnAppleSilicon;
+import co.elastic.otel.testing.DisabledOnOpenJ9;
 import java.io.File;
 import java.io.FilenameFilter;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 @DisabledOnOs(OS.WINDOWS)
 @DisabledOnAppleSilicon
+@DisabledOnOpenJ9
 public class AsyncProfilerTest {
 
   @BeforeEach

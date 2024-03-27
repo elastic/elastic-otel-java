@@ -2,7 +2,7 @@ import jdk.internal.joptsimple.internal.Strings
 
 // TODO : convert to kotlin for consistency
 plugins {
-  id "java"
+  id("elastic-otel.java-conventions")
   alias catalog.plugins.taskinfo
 }
 
@@ -12,6 +12,10 @@ configurations {
     canBeResolved = true
     canBeConsumed = false
   }
+}
+
+compileTestJava {
+  options.release.set(17)
 }
 
 dependencies {
