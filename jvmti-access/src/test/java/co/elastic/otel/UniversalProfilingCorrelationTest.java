@@ -63,7 +63,7 @@ public class UniversalProfilingCorrelationTest {
     public void testProcessStorage() {
       ByteBuffer buffer = ByteBuffer.allocateDirect(100);
       buffer.order(ByteOrder.nativeOrder());
-      buffer.asCharBuffer().put(0, "Hello World".toCharArray());
+      buffer.asCharBuffer().put("Hello World".toCharArray());
 
       UniversalProfilingCorrelation.setProcessStorage(buffer);
 

@@ -24,6 +24,7 @@ import static java.util.stream.Collectors.toMap;
 import co.elastic.otel.common.ElasticAttributes;
 import co.elastic.otel.profiler.pooling.ObjectPool;
 import co.elastic.otel.testing.DisabledOnAppleSilicon;
+import co.elastic.otel.testing.DisabledOnOpenJ9;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.Tracer;
@@ -52,6 +53,7 @@ import org.junit.jupiter.api.condition.OS;
 
 @DisabledOnOs(OS.WINDOWS)
 @DisabledOnAppleSilicon
+@DisabledOnOpenJ9
 class CallTreeTest {
 
   private ProfilerTestSetup profilerSetup;
@@ -79,19 +81,19 @@ class CallTreeTest {
         CallTree.createRoot(
             ObjectPool.createRecyclable(100, CallTree.Root::new), traceContext.serialize(), 0);
     ObjectPool<CallTree> callTreePool = ObjectPool.createRecyclable(100, CallTree::new);
-    root.addStackTrace(List.of(StackFrame.of("A", "a")), 0, callTreePool, 0);
+    root.addStackTrace(Arrays.asList(StackFrame.of("A", "a")), 0, callTreePool, 0);
     root.addStackTrace(
-        List.of(StackFrame.of("A", "b"), StackFrame.of("A", "a")),
+        Arrays.asList(StackFrame.of("A", "b"), StackFrame.of("A", "a")),
         TimeUnit.MILLISECONDS.toNanos(10),
         callTreePool,
         0);
     root.addStackTrace(
-        List.of(StackFrame.of("A", "b"), StackFrame.of("A", "a")),
+        Arrays.asList(StackFrame.of("A", "b"), StackFrame.of("A", "a")),
         TimeUnit.MILLISECONDS.toNanos(20),
         callTreePool,
         0);
     root.addStackTrace(
-        List.of(StackFrame.of("A", "a")), TimeUnit.MILLISECONDS.toNanos(30), callTreePool, 0);
+        Arrays.asList(StackFrame.of("A", "a")), TimeUnit.MILLISECONDS.toNanos(30), callTreePool, 0);
     root.end(callTreePool, 0);
 
     System.out.println(root);
@@ -174,7 +176,7 @@ class CallTreeTest {
         },
         new Object[][] {
           {"a", 3},
-          {"  d", 1, List.of("c", "b")}
+          {"  d", 1, Arrays.asList("c", "b")}
         });
   }
 
@@ -240,7 +242,7 @@ class CallTreeTest {
           {"    2", 7},
           {"      b", 2},
           {"        c", 1},
-          {"      e", 1, List.of("d")},
+          {"      e", 1, Arrays.asList("d")},
         });
   }
 
@@ -321,7 +323,7 @@ class CallTreeTest {
             new Object[][] {
               {"a", 9},
               {"  1", 2},
-              {"  c", 3, List.of("b")},
+              {"  c", 3, Arrays.asList("b")},
               {"    2", 2},
             });
     assertThat(spans.get("a").getLinks())
@@ -354,7 +356,7 @@ class CallTreeTest {
             new Object[][] {
               {"a", 11},
               {"  1", 2},
-              {"  c", 4, List.of("b")},
+              {"  c", 4, Arrays.asList("b")},
               {"    2", 4},
               {"      3", 2},
             });
@@ -511,7 +513,7 @@ class CallTreeTest {
             },
             new Object[][] {
               {"1", 11},
-              {"  b", 2, List.of("a")},
+              {"  b", 2, Arrays.asList("a")},
               {"  2", 6},
               {"    3", 4},
               {"      c", 2}
@@ -537,7 +539,7 @@ class CallTreeTest {
         },
         new Object[][] {
           {"1", 13},
-          {"  b", 4, List.of("a")},
+          {"  b", 4, Arrays.asList("a")},
           {"    2", 2},
           {"  3", 6},
           {"    4", 4},
@@ -615,7 +617,7 @@ class CallTreeTest {
           {"1", 9},
           {"  a", 2},
           {"  2", 4},
-          {"    c", 2, List.of("b")}
+          {"    c", 2, Arrays.asList("b")}
         });
   }
 
@@ -896,7 +898,7 @@ class CallTreeTest {
         String spanName = ((String) expectedSpan[0]).trim();
         long durationMs = (int) expectedSpan[1] * 10;
         List<String> stackTrace =
-            expectedSpan.length == 3 ? (List<String>) expectedSpan[2] : List.of();
+            expectedSpan.length == 3 ? (List<String>) expectedSpan[2] : Arrays.asList();
         int nestingLevel = getNestingLevel((String) expectedSpan[0]);
         String parentName = getParentName(expectedSpans, i, nestingLevel);
         if (parentName == null) {
