@@ -233,7 +233,7 @@ public class UniversalProfilingProcessorTest {
       assertThat(readUtf8Str(buffer)).matches(sockRegex); // socket file path
     }
 
-    private static String readUtf8Str(ByteBuffer buffer) {
+    private String readUtf8Str(ByteBuffer buffer) {
       int serviceNameLen = buffer.getInt();
       byte[] serviceUtf8 = new byte[serviceNameLen];
       buffer.get(serviceUtf8);
