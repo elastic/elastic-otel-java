@@ -55,7 +55,8 @@ jobs:
     needs:
       - build
     strategy:
-      fail-fast: false #Even if the tests fail on one JDK we want to know if it also fails on others
+      # Even if the tests fail on one JDK we want to know if it also fails on others
+      fail-fast: false 
       matrix:
         include:
           - version: 8
