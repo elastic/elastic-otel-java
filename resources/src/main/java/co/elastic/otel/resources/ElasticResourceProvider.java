@@ -90,14 +90,16 @@ public class ElasticResourceProvider implements ResourceProvider {
       ResourceProvider provider, ConfigProperties config) {
 
     try {
-      logger.log(Level.FINE, "before invoke service provider %s", provider.getClass());
+      logger.log(
+          Level.FINE, String.format("before invoke resource provider %s", provider.getClass()));
       Resource result = provider.createResource(config);
-      logger.log(Level.FINE, "after invoke service provider %s", provider.getClass());
+      logger.log(
+          Level.FINE, String.format("after invoke resource provider %s", provider.getClass()));
       if (Resource.empty().equals(result)) {
         logger.log(
             Level.FINE,
             String.format(
-                "resource provided did not provide any attribute: %s", provider.getClass()));
+                "resource provider did not provide any attribute: %s", provider.getClass()));
       }
       return result;
     } catch (RuntimeException e) {
