@@ -60,7 +60,7 @@ public class SpanByIdSet {
   @Nullable
   public ReadableSpan get(String traceId, String spanId) {
     LookupKey key = new LookupKey(traceId, spanId);
-    WeakSpanWithId result = (WeakSpanWithId) spansById.get(key);
+    WeakSpanWithId result = spansById.get(key);
     return result != null ? result.get() : null;
   }
 
