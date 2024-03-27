@@ -21,6 +21,7 @@ import static org.awaitility.Awaitility.await;
 
 import co.elastic.otel.common.ElasticAttributes;
 import co.elastic.otel.testing.DisabledOnAppleSilicon;
+import co.elastic.otel.testing.DisabledOnOpenJ9;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.opentelemetry.instrumentation.testing.junit.AgentInstrumentationExtension;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -33,6 +34,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 @DisabledOnOs(OS.WINDOWS)
 @DisabledOnAppleSilicon
+@DisabledOnOpenJ9
 public class InferredSpansTest {
 
   @RegisterExtension

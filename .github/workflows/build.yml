@@ -66,8 +66,6 @@ jobs:
             vm: 'hotspot'
           - version: 21
             vm: 'hotspot'
-          - version: 22
-            vm: 'hotspot'
           - version: 11
             vm: 'openj9'
           - version: 21
