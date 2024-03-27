@@ -90,7 +90,9 @@ public class ElasticResourceProvider implements ResourceProvider {
       ResourceProvider provider, ConfigProperties config) {
 
     try {
+      logger.log(Level.FINE, "before invoke service provider %s", provider.getClass());
       Resource result = provider.createResource(config);
+      logger.log(Level.FINE, "after invoke service provider %s", provider.getClass());
       if (Resource.empty().equals(result)) {
         logger.log(
             Level.FINE,
