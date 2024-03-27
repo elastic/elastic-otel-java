@@ -1,8 +1,7 @@
 plugins {
-    id("java-library")
+    id("elastic-otel.library-packaging-conventions")
     alias(libs.plugins.jmh)
 }
-
 
 jmh {
   fork = 1

@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -65,7 +66,7 @@ public class ResourceExtractionUtilTest {
   void testContentDoesNotMatch(@TempDir Path tmpDir) throws Exception {
     Path tmp =
         ResourceExtractionUtil.extractResourceToDirectory("test.txt", "test", ".tmp", tmpDir);
-    Files.writeString(tmp, "changed");
+    Files.write(tmp, "changed".getBytes(StandardCharsets.UTF_8));
     assertThatThrownBy(
             () ->
                 ResourceExtractionUtil.extractResourceToDirectory(

@@ -25,6 +25,7 @@ import co.elastic.otel.profiler.config.WildcardMatcher;
 import co.elastic.otel.testing.AutoConfigTestProperties;
 import co.elastic.otel.testing.AutoConfiguredDataCapture;
 import co.elastic.otel.testing.DisabledOnAppleSilicon;
+import co.elastic.otel.testing.DisabledOnOpenJ9;
 import co.elastic.otel.testing.OtelReflectionUtils;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
@@ -103,6 +104,7 @@ public class InferredSpansAutoConfigTest {
   }
 
   @DisabledOnAppleSilicon
+  @DisabledOnOpenJ9
   @DisabledOnOs(OS.WINDOWS)
   @Test
   public void checkProfilerWorking() {
