@@ -94,7 +94,8 @@ jobs:
           command: "./gradlew test -x compileJni -PtestJavaVersion=${{ matrix.version }} -PtestJavaVM=${{ matrix.vm }}"
       - name: Store test results
         if: success() || failure()
-        uses: actions/upload-artifact@v4
+        # The test reporting workflow only supports the @v3 artifact mechanism
+        uses: actions/upload-artifact@v3
         with:
           name: test-results-${{ matrix.version }}-${{ matrix.vm }}
           path: '**/build/test-results/test/TEST-*.xml'
