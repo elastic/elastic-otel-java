@@ -58,6 +58,10 @@ jobs:
       # Even if the tests fail on one JDK we want to know if it also fails on others
       fail-fast: false 
       matrix:
+        # The JVMs for testing will be automatically downloaded by gradle using the toolchains-feature
+        # We use the following plugin to download them: https://github.com/gradle/foojay-toolchains
+        # We should make sure to always add the latest releases here when they are GA
+        # non LTS-releases should be removed if a newer version is GA
         include:
           - version: 8
             vm: 'hotspot'
