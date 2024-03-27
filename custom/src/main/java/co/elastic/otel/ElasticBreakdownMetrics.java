@@ -34,8 +34,12 @@ import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ElasticBreakdownMetrics {
+
+  private static final Logger logger = Logger.getLogger(ElasticBreakdownMetrics.class.getName());
 
   private final ConcurrentHashMap<SpanContext, BreakdownData> elasticSpanData;
 
@@ -129,11 +133,14 @@ public class ElasticBreakdownMetrics {
         ChildDuration parentChildDuration = breakdownData.childDuration;
         parentChildDuration.startChild(spanStart);
       }
-      System.out.printf(
-          "start of child span %s, parent = %s, root = %s%n",
-          spanContext.getSpanId(),
-          span.getParentSpanContext().getSpanId(),
-          localRootSpanContext.getSpanId());
+
+      logger.log(
+          Level.FINER,
+          String.format(
+              "start of child span %s, parent = %s, root = %s",
+              spanContext.getSpanId(),
+              span.getParentSpanContext().getSpanId(),
+              localRootSpanContext.getSpanId()));
     }
     // we store extra attributes in span for later use, however we can't replace because we
     // don't
@@ -259,7 +266,8 @@ public class ElasticBreakdownMetrics {
           childStartEpoch = startEpochNanos;
         }
       }
-      System.out.printf("start child span, count = %d%n", count);
+
+      logger.log(Level.FINER, String.format("start child span, count = %d", count));
     }
 
     public void endChild(long endEpochNanos) {
