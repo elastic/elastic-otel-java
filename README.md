@@ -18,10 +18,16 @@ Use the `-javaagent:` JVM argument with the path to agent jar.
 java -javaagent:/path/to/agent.jar \
 -jar myapp.jar
 ```
-## Build
+## Build and Test
 
 Execute `./gradlew assemble`, the agent binary will be in `./agent/build/libs/elastic-otel-javaagent-${VERSION}.jar`
 where `${VERSION}` is the current project version set in [`version.properties`](version.properties).
+
+You can run the tests locally using `./gradlew test`. You can optionally specify the
+ * Java Version to test on, e.g. `-PtestJavaVersion=8`
+ * Java implementation to run on (`hotspot` or `openJ9`):  `-PtestJavaVM=openj9`
+
+You don't need to have a corresponding JVM installed, gradle automatically will download a matching one.
 
 ## Features
 
