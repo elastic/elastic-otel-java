@@ -47,14 +47,14 @@ public class SpanValueTest {
     Class<?> readableSpanInterface =
         Class.forName(
             "io.opentelemetry.sdk.trace.ReadableSpan", true, agentSpan.getClass().getClassLoader());
-    Object denseSpanValue = SpanValueClass.getMethod("createDense").invoke(null);
+    Object denseSpanValue = spanValueClass.getMethod("createDense").invoke(null);
 
     // create a new span which has a space for our newly created SpanValue allocated
 
     Span bridgeSpan2 = tracer.spanBuilder("s2").startSpan();
     Object agentSpan2 = readFieldValue(bridgeSpan2, "agentSpan");
 
-    SpanValueClass.getMethod("set", ReadableSpanInterface, Object.class)
+    spanValueClass.getMethod("set", readableSpanInterface, Object.class)
         .invoke(denseSpanValue, agentSpan2, "foo");
     // Setting the value should initialize the backing AtomicReferenceArray on the span
     AtomicReferenceArray<Object> storage =
@@ -73,7 +73,7 @@ public class SpanValueTest {
     storage.set(storageIndex, "bar");
 
     Object value =
-        SpanValueClass.getMethod("get", ReadableSpanInterface).invoke(denseSpanValue, agentSpan2);
+        spanValueClass.getMethod("get", readableSpanInterface).invoke(denseSpanValue, agentSpan2);
 
     assertThat(value).isEqualTo("bar");
   }
