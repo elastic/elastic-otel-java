@@ -41,7 +41,7 @@ public class SpanValueTest {
     assertThat(agentSpan.getClass().getSimpleName()).isEqualTo("SdkSpan");
 
     // From that Classloader we should be able to find and create SpanValues
-    Class<?> SpanValueClass =
+    Class<?> spanValueClass =
         Class.forName(
             "co.elastic.otel.common.SpanValue", true, agentSpan.getClass().getClassLoader());
     Class<?> ReadableSpanInterface =
