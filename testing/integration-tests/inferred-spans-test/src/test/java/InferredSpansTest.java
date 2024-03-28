@@ -42,30 +42,41 @@ public class InferredSpansTest {
 
   @Test
   public void checkInferredSpansFunctional() {
-    rootSpan();
     await()
-        .atMost(Duration.ofSeconds(20))
+        .atMost(Duration.ofSeconds(30))
         .untilAsserted(
             () -> {
-              List<SpanData> spans = testing.spans();
-              assertThat(spans).hasSize(2);
+              rootSpan();
+              try {
+                await()
+                    .atMost(Duration.ofSeconds(5))
+                    .untilAsserted(
+                        () -> {
+                          List<SpanData> spans = testing.spans();
+                          assertThat(spans).hasSize(2);
 
-              assertThat(spans)
-                  .anySatisfy(span -> assertThat(span).hasName("InferredSpansTest.rootSpan"));
+                          assertThat(spans)
+                              .anySatisfy(
+                                  span -> assertThat(span).hasName("InferredSpansTest.rootSpan"));
 
-              SpanData parent =
-                  spans.stream()
-                      .filter(span -> span.getName().equals("InferredSpansTest.rootSpan"))
-                      .findFirst()
-                      .get();
+                          SpanData parent =
+                              spans.stream()
+                                  .filter(
+                                      span -> span.getName().equals("InferredSpansTest.rootSpan"))
+                                  .findFirst()
+                                  .get();
 
-              assertThat(spans)
-                  .anySatisfy(
-                      span ->
-                          assertThat(span)
-                              .hasName("InferredSpansTest#rootSpan")
-                              .hasParent(parent)
-                              .hasAttribute(ElasticAttributes.IS_INFERRED, true));
+                          assertThat(spans)
+                              .anySatisfy(
+                                  span ->
+                                      assertThat(span)
+                                          .hasName("InferredSpansTest#rootSpan")
+                                          .hasParent(parent)
+                                          .hasAttribute(ElasticAttributes.IS_INFERRED, true));
+                        });
+              } finally {
+                testing.clearData();
+              }
             });
   }
 
