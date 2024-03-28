@@ -44,7 +44,8 @@ public class InferredSpansTest {
   public void checkInferredSpansFunctional() {
     await()
         .atMost(Duration.ofSeconds(30))
-        .untilAsserted(
+        .ignoreExceptions()
+        .until(
             () -> {
               rootSpan();
               try {
@@ -74,6 +75,7 @@ public class InferredSpansTest {
                                           .hasParent(parent)
                                           .hasAttribute(ElasticAttributes.IS_INFERRED, true));
                         });
+                return true;
               } finally {
                 testing.clearData();
               }
