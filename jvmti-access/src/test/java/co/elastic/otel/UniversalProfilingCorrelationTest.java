@@ -24,11 +24,13 @@ import static org.awaitility.Awaitility.await;
 
 import co.elastic.otel.profiler.DecodeException;
 import co.elastic.otel.profiler.ProfilerMessage;
+import co.elastic.otel.profiler.ProfilerRegistrationMessage;
 import co.elastic.otel.profiler.TraceCorrelationMessage;
 import co.elastic.otel.profiler.UnknownMessage;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -319,6 +321,33 @@ public class UniversalProfilingCorrelationTest {
       assertThat(correl.getLocalRootSpanId()).containsExactly(rootSpanId);
       assertThat(correl.getStackTraceId()).containsExactly(sampleId);
       assertThat(correl.getSampleCount()).isEqualTo(42);
+
+      assertThat(UniversalProfilingCorrelation.readProfilerReturnChannelMessage()).isNull();
+    }
+
+    @Test
+    public void receiveProfilerRegistrationMessage(@TempDir Path tempDir) throws Exception {
+      String socketFile = tempDir.resolve("socketfile").toAbsolutePath().toString();
+      UniversalProfilingCorrelation.startProfilerReturnChannel(socketFile);
+
+      byte[] hostIdUtf8 = "my-hostidäöü".getBytes(StandardCharsets.UTF_8);
+
+      ByteBuffer dummyMessage = ByteBuffer.allocate(hostIdUtf8.length + 12);
+      dummyMessage.order(ByteOrder.nativeOrder());
+      dummyMessage.putShort((short) 2); // message-type
+      dummyMessage.putShort((short) 1); // message-version
+      dummyMessage.putInt(42424242); // profiler sample delay
+      dummyMessage.putInt(hostIdUtf8.length); // utf8-encoded host id
+      dummyMessage.put(hostIdUtf8);
+
+      JvmtiAccessImpl.sendToProfilerReturnChannelSocket0(dummyMessage.array());
+
+      ProfilerMessage msg = UniversalProfilingCorrelation.readProfilerReturnChannelMessage();
+      assertThat(msg).isInstanceOf(ProfilerRegistrationMessage.class);
+
+      ProfilerRegistrationMessage reg = (ProfilerRegistrationMessage) msg;
+      assertThat(reg.getSamplesDelayMillis()).isEqualTo(42424242);
+      assertThat(reg.getHostId()).isEqualTo("my-hostidäöü");
 
       assertThat(UniversalProfilingCorrelation.readProfilerReturnChannelMessage()).isNull();
     }

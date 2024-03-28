@@ -19,9 +19,12 @@
 package co.elastic.otel.profiler;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 public class MessageDecoder {
   private final TraceCorrelationMessage traceCorrelationMessage = new TraceCorrelationMessage();
+  private final ProfilerRegistrationMessage profilerRegistrationMessage =
+      new ProfilerRegistrationMessage();
   private final UnknownMessage unknownMessage = new UnknownMessage();
 
   public ProfilerMessage decode(ByteBuffer data) throws DecodeException {
@@ -31,6 +34,8 @@ public class MessageDecoder {
       switch (messageType) {
         case TraceCorrelationMessage.TYPE_ID:
           return decode(traceCorrelationMessage, data);
+        case ProfilerRegistrationMessage.TYPE_ID:
+          return decode(profilerRegistrationMessage, data);
         default:
           unknownMessage.messageType = messageType;
           return unknownMessage;
@@ -46,5 +51,22 @@ public class MessageDecoder {
     data.get(message.stackTraceId);
     message.sampleCount = data.getShort();
     return message;
+  }
+
+  private ProfilerMessage decode(ProfilerRegistrationMessage message, ByteBuffer data) {
+    // unsigned int to long conversion
+    message.samplesDelayMillis = ((long) data.getInt()) & 0x00000000FFFFFFFFL;
+    message.hostId = readUtf8Str(data);
+    return message;
+  }
+
+  private String readUtf8Str(ByteBuffer data) {
+    int len = data.getInt();
+    if (len == 0) {
+      return "";
+    }
+    byte[] utf8Data = new byte[len];
+    data.get(utf8Data);
+    return new String(utf8Data, StandardCharsets.UTF_8);
   }
 }
