@@ -42,6 +42,9 @@ public class InferredSpansTest {
 
   @Test
   public void checkInferredSpansFunctional() {
+    // Presumably due to the CI delay it looks like sometimes inferred spans is not able
+    // to generate spans for the first normal span
+    // To avoid flakyness we therefore do multiple attempts
     await()
         .atMost(Duration.ofSeconds(30))
         .ignoreExceptions()
