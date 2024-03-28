@@ -1,5 +1,5 @@
 plugins {
-  java
+  id("elastic-otel.library-packaging-conventions")
 }
 
 dependencies {
@@ -11,7 +11,7 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-extension-api")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
-  compileOnly(catalog.opentelemetrySemconv)
+  compileOnly("io.opentelemetry.semconv:opentelemetry-semconv")
 
   annotationProcessor(libs.autoservice.processor)
   compileOnly(libs.autoservice.annotations)
@@ -24,8 +24,11 @@ dependencies {
   testImplementation(project(":testing-common"))
   testImplementation("io.opentelemetry:opentelemetry-sdk")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
-  testImplementation("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
-  testImplementation(catalog.opentelemetrySemconv)
+  testImplementation("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling") {
+    //The following dependency isn't actually needed, but breaks the classpath when testing with Java 8
+    exclude(group = "io.opentelemetry.javaagent", module = "opentelemetry-javaagent-tooling-java9")
+  }
+  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv")
 
   testAnnotationProcessor(libs.autoservice.processor)
   testCompileOnly(libs.autoservice.annotations)
@@ -36,5 +39,8 @@ dependencies {
   testImplementation("org.freemarker:freemarker:2.3.27-incubating")
 }
 tasks.withType<Test> {
-  systemProperty("elastic.otel.overwrite.config.docs", project.properties["elastic.otel.overwrite.config.docs"])
+  val overrideConfig = project.properties["elastic.otel.overwrite.config.docs"]
+  if (overrideConfig != null) {
+    systemProperty("elastic.otel.overwrite.config.docs", overrideConfig)
+  }
 }

@@ -8,8 +8,8 @@ import java.io.IOException
 import java.util.*
 
 plugins {
-    id("java-library")
-    id("com.bmuschko.docker-java-application") version "9.4.0"
+  id("elastic-otel.library-packaging-conventions")
+  id("com.bmuschko.docker-java-application") version "9.4.0"
 }
 
 dependencies {

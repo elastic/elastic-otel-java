@@ -21,6 +21,7 @@ package co.elastic.otel.profiler;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import co.elastic.otel.testing.DisabledOnAppleSilicon;
+import co.elastic.otel.testing.DisabledOnOpenJ9;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;
@@ -34,6 +35,7 @@ public class SamplingProfilerQueueTest {
   @Test
   @DisabledOnOs(OS.WINDOWS)
   @DisabledOnAppleSilicon
+  @DisabledOnOpenJ9
   void testFillQueue() throws Exception {
 
     try (ProfilerTestSetup setup =

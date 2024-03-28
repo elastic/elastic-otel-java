@@ -17,7 +17,6 @@ include("custom")
 include("instrumentation")
 include("inferred-spans")
 include("resources")
-include("resources:repackaged")
 include("smoke-tests")
 include("smoke-tests:test-app")
 include("smoke-tests:test-app-war")
@@ -38,4 +37,8 @@ dependencyResolutionManagement {
           from(files("gradle/libs.versions.toml"))
         }
     }
+}
+
+plugins {
+  id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0" //for resolving testing JVMs
 }

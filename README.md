@@ -18,12 +18,27 @@ Use the `-javaagent:` JVM argument with the path to agent jar.
 java -javaagent:/path/to/agent.jar \
 -jar myapp.jar
 ```
-## Build
+## Build and Test
 
 Execute `./gradlew assemble`, the agent binary will be in `./agent/build/libs/elastic-otel-javaagent-${VERSION}.jar`
 where `${VERSION}` is the current project version set in [`version.properties`](version.properties).
 
+You can run the tests locally using `./gradlew test`. You can optionally specify the
+ * Java Version to test on, e.g. `-PtestJavaVersion=8`
+ * Java implementation to run on (`hotspot` or `openJ9`):  `-PtestJavaVM=openj9`
+
+You don't need to have a corresponding JVM installed, gradle automatically will download a matching one.
+
 ## Features
+
+### Resource attributes
+
+The agent enables the following resource attributes providers from [opentelemetry-java-contrib](https://github.com/open-telemetry/opentelemetry-java-contrib/)
+- AWS: [aws-resources](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/aws-resources)
+- GCP: [gcp-resources](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/gcp-resources)
+- application server service name detection: [resource-providers](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/resource-providers)
+
+The attributes for cloud providers are captured asynchronously to prevent application startup overhead due to calling an internal metadata API.
 
 ### Inferred spans
 

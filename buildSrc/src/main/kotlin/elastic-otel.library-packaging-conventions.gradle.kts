@@ -1,5 +1,6 @@
 plugins {
-  id("java")
+  `java-library`
+  id("elastic-otel.java-conventions")
 }
 
 tasks {

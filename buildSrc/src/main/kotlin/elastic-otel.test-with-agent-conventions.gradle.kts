@@ -1,5 +1,5 @@
 plugins {
-  id("java")
+  id("elastic-otel.java-conventions")
 }
 
 val agentForTesting: Configuration by configurations.creating

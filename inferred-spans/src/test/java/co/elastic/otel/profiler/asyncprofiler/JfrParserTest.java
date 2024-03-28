@@ -26,7 +26,7 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +44,10 @@ class JfrParserTest {
         Paths.get(JfrParserTest.class.getClassLoader().getResource("recording.jfr").toURI())
             .toFile();
 
-    jfrParser.parse(file, List.of(), List.of(caseSensitiveMatcher("co.elastic.apm.*")));
+    jfrParser.parse(
+        file,
+        Collections.emptyList(),
+        Collections.singletonList(caseSensitiveMatcher("co.elastic.apm.*")));
     AtomicInteger stackTraces = new AtomicInteger();
     ArrayList<StackFrame> stackFrames = new ArrayList<>();
     jfrParser.consumeStackTraces(
