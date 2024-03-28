@@ -54,7 +54,8 @@ public class SpanValueTest {
     Span bridgeSpan2 = tracer.spanBuilder("s2").startSpan();
     Object agentSpan2 = readFieldValue(bridgeSpan2, "agentSpan");
 
-    spanValueClass.getMethod("set", readableSpanInterface, Object.class)
+    spanValueClass
+        .getMethod("set", readableSpanInterface, Object.class)
         .invoke(denseSpanValue, agentSpan2, "foo");
     // Setting the value should initialize the backing AtomicReferenceArray on the span
     AtomicReferenceArray<Object> storage =
