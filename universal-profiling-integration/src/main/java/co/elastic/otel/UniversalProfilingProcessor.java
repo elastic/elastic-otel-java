@@ -241,7 +241,7 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
           }
         } catch (DecodeException e) {
           log.log(Level.WARNING, "Failed to read profiler message", e);
-          // intentionally no
+          // intentionally no break here, subsequent messages might be decodeable
         }
       }
     } catch (Exception e) {
