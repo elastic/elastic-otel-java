@@ -44,7 +44,7 @@ public class SpanValueTest {
     Class<?> spanValueClass =
         Class.forName(
             "co.elastic.otel.common.SpanValue", true, agentSpan.getClass().getClassLoader());
-    Class<?> ReadableSpanInterface =
+    Class<?> readableSpanInterface =
         Class.forName(
             "io.opentelemetry.sdk.trace.ReadableSpan", true, agentSpan.getClass().getClassLoader());
     Object denseSpanValue = SpanValueClass.getMethod("createDense").invoke(null);
