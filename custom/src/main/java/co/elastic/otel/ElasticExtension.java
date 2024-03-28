@@ -22,6 +22,7 @@ import co.elastic.otel.common.util.ExecutorUtils;
 import co.elastic.otel.resources.ElasticResourceProvider;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.context.internal.shaded.WeakConcurrentMap;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
@@ -72,8 +73,9 @@ public class ElasticExtension {
     return spanExporter;
   }
 
-  public void registerResourceProvider(ElasticResourceProvider resourceProvider) {
-    this.resourceFuture = asyncInitExecutor.submit(resourceProvider::getExtraResource);
+  public void registerResourceProvider(
+      ElasticResourceProvider resourceProvider, ConfigProperties config) {
+    this.resourceFuture = asyncInitExecutor.submit(() -> resourceProvider.getExtraResource(config));
   }
 
   public Resource wrapResource(Resource resource) {

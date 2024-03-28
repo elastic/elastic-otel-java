@@ -31,6 +31,15 @@ You don't need to have a corresponding JVM installed, gradle automatically will 
 
 ## Features
 
+### Resource attributes
+
+The agent enables the following resource attributes providers from [opentelemetry-java-contrib](https://github.com/open-telemetry/opentelemetry-java-contrib/)
+- AWS: [aws-resources](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/aws-resources)
+- GCP: [gcp-resources](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/gcp-resources)
+- application server service name detection: [resource-providers](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/resource-providers)
+
+The attributes for cloud providers are captured asynchronously to prevent application startup overhead due to calling an internal metadata API.
+
 ### Inferred spans
 
 Set `ELASTIC_OTEL_INFERRED_SPANS_ENABLED=true` to enable.

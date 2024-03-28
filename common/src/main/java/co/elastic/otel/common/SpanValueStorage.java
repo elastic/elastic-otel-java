@@ -28,14 +28,14 @@ import javax.annotation.Nullable;
 
 // We use inheritance over composition here to not
 // waste space and time with an additional reference and object
-class SpanValueStorage extends AtomicReferenceArray<Object> {
+public class SpanValueStorage extends AtomicReferenceArray<Object> {
 
   // initialized with one because index zero is reserved for the map of sparse values
   private static final AtomicInteger nextDenseSpanValueIndex = new AtomicInteger(1);
 
   private static final int SPARSE_INDEX = Integer.MAX_VALUE;
 
-  SpanValueStorage() {
+  public SpanValueStorage() {
     super(nextDenseSpanValueIndex.get());
   }
 
