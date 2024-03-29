@@ -3,7 +3,6 @@ import com.github.jk1.license.render.InventoryMarkdownReportRenderer
 import java.nio.file.Files
 import java.util.*
 import java.util.stream.Collectors
-import kotlin.collections.ArrayList
 
 plugins {
   id("elastic-otel.agent-packaging-conventions")
@@ -79,11 +78,18 @@ tasks {
       "io.opentelemetry:opentelemetry-bom-alpha",
       "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha"
     )
-    filters = arrayOf(LicenseBundleNormalizer("${rootProject.rootDir}/buildscripts/license-normalizer-bundle.json", true))
-    projects = arrayOf(rootProject, rootProject.project("agent"), rootProject.project("bootstrap"),
+    filters = arrayOf(
+      LicenseBundleNormalizer(
+        "${rootProject.rootDir}/buildscripts/license-normalizer-bundle.json",
+        true
+      )
+    )
+    projects = arrayOf(
+      rootProject, rootProject.project("agent"), rootProject.project("bootstrap"),
       rootProject.project("common"), rootProject.project("custom"),
       rootProject.project("inferred-spans"), rootProject.project("instrumentation"),
-      rootProject.project("resources"), project)
+      rootProject.project("resources"), project
+    )
 
     configurations = arrayOf("runtimeClasspath", "compileClasspath")
   }
