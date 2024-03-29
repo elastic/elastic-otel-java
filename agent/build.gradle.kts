@@ -22,9 +22,6 @@ publishingConventions {
 }
 
 dependencies {
-  // required to access OpenTelemetryAgent
-  compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-bootstrap")
-
   upstreamAgent(platform(catalog.opentelemetryInstrumentationAlphaBom))
   upstreamAgent("io.opentelemetry.javaagent:opentelemetry-javaagent")
 }
@@ -55,12 +52,6 @@ tasks {
       include("licenses/**")
     }
 
-    //TODO: The agent-for-testing should also use our custom entrypoint
-    manifest {
-      attributes["Main-Class"] = "co.elastic.otel.agent.ElasticAgent"
-      attributes["Agent-Class"] = "co.elastic.otel.agent.ElasticAgent"
-      attributes["Premain-Class"] = "co.elastic.otel.agent.ElasticAgent"
-    }
   }
 
   assemble {

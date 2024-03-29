@@ -12,6 +12,7 @@ pluginManagement {
 rootProject.name = "elastic-otel-java"
 
 include("agent")
+include("agent:entrypoint")
 include("bootstrap")
 include("custom")
 include("instrumentation")
