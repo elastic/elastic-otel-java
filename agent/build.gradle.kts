@@ -1,7 +1,6 @@
 import com.github.jk1.license.filter.LicenseBundleNormalizer
 import com.github.jk1.license.render.InventoryMarkdownReportRenderer
 import java.nio.file.Files
-import java.nio.file.Paths
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.collections.ArrayList
