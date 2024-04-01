@@ -50,7 +50,7 @@ shadowPlugin = { group = "com.github.johnrengelman", name = "shadow", version.re
 # Ant should be kept in sync with the version used in the shadow plugin
 ant = "org.apache.ant:ant:1.10.13"
 # ASM is currently only used during compile-time, so it is okay to diverge from the version used in ByteBuddy
-asm = "org.ow2.asm:asm:9.6"
+asm = "org.ow2.asm:asm:9.7"
 
 [bundles]
 
