@@ -48,7 +48,7 @@ okhttp = "com.squareup.okhttp3:okhttp:4.12.0"
 spotlessPlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
 shadowPlugin = { group = "com.github.johnrengelman", name = "shadow", version.ref = "shadow" }
 # Ant should be kept in sync with the version used in the shadow plugin
-ant = "org.apache.ant:ant:1.10.13"
+ant = "org.apache.ant:ant:1.10.14"
 # ASM is currently only used during compile-time, so it is okay to diverge from the version used in ByteBuddy
 asm = "org.ow2.asm:asm:9.7"
 
