@@ -54,16 +54,17 @@ public class SpanProfilingSamplesCorrelator {
   private final PeekingPoller<DelayedSpan> delayedSpansPoller;
 
   private volatile long spanDelayNanos;
+  private volatile boolean shuttingDown = false;
 
   private final WriterReaderPhaser shutdownPhaser = new WriterReaderPhaser();
 
   public SpanProfilingSamplesCorrelator(
       int bufferCapacity,
       LongSupplier nanoClock,
-      long spanDelayNanos,
+      long initialSpanDelayNanos,
       Consumer<ReadableSpan> sendSpan) {
     this.nanoClock = nanoClock;
-    this.spanDelayNanos = spanDelayNanos;
+    this.spanDelayNanos = initialSpanDelayNanos;
     this.sendSpan = sendSpan;
 
     bufferCapacity = nextPowerOf2(bufferCapacity);
@@ -76,6 +77,10 @@ public class SpanProfilingSamplesCorrelator {
     delayedSpans.addGatingSequences(nonPeekingPoller.getSequence());
 
     delayedSpansPoller = new PeekingPoller<>(nonPeekingPoller, DelayedSpan::new);
+  }
+
+  public void setSpanDelayNanos(long delay) {
+    spanDelayNanos = delay;
   }
 
   public void onSpanStart(ReadableSpan span, Context parentCtx) {
@@ -95,7 +100,7 @@ public class SpanProfilingSamplesCorrelator {
 
     long criticalPhaseVal = shutdownPhaser.writerCriticalSectionEnter();
     try {
-      if (spanDelayNanos == 0) {
+      if (spanDelayNanos == 0 || shuttingDown) {
         correlateAndSendSpan(span);
         return;
       }
@@ -138,7 +143,7 @@ public class SpanProfilingSamplesCorrelator {
       delayedSpansPoller.poll(
           delayedSpan -> {
             long elapsed = nanoClock.getAsLong() - delayedSpan.endNanoTimestamp;
-            if (elapsed >= spanDelayNanos) {
+            if (elapsed >= spanDelayNanos || shuttingDown) {
               correlateAndSendSpan(delayedSpan.span);
               delayedSpan.clear();
               return true;
@@ -154,7 +159,7 @@ public class SpanProfilingSamplesCorrelator {
   public synchronized void shutdownAndFlushAll() {
     shutdownPhaser.readerLock();
     try {
-      spanDelayNanos = 0L; // This will cause new ended spans to not be buffered anymore
+      shuttingDown = true; // This will cause new ended spans to not be buffered anymore
 
       // avoid race condition: we wait until we are
       // sure that no more spans will be added to the ringbuffer
@@ -162,7 +167,7 @@ public class SpanProfilingSamplesCorrelator {
     } finally {
       shutdownPhaser.readerUnlock();
     }
-    // every span is now pending because the desired delay is zero
+    // This will flush all pending spans because shuttingDown=true
     flushPendingDelayedSpans();
   }
 

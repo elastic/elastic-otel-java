@@ -20,14 +20,13 @@ package co.elastic.otel;
 
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SpanProcessor;
-import java.time.Duration;
 import java.util.function.LongSupplier;
 
 public class UniversalProfilingProcessorBuilder {
 
   private final Resource resource;
   private final SpanProcessor nextProcessor;
-  private Duration spanDelay = Duration.ofSeconds(10);
+  private boolean activeOnlyAfterProfilerRegistration = false;
 
   private LongSupplier nanoClock = System::nanoTime;
 
@@ -42,7 +41,8 @@ public class UniversalProfilingProcessorBuilder {
 
   public UniversalProfilingProcessor build() {
     return new UniversalProfilingProcessor(
-        nextProcessor, resource, bufferSize, spanDelay, socketDir, nanoClock);
+        nextProcessor, resource, bufferSize, activeOnlyAfterProfilerRegistration, socketDir,
+        nanoClock);
   }
 
   UniversalProfilingProcessorBuilder clock(LongSupplier nanoClock) {
@@ -50,8 +50,8 @@ public class UniversalProfilingProcessorBuilder {
     return this;
   }
 
-  public UniversalProfilingProcessorBuilder spanDelay(Duration delay) {
-    this.spanDelay = delay;
+  public UniversalProfilingProcessorBuilder activeOnlyAfterProfilerRegistration(boolean value) {
+    this.activeOnlyAfterProfilerRegistration = value;
     return this;
   }
 

@@ -22,8 +22,10 @@ import co.elastic.otel.common.AbstractChainingSpanProcessor;
 import co.elastic.otel.common.LocalRootSpan;
 import co.elastic.otel.common.util.ExecutorUtils;
 import co.elastic.otel.common.util.HexUtils;
+import co.elastic.otel.hostid.ProfilerProvidedHostId;
 import co.elastic.otel.profiler.DecodeException;
 import co.elastic.otel.profiler.ProfilerMessage;
+import co.elastic.otel.profiler.ProfilerRegistrationMessage;
 import co.elastic.otel.profiler.TraceCorrelationMessage;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
@@ -66,6 +68,8 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
 
   private static final Logger log = Logger.getLogger(UniversalProfilingProcessor.class.getName());
 
+  private static final long INITIAL_SPAN_DELAY_NANOS = Duration.ofSeconds(5).toNanos();
+
   /**
    * The frequency at which the processor polls the unix domain socket for new messages from the
    * profiler.
@@ -80,6 +84,8 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
   // Visibile for testing
   String socketPath;
 
+  private volatile boolean tlsPropagationActive = false;
+
   public static UniversalProfilingProcessorBuilder builder(SpanProcessor next, Resource resource) {
     return new UniversalProfilingProcessorBuilder(next, resource);
   }
@@ -88,7 +94,7 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
       SpanProcessor next,
       Resource serviceResource,
       int bufferSize,
-      Duration spanDelay,
+      boolean activeOnlyAfterProfilerRegistration,
       String socketDir,
       LongSupplier nanoClock) {
     super(next);
@@ -99,9 +105,18 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
                 + " There must be at most one processor of this type active at a time!");
       }
 
+      long initialSpanDelay;
+      if (activeOnlyAfterProfilerRegistration) {
+        initialSpanDelay = 0; //do not buffer spans until we know that a profiler is running
+        tlsPropagationActive = false;
+      } else {
+        initialSpanDelay = INITIAL_SPAN_DELAY_NANOS; //delay conservatively to not miss any data
+        tlsPropagationActive = true;
+      }
+
       correlator =
           new SpanProfilingSamplesCorrelator(
-              bufferSize, nanoClock, spanDelay.toNanos(), this.next::onEnd);
+              bufferSize, nanoClock, initialSpanDelay, this.next::onEnd);
 
       socketPath = openProfilerSocket(socketDir);
       try {
@@ -200,10 +215,12 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
   @Nullable
   private void onContextChange(@Nullable Context previous, @Nullable Context next) {
     try {
-      Span oldSpan = safeSpanFromContext(previous);
-      Span newSpan = safeSpanFromContext(next);
-      if (oldSpan != newSpan && !oldSpan.getSpanContext().equals(newSpan.getSpanContext())) {
-        ProfilerSharedMemoryWriter.updateThreadCorrelationStorage(newSpan);
+      if (tlsPropagationActive) {
+        Span oldSpan = safeSpanFromContext(previous);
+        Span newSpan = safeSpanFromContext(next);
+        if (oldSpan != newSpan && !oldSpan.getSpanContext().equals(newSpan.getSpanContext())) {
+          ProfilerSharedMemoryWriter.updateThreadCorrelationStorage(newSpan);
+        }
       }
     } catch (Throwable t) {
       log.log(Level.SEVERE, "Error on context update", t);
@@ -236,6 +253,8 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
             break;
           } else if (message instanceof TraceCorrelationMessage) {
             handleMessage((TraceCorrelationMessage) message, tempBuffer);
+          } else if (message instanceof ProfilerRegistrationMessage) {
+            handleMessage((ProfilerRegistrationMessage) message);
           } else {
             log.log(Level.FINE, "Received unknown message type from profiler: {0}", message);
           }
@@ -247,6 +266,19 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
     } catch (Exception e) {
       log.log(Level.SEVERE, "Cannot read from profiler socket", e);
     }
+  }
+
+  private void handleMessage(ProfilerRegistrationMessage message) {
+    log.log(Level.FINE,
+        "Received profiler registration message! host.id is {0} and the span delay is {1} ms",
+        new Object[] {message.getHostId(), message.getSamplesDelayMillis()});
+
+    tlsPropagationActive = true;
+    long spanDelayNanos = Duration.ofMillis(message.getSamplesDelayMillis() + POLL_FREQUENCY_MS)
+        .toNanos();
+    correlator.setSpanDelayNanos(spanDelayNanos);
+
+    ProfilerProvidedHostId.set(message.getHostId());
   }
 
   private void handleMessage(TraceCorrelationMessage message, StringBuilder tempBuffer) {
