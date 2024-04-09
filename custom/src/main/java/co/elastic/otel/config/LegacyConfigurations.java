@@ -191,5 +191,6 @@ public class LegacyConfigurations {
     addUnspecifiedOption("rabbitmq_naming_mode");
     addUnspecifiedOption("jmx_failed_retry_interval");
     addUnspecifiedOption("safe_exceptions");
+    addUnspecifiedOption("exclude_from_getting_username");
   }
 }
