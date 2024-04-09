@@ -11,8 +11,8 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-sdk")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   compileOnly(libs.findbugs.jsr305)
-  implementation("com.lmax:disruptor:3.4.4")
-  implementation("org.jctools:jctools-core:4.0.1")
+  implementation(libs.lmax.disruptor)
+  implementation(libs.jctools)
   implementation(project(":common"))
 
   testAnnotationProcessor(libs.autoservice.processor)
@@ -22,9 +22,9 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation(libs.awaitility)
-  testImplementation("org.kohsuke:github-api:1.133")
-  testImplementation("org.apache.commons:commons-compress:1.21")
-  testImplementation("tools.profiler:async-profiler:1.8.3")
+  testImplementation(libs.github.api)
+  testImplementation(libs.apachecommons.compress)
+  testImplementation(libs.asyncprofiler)
 }
 
 tasks.compileJava {

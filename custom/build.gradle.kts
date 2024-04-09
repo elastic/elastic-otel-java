@@ -35,8 +35,8 @@ dependencies {
 
   testImplementation("io.opentelemetry.javaagent:opentelemetry-testing-common")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-  testImplementation(catalog.assertj.core)
-  testImplementation("org.freemarker:freemarker:2.3.27-incubating")
+  testImplementation(libs.assertj.core)
+  testImplementation(libs.freemarker)
 }
 tasks.withType<Test> {
   val overrideConfig = project.properties["elastic.otel.overwrite.config.docs"]

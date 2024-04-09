@@ -1,5 +1,3 @@
-import jdk.internal.joptsimple.internal.Strings
-
 // TODO : convert to kotlin for consistency
 plugins {
   id("elastic-otel.java-conventions")
@@ -33,7 +31,7 @@ dependencies {
 
   testImplementation("io.opentelemetry.semconv:opentelemetry-semconv")
 
-  testImplementation("org.mock-server:mockserver-client-java:5.15.0")
+  testImplementation(catalog.mockserver.client)
 
   warOnly(project("test-app-war")){
     attributes {

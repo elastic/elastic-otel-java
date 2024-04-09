@@ -1,10 +1,8 @@
 import com.github.jk1.license.filter.LicenseBundleNormalizer
 import com.github.jk1.license.render.InventoryMarkdownReportRenderer
 import java.nio.file.Files
-import java.nio.file.Paths
 import java.util.*
 import java.util.stream.Collectors
-import kotlin.collections.ArrayList
 
 plugins {
   id("elastic-otel.agent-packaging-conventions")
@@ -24,9 +22,6 @@ publishingConventions {
 }
 
 dependencies {
-  // required to access OpenTelemetryAgent
-  compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-bootstrap")
-
   upstreamAgent(platform(catalog.opentelemetryInstrumentationAlphaBom))
   upstreamAgent("io.opentelemetry.javaagent:opentelemetry-javaagent")
 }
@@ -57,12 +52,6 @@ tasks {
       include("licenses/**")
     }
 
-    //TODO: The agent-for-testing should also use our custom entrypoint
-    manifest {
-      attributes["Main-Class"] = "co.elastic.otel.agent.ElasticAgent"
-      attributes["Agent-Class"] = "co.elastic.otel.agent.ElasticAgent"
-      attributes["Premain-Class"] = "co.elastic.otel.agent.ElasticAgent"
-    }
   }
 
   assemble {
@@ -80,11 +69,18 @@ tasks {
       "io.opentelemetry:opentelemetry-bom-alpha",
       "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha"
     )
-    filters = arrayOf(LicenseBundleNormalizer("${rootProject.rootDir}/buildscripts/license-normalizer-bundle.json", true))
-    projects = arrayOf(rootProject, rootProject.project("agent"), rootProject.project("bootstrap"),
+    filters = arrayOf(
+      LicenseBundleNormalizer(
+        "${rootProject.rootDir}/buildscripts/license-normalizer-bundle.json",
+        true
+      )
+    )
+    projects = arrayOf(
+      rootProject, rootProject.project("agent"), rootProject.project("bootstrap"),
       rootProject.project("common"), rootProject.project("custom"),
       rootProject.project("inferred-spans"), rootProject.project("instrumentation"),
-      rootProject.project("resources"), project)
+      rootProject.project("resources"), project
+    )
 
     configurations = arrayOf("runtimeClasspath", "compileClasspath")
   }
