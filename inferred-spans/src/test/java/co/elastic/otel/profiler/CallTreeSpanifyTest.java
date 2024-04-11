@@ -107,7 +107,7 @@ class CallTreeSpanifyTest {
     TraceContext rootContext =
         TraceContext.fromSpanContextWithZeroClockAnchor(
             SpanContext.create(
-                traceId, rootSpanId, TraceFlags.getSampled(), TraceState.getDefault()));
+                traceId, rootSpanId, TraceFlags.getSampled(), TraceState.getDefault()), null);
 
     ObjectPool<CallTree.Root> rootPool = ObjectPool.createRecyclable(2, CallTree.Root::new);
     ObjectPool<CallTree> childPool = ObjectPool.createRecyclable(2, CallTree::new);
@@ -119,7 +119,8 @@ class CallTreeSpanifyTest {
     TraceContext spanContext =
         TraceContext.fromSpanContextWithZeroClockAnchor(
             SpanContext.create(
-                traceId, childSpanId, TraceFlags.getSampled(), TraceState.getDefault()));
+                traceId, childSpanId, TraceFlags.getSampled(), TraceState.getDefault()),
+            rootSpanId);
 
     root.onActivation(spanContext.serialize(), TimeUnit.MILLISECONDS.toNanos(5));
     root.addStackTrace(
@@ -141,8 +142,6 @@ class CallTreeSpanifyTest {
         childPool,
         0);
     root.end(childPool, 0);
-
-    System.out.println(root);
 
     assertThat(root.getCount()).isEqualTo(4);
     assertThat(root.getDurationUs()).isEqualTo(30_000);
@@ -179,4 +178,97 @@ class CallTreeSpanifyTest {
       assertThat(spans.get(1)).hasTraceId(traceId).hasParentSpanId(childSpanId);
     }
   }
+
+  @Test
+  void testSpanWithInvertedActivation() {
+    FixedClock nanoClock = new FixedClock();
+
+    String traceId = "0af7651916cd43dd8448eb211c80319c";
+    String rootSpanId = "77ad6b7169203331";
+    TraceContext rootContext =
+        TraceContext.fromSpanContextWithZeroClockAnchor(
+            SpanContext.create(
+                traceId, rootSpanId, TraceFlags.getSampled(), TraceState.getDefault()), null);
+
+    String childSpanId = "11b2c3d4e5f64242";
+    TraceContext childSpanContext =
+        TraceContext.fromSpanContextWithZeroClockAnchor(
+            SpanContext.create(
+                traceId, childSpanId, TraceFlags.getSampled(), TraceState.getDefault()),
+            rootSpanId);
+
+    ObjectPool<CallTree.Root> rootPool = ObjectPool.createRecyclable(2, CallTree.Root::new);
+    ObjectPool<CallTree> childPool = ObjectPool.createRecyclable(2, CallTree::new);
+
+    CallTree.Root root = CallTree.createRoot(rootPool, childSpanContext.serialize(), 0);
+    root.addStackTrace(Collections.singletonList(StackFrame.of("A", "a")), 10_000, childPool, 0);
+
+    root.onActivation(rootContext.serialize(), 20_000);
+    root.onDeactivation(rootContext.serialize(), childSpanContext.serialize(), 30_000);
+
+    root.addStackTrace(Collections.singletonList(StackFrame.of("A", "a")), 40_000, childPool, 0);
+    root.end(childPool, 0);
+
+    InMemorySpanExporter exporter = InMemorySpanExporter.create();
+    OpenTelemetrySdkBuilder sdkBuilder =
+        OpenTelemetrySdk.builder()
+            .setTracerProvider(
+                SdkTracerProvider.builder()
+                    .addSpanProcessor(SimpleSpanProcessor.create(exporter))
+                    .build());
+    try (OpenTelemetrySdk outputSdk = sdkBuilder.build()) {
+      root.spanify(nanoClock, outputSdk.getTracer("dummy-tracer"));
+
+      List<SpanData> spans = exporter.getFinishedSpanItems();
+      assertThat(spans).hasSize(1);
+      assertThat(spans.get(0)).hasTraceId(traceId).hasParentSpanId(childSpanId);
+      // the inferred span should not have any span links because this
+      // span link would cause a cycle in the trace
+      assertThat(spans.get(0).getLinks()).isEmpty();
+    }
+  }
+
+  @Test
+  void testSpanWithNestedActivation() {
+    FixedClock nanoClock = new FixedClock();
+
+    String traceId = "0af7651916cd43dd8448eb211c80319c";
+    String rootSpanId = "77ad6b7169203331";
+    TraceContext rootContext =
+        TraceContext.fromSpanContextWithZeroClockAnchor(
+            SpanContext.create(
+                traceId, rootSpanId, TraceFlags.getSampled(), TraceState.getDefault()), null);
+
+    ObjectPool<CallTree.Root> rootPool = ObjectPool.createRecyclable(2, CallTree.Root::new);
+    ObjectPool<CallTree> childPool = ObjectPool.createRecyclable(2, CallTree::new);
+
+    CallTree.Root root = CallTree.createRoot(rootPool, rootContext.serialize(), 0);
+    root.addStackTrace(Collections.singletonList(StackFrame.of("A", "a")), 10_000, childPool, 0);
+
+    root.onActivation(rootContext.serialize(), 20_000);
+    root.onDeactivation(rootContext.serialize(), rootContext.serialize(), 30_000);
+
+    root.addStackTrace(Collections.singletonList(StackFrame.of("A", "a")), 40_000, childPool, 0);
+    root.end(childPool, 0);
+
+    InMemorySpanExporter exporter = InMemorySpanExporter.create();
+    OpenTelemetrySdkBuilder sdkBuilder =
+        OpenTelemetrySdk.builder()
+            .setTracerProvider(
+                SdkTracerProvider.builder()
+                    .addSpanProcessor(SimpleSpanProcessor.create(exporter))
+                    .build());
+    try (OpenTelemetrySdk outputSdk = sdkBuilder.build()) {
+      root.spanify(nanoClock, outputSdk.getTracer("dummy-tracer"));
+
+      List<SpanData> spans = exporter.getFinishedSpanItems();
+      assertThat(spans).hasSize(1);
+      assertThat(spans.get(0)).hasTraceId(traceId).hasParentSpanId(rootSpanId);
+      // the inferred span should not have any span links because this
+      // span link would cause a cycle in the trace
+      assertThat(spans.get(0).getLinks()).isEmpty();
+    }
+  }
+
+
 }
