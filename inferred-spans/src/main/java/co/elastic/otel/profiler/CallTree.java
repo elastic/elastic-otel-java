@@ -621,25 +621,13 @@ public class CallTree implements Recyclable {
    * {@link CallTree.Root#addStackTrace}. After seeing another frame of {@code a}, we know that
    * {@code 1} is really the child of {@code a}, so we {@link #transferMaybeChildIdsToChildIds()}.
    *
-   * @param serializedTraceContext the trace context of the child span to add to this call tree
-   *     element
+   * @param id the child span id to add to this call tree element
    */
-  public void addMaybeChildId(byte[] serializedTraceContext) {
-    TraceContext ctx = findNonInferredParentContext();
-    if (TraceContext.parentIdIs(serializedTraceContext, ctx.getSpanId())) {
-      if (maybeChildIds == null) {
-        maybeChildIds = new LongList();
-      }
-      maybeChildIds.add(TraceContext.getSpanId(serializedTraceContext));
+  public void addMaybeChildId(long id) {
+    if (maybeChildIds == null) {
+      maybeChildIds = new LongList();
     }
-  }
-
-  protected TraceContext findNonInferredParentContext() {
-    if (activeContextOfDirectParent != null) { // setActiveSpan has been called
-      return activeContextOfDirectParent;
-    } else {
-      return parent.findNonInferredParentContext();
-    }
+    maybeChildIds.add(id);
   }
 
   public void addChildId(long id) {
@@ -755,7 +743,7 @@ public class CallTree implements Recyclable {
         long spanId = TraceContext.getSpanId(active);
         activeSet.add(spanId);
         if (!isNestedActivation(topOfStack)) {
-          topOfStack.addMaybeChildId(active);
+          topOfStack.addMaybeChildId(spanId);
         }
       }
     }
@@ -882,10 +870,6 @@ public class CallTree implements Recyclable {
             callTrees.get(i).spanify(this, null, rootContext, clock, tempBuilder, tracer);
       }
       return createdSpans;
-    }
-
-    protected TraceContext findNonInferredParentContext() {
-      return getRootContext();
     }
 
     public TraceContext getRootContext() {
