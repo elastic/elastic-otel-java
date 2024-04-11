@@ -49,14 +49,13 @@ public class TraceContext implements Recyclable {
   public TraceContext() {}
 
   // For testing only
-  static TraceContext fromSpanContextWithZeroClockAnchor(SpanContext ctx,
-      @Nullable String parentSpanId) {
+  static TraceContext fromSpanContextWithZeroClockAnchor(
+      SpanContext ctx, @Nullable String parentSpanId) {
     TraceContext result = new TraceContext();
     result.fillFromSpanContext(ctx, parentSpanId);
     result.clockAnchor = 0L;
     return result;
   }
-
 
   private void fillFromSpanContext(SpanContext ctx, @Nullable String parentSpanId) {
     id = HexUtils.hexToLong(ctx.getSpanId(), 0);

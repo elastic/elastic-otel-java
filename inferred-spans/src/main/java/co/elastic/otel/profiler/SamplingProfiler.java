@@ -867,9 +867,7 @@ class SamplingProfiler implements Runnable {
       this.activation = activation;
       if (previousContext != null) {
         TraceContext.serialize(
-            previousContext,
-            clock.getAnchor(previousContext),
-            previousContextBuffer);
+            previousContext, clock.getAnchor(previousContext), previousContextBuffer);
         rootContext = false;
       } else {
         rootContext = true;

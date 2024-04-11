@@ -634,7 +634,7 @@ public class CallTree implements Recyclable {
   }
 
   protected TraceContext findNonInferredParentContext() {
-    if (activeContextOfDirectParent != null) { //setActiveSpan has been called
+    if (activeContextOfDirectParent != null) { // setActiveSpan has been called
       return activeContextOfDirectParent;
     } else {
       return parent.findNonInferredParentContext();

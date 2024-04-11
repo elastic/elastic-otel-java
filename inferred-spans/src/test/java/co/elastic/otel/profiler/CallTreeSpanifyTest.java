@@ -107,7 +107,8 @@ class CallTreeSpanifyTest {
     TraceContext rootContext =
         TraceContext.fromSpanContextWithZeroClockAnchor(
             SpanContext.create(
-                traceId, rootSpanId, TraceFlags.getSampled(), TraceState.getDefault()), null);
+                traceId, rootSpanId, TraceFlags.getSampled(), TraceState.getDefault()),
+            null);
 
     ObjectPool<CallTree.Root> rootPool = ObjectPool.createRecyclable(2, CallTree.Root::new);
     ObjectPool<CallTree> childPool = ObjectPool.createRecyclable(2, CallTree::new);
@@ -188,7 +189,8 @@ class CallTreeSpanifyTest {
     TraceContext rootContext =
         TraceContext.fromSpanContextWithZeroClockAnchor(
             SpanContext.create(
-                traceId, rootSpanId, TraceFlags.getSampled(), TraceState.getDefault()), null);
+                traceId, rootSpanId, TraceFlags.getSampled(), TraceState.getDefault()),
+            null);
 
     String childSpanId = "11b2c3d4e5f64242";
     TraceContext childSpanContext =
@@ -237,7 +239,8 @@ class CallTreeSpanifyTest {
     TraceContext rootContext =
         TraceContext.fromSpanContextWithZeroClockAnchor(
             SpanContext.create(
-                traceId, rootSpanId, TraceFlags.getSampled(), TraceState.getDefault()), null);
+                traceId, rootSpanId, TraceFlags.getSampled(), TraceState.getDefault()),
+            null);
 
     ObjectPool<CallTree.Root> rootPool = ObjectPool.createRecyclable(2, CallTree.Root::new);
     ObjectPool<CallTree> childPool = ObjectPool.createRecyclable(2, CallTree::new);
@@ -269,6 +272,4 @@ class CallTreeSpanifyTest {
       assertThat(spans.get(0).getLinks()).isEmpty();
     }
   }
-
-
 }
