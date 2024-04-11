@@ -109,9 +109,12 @@ public class TraceContext implements Recyclable {
     clockAnchor = ByteUtils.getLong(serialized, 34);
   }
 
-  public static boolean parentIdIs(byte[] serializedTraceContext, long expectedParent) {
+  public static long getParentId(byte[] serializedTraceContext) {
     boolean hasParent = serializedTraceContext[25] != 0;
-    return hasParent && ByteUtils.getLong(serializedTraceContext, 26) == expectedParent;
+    if (!hasParent) {
+      return 0L;
+    }
+    return ByteUtils.getLong(serializedTraceContext, 26);
   }
 
   public boolean traceIdAndIdEquals(byte[] otherSerialized) {
