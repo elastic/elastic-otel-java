@@ -621,7 +621,8 @@ public class CallTree implements Recyclable {
    * {@link CallTree.Root#addStackTrace}. After seeing another frame of {@code a}, we know that
    * {@code 1} is really the child of {@code a}, so we {@link #transferMaybeChildIdsToChildIds()}.
    *
-   * @param id the child span id to add to this call tree element
+   * @param serializedTraceContext the trace context of the child span to add to this call tree
+   *     element
    */
   public void addMaybeChildId(byte[] serializedTraceContext) {
     TraceContext ctx = findNonInferredParentContext();
