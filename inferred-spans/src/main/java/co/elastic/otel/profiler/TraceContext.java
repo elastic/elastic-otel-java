@@ -25,6 +25,7 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;
 import io.opentelemetry.api.trace.TraceState;
+import io.opentelemetry.sdk.trace.ReadableSpan;
 import javax.annotation.Nullable;
 
 /**
@@ -34,10 +35,13 @@ import javax.annotation.Nullable;
  */
 public class TraceContext implements Recyclable {
 
-  public static final int SERIALIZED_LENGTH = 16 + 8 + 1 + 8;
+  public static final int SERIALIZED_LENGTH = 16 + 8 + 1 + 1 + 8 + 8;
   private long traceIdLow;
   private long traceIdHigh;
   private long id;
+
+  private boolean hasParentId;
+  private long parentId;
   private byte flags;
 
   private long clockAnchor;
@@ -53,10 +57,17 @@ public class TraceContext implements Recyclable {
     return result;
   }
 
+
   private void fillFromSpanContext(SpanContext ctx, @Nullable String parentSpanId) {
     id = HexUtils.hexToLong(ctx.getSpanId(), 0);
     traceIdHigh = HexUtils.hexToLong(ctx.getTraceId(), 0);
     traceIdLow = HexUtils.hexToLong(ctx.getTraceId(), 16);
+    if (parentSpanId != null) {
+      hasParentId = true;
+      parentId = HexUtils.hexToLong(parentSpanId, 0);
+    } else {
+      hasParentId = false;
+    }
     flags = ctx.getTraceFlags().asByte();
   }
 
@@ -72,6 +83,10 @@ public class TraceContext implements Recyclable {
 
     return SpanContext.create(
         traceIdStr, idStr, TraceFlags.fromByte(flags), TraceState.getDefault());
+  }
+
+  public long getSpanId() {
+    return id;
   }
 
   public boolean idEquals(@Nullable TraceContext o) {
@@ -90,7 +105,14 @@ public class TraceContext implements Recyclable {
     traceIdHigh = ByteUtils.getLong(serialized, 8);
     id = ByteUtils.getLong(serialized, 16);
     flags = serialized[24];
-    clockAnchor = ByteUtils.getLong(serialized, 25);
+    hasParentId = serialized[25] != 0;
+    parentId = ByteUtils.getLong(serialized, 26);
+    clockAnchor = ByteUtils.getLong(serialized, 34);
+  }
+
+  public static boolean parentIdIs(byte[] serializedTraceContext, long expectedParent) {
+    boolean hasParent = serializedTraceContext[25] != 0;
+    return hasParent && ByteUtils.getLong(serializedTraceContext, 26) == expectedParent;
   }
 
   public boolean traceIdAndIdEquals(byte[] otherSerialized) {
@@ -106,7 +128,13 @@ public class TraceContext implements Recyclable {
     return id == otherId;
   }
 
-  public static void serialize(SpanContext ctx, long clockAnchor, byte[] buffer) {
+  public static void serialize(Span span, long clockAnchor, byte[] buffer) {
+    SpanContext ctx = span.getSpanContext();
+    SpanContext parentSpanCtx = SpanContext.getInvalid();
+    if (span instanceof ReadableSpan) {
+      parentSpanCtx = ((ReadableSpan) span).getParentSpanContext();
+    }
+
     long id = HexUtils.hexToLong(ctx.getSpanId(), 0);
     long traceIdHigh = HexUtils.hexToLong(ctx.getTraceId(), 0);
     long traceIdLow = HexUtils.hexToLong(ctx.getTraceId(), 16);
@@ -115,7 +143,14 @@ public class TraceContext implements Recyclable {
     ByteUtils.putLong(buffer, 8, traceIdHigh);
     ByteUtils.putLong(buffer, 16, id);
     buffer[24] = flags;
-    ByteUtils.putLong(buffer, 25, clockAnchor);
+    if (parentSpanCtx.isValid()) {
+      buffer[25] = 1;
+      ByteUtils.putLong(buffer, 26, HexUtils.hexToLong(parentSpanCtx.getSpanId(), 0));
+    } else {
+      buffer[25] = 0;
+      ByteUtils.putLong(buffer, 26, 0);
+    }
+    ByteUtils.putLong(buffer, 34, clockAnchor);
   }
 
   public void serialize(byte[] buffer) {
@@ -123,7 +158,14 @@ public class TraceContext implements Recyclable {
     ByteUtils.putLong(buffer, 8, traceIdHigh);
     ByteUtils.putLong(buffer, 16, id);
     buffer[24] = flags;
-    ByteUtils.putLong(buffer, 25, clockAnchor);
+    if (hasParentId) {
+      buffer[25] = 1;
+      ByteUtils.putLong(buffer, 26, parentId);
+    } else {
+      buffer[25] = 0;
+      ByteUtils.putLong(buffer, 26, 0);
+    }
+    ByteUtils.putLong(buffer, 34, clockAnchor);
   }
 
   public byte[] serialize() {

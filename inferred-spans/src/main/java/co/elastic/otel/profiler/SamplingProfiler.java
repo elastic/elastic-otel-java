@@ -862,13 +862,12 @@ class SamplingProfiler implements Runnable {
         @Nullable Span previousContext,
         long nanoTime,
         SpanAnchoredClock clock) {
-      TraceContext.serialize(
-          traceContext.getSpanContext(), clock.getAnchor(traceContext), traceContextBuffer);
+      TraceContext.serialize(traceContext, clock.getAnchor(traceContext), traceContextBuffer);
       this.threadId = threadId;
       this.activation = activation;
       if (previousContext != null) {
         TraceContext.serialize(
-            previousContext.getSpanContext(),
+            previousContext,
             clock.getAnchor(previousContext),
             previousContextBuffer);
         rootContext = false;

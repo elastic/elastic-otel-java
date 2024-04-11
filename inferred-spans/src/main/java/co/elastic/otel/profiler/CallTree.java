@@ -623,11 +623,22 @@ public class CallTree implements Recyclable {
    *
    * @param id the child span id to add to this call tree element
    */
-  public void addMaybeChildId(long id) {
-    if (maybeChildIds == null) {
-      maybeChildIds = new LongList();
+  public void addMaybeChildId(byte[] serializedTraceContext) {
+    TraceContext ctx = findNonInferredParentContext();
+    if (TraceContext.parentIdIs(serializedTraceContext, ctx.getSpanId())) {
+      if (maybeChildIds == null) {
+        maybeChildIds = new LongList();
+      }
+      maybeChildIds.add(TraceContext.getSpanId(serializedTraceContext));
     }
-    maybeChildIds.add(id);
+  }
+
+  protected TraceContext findNonInferredParentContext() {
+    if (activeContextOfDirectParent != null) { //setActiveSpan has been called
+      return activeContextOfDirectParent;
+    } else {
+      return parent.findNonInferredParentContext();
+    }
   }
 
   public void addChildId(long id) {
@@ -743,7 +754,7 @@ public class CallTree implements Recyclable {
         long spanId = TraceContext.getSpanId(active);
         activeSet.add(spanId);
         if (!isNestedActivation(topOfStack)) {
-          topOfStack.addMaybeChildId(spanId);
+          topOfStack.addMaybeChildId(active);
         }
       }
     }
@@ -870,6 +881,10 @@ public class CallTree implements Recyclable {
             callTrees.get(i).spanify(this, null, rootContext, clock, tempBuilder, tracer);
       }
       return createdSpans;
+    }
+
+    protected TraceContext findNonInferredParentContext() {
+      return getRootContext();
     }
 
     public TraceContext getRootContext() {
