@@ -31,13 +31,21 @@ public class ElasticDistroResourceProvider implements ResourceProvider {
 
   @Override
   public Resource createResource(ConfigProperties configProperties) {
-    return AgentVersion.VERSION == null
-        ? Resource.empty()
-        : Resource.create(
-            Attributes.of(
-                ElasticAttributes.TELEMETRY_DISTRO_NAME,
-                "elastic",
-                ElasticAttributes.TELEMETRY_DISTRO_VERSION,
-                AgentVersion.VERSION));
+    if (AgentVersion.VERSION == null) {
+      return Resource.empty();
+    }
+    try {
+      Class.forName("co.elastic.otel.agent.ElasticAgent");
+    } catch (ClassNotFoundException e) {
+      // this means that we are running as an extension of the vanilla agent
+      // and not as distro.
+      return Resource.empty();
+    }
+    return Resource.create(
+        Attributes.of(
+            ElasticAttributes.TELEMETRY_DISTRO_NAME,
+            "elastic",
+            ElasticAttributes.TELEMETRY_DISTRO_VERSION,
+            AgentVersion.VERSION));
   }
 }
