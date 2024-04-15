@@ -30,7 +30,7 @@ tasks {
     jvmArgs("-javaagent:${upstreamAgentForTesting.singleFile.absoluteFile}")
     jvmArgs("-Dotel.javaagent.extensions=${agentExtension.singleFile.absoluteFile}")
   }
-  check {
+  test {
     dependsOn(testWithVanillaAgentAndExtension)
   }
 
