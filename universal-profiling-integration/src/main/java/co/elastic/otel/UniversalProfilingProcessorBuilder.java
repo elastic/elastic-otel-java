@@ -26,7 +26,7 @@ public class UniversalProfilingProcessorBuilder {
 
   private final Resource resource;
   private final SpanProcessor nextProcessor;
-  private boolean activeOnlyAfterProfilerRegistration = false;
+  private boolean delayActivationAfterProfilerRegistration = true;
 
   private LongSupplier nanoClock = System::nanoTime;
 
@@ -44,7 +44,7 @@ public class UniversalProfilingProcessorBuilder {
         nextProcessor,
         resource,
         bufferSize,
-        activeOnlyAfterProfilerRegistration,
+        delayActivationAfterProfilerRegistration,
         socketDir,
         nanoClock);
   }
@@ -54,8 +54,19 @@ public class UniversalProfilingProcessorBuilder {
     return this;
   }
 
-  public UniversalProfilingProcessorBuilder activeOnlyAfterProfilerRegistration(boolean value) {
-    this.activeOnlyAfterProfilerRegistration = value;
+  /**
+   * If enabled, the profiling integration will remain inactive until the presence of a profiler is
+   * actually detected. This safes a bit of overhead in the case no profiler is there.
+   *
+   * <p>The downside is if the application starts a span immediately after startup, the profiler
+   * might not be detected in time and therefore this first span might not be correlated correctly.
+   * This can be avoided by setting this option to {@code false}. In this case the {@link
+   * UniversalProfilingProcessor} will assume a profiler will be eventually running and start the
+   * correlation eagerly.
+   */
+  public UniversalProfilingProcessorBuilder delayActivationAfterProfilerRegistration(
+      boolean value) {
+    this.delayActivationAfterProfilerRegistration = value;
     return this;
   }
 
