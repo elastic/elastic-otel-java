@@ -24,7 +24,6 @@ import static java.util.logging.Level.WARNING;
 import co.elastic.otel.common.ElasticAttributes;
 import co.elastic.otel.common.util.HexUtils;
 import co.elastic.otel.profiler.collections.LongHashSet;
-import co.elastic.otel.profiler.collections.LongList;
 import co.elastic.otel.profiler.pooling.ObjectPool;
 import co.elastic.otel.profiler.pooling.Recyclable;
 import io.opentelemetry.api.common.Attributes;
@@ -84,9 +83,9 @@ public class CallTree implements Recyclable {
   private boolean isSpan;
   private int depth;
 
-  @Nullable private LongList childIds;
+  @Nullable private ChildList childIds;
 
-  @Nullable private LongList maybeChildIds;
+  @Nullable private ChildList maybeChildIds;
 
   public CallTree() {}
 
@@ -504,7 +503,8 @@ public class CallTree implements Recyclable {
             .setStartTimestamp(
                 clock.toEpochNanos(parentContext.getClockAnchor(), this.start),
                 TimeUnit.NANOSECONDS);
-    insertChildIdLinks(spanBuilder, Span.fromContext(parentOtelCtx).getSpanContext(), tempBuilder);
+    insertChildIdLinks(
+        spanBuilder, Span.fromContext(parentOtelCtx).getSpanContext(), parentContext, tempBuilder);
 
     // we're not interested in the very bottom of the stack which contains things like accepting and
     // handling connections
@@ -524,20 +524,27 @@ public class CallTree implements Recyclable {
   }
 
   private void insertChildIdLinks(
-      SpanBuilder span, SpanContext parentContext, StringBuilder tempBuilder) {
+      SpanBuilder span,
+      SpanContext parentContext,
+      TraceContext nonInferredParent,
+      StringBuilder tempBuilder) {
     if (childIds == null || childIds.isEmpty()) {
       return;
     }
     for (int i = 0; i < childIds.getSize(); i++) {
-      tempBuilder.setLength(0);
-      HexUtils.appendLongAsHex(childIds.get(i), tempBuilder);
-      SpanContext spanContext =
-          SpanContext.create(
-              parentContext.getTraceId(),
-              tempBuilder.toString(),
-              parentContext.getTraceFlags(),
-              parentContext.getTraceState());
-      span.addLink(spanContext, CHILD_LINK_ATTRIBUTES);
+      // to avoid cycles, we only insert child-ids if the parent of the child is also
+      // the parent of the stack of inferred spans inserted
+      if (nonInferredParent.getSpanId() == childIds.getParentId(i)) {
+        tempBuilder.setLength(0);
+        HexUtils.appendLongAsHex(childIds.getId(i), tempBuilder);
+        SpanContext spanContext =
+            SpanContext.create(
+                parentContext.getTraceId(),
+                tempBuilder.toString(),
+                parentContext.getTraceFlags(),
+                parentContext.getTraceState());
+        span.addLink(spanContext, CHILD_LINK_ATTRIBUTES);
+      }
     }
   }
 
@@ -623,18 +630,18 @@ public class CallTree implements Recyclable {
    *
    * @param id the child span id to add to this call tree element
    */
-  public void addMaybeChildId(long id) {
+  public void addMaybeChildId(long id, long parentId) {
     if (maybeChildIds == null) {
-      maybeChildIds = new LongList();
+      maybeChildIds = new ChildList();
     }
-    maybeChildIds.add(id);
+    maybeChildIds.add(id, parentId);
   }
 
-  public void addChildId(long id) {
+  public void addChildId(long id, long parentId) {
     if (childIds == null) {
-      childIds = new LongList();
+      childIds = new ChildList();
     }
-    childIds.add(id);
+    childIds.add(id, parentId);
   }
 
   public boolean hasChildIds() {
@@ -664,7 +671,11 @@ public class CallTree implements Recyclable {
 
   void giveLastChildIdTo(CallTree giveTo) {
     if (childIds != null && !childIds.isEmpty()) {
-      giveTo.addChildId(childIds.remove(childIds.getSize() - 1));
+      int size = childIds.getSize();
+      long id = childIds.getId(size - 1);
+      long parentId = childIds.getParentId(size - 1);
+      giveTo.addChildId(id, parentId);
+      childIds.removeLast();
     }
   }
 
@@ -743,7 +754,7 @@ public class CallTree implements Recyclable {
         long spanId = TraceContext.getSpanId(active);
         activeSet.add(spanId);
         if (!isNestedActivation(topOfStack)) {
-          topOfStack.addMaybeChildId(spanId);
+          topOfStack.addMaybeChildId(spanId, TraceContext.getParentId(active));
         }
       }
     }
@@ -752,12 +763,12 @@ public class CallTree implements Recyclable {
       return isAnyActive(topOfStack.childIds) || isAnyActive(topOfStack.maybeChildIds);
     }
 
-    private boolean isAnyActive(@Nullable LongList spanIds) {
+    private boolean isAnyActive(@Nullable ChildList spanIds) {
       if (spanIds == null) {
         return false;
       }
       for (int i = 0, size = spanIds.getSize(); i < size; i++) {
-        if (activeSet.contains(spanIds.get(i))) {
+        if (activeSet.contains(spanIds.getId(i))) {
           return true;
         }
       }
