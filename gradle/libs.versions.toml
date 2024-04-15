@@ -47,7 +47,7 @@ okhttp = "com.squareup.okhttp3:okhttp:4.12.0"
 
 hdrhistogram = "org.hdrhistogram:HdrHistogram:2.1.12"
 lmax-disruptor = "com.lmax:disruptor:3.4.4"
-jctools = "org.jctools:jctools-core:4.0.1"
+jctools = "org.jctools:jctools-core:4.0.3"
 github-api = "org.kohsuke:github-api:1.133"
 apachecommons-compress = "org.apache.commons:commons-compress:1.21"
 asyncprofiler = "tools.profiler:async-profiler:1.8.3"
