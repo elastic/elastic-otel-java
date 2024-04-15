@@ -16,37 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.common.util;
+package co.elastic.otel.disruptor;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.nio.ByteBuffer;
-import org.junit.jupiter.api.Test;
+public class FreezableList<T> {
 
-public class HexUtilsTest {
+  private List<T> list = new ArrayList<>();
+  private boolean isFrozen = false;
 
-  @Test
-  public void writeHexToByteBuffer() {
-    ByteBuffer buffer = ByteBuffer.allocate(6);
-
-    buffer.put(0, (byte) 42);
-    buffer.put(5, (byte) 42);
-
-    HexUtils.writeHexAsBinary("ignore0005abf1ignore", "ignore".length(), buffer, 1, 4);
-
-    byte[] data = new byte[6];
-    buffer.position(0);
-    buffer.get(data);
-
-    assertThat(data).containsExactly(42, 0x00, 0x05, 0xab, 0xf1, 42);
+  public synchronized void addIfNotFrozen(T value) {
+    if (isFrozen) {
+      return;
+    }
+    list.add(value);
   }
 
-  @Test
-  public void bytesToHexString() {
-    StringBuilder result = new StringBuilder();
-
-    HexUtils.appendAsHex(new byte[] {0x01, (byte) 0xAB, (byte) 0xFF}, result);
-
-    assertThat(result.toString()).isEqualTo("01abff");
+  public synchronized List<T> freezeAndGet() {
+    isFrozen = true;
+    return list;
   }
 }

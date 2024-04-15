@@ -47,6 +47,14 @@ public class HexUtils {
     appendHexChar(value, builder);
   }
 
+  public static void appendAsHex(byte[] value, StringBuilder builder) {
+    for (byte val : value) {
+      int intVal = ((int) val) & 0xFF;
+      appendHexChar(intVal >> 4, builder);
+      appendHexChar(intVal, builder);
+    }
+  }
+
   private static void appendHexChar(long value, StringBuilder sb) {
     sb.append(HEX_CHARS[(int) (value & 0x0F)]);
   }

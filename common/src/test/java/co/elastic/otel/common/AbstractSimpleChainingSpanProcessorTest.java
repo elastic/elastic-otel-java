@@ -47,6 +47,7 @@ public class AbstractSimpleChainingSpanProcessorTest {
   public void testSpanDropping() {
     SpanProcessor processor =
         new AbstractSimpleChainingSpanProcessor(exportProcessor) {
+
           @Override
           protected ReadableSpan doOnEnd(ReadableSpan readableSpan) {
             if (readableSpan.getName().startsWith("dropMe")) {
@@ -54,6 +55,16 @@ public class AbstractSimpleChainingSpanProcessorTest {
             } else {
               return readableSpan;
             }
+          }
+
+          @Override
+          protected boolean requiresStart() {
+            return false;
+          }
+
+          @Override
+          protected boolean requiresEnd() {
+            return true;
           }
         };
     try (OpenTelemetrySdk sdk = sdkWith(processor)) {
@@ -80,20 +91,40 @@ public class AbstractSimpleChainingSpanProcessorTest {
     SpanProcessor second =
         new AbstractSimpleChainingSpanProcessor(exportProcessor) {
           @Override
+          protected boolean requiresStart() {
+            return false;
+          }
+
+          @Override
           protected ReadableSpan doOnEnd(ReadableSpan readableSpan) {
             MutableSpan span = MutableSpan.makeMutable(readableSpan);
             span.setAttribute(addMeKey, "added");
             return span;
           }
+
+          @Override
+          protected boolean requiresEnd() {
+            return true;
+          }
         };
     SpanProcessor first =
         new AbstractSimpleChainingSpanProcessor(second) {
+          @Override
+          protected boolean requiresStart() {
+            return false;
+          }
+
           @Override
           protected ReadableSpan doOnEnd(ReadableSpan readableSpan) {
             MutableSpan span = MutableSpan.makeMutable(readableSpan);
             span.setAttribute(updateMeKey, "updated");
             span.removeAttribute(removeMeKey);
             return span;
+          }
+
+          @Override
+          protected boolean requiresEnd() {
+            return true;
           }
         };
     try (OpenTelemetrySdk sdk = sdkWith(first)) {

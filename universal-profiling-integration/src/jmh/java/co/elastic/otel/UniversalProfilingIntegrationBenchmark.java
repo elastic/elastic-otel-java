@@ -78,12 +78,12 @@ public class UniversalProfilingIntegrationBenchmark {
 
     @Setup(Level.Iteration)
     public void init(Blackhole blackhole) {
-      SdkTracerProviderBuilder builder =
-          SdkTracerProvider.builder().addSpanProcessor(new BlackholeSpanProcessor(blackhole));
+      BlackholeSpanProcessor spanProcessor = new BlackholeSpanProcessor(blackhole);
+      SdkTracerProviderBuilder builder = SdkTracerProvider.builder();
       if (universalProfilerProcessorActive) {
         Resource res =
             Resource.builder().put(ResourceAttributes.SERVICE_NAME, "benchmark-service").build();
-        builder.addSpanProcessor(new UniversalProfilingProcessor(res));
+        builder.addSpanProcessor(UniversalProfilingProcessor.builder(spanProcessor, res).build());
       }
       tracerProvider = builder.build();
 

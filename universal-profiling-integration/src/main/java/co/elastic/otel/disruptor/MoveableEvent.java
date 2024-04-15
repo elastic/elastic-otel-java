@@ -16,14 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.profiler;
+package co.elastic.otel.disruptor;
 
-/**
- * Indicates that a message could not be decoded. Possible reasons are for example the message was
- * smaller than it should be or contained malformed content.
- */
-public class DecodeException extends Exception {
-  public DecodeException(String message, Throwable cause) {
-    super(message, cause);
-  }
+public interface MoveableEvent<SELF extends MoveableEvent<?>> {
+
+  /**
+   * Moves the content from this event into the provided other event. This event should be in a
+   * resetted state after the call.
+   */
+  void moveInto(SELF other);
+
+  void clear();
 }
