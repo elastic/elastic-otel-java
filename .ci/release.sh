@@ -25,7 +25,7 @@ java -version
 publishArg=''
 if [[ "$dry_run" == "false" ]] ; then
     echo "--- Build and publish the release :package:"
-    publishArg='publishToSonatype closeAndReleaseStagingRepository'
+    publishArg='publishToSonatype closeAndReleaseStagingRepositories'
 else
     echo "--- Build and publish the release :package: (dry-run)"
     publishArg='publishAllPublicationsToDryRunRepository'

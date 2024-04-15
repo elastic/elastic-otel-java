@@ -31,6 +31,8 @@ val upstreamAgent: Configuration by configurations.creating {
 dependencies {
   bootstrapLibs(project(":bootstrap"))
 
+  bootstrapLibs(project(":agent:entrypoint"))
+
   javaagentLibs(project(":custom"))
 }
 
@@ -193,9 +195,9 @@ tasks {
     transform(injectSpanValueFieldTransformer)
 
     manifest {
-      attributes["Main-Class"] = "io.opentelemetry.javaagent.OpenTelemetryAgent"
-      attributes["Agent-Class"] = "io.opentelemetry.javaagent.OpenTelemetryAgent"
-      attributes["Premain-Class"] = "io.opentelemetry.javaagent.OpenTelemetryAgent"
+      attributes["Main-Class"] = "co.elastic.otel.agent.ElasticAgent"
+      attributes["Agent-Class"] = "co.elastic.otel.agent.ElasticAgent"
+      attributes["Premain-Class"] = "co.elastic.otel.agent.ElasticAgent"
       attributes["Can-Redefine-Classes"] = "true"
       attributes["Can-Retransform-Classes"] = "true"
       attributes["Implementation-Vendor"] = "Elastic"

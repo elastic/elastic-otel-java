@@ -9,7 +9,7 @@ import java.util.*
 
 plugins {
   id("elastic-otel.library-packaging-conventions")
-  id("com.bmuschko.docker-java-application") version "9.4.0"
+  alias(catalog.plugins.dockerJavaApplication)
 }
 
 dependencies {
