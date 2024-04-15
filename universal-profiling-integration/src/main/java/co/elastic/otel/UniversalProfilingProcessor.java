@@ -68,13 +68,13 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
 
   private static final Logger log = Logger.getLogger(UniversalProfilingProcessor.class.getName());
 
-  private static final long INITIAL_SPAN_DELAY_NANOS = Duration.ofSeconds(5).toNanos();
+  private static final long INITIAL_SPAN_DELAY_NANOS = Duration.ofSeconds(1).toNanos();
 
   /**
    * The frequency at which the processor polls the unix domain socket for new messages from the
    * profiler.
    */
-  private static final long POLL_FREQUENCY_MS = 20;
+  static final long POLL_FREQUENCY_MS = 20;
 
   private static boolean anyInstanceActive = false;
 
@@ -107,10 +107,10 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
 
       long initialSpanDelay;
       if (activeOnlyAfterProfilerRegistration) {
-        initialSpanDelay = 0; //do not buffer spans until we know that a profiler is running
+        initialSpanDelay = 0; // do not buffer spans until we know that a profiler is running
         tlsPropagationActive = false;
       } else {
-        initialSpanDelay = INITIAL_SPAN_DELAY_NANOS; //delay conservatively to not miss any data
+        initialSpanDelay = INITIAL_SPAN_DELAY_NANOS; // delay conservatively to not miss any data
         tlsPropagationActive = true;
       }
 
@@ -269,13 +269,14 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
   }
 
   private void handleMessage(ProfilerRegistrationMessage message) {
-    log.log(Level.FINE,
+    log.log(
+        Level.FINE,
         "Received profiler registration message! host.id is {0} and the span delay is {1} ms",
         new Object[] {message.getHostId(), message.getSamplesDelayMillis()});
 
     tlsPropagationActive = true;
-    long spanDelayNanos = Duration.ofMillis(message.getSamplesDelayMillis() + POLL_FREQUENCY_MS)
-        .toNanos();
+    long spanDelayNanos =
+        Duration.ofMillis(message.getSamplesDelayMillis() + POLL_FREQUENCY_MS).toNanos();
     correlator.setSpanDelayNanos(spanDelayNanos);
 
     ProfilerProvidedHostId.set(message.getHostId());

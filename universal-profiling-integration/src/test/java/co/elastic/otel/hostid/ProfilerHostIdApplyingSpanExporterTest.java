@@ -26,9 +26,17 @@ import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.semconv.ResourceAttributes;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class ProfilerHostIdApplyingSpanExporterTest {
+
+  @BeforeEach
+  @AfterEach
+  public void resetProfilerProvidedHostId() {
+    ProfilerProvidedHostId.set(null);
+  }
 
   @Test
   public void checkHostIdUpdated() {

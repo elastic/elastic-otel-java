@@ -41,7 +41,11 @@ public class UniversalProfilingProcessorBuilder {
 
   public UniversalProfilingProcessor build() {
     return new UniversalProfilingProcessor(
-        nextProcessor, resource, bufferSize, activeOnlyAfterProfilerRegistration, socketDir,
+        nextProcessor,
+        resource,
+        bufferSize,
+        activeOnlyAfterProfilerRegistration,
+        socketDir,
         nanoClock);
   }
 
