@@ -19,11 +19,13 @@
 package co.elastic.otel;
 
 import static co.elastic.otel.ProfilerSharedMemoryWriter.TLS_STORAGE_SIZE;
+import static co.elastic.otel.UniversalProfilingProcessor.POLL_FREQUENCY_MS;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 
 import co.elastic.otel.common.ElasticAttributes;
+import co.elastic.otel.hostid.ProfilerHostIdApplyingSpanExporter;
 import co.elastic.otel.testing.MapGetter;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
@@ -68,6 +70,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @DisabledOnOs(OS.WINDOWS)
 public class UniversalProfilingProcessorTest {
@@ -123,10 +127,14 @@ public class UniversalProfilingProcessorTest {
         };
 
     SpanProcessor exporter =
-        SimpleSpanProcessor.builder(ignoreShutdown).setExportUnsampledSpans(true).build();
+        SimpleSpanProcessor.builder(new ProfilerHostIdApplyingSpanExporter(ignoreShutdown))
+            .setExportUnsampledSpans(true)
+            .build();
 
     UniversalProfilingProcessorBuilder builder =
-        UniversalProfilingProcessor.builder(exporter, res).socketDir(tempDir.toString());
+        UniversalProfilingProcessor.builder(exporter, res)
+            .socketDir(tempDir.toString())
+            .delayActivationAfterProfilerRegistration(false);
     customizer.accept(builder);
     processor = builder.build();
     return OpenTelemetrySdk.builder()
@@ -239,37 +247,36 @@ public class UniversalProfilingProcessorTest {
       buffer.get(serviceUtf8);
       return new String(serviceUtf8, StandardCharsets.UTF_8);
     }
+  }
 
-    private void checkTlsIs(Span span, Span localRoot) {
-      ByteBuffer tls =
-          JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(TLS_STORAGE_SIZE);
-      if (tls != null) {
-        tls.order(ByteOrder.nativeOrder());
-        assertThat(tls.getChar(0)).isEqualTo((char) 1); // layout-minor-version
-        assertThat(tls.get(2)).isEqualTo((byte) 1); // valid byte
-      }
+  static void checkTlsIs(Span span, Span localRoot) {
+    ByteBuffer tls = JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(TLS_STORAGE_SIZE);
+    if (tls != null) {
+      tls.order(ByteOrder.nativeOrder());
+      assertThat(tls.getChar(0)).describedAs("layout-minor-version").isEqualTo((char) 1);
+      assertThat(tls.get(2)).describedAs("valid byte").isEqualTo((byte) 1);
+    }
 
-      SpanContext ctx = span.getSpanContext();
-      if (ctx.isValid()) {
-        assertThat(tls).isNotNull();
-        assertThat(tls.get(3)).isEqualTo((byte) 1); // trace-present-flag
-        assertThat(tls.get(4)).isEqualTo(ctx.getTraceFlags().asByte()); // trace-flags
+    SpanContext ctx = span.getSpanContext();
+    if (ctx.isValid()) {
+      assertThat(tls).isNotNull();
+      assertThat(tls.get(3)).describedAs("trace-present-flag").isEqualTo((byte) 1);
+      assertThat(tls.get(4)).describedAs("trace-flags").isEqualTo(ctx.getTraceFlags().asByte());
 
-        byte[] traceId = new byte[16];
-        byte[] spanId = new byte[8];
-        byte[] localRootSpanId = new byte[8];
-        tls.position(5);
-        tls.get(traceId);
-        assertThat(traceId).containsExactly(ctx.getTraceIdBytes());
-        tls.position(21);
-        tls.get(spanId);
-        assertThat(spanId).containsExactly(ctx.getSpanIdBytes());
-        tls.position(29);
-        tls.get(localRootSpanId);
-        assertThat(localRootSpanId).containsExactly(localRoot.getSpanContext().getSpanIdBytes());
-      } else if (tls != null) {
-        assertThat(tls.get(3)).isEqualTo((byte) 0); // trace-present-flag
-      }
+      byte[] traceId = new byte[16];
+      byte[] spanId = new byte[8];
+      byte[] localRootSpanId = new byte[8];
+      tls.position(5);
+      tls.get(traceId);
+      assertThat(traceId).containsExactly(ctx.getTraceIdBytes());
+      tls.position(21);
+      tls.get(spanId);
+      assertThat(spanId).containsExactly(ctx.getSpanIdBytes());
+      tls.position(29);
+      tls.get(localRootSpanId);
+      assertThat(localRootSpanId).containsExactly(localRoot.getSpanContext().getSpanIdBytes());
+    } else if (tls != null) {
+      assertThat(tls.get(3)).describedAs("trace-present-flag").isEqualTo((byte) 0);
     }
   }
 
@@ -282,20 +289,22 @@ public class UniversalProfilingProcessorTest {
       AtomicLong clock = new AtomicLong(0L);
 
       try (OpenTelemetrySdk sdk =
-          initSdk(builder -> builder.clock(clock::get).spanDelay(Duration.ofNanos(1)))) {
+          initSdk(builder -> builder.clock(() -> clock.get() * 1_000_0000L))) {
+        sendProfilerRegistrationMsg(1, "hostid");
+
         Tracer tracer = sdk.getTracer("test-tracer");
 
         Span span1 = tracer.spanBuilder("span1").startSpan();
         Span span2 = tracer.spanBuilder("span2").startSpan();
 
         byte[] st1 = randomStackTraceId(1);
-        sendMsg(span1, st1, 1);
+        sendSampleMsg(span1, st1, 1);
 
         // Send some garbage which should not affect our processing
         JvmtiAccessImpl.sendToProfilerReturnChannelSocket0(new byte[] {1, 2, 3});
 
         byte[] st2 = randomStackTraceId(2);
-        sendMsg(span2, st2, 2);
+        sendSampleMsg(span2, st2, 2);
 
         // ensure that the messages are processed now
         processor.pollMessagesAndFlushPendingSpans();
@@ -307,11 +316,11 @@ public class UniversalProfilingProcessorTest {
         assertThat(spans.getFinishedSpanItems()).isEmpty();
 
         byte[] st3 = randomStackTraceId(3);
-        sendMsg(span2, st2, 1);
-        sendMsg(span1, st3, 2);
-        sendMsg(span2, st3, 1);
+        sendSampleMsg(span2, st2, 1);
+        sendSampleMsg(span1, st3, 2);
+        sendSampleMsg(span2, st3, 1);
 
-        clock.set(1L);
+        clock.set(1L + POLL_FREQUENCY_MS);
         // now the background thread should consume those messages and flush the spans
         await()
             .atMost(Duration.ofSeconds(10))
@@ -345,6 +354,88 @@ public class UniversalProfilingProcessorTest {
       }
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void checkAwaitProfilerRegistrationSetting(boolean activeOnlyAfterRegistration) {
+
+      AtomicLong clock = new AtomicLong(0L);
+
+      try (OpenTelemetrySdk sdk =
+          initSdk(
+              builder ->
+                  builder
+                      .clock(() -> clock.get() * 1_000_0000L)
+                      .delayActivationAfterProfilerRegistration(activeOnlyAfterRegistration))) {
+        Tracer tracer = sdk.getTracer("test-tracer");
+
+        Span span1 = tracer.spanBuilder("span1").startSpan();
+
+        try (Scope scope = span1.makeCurrent()) {
+          Span expected = activeOnlyAfterRegistration ? Span.getInvalid() : span1;
+          checkTlsIs(expected, expected);
+        }
+
+        span1.end();
+        processor.pollMessagesAndFlushPendingSpans();
+
+        if (activeOnlyAfterRegistration) {
+          assertThat(spans.getFinishedSpanItems()).hasSize(1);
+        } else {
+          assertThat(spans.getFinishedSpanItems()).hasSize(0);
+        }
+
+        clock.addAndGet(10000);
+        processor.pollMessagesAndFlushPendingSpans();
+        // now the span should be sent even if we do not wait for profiler data
+        assertThat(spans.getFinishedSpanItems()).hasSize(1);
+        spans.reset();
+
+        // check that the processor updates the span delay and host-id
+        sendProfilerRegistrationMsg(1, "host1");
+        processor.pollMessagesAndFlushPendingSpans();
+
+        Span span2 = tracer.spanBuilder("span2").startSpan();
+        try (Scope scope = span2.makeCurrent()) {
+          checkTlsIs(span2, span2);
+        }
+        span2.end();
+
+        processor.pollMessagesAndFlushPendingSpans();
+
+        clock.addAndGet(1 + POLL_FREQUENCY_MS);
+        processor.pollMessagesAndFlushPendingSpans();
+        assertThat(spans.getFinishedSpanItems())
+            .hasSize(1)
+            .first()
+            .satisfies(
+                span -> {
+                  assertThat(span.getResource().getAttributes())
+                      .containsEntry(ResourceAttributes.HOST_ID, "host1");
+                });
+        spans.reset();
+
+        // check that the processor also reacts to subsequent registrations, e.g. due to profiler
+        // restart
+        sendProfilerRegistrationMsg(100, "host1");
+        processor.pollMessagesAndFlushPendingSpans();
+
+        Span span3 = tracer.spanBuilder("span2").startSpan();
+        span3.end();
+        processor.pollMessagesAndFlushPendingSpans();
+
+        clock.addAndGet(100 + POLL_FREQUENCY_MS);
+        processor.pollMessagesAndFlushPendingSpans();
+        assertThat(spans.getFinishedSpanItems())
+            .hasSize(1)
+            .first()
+            .satisfies(
+                span -> {
+                  assertThat(span.getResource().getAttributes())
+                      .containsEntry(ResourceAttributes.HOST_ID, "host1");
+                });
+      }
+    }
+
     @Test
     void unsampledSpansNotCorrelated() {
       Sampler sampler =
@@ -365,15 +456,15 @@ public class UniversalProfilingProcessorTest {
               return "";
             }
           };
-      try (OpenTelemetrySdk sdk =
-          initSdk(builder -> builder.clock(() -> 0L).spanDelay(Duration.ofNanos(1)), sampler)) {
+      try (OpenTelemetrySdk sdk = initSdk(builder -> builder.clock(() -> 0L), sampler)) {
+        sendProfilerRegistrationMsg(1, "hostid");
         Tracer tracer = sdk.getTracer("test-tracer");
 
         Span span1 = tracer.spanBuilder("span1").startSpan();
         assertThat(span1.getSpanContext().isSampled()).isFalse();
 
         // Still send a stacktrace to make sure it is actually ignored
-        sendMsg(span1, randomStackTraceId(1), 1);
+        sendSampleMsg(span1, randomStackTraceId(1), 1);
 
         // ensure that the messages are processed now
         processor.pollMessagesAndFlushPendingSpans();
@@ -392,15 +483,15 @@ public class UniversalProfilingProcessorTest {
 
     @Test
     void nonLocalRootSpansNotDelayed() {
-      try (OpenTelemetrySdk sdk =
-          initSdk(builder -> builder.clock(() -> 0L).spanDelay(Duration.ofNanos(1)))) {
+      try (OpenTelemetrySdk sdk = initSdk(builder -> builder.clock(() -> 0L))) {
+        sendProfilerRegistrationMsg(1, "hostid");
         Tracer tracer = sdk.getTracer("test-tracer");
 
         Span root = tracer.spanBuilder("root").startSpan();
         Span child = tracer.spanBuilder("child").setParent(Context.root().with(root)).startSpan();
 
         // Still send a stacktrace to make sure it is actually ignored
-        sendMsg(child, randomStackTraceId(1), 1);
+        sendSampleMsg(child, randomStackTraceId(1), 1);
 
         // ensure that the messages are processed now
         processor.pollMessagesAndFlushPendingSpans();
@@ -421,8 +512,8 @@ public class UniversalProfilingProcessorTest {
     void shutdownFlushesBufferedSpans() {
       byte[] st1 = randomStackTraceId(1);
 
-      try (OpenTelemetrySdk sdk =
-          initSdk(builder -> builder.clock(() -> 0L).spanDelay(Duration.ofNanos(1)))) {
+      try (OpenTelemetrySdk sdk = initSdk(builder -> builder.clock(() -> 0L))) {
+        sendProfilerRegistrationMsg(1, "hostid");
         Tracer tracer = sdk.getTracer("test-tracer");
 
         Span root = tracer.spanBuilder("root").startSpan();
@@ -430,7 +521,7 @@ public class UniversalProfilingProcessorTest {
 
         assertThat(spans.getFinishedSpanItems()).isEmpty();
 
-        sendMsg(root, st1, 1);
+        sendSampleMsg(root, st1, 1);
       }
 
       assertThat(spans.getFinishedSpanItems())
@@ -445,9 +536,9 @@ public class UniversalProfilingProcessorTest {
 
     @Test
     void bufferCapacityExceeded() {
-      try (OpenTelemetrySdk sdk =
-          initSdk(
-              builder -> builder.clock(() -> 0L).spanDelay(Duration.ofNanos(1)).bufferSize(2))) {
+      try (OpenTelemetrySdk sdk = initSdk(builder -> builder.clock(() -> 0L).bufferSize(2))) {
+
+        sendProfilerRegistrationMsg(1, "hostid");
 
         Tracer tracer = sdk.getTracer("test-tracer");
 
@@ -524,7 +615,7 @@ public class UniversalProfilingProcessorTest {
       return Base64.getUrlEncoder().withoutPadding().encodeToString(data);
     }
 
-    void sendMsg(Span localRoot, byte[] stackTraceId, int count) {
+    void sendSampleMsg(Span localRoot, byte[] stackTraceId, int count) {
       byte[] traceId = localRoot.getSpanContext().getTraceIdBytes();
       byte[] rootSpanId = localRoot.getSpanContext().getSpanIdBytes();
 
@@ -536,6 +627,20 @@ public class UniversalProfilingProcessorTest {
       message.put(rootSpanId);
       message.put(stackTraceId);
       message.putShort((short) count);
+
+      JvmtiAccessImpl.sendToProfilerReturnChannelSocket0(message.array());
+    }
+
+    void sendProfilerRegistrationMsg(int sampleDelayMillis, String hostId) {
+      byte[] hostIdUtf8 = hostId.getBytes(StandardCharsets.UTF_8);
+
+      ByteBuffer message = ByteBuffer.allocate(12 + hostIdUtf8.length);
+      message.order(ByteOrder.nativeOrder());
+      message.putShort((short) 2); // message-type = registration message
+      message.putShort((short) 1); // message-version
+      message.putInt(sampleDelayMillis);
+      message.putInt(hostIdUtf8.length);
+      message.put(hostIdUtf8);
 
       JvmtiAccessImpl.sendToProfilerReturnChannelSocket0(message.array());
     }
