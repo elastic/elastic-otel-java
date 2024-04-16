@@ -1,24 +1,31 @@
 plugins {
   id("java")
   id("elastic-otel.sign-and-publish-conventions")
+  id("com.github.johnrengelman.shadow")
 }
 
 description = "Bundles all elastic extensions in a fat-jar to be used" +
     " with the vanilla agent via the otel.javaagent.extensions config option"
 base.archivesName.set("elastic-otel-agentextension")
 
-val fatjar: Configuration by configurations.creating
+val shadowDependencies: Configuration by configurations.creating
 
 dependencies {
-  fatjar(project(":custom"))
+  shadowDependencies(project(":custom"))
 }
 
 
 tasks {
-  jar {
-    dependsOn(fatjar)
-    dependsOn(project(":agent").tasks.named("updateLicensesAndNotice"))
 
+  jar {
+    enabled = false
+    dependsOn(shadowJar)
+  }
+
+  shadowJar {
+    configurations = listOf(shadowDependencies)
+    mergeServiceFiles()
+    archiveClassifier.set("")
     // include licenses and notices in jar
     from(rootDir) {
       into("META-INF")
@@ -27,7 +34,5 @@ tasks {
       include("NOTICE")
       include("licenses/**")
     }
-    from(fatjar.map { if (it.isDirectory) it else zipTree(it) })
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
   }
 }

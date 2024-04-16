@@ -72,3 +72,4 @@ jmh = {id = "me.champeau.jmh", version = "0.7.2"}
 nexusPublish = { id = "io.github.gradle-nexus.publish-plugin", version = '2.0.0' }
 licenseReport = { id = "com.github.jk1.dependency-license-report", version = "2.6" }
 dockerJavaApplication = { id = "com.bmuschko.docker-java-application", version = "9.4.0" }
+shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
