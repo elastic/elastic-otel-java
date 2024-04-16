@@ -13,6 +13,7 @@ rootProject.name = "elastic-otel-java"
 
 include("agent")
 include("agent:entrypoint")
+include("agentextension")
 include("bootstrap")
 include("custom")
 include("instrumentation")

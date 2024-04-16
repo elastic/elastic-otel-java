@@ -514,6 +514,7 @@ public class UniversalProfilingProcessorTest {
 
       try (OpenTelemetrySdk sdk = initSdk(builder -> builder.clock(() -> 0L))) {
         sendProfilerRegistrationMsg(1, "hostid");
+        processor.pollMessagesAndFlushPendingSpans();
         Tracer tracer = sdk.getTracer("test-tracer");
 
         Span root = tracer.spanBuilder("root").startSpan();
@@ -539,6 +540,7 @@ public class UniversalProfilingProcessorTest {
       try (OpenTelemetrySdk sdk = initSdk(builder -> builder.clock(() -> 0L).bufferSize(2))) {
 
         sendProfilerRegistrationMsg(1, "hostid");
+        processor.pollMessagesAndFlushPendingSpans();
 
         Tracer tracer = sdk.getTracer("test-tracer");
 

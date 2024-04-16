@@ -24,7 +24,13 @@ import io.opentelemetry.api.trace.Tracer;
 import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 
+@DisabledIfSystemProperty(
+    named = "otel.javaagent.extensions",
+    matches = ".+",
+    disabledReason =
+        "When running with the vanilla agent, span values won't be able to use the field backed storage")
 public class SpanValueTest {
   @Test
   @SuppressWarnings("unchecked")

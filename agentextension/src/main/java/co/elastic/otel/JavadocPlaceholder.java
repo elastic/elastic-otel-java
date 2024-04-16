@@ -18,21 +18,5 @@
  */
 package co.elastic.otel;
 
-import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
-
-import io.opentelemetry.sdk.resources.Resource;
-import org.junit.jupiter.api.Test;
-
-class ElasticDistroResourceProviderTest {
-
-  @Test
-  void elasticDistroNameAndVersion() {
-    ElasticDistroResourceProvider provider = new ElasticDistroResourceProvider();
-    Resource resource = provider.createResource(null);
-
-    assertThat(resource.getAttributes())
-        .hasSize(2)
-        .containsEntry("telemetry.distro.name", "elastic")
-        .containsKey("telemetry.distro.version");
-  }
-}
+/** This class is here as a placeholder so that the sources and javadoc are not empty. */
+public class JavadocPlaceholder {}
