@@ -81,7 +81,7 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
   private final SpanProfilingSamplesCorrelator correlator;
   private final ScheduledExecutorService messagePollAndSpanFlushExecutor;
 
-  // Visibile for testing
+  // Visible for testing
   String socketPath;
 
   private volatile boolean tlsPropagationActive = false;
@@ -214,13 +214,14 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
 
   @Nullable
   private void onContextChange(@Nullable Context previous, @Nullable Context next) {
+    if (!tlsPropagationActive) {
+      return;
+    }
     try {
-      if (tlsPropagationActive) {
-        Span oldSpan = safeSpanFromContext(previous);
-        Span newSpan = safeSpanFromContext(next);
-        if (oldSpan != newSpan && !oldSpan.getSpanContext().equals(newSpan.getSpanContext())) {
-          ProfilerSharedMemoryWriter.updateThreadCorrelationStorage(newSpan);
-        }
+      Span oldSpan = safeSpanFromContext(previous);
+      Span newSpan = safeSpanFromContext(next);
+      if (oldSpan != newSpan && !oldSpan.getSpanContext().equals(newSpan.getSpanContext())) {
+        ProfilerSharedMemoryWriter.updateThreadCorrelationStorage(newSpan);
       }
     } catch (Throwable t) {
       log.log(Level.SEVERE, "Error on context update", t);
@@ -239,7 +240,7 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
     // Order is important: we only want to flush spans after we have consumed all pending messages
     // otherwise the data for the spans to be flushed might be incomplete
     consumeProfilerMessages();
-    correlator.flushPendingDelayedSpans();
+    correlator.flushPendingBufferedSpans();
   }
 
   private void consumeProfilerMessages() {
@@ -277,7 +278,7 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
     tlsPropagationActive = true;
     long spanDelayNanos =
         Duration.ofMillis(message.getSamplesDelayMillis() + POLL_FREQUENCY_MS).toNanos();
-    correlator.setSpanDelayNanos(spanDelayNanos);
+    correlator.setSpanBufferDurationNanos(spanDelayNanos);
 
     ProfilerProvidedHostId.set(message.getHostId());
   }

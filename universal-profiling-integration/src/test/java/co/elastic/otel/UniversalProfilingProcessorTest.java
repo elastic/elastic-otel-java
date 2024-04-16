@@ -253,15 +253,15 @@ public class UniversalProfilingProcessorTest {
     ByteBuffer tls = JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(TLS_STORAGE_SIZE);
     if (tls != null) {
       tls.order(ByteOrder.nativeOrder());
-      assertThat(tls.getChar(0)).isEqualTo((char) 1); // layout-minor-version
-      assertThat(tls.get(2)).isEqualTo((byte) 1); // valid byte
+      assertThat(tls.getChar(0)).describedAs("layout-minor-version").isEqualTo((char) 1);
+      assertThat(tls.get(2)).describedAs("valid byte").isEqualTo((byte) 1);
     }
 
     SpanContext ctx = span.getSpanContext();
     if (ctx.isValid()) {
       assertThat(tls).isNotNull();
-      assertThat(tls.get(3)).isEqualTo((byte) 1); // trace-present-flag
-      assertThat(tls.get(4)).isEqualTo(ctx.getTraceFlags().asByte()); // trace-flags
+      assertThat(tls.get(3)).describedAs("trace-present-flag").isEqualTo((byte) 1);
+      assertThat(tls.get(4)).describedAs("trace-flags").isEqualTo(ctx.getTraceFlags().asByte());
 
       byte[] traceId = new byte[16];
       byte[] spanId = new byte[8];
@@ -276,7 +276,7 @@ public class UniversalProfilingProcessorTest {
       tls.get(localRootSpanId);
       assertThat(localRootSpanId).containsExactly(localRoot.getSpanContext().getSpanIdBytes());
     } else if (tls != null) {
-      assertThat(tls.get(3)).isEqualTo((byte) 0); // trace-present-flag
+      assertThat(tls.get(3)).describedAs("trace-present-flag").isEqualTo((byte) 0);
     }
   }
 

@@ -53,7 +53,7 @@ public class SpanProfilingSamplesCorrelator {
   private final RingBuffer<DelayedSpan> delayedSpans;
   private final PeekingPoller<DelayedSpan> delayedSpansPoller;
 
-  private volatile long spanDelayNanos;
+  private volatile long spanBufferDurationNanos;
   private volatile boolean shuttingDown = false;
 
   private final WriterReaderPhaser shutdownPhaser = new WriterReaderPhaser();
@@ -64,7 +64,7 @@ public class SpanProfilingSamplesCorrelator {
       long initialSpanDelayNanos,
       Consumer<ReadableSpan> sendSpan) {
     this.nanoClock = nanoClock;
-    this.spanDelayNanos = initialSpanDelayNanos;
+    this.spanBufferDurationNanos = initialSpanDelayNanos;
     this.sendSpan = sendSpan;
 
     bufferCapacity = nextPowerOf2(bufferCapacity);
@@ -79,8 +79,11 @@ public class SpanProfilingSamplesCorrelator {
     delayedSpansPoller = new PeekingPoller<>(nonPeekingPoller, DelayedSpan::new);
   }
 
-  public void setSpanDelayNanos(long delay) {
-    spanDelayNanos = delay;
+  public void setSpanBufferDurationNanos(long nanos) {
+    if (nanos < 0) {
+      throw new IllegalArgumentException("nanos must be positive but was " + nanos);
+    }
+    spanBufferDurationNanos = nanos;
   }
 
   public void onSpanStart(ReadableSpan span, Context parentCtx) {
@@ -100,7 +103,7 @@ public class SpanProfilingSamplesCorrelator {
 
     long criticalPhaseVal = shutdownPhaser.writerCriticalSectionEnter();
     try {
-      if (spanDelayNanos == 0 || shuttingDown) {
+      if (spanBufferDurationNanos == 0 || shuttingDown) {
         correlateAndSendSpan(span);
         return;
       }
@@ -138,14 +141,14 @@ public class SpanProfilingSamplesCorrelator {
     }
   }
 
-  public synchronized void flushPendingDelayedSpans() {
+  public synchronized void flushPendingBufferedSpans() {
     try {
       delayedSpansPoller.poll(
-          delayedSpan -> {
-            long elapsed = nanoClock.getAsLong() - delayedSpan.endNanoTimestamp;
-            if (elapsed >= spanDelayNanos || shuttingDown) {
-              correlateAndSendSpan(delayedSpan.span);
-              delayedSpan.clear();
+          bufferedSpan -> {
+            long elapsed = nanoClock.getAsLong() - bufferedSpan.endNanoTimestamp;
+            if (elapsed >= spanBufferDurationNanos || shuttingDown) {
+              correlateAndSendSpan(bufferedSpan.span);
+              bufferedSpan.clear();
               return true;
             }
             return false; // span is not yet ready to be sent
@@ -168,7 +171,7 @@ public class SpanProfilingSamplesCorrelator {
       shutdownPhaser.readerUnlock();
     }
     // This will flush all pending spans because shuttingDown=true
-    flushPendingDelayedSpans();
+    flushPendingBufferedSpans();
   }
 
   private void correlateAndSendSpan(ReadableSpan span) {
