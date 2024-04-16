@@ -26,7 +26,9 @@ tasks {
     configurations = listOf(shadowDependencies)
     mergeServiceFiles()
     archiveClassifier.set("")
+
     // include licenses and notices in jar
+    dependsOn(project(":agent").tasks.named("updateLicensesAndNotice"))
     from(rootDir) {
       into("META-INF")
 
