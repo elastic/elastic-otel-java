@@ -21,11 +21,11 @@ package co.elastic.otel.profiler;
 import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.WRITE;
 
+import co.elastic.otel.common.config.WildcardMatcher;
 import co.elastic.otel.common.util.ExecutorUtils;
 import co.elastic.otel.profiler.asyncprofiler.AsyncProfiler;
 import co.elastic.otel.profiler.asyncprofiler.JfrParser;
 import co.elastic.otel.profiler.collections.Long2ObjectHashMap;
-import co.elastic.otel.profiler.config.WildcardMatcher;
 import co.elastic.otel.profiler.pooling.Allocator;
 import co.elastic.otel.profiler.pooling.ObjectPool;
 import com.lmax.disruptor.EventFactory;

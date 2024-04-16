@@ -18,12 +18,12 @@
  */
 package co.elastic.otel.profiler.asyncprofiler;
 
+import co.elastic.otel.common.config.WildcardMatcher;
 import co.elastic.otel.profiler.StackFrame;
 import co.elastic.otel.profiler.collections.Int2IntHashMap;
 import co.elastic.otel.profiler.collections.Int2ObjectHashMap;
 import co.elastic.otel.profiler.collections.Long2LongHashMap;
 import co.elastic.otel.profiler.collections.Long2ObjectHashMap;
-import co.elastic.otel.profiler.config.WildcardMatcher;
 import co.elastic.otel.profiler.pooling.Recyclable;
 import java.io.File;
 import java.io.IOException;

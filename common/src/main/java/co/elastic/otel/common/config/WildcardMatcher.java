@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.profiler.config;
+package co.elastic.otel.common.config;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -334,10 +334,10 @@ public abstract class WildcardMatcher {
       this.ignoreCase = ignoreCase;
       this.stringRepresentation =
           new StringBuilder(
-                  matcher.length()
-                      + CASE_SENSITIVE_PREFIX.length()
-                      + WILDCARD.length()
-                      + WILDCARD.length())
+              matcher.length()
+                  + CASE_SENSITIVE_PREFIX.length()
+                  + WILDCARD.length()
+                  + WILDCARD.length())
               .append(ignoreCase ? "" : CASE_SENSITIVE_PREFIX)
               .append(wildcardAtBeginning ? WILDCARD : "")
               .append(matcher)

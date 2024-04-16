@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.profiler;
 
-import co.elastic.otel.profiler.config.WildcardMatcher;
+import co.elastic.otel.common.config.WildcardMatcher;
 import java.io.File;
 import java.time.Duration;
 import java.util.Arrays;

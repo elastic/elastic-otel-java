@@ -18,17 +18,11 @@
  */
 package co.elastic.otel.profiler;
 
-import co.elastic.otel.profiler.config.WildcardMatcher;
+import co.elastic.otel.common.config.PropertiesApplier;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Consumer;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 @AutoService(AutoConfigurationCustomizerProvider.class)
 public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvider {
@@ -79,48 +73,4 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
         });
   }
 
-  private static class PropertiesApplier {
-
-    private final ConfigProperties properties;
-
-    private PropertiesApplier(ConfigProperties properties) {
-      this.properties = properties;
-    }
-
-    void applyBool(String configKey, Consumer<Boolean> funcToApply) {
-      applyValue(properties.getBoolean(configKey), funcToApply);
-    }
-
-    void applyInt(String configKey, Consumer<Integer> funcToApply) {
-      applyValue(properties.getInt(configKey), funcToApply);
-    }
-
-    void applyDuration(String configKey, Consumer<Duration> funcToApply) {
-      applyValue(properties.getDuration(configKey), funcToApply);
-    }
-
-    void applyString(String configKey, Consumer<String> funcToApply) {
-      applyValue(properties.getString(configKey), funcToApply);
-    }
-
-    void applyWildcards(String configKey, Consumer<? super List<WildcardMatcher>> funcToApply) {
-      String wildcardListString = properties.getString(configKey);
-      if (wildcardListString != null && !wildcardListString.isEmpty()) {
-        List<WildcardMatcher> values =
-            Arrays.stream(wildcardListString.split(","))
-                .filter(str -> !str.isEmpty())
-                .map(WildcardMatcher::valueOf)
-                .collect(Collectors.toList());
-        if (!values.isEmpty()) {
-          funcToApply.accept(values);
-        }
-      }
-    }
-
-    private static <T> void applyValue(T value, Consumer<T> funcToApply) {
-      if (value != null) {
-        funcToApply.accept(value);
-      }
-    }
-  }
 }
