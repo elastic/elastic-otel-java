@@ -20,14 +20,13 @@ package co.elastic.otel;
 
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SpanProcessor;
-import java.time.Duration;
 import java.util.function.LongSupplier;
 
 public class UniversalProfilingProcessorBuilder {
 
   private final Resource resource;
   private final SpanProcessor nextProcessor;
-  private Duration spanDelay = Duration.ofSeconds(10);
+  private boolean delayActivationAfterProfilerRegistration = true;
 
   private LongSupplier nanoClock = System::nanoTime;
 
@@ -42,7 +41,12 @@ public class UniversalProfilingProcessorBuilder {
 
   public UniversalProfilingProcessor build() {
     return new UniversalProfilingProcessor(
-        nextProcessor, resource, bufferSize, spanDelay, socketDir, nanoClock);
+        nextProcessor,
+        resource,
+        bufferSize,
+        delayActivationAfterProfilerRegistration,
+        socketDir,
+        nanoClock);
   }
 
   UniversalProfilingProcessorBuilder clock(LongSupplier nanoClock) {
@@ -50,8 +54,19 @@ public class UniversalProfilingProcessorBuilder {
     return this;
   }
 
-  public UniversalProfilingProcessorBuilder spanDelay(Duration delay) {
-    this.spanDelay = delay;
+  /**
+   * If enabled, the profiling integration will remain inactive until the presence of a profiler is
+   * actually detected. This safes a bit of overhead in the case no profiler is there.
+   *
+   * <p>The downside is if the application starts a span immediately after startup, the profiler
+   * might not be detected in time and therefore this first span might not be correlated correctly.
+   * This can be avoided by setting this option to {@code false}. In this case the {@link
+   * UniversalProfilingProcessor} will assume a profiler will be eventually running and start the
+   * correlation eagerly.
+   */
+  public UniversalProfilingProcessorBuilder delayActivationAfterProfilerRegistration(
+      boolean value) {
+    this.delayActivationAfterProfilerRegistration = value;
     return this;
   }
 
