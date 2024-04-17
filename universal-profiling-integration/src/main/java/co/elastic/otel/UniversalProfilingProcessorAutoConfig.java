@@ -25,10 +25,15 @@ import com.google.auto.service.AutoService;
 import io.opentelemetry.sdk.autoconfigure.ResourceConfiguration;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.semconv.ResourceAttributes;
+import java.util.logging.Logger;
 
 @AutoService(ChainingSpanProcessorAutoConfiguration.class)
 public class UniversalProfilingProcessorAutoConfig
     implements ChainingSpanProcessorAutoConfiguration {
+
+  private static final Logger logger = Logger.getLogger(
+      UniversalProfilingProcessorAutoConfig.class.getName());
 
   static final String ENABLED_OPTION = "elastic.otel.universal.profiling.integration.enabled";
   static final String BUFFER_SIZE_OPTION =
@@ -52,9 +57,16 @@ public class UniversalProfilingProcessorAutoConfig
     if (enabled == EnabledOptions.FALSE) {
       return;
     }
+    Resource resource = ResourceConfiguration.createEnvironmentResource(properties);
+
+    String serviceName = resource.getAttribute(ResourceAttributes.SERVICE_NAME);
+    if (serviceName == null || serviceName.isEmpty()) {
+      logger.warning(
+          "Cannot start universal profiling integration because no service name was configured");
+      return;
+    }
 
     PropertiesApplier props = new PropertiesApplier(properties);
-    Resource resource = ResourceConfiguration.createEnvironmentResource(properties);
     registerer.register(
         next -> {
           UniversalProfilingProcessorBuilder builder =
