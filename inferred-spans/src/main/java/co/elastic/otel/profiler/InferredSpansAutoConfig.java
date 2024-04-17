@@ -72,5 +72,4 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
           return providerBuilder;
         });
   }
-
 }

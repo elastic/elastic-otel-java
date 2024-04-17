@@ -34,10 +34,10 @@ public interface SpanValueStorageProvider {
       Class<?> sdkSpan = Class.forName("io.opentelemetry.sdk.trace.SdkSpan");
       if (sdkSpan.getClassLoader() != SpanValueStorage.class.getClassLoader()) {
         // If we are running in a different classloader, this means we aren't running in our distro
-        logger.log(Level.FINE,
+        logger.log(
+            Level.FINE,
             "Using map-backed storage for SpanValues because SdkSpan lives in a different classloader and therefore is inaccessible");
         return MapBacked.getInstance();
-
       }
     } catch (ClassNotFoundException e) {
       throw new RuntimeException("Expected SdkSpan class to exist", e);
