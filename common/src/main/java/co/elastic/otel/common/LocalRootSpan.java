@@ -92,7 +92,6 @@ public class LocalRootSpan {
     return (ReadableSpan) rootSpanVal;
   }
 
-
   /**
    * If the provided span is a local root span, itself is returned. Otherwise, returns the
    * (transitive) parent which is a local root.
