@@ -70,11 +70,25 @@ public class UniversalProfilingProcessorBuilder {
     return this;
   }
 
+  /**
+   * The extension needs to buffer ended local-root spans for a short duration to ensure that all of
+   * its profiling data has been received. This configuration options configures the buffer size in
+   * number of spans. The higher the number of local root spans per second, the higher this buffer
+   * size should be set. The extension will log a warning if it is not capable of buffering a span
+   * due to insufficient buffer size. This will cause the span to be exported immediately instead
+   * with possibly incomplete profiling correlation data.
+   */
   public UniversalProfilingProcessorBuilder bufferSize(int bufferSize) {
     this.bufferSize = bufferSize;
     return this;
   }
 
+  /**
+   * The extension needs to bind a socket to a file for communicating with the universal profiling
+   * host agent. By default, this socket will be placed in the java.io.tmpdir. This configuration
+   * option can be used to change the location. Note that the total path name (including the socket)
+   * must not exceed 100 characters due to OS restrictions.
+   */
   public UniversalProfilingProcessorBuilder socketDir(String path) {
     this.socketDir = path;
     return this;
