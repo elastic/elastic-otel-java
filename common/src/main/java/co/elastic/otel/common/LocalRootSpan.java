@@ -79,6 +79,20 @@ public class LocalRootSpan {
     }
   }
 
+  /** See {@link LocalRootSpan#getFor(Span)}. */
+  @Nullable
+  public static ReadableSpan getFor(ReadableSpan span) {
+    Object rootSpanVal = localRoot.get(span);
+    if (rootSpanVal == LOCAL_ROOT_MARKER) {
+      return span;
+    }
+    if (rootSpanVal == INFERRED_SPAN_UNKNOWN_ROOT_MARKER) {
+      return null;
+    }
+    return (ReadableSpan) rootSpanVal;
+  }
+
+
   /**
    * If the provided span is a local root span, itself is returned. Otherwise, returns the
    * (transitive) parent which is a local root.
@@ -93,31 +107,14 @@ public class LocalRootSpan {
    * </ul>
    */
   @Nullable
-  public static Span getFor(Span span) {
-    return resolveRoot(span, localRoot.get(span));
+  public static ReadableSpan getFor(Span span) {
+    return getFor((ReadableSpan) span);
   }
 
   /** See {@link LocalRootSpan#getFor(Span)}. */
   @Nullable
-  public static Span getFor(ReadableSpan span) {
-    return resolveRoot(span, localRoot.get(span));
-  }
-
-  /** See {@link LocalRootSpan#getFor(Span)}. */
-  @Nullable
-  public static Span getFor(ReadWriteSpan span) {
-    return resolveRoot(span, localRoot.get(span));
-  }
-
-  @Nullable
-  private static Span resolveRoot(Object span, Object rootSpanVal) {
-    if (rootSpanVal == LOCAL_ROOT_MARKER) {
-      return (Span) span;
-    }
-    if (rootSpanVal == INFERRED_SPAN_UNKNOWN_ROOT_MARKER) {
-      return null;
-    }
-    return (Span) rootSpanVal;
+  public static ReadableSpan getFor(ReadWriteSpan span) {
+    return getFor((ReadableSpan) span);
   }
 
   private LocalRootSpan() {}

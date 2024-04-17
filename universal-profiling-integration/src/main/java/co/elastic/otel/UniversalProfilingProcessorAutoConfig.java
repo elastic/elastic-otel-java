@@ -32,8 +32,8 @@ import java.util.logging.Logger;
 public class UniversalProfilingProcessorAutoConfig
     implements ChainingSpanProcessorAutoConfiguration {
 
-  private static final Logger logger = Logger.getLogger(
-      UniversalProfilingProcessorAutoConfig.class.getName());
+  private static final Logger logger =
+      Logger.getLogger(UniversalProfilingProcessorAutoConfig.class.getName());
 
   static final String ENABLED_OPTION = "elastic.otel.universal.profiling.integration.enabled";
   static final String BUFFER_SIZE_OPTION =
