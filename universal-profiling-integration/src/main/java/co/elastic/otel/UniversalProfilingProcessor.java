@@ -78,13 +78,15 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
 
   private static boolean anyInstanceActive = false;
 
-  private final SpanProfilingSamplesCorrelator correlator;
+  // Visible for testing
+  final SpanProfilingSamplesCorrelator correlator;
   private final ScheduledExecutorService messagePollAndSpanFlushExecutor;
 
   // Visible for testing
   String socketPath;
 
-  private volatile boolean tlsPropagationActive = false;
+  // Visible for testing
+  volatile boolean tlsPropagationActive = false;
 
   public static UniversalProfilingProcessorBuilder builder(SpanProcessor next, Resource resource) {
     return new UniversalProfilingProcessorBuilder(next, resource);
