@@ -14,6 +14,11 @@ dependencies {
   shadowDependencies(project(":custom"))
 }
 
+publishingConventions {
+  artifactTasks.add(tasks.shadowJar)
+  artifactTasks.add(tasks.javadocJar)
+  artifactTasks.add(tasks.sourcesJar)
+}
 
 tasks {
 
