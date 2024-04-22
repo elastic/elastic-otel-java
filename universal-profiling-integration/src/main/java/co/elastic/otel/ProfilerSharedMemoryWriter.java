@@ -23,6 +23,7 @@ import co.elastic.otel.common.util.HexUtils;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.semconv.ResourceAttributes;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -99,7 +100,7 @@ public class ProfilerSharedMemoryWriter {
 
       SpanContext spanCtx = newSpan.getSpanContext();
       if (spanCtx.isValid() && !spanCtx.isRemote()) {
-        Span localRoot = LocalRootSpan.getFor(newSpan);
+        ReadableSpan localRoot = LocalRootSpan.getFor(newSpan);
         if (localRoot != null) {
           String localRootSpanId = localRoot.getSpanContext().getSpanId();
           tls.put(TLS_TRACE_PRESENT_OFFSET, (byte) 1);

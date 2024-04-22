@@ -21,11 +21,27 @@ package co.elastic.otel.common;
 import com.blogspot.mydailyjava.weaklockfree.WeakConcurrentMap;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.sdk.trace.FieldBackedSpanValueStorageProvider;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Nullable;
 
 public interface SpanValueStorageProvider {
 
+  Logger logger = Logger.getLogger(SpanValueStorageProvider.class.getName());
+
   static SpanValueStorageProvider get() {
+    try {
+      Class<?> sdkSpan = Class.forName("io.opentelemetry.sdk.trace.SdkSpan");
+      if (sdkSpan.getClassLoader() != SpanValueStorage.class.getClassLoader()) {
+        // If we are running in a different classloader, this means we aren't running in our distro
+        logger.log(
+            Level.FINE,
+            "Using map-backed storage for SpanValues because SdkSpan lives in a different classloader and therefore is inaccessible");
+        return MapBacked.getInstance();
+      }
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException("Expected SdkSpan class to exist", e);
+    }
     return FieldBackedSpanValueStorageProvider.INSTANCE != null
         ? FieldBackedSpanValueStorageProvider.INSTANCE
         : MapBacked.getInstance();
