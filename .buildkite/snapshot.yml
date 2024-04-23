@@ -11,6 +11,9 @@ steps:
       - "agent/build/libs/elastic-otel-javaagent-*.jar"
       - "jvmti-access/build/libs/jvmti-access-.*.jar"
       - "universal-profiling-integration/build/libs/universal-profiling-integration-.*.jar"
+      - "agentextension/build/libs/elastic-otel-agentextension-.*.jar"
+      - "common/build/libs/common-.*.jar"
+      - "inferred-spans/build/libs/inferred-spans-.*.jar"
       - "build/dry-run-maven-repo.tgz"
 
 notify:
