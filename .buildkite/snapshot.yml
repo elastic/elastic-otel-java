@@ -2,6 +2,9 @@ agents:
   provider: "gcp"
   image: "family/elastic-otel-java-ubuntu-2204"
 
+env:
+  TARBALL_FILE: ${TARBALL_FILE:-dist.tar}
+
 steps:
   - label: "Build and publish snapshot"
     key: "release"
@@ -13,6 +16,7 @@ steps:
       - "common/build/libs/common-.*.jar"
       - "inferred-spans/build/libs/inferred-spans-.*.jar"
       - "build/dry-run-maven-repo.tgz"
+      - "${TARBALL_FILE}"
 
 notify:
   - slack: "#apm-agent-java"

@@ -45,6 +45,8 @@ jobs:
     permissions:
       contents: write
       id-token: write
+    env:
+      TARBALL_FILE: dist.tar
     if: ${{ contains(needs.validate.outputs.is-snapshot, 'true') }}
     steps:
       - id: buildkite
@@ -59,18 +61,22 @@ jobs:
           waitFor: true
           printBuildLogs: false
           artifactName: snapshots
-          artifactPath: agent/build/libs/elastic-otel-javaagent-*.jar
+          artifactPath: ${{ env.TARBALL_FILE }}
           buildEnvVars: |
             dry_run=${{ inputs.dry_run || 'false' }}
+            TARBALL_FILE=dist.tar
 
       - uses: actions/download-artifact@v3
         with:
           name: snapshots
 
+      - name: untar the buildkite tarball
+        run: tar xvf ${{ env.TARBALL_FILE }}
+
       - name: generate build provenance
         uses: github-early-access/generate-build-provenance@main
         with:
-          subject-path: "${{ github.workspace }}/agent/build/libs/elastic-otel-javaagent-*.jar"
+          subject-path: "${{ github.workspace }}/**/*.jar"
 
       - if: ${{ failure() }}
         uses: elastic/apm-pipeline-library/.github/actions/slack-message@current

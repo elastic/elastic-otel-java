@@ -40,3 +40,6 @@ if [[ "$dry_run" == "true" ]] ; then
     echo "--- Archive the dry-run repository :package: (dry-run)"
     tar czvf ./build/dry-run-maven-repo.tgz -C ./build/dry-run-maven-repo/ . | tee release.txt
 fi
+
+echo "--- Archive the build folders with jar files"
+find . -type d -name build -exec find {} -name '*.jar' -print0 \; | xargs -0 tar -cvf "${TARBALL_FILE:-dist.tar}"
