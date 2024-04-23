@@ -49,6 +49,14 @@ Set `ELASTIC_OTEL_INFERRED_SPANS_ENABLED=true` to enable.
 
 See [inferred spans](./inferred-spans/README.md) for more details
 
+### Span stacktrace
+
+The agent captures the stacktraces of spans to help identify code paths that triggered them.
+
+The stacktrace is stored in the [`code.stacktrace`](https://opentelemetry.io/docs/specs/semconv/attributes-registry/code/) attribute.
+
+The minimum span duration can be configured with `elastic.otel.span.stack.trace.min.duration` (in milliseconds, defaults to 5ms).
+
 ### Breakdown metrics
 
 Breakdown metrics currently require a custom Elasticsearch ingest pipeline.
