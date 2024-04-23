@@ -48,7 +48,7 @@ sourceSets {
   }
 }
 
-val sharedCompilerArgs = "-std=c++17 -fno-rtti -fno-exceptions -O2 -ftls-model=global-dynamic -fPIC -Wall -Werror -Wextra -shared"
+val sharedCompilerArgs = "-std=c++17 -fno-rtti -fno-exceptions -O2 -ftls-model=global-dynamic -fPIC -fdata-sections -ffunction-sections -Wall -Werror -Wextra -shared"
 val nativeTargets = listOf(
   NativeTarget(
     "darwin-arm64.so",
@@ -64,12 +64,12 @@ val nativeTargets = listOf(
   NativeTarget(
     "linux-arm64.so",
     "jni_linux_arm64.Dockerfile",
-    "-static-libstdc++ -static-libgcc -mtls-dialect=desc $sharedCompilerArgs"
+    "-static-libstdc++ -static-libgcc -mtls-dialect=desc -Wl,--exclude-libs,ALL -Wl,--gc-sections $sharedCompilerArgs"
   ),
   NativeTarget(
     "linux-x64.so",
     "jni_linux_x64.Dockerfile",
-    "-static-libstdc++ -static-libgcc -mtls-dialect=gnu2 $sharedCompilerArgs"
+    "-static-libstdc++ -static-libgcc -mtls-dialect=gnu2 -Wl,--exclude-libs,ALL -Wl,--gc-sections $sharedCompilerArgs"
   )
 )
 
