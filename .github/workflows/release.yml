@@ -70,6 +70,9 @@ jobs:
     if: ${{ ! inputs.skip_maven_deploy }}
     needs:
       - validate-tag
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - id: buildkite
         name: Run Release
@@ -81,9 +84,20 @@ jobs:
           pipeline: elastic-otel-java-release
           waitFor: true
           printBuildLogs: false
+          artifactName: releases
+          artifactPath: agent/build/libs/elastic-otel-javaagent-*.jar
           buildEnvVars: |
             ref=${{ inputs.ref }}
             dry_run=${{ inputs.dry_run || 'false' }}
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: releases
+
+      - name: generate build provenance
+        uses: github-early-access/generate-build-provenance@main
+        with:
+          subject-path: "${{ github.workspace }}/agent/build/libs/elastic-otel-javaagent-*.jar"
 
       - if: ${{ success() && ! inputs.dry_run }}
         uses: elastic/apm-pipeline-library/.github/actions/slack-message@current
