@@ -40,7 +40,7 @@ public interface SpanValueStorageProvider {
         return MapBacked.getInstance();
       }
     } catch (ClassNotFoundException e) {
-      throw new RuntimeException("Expected SdkSpan class to exist", e);
+      throw new IllegalStateException("Expected SdkSpan class to exist", e);
     }
     return FieldBackedSpanValueStorageProvider.INSTANCE != null
         ? FieldBackedSpanValueStorageProvider.INSTANCE
