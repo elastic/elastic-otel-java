@@ -33,6 +33,7 @@ import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import io.opentelemetry.semconv.incubating.CodeIncubatingAttributes;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;

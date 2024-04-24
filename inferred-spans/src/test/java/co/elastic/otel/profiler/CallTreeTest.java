@@ -32,6 +32,7 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.semconv.incubating.CodeIncubatingAttributes;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
