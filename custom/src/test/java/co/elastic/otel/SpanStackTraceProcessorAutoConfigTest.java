@@ -21,7 +21,6 @@ package co.elastic.otel;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.satisfies;
 
-import co.elastic.otel.common.ElasticAttributes;
 import co.elastic.otel.testing.AutoConfigTestProperties;
 import co.elastic.otel.testing.AutoConfiguredDataCapture;
 import co.elastic.otel.testing.OtelReflectionUtils;
@@ -29,6 +28,7 @@ import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.semconv.incubating.CodeIncubatingAttributes;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,7 +60,8 @@ public class SpanStackTraceProcessorAutoConfigTest {
       assertThat(spans).hasSize(1);
       assertThat(spans.get(0))
           .hasName("my-span")
-          .hasAttribute(satisfies(ElasticAttributes.SPAN_STACKTRACE, att -> att.isNotBlank()));
+          .hasAttribute(
+              satisfies(CodeIncubatingAttributes.CODE_STACKTRACE, att -> att.isNotBlank()));
     }
   }
 

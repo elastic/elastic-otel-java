@@ -939,7 +939,8 @@ class CallTreeTest {
             .describedAs("Unexpected duration for span %s", span)
             .isEqualTo(durationMs * 1_000_000L);
 
-        String actualStacktrace = span.getAttributes().get(ElasticAttributes.SPAN_STACKTRACE);
+        String actualStacktrace =
+            span.getAttributes().get(CodeIncubatingAttributes.CODE_STACKTRACE);
         if (stackTrace == null || stackTrace.isEmpty()) {
           assertThat(actualStacktrace).isBlank();
         } else {

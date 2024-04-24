@@ -16,6 +16,12 @@ opentelemetryJavaagentAlpha = "2.3.0-alpha"
 # updated from upstream agent with .ci/update-upstream.sh
 opentelemetryContribAlpha = "1.34.0-alpha"
 
+# otel semconv
+# updated from upstream agent with .ci/update-upstream.sh
+# While the semconv stable artifact is provided transitively by the agent, we still have to explicitly
+# reference the "incubating" version explicitly
+opentelemetrySemconvAlpha = "1.25.0-alpha"
+
 [libraries]
 
 # transitively provides 'opentelemetry-instrumentation-bom' (non-alpha)
@@ -26,6 +32,9 @@ opentelemetryProto = { group = "io.opentelemetry.proto", name = "opentelemetry-p
 awsContribResources = { group = "io.opentelemetry.contrib", name = "opentelemetry-aws-resources", version.ref = "opentelemetryContribAlpha" }
 gcpContribResources = { group = "io.opentelemetry.contrib", name = "opentelemetry-gcp-resources", version.ref = "opentelemetryContribAlpha" }
 contribResources = { group = "io.opentelemetry.contrib", name = "opentelemetry-resource-providers", version.ref = "opentelemetryContribAlpha" }
+
+opentelemetrySemconv = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv", version.ref = "opentelemetrySemconvAlpha"}
+opentelemetrySemconvIncubating = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv-incubating", version.ref = "opentelemetrySemconvAlpha"}
 
 autoservice-processor = { group = "com.google.auto.service", name = "auto-service", version.ref = "autoservice" }
 autoservice-annotations = { group = "com.google.auto.service", name = "auto-service-annotations", version.ref = "autoservice" }
@@ -62,6 +71,8 @@ ant = "org.apache.ant:ant:1.10.14"
 asm = "org.ow2.asm:asm:9.7"
 
 [bundles]
+
+semconv = ["opentelemetrySemconv", "opentelemetrySemconvIncubating"]
 
 [plugins]
 

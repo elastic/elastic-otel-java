@@ -11,7 +11,7 @@ dependencies {
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-extension-api")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
-  compileOnly("io.opentelemetry.semconv:opentelemetry-semconv")
+  compileOnly(libs.bundles.semconv)
 
   annotationProcessor(libs.autoservice.processor)
   compileOnly(libs.autoservice.annotations)
@@ -28,7 +28,7 @@ dependencies {
     //The following dependency isn't actually needed, but breaks the classpath when testing with Java 8
     exclude(group = "io.opentelemetry.javaagent", module = "opentelemetry-javaagent-tooling-java9")
   }
-  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv")
+  testImplementation(libs.bundles.semconv)
 
   testAnnotationProcessor(libs.autoservice.processor)
   testCompileOnly(libs.autoservice.annotations)

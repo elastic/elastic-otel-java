@@ -32,6 +32,7 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
+import io.opentelemetry.semconv.incubating.CodeIncubatingAttributes;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -513,7 +514,7 @@ public class CallTree implements Recyclable {
       assert this.parent != null;
       tempBuilder.setLength(0);
       this.parent.fillStackTrace(tempBuilder);
-      spanBuilder.setAttribute(ElasticAttributes.SPAN_STACKTRACE, tempBuilder.toString());
+      spanBuilder.setAttribute(CodeIncubatingAttributes.CODE_STACKTRACE, tempBuilder.toString());
     }
 
     Span span = spanBuilder.startSpan();

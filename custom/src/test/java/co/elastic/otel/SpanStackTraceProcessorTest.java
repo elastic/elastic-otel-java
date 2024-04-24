@@ -29,6 +29,7 @@ import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import io.opentelemetry.semconv.incubating.CodeIncubatingAttributes;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -72,7 +73,8 @@ public class SpanStackTraceProcessorTest {
       assertThat(spans.getFinishedSpanItems().get(0))
           .hasName("my-span")
           .hasAttribute(
-              satisfies(ElasticAttributes.SPAN_STACKTRACE, att -> att.matches(expectedRegex)));
+              satisfies(
+                  CodeIncubatingAttributes.CODE_STACKTRACE, att -> att.matches(expectedRegex)));
     }
   }
 
@@ -87,7 +89,8 @@ public class SpanStackTraceProcessorTest {
       assertThat(spans.getFinishedSpanItems().get(0))
           .hasName("my-span")
           .hasAttributesSatisfying(
-              attrib -> assertThat(attrib).doesNotContainKey(ElasticAttributes.SPAN_STACKTRACE));
+              attrib ->
+                  assertThat(attrib).doesNotContainKey(CodeIncubatingAttributes.CODE_STACKTRACE));
     }
   }
 
@@ -106,7 +109,8 @@ public class SpanStackTraceProcessorTest {
       assertThat(spans.getFinishedSpanItems().get(0))
           .hasName("my-span")
           .hasAttributesSatisfying(
-              attrib -> assertThat(attrib).doesNotContainKey(ElasticAttributes.SPAN_STACKTRACE));
+              attrib ->
+                  assertThat(attrib).doesNotContainKey(CodeIncubatingAttributes.CODE_STACKTRACE));
     }
   }
 
