@@ -23,6 +23,6 @@ dependencies {
     testImplementation(project(":testing-common"))
     testImplementation("io.opentelemetry:opentelemetry-exporter-otlp")
     testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
-    testImplementation("io.opentelemetry:opentelemetry-api-events")
+    testImplementation("io.opentelemetry:opentelemetry-api-incubator")
     testImplementation(libs.assertj.core)
 }
