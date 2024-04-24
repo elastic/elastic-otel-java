@@ -9,6 +9,7 @@ import java.util.*
 
 plugins {
   id("elastic-otel.library-packaging-conventions")
+  id("elastic-otel.sign-and-publish-conventions")
   alias(catalog.plugins.dockerJavaApplication)
 }
 
@@ -17,6 +18,9 @@ dependencies {
   testImplementation(libs.awaitility)
   implementation(libs.findbugs.jsr305)
 }
+
+description = "Library for exposing JVMTI and JNI functionality to Java"
+
 
 // we use Java 7 for this project so that it can be reused in the old elastic-apm-agent
 // Subsequently, the newest Java compiler we can use is java 17

@@ -21,7 +21,7 @@ package co.elastic.otel.profiler;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import co.elastic.otel.profiler.config.WildcardMatcher;
+import co.elastic.otel.common.config.WildcardMatcher;
 import co.elastic.otel.testing.AutoConfigTestProperties;
 import co.elastic.otel.testing.AutoConfiguredDataCapture;
 import co.elastic.otel.testing.DisabledOnAppleSilicon;

@@ -1,5 +1,6 @@
 plugins {
     id("elastic-otel.library-packaging-conventions")
+    id("elastic-otel.sign-and-publish-conventions")
     alias(libs.plugins.jmh)
 }
 
@@ -10,10 +11,16 @@ jmh {
   //profilers.add("jfr")
 }
 
+description = "OpenTelemetry SDK extension to enable correlation of traces with elastic universal profiling"
+
 dependencies {
+  annotationProcessor(libs.autoservice.processor)
+  compileOnly(libs.autoservice.annotations)
   implementation(project(":jvmti-access"))
   implementation(project(":common"))
   implementation("io.opentelemetry.semconv:opentelemetry-semconv")
+  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
+  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   implementation(libs.lmax.disruptor)
   implementation(libs.hdrhistogram) //only used for the WriterReaderPhaser
 
@@ -24,6 +31,7 @@ dependencies {
   testImplementation(project(":testing-common"))
   testImplementation("io.opentelemetry:opentelemetry-sdk")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation(libs.assertj.core)
   testImplementation(libs.awaitility)
 }
