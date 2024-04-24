@@ -40,3 +40,7 @@ if [[ "$dry_run" == "true" ]] ; then
     echo "--- Archive the dry-run repository :package: (dry-run)"
     tar czvf ./build/dry-run-maven-repo.tgz -C ./build/dry-run-maven-repo/ . | tee release.txt
 fi
+
+echo "--- Archive the build folders with jar files"
+./gradlew printPublishedCodeArtifacts -q | tee artifacts.list
+tar -cvf "${TARBALL_FILE:-artifacts.tar}" -T artifacts.list

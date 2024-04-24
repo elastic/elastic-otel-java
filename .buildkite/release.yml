@@ -2,19 +2,17 @@ agents:
   provider: "gcp"
   image: "family/elastic-otel-java-ubuntu-2204"
 
+env:
+  TARBALL_FILE: ${TARBALL_FILE:-artifacts.tar}
+
 steps:
   - label: "Build and publish release"
     key: "release"
     commands: .ci/release.sh
     artifact_paths:
       - "release.txt"
-      - "agent/build/libs/elastic-otel-javaagent-*.jar"
-      - "jvmti-access/build/libs/jvmti-access-.*.jar"
-      - "universal-profiling-integration/build/libs/universal-profiling-integration-.*.jar"
-      - "agentextension/build/libs/elastic-otel-agentextension-.*.jar"
-      - "common/build/libs/common-.*.jar"
-      - "inferred-spans/build/libs/inferred-spans-.*.jar"
       - "build/dry-run-maven-repo.tgz"
+      - "${TARBALL_FILE}"
 
 notify:
   - slack: "#apm-agent-java"
