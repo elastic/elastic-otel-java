@@ -50,6 +50,12 @@ public class JvmtiAccess {
     JvmtiAccessImpl.setThreadProfilingCorrelationBuffer0(storage);
   }
 
+  /**
+   * Starts the socket for receiving universal profiler messages on the given filepath. Note that
+   * the path has a limitation of about 100 characters, see <a
+   * href="https://unix.stackexchange.com/questions/367008/why-is-socket-path-length-limited-to-a-hundred-chars">this
+   * discussion</a> for details.
+   */
   static void startProfilerReturnChannelSocket(String filepath) {
     ensureInitialized();
     checkError(JvmtiAccessImpl.startProfilerReturnChannelSocket0(filepath));
