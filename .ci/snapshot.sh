@@ -42,4 +42,5 @@ if [[ "$dry_run" == "true" ]] ; then
 fi
 
 echo "--- Archive the build folders with jar files"
-find . -type d -name build -exec find {} -name '*.jar' -print0 \; | xargs -0 tar -cvf "${TARBALL_FILE:-dist.tar}"
+./gradlew printPublishedCodeArtifacts -q | tee artifacts.list
+tar -cvf "${TARBALL_FILE:-artifacts.tar}" -T artifacts.list

@@ -74,7 +74,7 @@ jobs:
       contents: write
       id-token: write
     env:
-      TARBALL_FILE: dist.tar
+      TARBALL_FILE: artifacts.tar
     steps:
       - id: buildkite
         name: Run Release
@@ -91,7 +91,7 @@ jobs:
           buildEnvVars: |
             ref=${{ inputs.ref }}
             dry_run=${{ inputs.dry_run || 'false' }}
-            TARBALL_FILE=dist.tar
+            TARBALL_FILE=${{ env.TARBALL_FILE }}
 
       - uses: actions/download-artifact@v3
         with:
