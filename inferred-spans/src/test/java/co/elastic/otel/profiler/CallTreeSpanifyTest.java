@@ -33,6 +33,7 @@ import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import io.opentelemetry.semconv.incubating.CodeIncubatingAttributes;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -74,26 +75,26 @@ class CallTreeSpanifyTest {
       SpanData a = setup.getSpans().get(1);
       assertThat(a).hasName("CallTreeTest#a");
       assertThat(a.getEndEpochNanos() - a.getStartEpochNanos()).isEqualTo(30_000_000);
-      assertThat(a.getAttributes().get(ElasticAttributes.SPAN_STACKTRACE)).isBlank();
+      assertThat(a.getAttributes().get(CodeIncubatingAttributes.CODE_STACKTRACE)).isBlank();
       assertThat(a).hasAttribute(ElasticAttributes.IS_INFERRED, true);
 
       SpanData b = setup.getSpans().get(2);
       assertThat(b).hasName("CallTreeTest#b");
       assertThat(b.getEndEpochNanos() - b.getStartEpochNanos()).isEqualTo(20_000_000);
-      assertThat(b.getAttributes().get(ElasticAttributes.SPAN_STACKTRACE)).isBlank();
+      assertThat(b.getAttributes().get(CodeIncubatingAttributes.CODE_STACKTRACE)).isBlank();
       assertThat(b).hasAttribute(ElasticAttributes.IS_INFERRED, true);
 
       SpanData d = setup.getSpans().get(3);
       assertThat(d).hasName("CallTreeTest#d");
       assertThat(d.getEndEpochNanos() - d.getStartEpochNanos()).isEqualTo(10_000_000);
-      assertThat(d.getAttributes().get(ElasticAttributes.SPAN_STACKTRACE))
+      assertThat(d.getAttributes().get(CodeIncubatingAttributes.CODE_STACKTRACE))
           .isEqualTo("at " + CallTreeTest.class.getName() + ".c(CallTreeTest.java)");
       assertThat(d).hasAttribute(ElasticAttributes.IS_INFERRED, true);
 
       SpanData e = setup.getSpans().get(4);
       assertThat(e).hasName("CallTreeTest#e");
       assertThat(e.getEndEpochNanos() - e.getStartEpochNanos()).isEqualTo(10_000_000);
-      assertThat(e.getAttributes().get(ElasticAttributes.SPAN_STACKTRACE)).isBlank();
+      assertThat(e.getAttributes().get(CodeIncubatingAttributes.CODE_STACKTRACE)).isBlank();
       assertThat(e).hasAttribute(ElasticAttributes.IS_INFERRED, true);
     }
   }

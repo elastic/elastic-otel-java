@@ -23,6 +23,7 @@ import co.elastic.otel.common.ElasticAttributes;
 import co.elastic.otel.common.MutableSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import io.opentelemetry.sdk.trace.SpanProcessor;
+import io.opentelemetry.semconv.incubating.CodeIncubatingAttributes;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.logging.Level;
@@ -58,7 +59,7 @@ public class SpanStackTraceProcessor extends AbstractSimpleChainingSpanProcessor
     if (span.getLatencyNanos() < minSpanDurationNanos) {
       return span;
     }
-    if (span.getAttribute(ElasticAttributes.SPAN_STACKTRACE) != null) {
+    if (span.getAttribute(CodeIncubatingAttributes.CODE_STACKTRACE) != null) {
       // Span already has a stacktrace, do not override
       return span;
     }
@@ -71,7 +72,7 @@ public class SpanStackTraceProcessor extends AbstractSimpleChainingSpanProcessor
     MutableSpan mutableSpan = MutableSpan.makeMutable(span);
 
     String stacktrace = generateSpanEndStacktrace();
-    mutableSpan.setAttribute(ElasticAttributes.SPAN_STACKTRACE, stacktrace);
+    mutableSpan.setAttribute(CodeIncubatingAttributes.CODE_STACKTRACE, stacktrace);
     return mutableSpan;
   }
 

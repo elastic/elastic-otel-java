@@ -38,12 +38,4 @@ public interface ElasticAttributes {
 
   AttributeKey<List<String>> PROFILER_STACK_TRACE_IDS =
       AttributeKey.stringArrayKey("elastic.profiler_stack_trace_ids");
-
-  // TODO : replace this with semantic conventions v1.24.0 equivalent once released
-  AttributeKey<String> SPAN_STACKTRACE = AttributeKey.stringKey("code.stacktrace");
-
-  // TODO : replace this with semantic conventions 1.22.0+ once released and upstream agent updated
-  AttributeKey<String> TELEMETRY_DISTRO_NAME = AttributeKey.stringKey("telemetry.distro.name");
-  AttributeKey<String> TELEMETRY_DISTRO_VERSION =
-      AttributeKey.stringKey("telemetry.distro.version");
 }

@@ -13,6 +13,7 @@ dependencies {
     compileOnly("io.opentelemetry:opentelemetry-sdk")
     compileOnly(libs.findbugs.jsr305)
     compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
+    implementation(libs.bundles.semconv)
 
     testAnnotationProcessor(libs.autoservice.processor)
     testCompileOnly(libs.autoservice.annotations)
@@ -23,6 +24,6 @@ dependencies {
     testImplementation(project(":testing-common"))
     testImplementation("io.opentelemetry:opentelemetry-exporter-otlp")
     testImplementation("io.opentelemetry:opentelemetry-exporter-logging")
-    testImplementation("io.opentelemetry:opentelemetry-api-events")
+    testImplementation("io.opentelemetry:opentelemetry-api-incubator")
     testImplementation(libs.assertj.core)
 }

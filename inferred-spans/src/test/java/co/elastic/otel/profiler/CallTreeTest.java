@@ -32,6 +32,7 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.semconv.incubating.CodeIncubatingAttributes;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -939,7 +940,8 @@ class CallTreeTest {
             .describedAs("Unexpected duration for span %s", span)
             .isEqualTo(durationMs * 1_000_000L);
 
-        String actualStacktrace = span.getAttributes().get(ElasticAttributes.SPAN_STACKTRACE);
+        String actualStacktrace =
+            span.getAttributes().get(CodeIncubatingAttributes.CODE_STACKTRACE);
         if (stackTrace == null || stackTrace.isEmpty()) {
           assertThat(actualStacktrace).isBlank();
         } else {

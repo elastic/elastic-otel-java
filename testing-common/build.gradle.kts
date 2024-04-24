@@ -8,7 +8,7 @@ dependencies {
 
   api(libs.assertj.core)
   api("io.opentelemetry:opentelemetry-sdk-testing")
-  implementation("io.opentelemetry:opentelemetry-api-events")
+  implementation("io.opentelemetry:opentelemetry-api-incubator")
   implementation("io.opentelemetry:opentelemetry-exporter-logging")
   implementation(enforcedPlatform(catalog.junitBom))
   implementation("org.junit.jupiter:junit-jupiter")
