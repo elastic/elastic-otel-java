@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.profiler.config;
+package co.elastic.otel.common.config;
 
 import java.util.ArrayList;
 import java.util.Collections;

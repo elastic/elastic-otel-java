@@ -70,6 +70,6 @@ spotless = { id = "com.diffplug.spotless:spotless", version.ref = "spotless" }
 taskinfo = { id = "org.barfuin.gradle.taskinfo", version = '2.2.0' }
 jmh = {id = "me.champeau.jmh", version = "0.7.2"}
 nexusPublish = { id = "io.github.gradle-nexus.publish-plugin", version = '2.0.0' }
-licenseReport = { id = "com.github.jk1.dependency-license-report", version = "2.6" }
+licenseReport = { id = "com.github.jk1.dependency-license-report", version = "2.7" }
 dockerJavaApplication = { id = "com.bmuschko.docker-java-application", version = "9.4.0" }
 shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }

@@ -16,7 +16,7 @@
 **3** **Group:** `com.google.code.findbugs` **Name:** `jsr305` **Version:** `3.0.2` 
 > - **Manifest License**: Apache License, Version 2.0 (Not Packaged)
 > - **POM Project URL**: [http://findbugs.sourceforge.net/](http://findbugs.sourceforge.net/)
-> - **POM License**: Apache License, Version 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+> - **POM License**: Apache License, Version 2.0 - [https://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
 **4** **Group:** `com.lmax` **Name:** `disruptor` **Version:** `3.4.4` 
 > - **Project URL**: [http://lmax-exchange.github.com/disruptor](http://lmax-exchange.github.com/disruptor)
@@ -80,7 +80,7 @@
 
 **19** **Group:** `io.opentelemetry.semconv` **Name:** `opentelemetry-semconv` **Version:** `1.23.1-alpha` 
 > - **POM Project URL**: [https://github.com/open-telemetry/semantic-conventions-java](https://github.com/open-telemetry/semantic-conventions-java)
-> - **POM License**: Apache License, Version 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+> - **POM License**: Apache License, Version 2.0 - [https://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
 **20** **Group:** `net.bytebuddy` **Name:** `byte-buddy-dep` **Version:** `1.14.12` 
 > - **POM License**: Apache License, Version 2.0 - [https://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0)
@@ -106,16 +106,43 @@
 > - **POM License**: Apache License, Version 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 > - **POM License**: The 3-Clause BSD License - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
+## Creative Commons Legal Code
+
+**24** **Group:** `org.hdrhistogram` **Name:** `HdrHistogram` **Version:** `2.1.12` 
+> - **Manifest License**: The 2-Clause BSD License (Not Packaged)
+> - **POM Project URL**: [http://hdrhistogram.github.io/HdrHistogram/](http://hdrhistogram.github.io/HdrHistogram/)
+> - **POM License**: Creative Commons Legal Code - [https://creativecommons.org/publicdomain/zero/1.0/legalcode](https://creativecommons.org/publicdomain/zero/1.0/legalcode)
+> - **POM License**: PUBLIC DOMAIN - [http://creativecommons.org/publicdomain/zero/1.0/](http://creativecommons.org/publicdomain/zero/1.0/)
+> - **POM License**: The 2-Clause BSD License - [https://opensource.org/licenses/BSD-2-Clause](https://opensource.org/licenses/BSD-2-Clause)
+
+## PUBLIC DOMAIN
+
+**25** **Group:** `org.hdrhistogram` **Name:** `HdrHistogram` **Version:** `2.1.12` 
+> - **Manifest License**: The 2-Clause BSD License (Not Packaged)
+> - **POM Project URL**: [http://hdrhistogram.github.io/HdrHistogram/](http://hdrhistogram.github.io/HdrHistogram/)
+> - **POM License**: Creative Commons Legal Code - [https://creativecommons.org/publicdomain/zero/1.0/legalcode](https://creativecommons.org/publicdomain/zero/1.0/legalcode)
+> - **POM License**: PUBLIC DOMAIN - [http://creativecommons.org/publicdomain/zero/1.0/](http://creativecommons.org/publicdomain/zero/1.0/)
+> - **POM License**: The 2-Clause BSD License - [https://opensource.org/licenses/BSD-2-Clause](https://opensource.org/licenses/BSD-2-Clause)
+
+## The 2-Clause BSD License
+
+**26** **Group:** `org.hdrhistogram` **Name:** `HdrHistogram` **Version:** `2.1.12` 
+> - **Manifest License**: The 2-Clause BSD License (Not Packaged)
+> - **POM Project URL**: [http://hdrhistogram.github.io/HdrHistogram/](http://hdrhistogram.github.io/HdrHistogram/)
+> - **POM License**: Creative Commons Legal Code - [https://creativecommons.org/publicdomain/zero/1.0/legalcode](https://creativecommons.org/publicdomain/zero/1.0/legalcode)
+> - **POM License**: PUBLIC DOMAIN - [http://creativecommons.org/publicdomain/zero/1.0/](http://creativecommons.org/publicdomain/zero/1.0/)
+> - **POM License**: The 2-Clause BSD License - [https://opensource.org/licenses/BSD-2-Clause](https://opensource.org/licenses/BSD-2-Clause)
+
 ## The 3-Clause BSD License
 
-**24** **Group:** `org.ow2.asm` **Name:** `asm` **Version:** `9.6` 
+**27** **Group:** `org.ow2.asm` **Name:** `asm` **Version:** `9.6` 
 > - **Manifest Project URL**: [http://asm.ow2.org](http://asm.ow2.org)
 > - **Manifest License**: The 3-Clause BSD License (Not Packaged)
 > - **POM Project URL**: [http://asm.ow2.io/](http://asm.ow2.io/)
 > - **POM License**: Apache License, Version 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 > - **POM License**: The 3-Clause BSD License - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-**25** **Group:** `org.ow2.asm` **Name:** `asm-commons` **Version:** `9.6` 
+**28** **Group:** `org.ow2.asm` **Name:** `asm-commons` **Version:** `9.6` 
 > - **Manifest Project URL**: [http://asm.ow2.org](http://asm.ow2.org)
 > - **Manifest License**: The 3-Clause BSD License (Not Packaged)
 > - **POM Project URL**: [http://asm.ow2.io/](http://asm.ow2.io/)

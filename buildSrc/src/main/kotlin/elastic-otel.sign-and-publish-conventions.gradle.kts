@@ -23,6 +23,27 @@ afterEvaluate {
     throw GradleException("Project description must be set to publish the project to maven central!")
   }
 
+  tasks {
+    // Used in CI to detect the artifacts which will be published
+    // Run "./gradlew printPublishedCodeArtifacts -q" to get only the output from this task without the gradle noise
+    val printPublishedCodeArtifacts by registering(Task::class) {
+      doLast {
+        var artifactTasks = publishingConventions.artifactTasks.get()
+        if (artifactTasks.isEmpty()) {
+          artifactTasks = listOf(tasks.getByName("jar"));
+        }
+        for (task in artifactTasks) {
+          if (task is Jar) {
+            // ignore javadoc, sources, testing, etc jars
+            if (task.archiveClassifier.get().isEmpty()) {
+              println(task.archiveFile.get().asFile.relativeTo(rootProject.rootDir))
+            }
+          }
+        }
+      }
+    }
+  }
+
   publishing {
 
     repositories {
