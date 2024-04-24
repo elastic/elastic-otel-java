@@ -1,5 +1,3 @@
-import gradle.kotlin.dsl.accessors._2a2fda20f7c0d5ad930aaa9c8e47b6e1.jar
-
 plugins {
   `maven-publish`
   publishing
@@ -32,7 +30,7 @@ afterEvaluate {
       doLast {
         var artifactTasks = publishingConventions.artifactTasks.get()
         if (artifactTasks.isEmpty()) {
-          artifactTasks = listOf(tasks.jar.get());
+          artifactTasks = listOf(tasks.getByName("jar"));
         }
         for (task in artifactTasks) {
           if (task is Jar) {
