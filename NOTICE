@@ -10,5 +10,10 @@ A copy of the ASM license (3-Clause BSD License) is provided in the 'licenses/LI
 This project depends on okhttp, which contains 'publicsuffixes.gz' that is licensed under the Mozilla Public License, v. 2.0 - https://mozilla.org/MPL/2.0/
 A copy of the publicsuffixes.gz license (Mozilla Public License, v. 2.0) is provided in the 'licenses/LICENSE_mpl-2' file.
 
+This project depends on HdrHistogram which is dual-licensed under the following licenses:
+- 2-Clause BSD License - https://opensource.org/licenses/BSD-2-Clause
+- Creative Commons Public Domain License - https://creativecommons.org/publicdomain/zero/1.0/
+A copy of the HdrHistogram license is provided in the 'licenses/LICENSE_hdrhistogram_bsd-2-clause_cc0' file.
+
 Details on the individual dependencies notices and licenses can be found in the 'licenses' folder.
 

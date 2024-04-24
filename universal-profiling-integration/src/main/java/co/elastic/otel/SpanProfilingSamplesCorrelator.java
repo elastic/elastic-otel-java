@@ -50,7 +50,8 @@ public class SpanProfilingSamplesCorrelator {
 
   private final LongSupplier nanoClock;
 
-  private final RingBuffer<DelayedSpan> delayedSpans;
+  // Visible for testing
+  final RingBuffer<DelayedSpan> delayedSpans;
   private final PeekingPoller<DelayedSpan> delayedSpansPoller;
 
   private volatile long spanBufferDurationNanos;

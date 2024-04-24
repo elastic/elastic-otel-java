@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.profiler.asyncprofiler;
 
-import static co.elastic.otel.profiler.config.WildcardMatcher.caseSensitiveMatcher;
+import static co.elastic.otel.common.config.WildcardMatcher.caseSensitiveMatcher;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import co.elastic.otel.profiler.StackFrame;

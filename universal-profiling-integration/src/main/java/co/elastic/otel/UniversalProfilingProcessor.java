@@ -78,13 +78,15 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
 
   private static boolean anyInstanceActive = false;
 
-  private final SpanProfilingSamplesCorrelator correlator;
+  // Visible for testing
+  final SpanProfilingSamplesCorrelator correlator;
   private final ScheduledExecutorService messagePollAndSpanFlushExecutor;
 
   // Visible for testing
   String socketPath;
 
-  private volatile boolean tlsPropagationActive = false;
+  // Visible for testing
+  volatile boolean tlsPropagationActive = false;
 
   public static UniversalProfilingProcessorBuilder builder(SpanProcessor next, Resource resource) {
     return new UniversalProfilingProcessorBuilder(next, resource);
@@ -154,7 +156,7 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
     } while (Files.exists(socketFile));
 
     String absolutePath = socketFile.toAbsolutePath().toString();
-    log.log(Level.FINE, "Opening profiler correlation socket '{0}'", absolutePath);
+    log.log(Level.FINE, "Opening profiler correlation socket {0}", new Object[] {absolutePath});
     UniversalProfilingCorrelation.startProfilerReturnChannel(absolutePath);
     return absolutePath;
   }
