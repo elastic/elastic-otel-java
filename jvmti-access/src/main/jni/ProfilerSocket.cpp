@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <fcntl.h>
+#include <cstring>
 
 namespace elastic {
     namespace jvmti_agent {
