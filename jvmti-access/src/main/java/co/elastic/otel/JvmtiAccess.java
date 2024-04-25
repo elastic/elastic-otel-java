@@ -18,9 +18,14 @@
  */
 package co.elastic.otel;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
@@ -134,12 +139,17 @@ public class JvmtiAccess {
     String arch = System.getProperty("os.arch").toLowerCase();
     String libraryName;
     if (os.contains("linux")) {
+      String prefix = "linux";
+      if (isMusl()) {
+        logger.log(Level.FINE, "Detected musl environment, will use binaries built for it");
+        prefix = "linux-musl";
+      }
       if (arch.contains("arm") || arch.contains("aarch32")) {
         throw new IllegalStateException("Unsupported architecture for Linux: " + arch);
       } else if (arch.contains("aarch")) {
-        libraryName = "linux-arm64";
+        libraryName = prefix + "-arm64";
       } else if (arch.contains("64")) {
-        libraryName = "linux-x64";
+        libraryName = prefix + "-x64";
       } else {
         throw new IllegalStateException("Unsupported architecture for Linux: " + arch);
       }
@@ -162,5 +172,39 @@ public class JvmtiAccess {
             ".so",
             Paths.get(libraryDirectory));
     System.load(file.toString());
+  }
+
+  public static boolean isMusl() {
+    Path mapFilesDir = Paths.get("/proc/self/map_files");
+    try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(mapFilesDir)) {
+      for (Path file : dirStream) {
+        try {
+          if (file.toRealPath().toString().toLowerCase().contains("musl")) {
+            return true;
+          }
+        } catch (IOException e) {
+          //ignore
+        }
+      }
+      return false;
+    } catch (Exception ignored) {
+      // fall back to checking for alpine linux in the event we're using an older kernel which
+      // may not fail the above check
+      return isAlpineLinux();
+    }
+  }
+
+  private static boolean isAlpineLinux() {
+    try {
+      List<String> lines = Files.readAllLines(Paths.get("/etc/os-release"),
+          StandardCharsets.UTF_8);
+      for (String l : lines) {
+        if (l.startsWith("ID") && l.contains("alpine")) {
+          return true;
+        }
+      }
+    } catch (Exception ignored) {
+    }
+    return false;
   }
 }
