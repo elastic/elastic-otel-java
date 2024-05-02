@@ -112,7 +112,7 @@ import one.profiler.AsyncProfiler;
  */
 class SamplingProfiler implements Runnable {
 
-  private static final
+  private static final String LIB_DIR_PROPERTY_NAME = "one.profiler.extractPath";
 
   private static final Logger logger = Logger.getLogger(SamplingProfiler.class.getName());
   private static final int ACTIVATION_EVENTS_IN_FILE = 1_000_000;
@@ -181,6 +181,8 @@ class SamplingProfiler implements Runnable {
 
   private final Supplier<Tracer> tracerProvider;
 
+  private final AsyncProfiler profiler;
+
   /**
    * Creates a sampling profiler, optionally relying on existing files.
    *
@@ -232,7 +234,14 @@ class SamplingProfiler implements Runnable {
     this.jfrFile = jfrFile;
     activationEventsBuffer = ByteBuffer.allocateDirect(ACTIVATION_EVENTS_BUFFER_SIZE);
     this.activationEventsFile = activationEventsFile;
+    profiler = loadProfiler();
     activationListener = ProfilingActivationListener.register(this);
+  }
+
+  private AsyncProfiler loadProfiler() {
+    System.setProperty(LIB_DIR_PROPERTY_NAME, config.getProfilerLibDirectory());
+    //TODO provide safemode as startup arg when starting profiling sessions
+    return AsyncProfiler.getInstance();
   }
 
   /**
@@ -311,11 +320,7 @@ class SamplingProfiler implements Runnable {
   public boolean onActivation(Span activeSpan, @Nullable Span previouslyActive) {
     if (profilingSessionOngoing) {
       if (previouslyActive == null) {
-        //TODO: provide safe mode on sessions start via --safemode arg
-
-        AsyncProfiler.getInstance(
-                config.getProfilerLibDirectory(), config.getAsyncProfilerSafeMode())
-            .enableProfilingCurrentThread();
+        profiler.addThread(Thread.currentThread());
       }
       boolean success =
           eventBuffer.tryPublishEvent(ACTIVATION_EVENT_TRANSLATOR, activeSpan, previouslyActive);
@@ -341,9 +346,7 @@ class SamplingProfiler implements Runnable {
   public boolean onDeactivation(Span activeSpan, @Nullable Span previouslyActive) {
     if (profilingSessionOngoing) {
       if (previouslyActive == null) {
-        AsyncProfiler.getInstance(
-                config.getProfilerLibDirectory(), config.getAsyncProfilerSafeMode())
-            .disableProfilingCurrentThread();
+        profiler.removeThread(Thread.currentThread());
       }
       boolean success =
           eventBuffer.tryPublishEvent(DEACTIVATION_EVENT_TRANSLATOR, activeSpan, previouslyActive);
@@ -397,15 +400,12 @@ class SamplingProfiler implements Runnable {
   }
 
   private void profile(Duration profilingDuration) throws Exception {
-    AsyncProfiler asyncProfiler =
-        AsyncProfiler.getInstance(
-            config.getProfilerLibDirectory(), config.getAsyncProfilerSafeMode());
     try {
       String startCommand = createStartCommand();
-      String startMessage = asyncProfiler.execute(startCommand);
+      String startMessage = profiler.execute(startCommand);
       logger.fine(startMessage);
       if (!profiledThreads.isEmpty()) {
-        restoreFilterState(asyncProfiler);
+        restoreFilterState(profiler);
       }
       // Doesn't need to be atomic as this field is being updated only by a single thread
       //noinspection NonAtomicOperationOnVolatileField
@@ -418,7 +418,7 @@ class SamplingProfiler implements Runnable {
       // residual activation events if post-processing is disabled dynamically
       consumeActivationEventsFromRingBufferAndWriteToFile(profilingDuration);
 
-      String stopMessage = asyncProfiler.execute("stop");
+      String stopMessage = profiler.execute("stop");
       logger.fine(stopMessage);
 
       // When post-processing is disabled, jfr file will not be parsed and the heavy processing will
@@ -427,7 +427,7 @@ class SamplingProfiler implements Runnable {
       processTraces();
     } catch (InterruptedException | ClosedByInterruptException e) {
       try {
-        asyncProfiler.stop();
+        profiler.stop();
       } catch (IllegalStateException ignore) {
       }
       Thread.currentThread().interrupt();
@@ -464,7 +464,7 @@ class SamplingProfiler implements Runnable {
         new ThreadMatcher.NonCapturingConsumer<Thread, AsyncProfiler>() {
           @Override
           public void accept(Thread thread, AsyncProfiler asyncProfiler) {
-            asyncProfiler.enableProfilingThread(thread);
+            asyncProfiler.addThread(thread);
           }
         },
         asyncProfiler);
