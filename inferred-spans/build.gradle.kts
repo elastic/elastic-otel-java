@@ -37,15 +37,6 @@ tasks.javadoc {
   options.encoding = "UTF-8"
 }
 
-tasks.processResources {
-  doLast {
-    val resourcesDir = sourceSets.main.get().output.resourcesDir
-    val packageDir = resourcesDir!!.resolve("co/elastic/otel/profiler");
-    packageDir.mkdirs();
-    packageDir.resolve("inferred-spans-version.txt").writeText(project.version.toString())
-  }
-}
-
 tasks.withType<Test>().all {
   jvmArgs("-Djava.util.logging.config.file="+sourceSets.test.get().output.resourcesDir+"/logging.properties")
 }
