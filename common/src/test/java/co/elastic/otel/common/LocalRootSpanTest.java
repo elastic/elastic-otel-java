@@ -97,7 +97,6 @@ public class LocalRootSpanTest {
     assertThat(LocalRootSpan.getFor((ReadableSpan) span)).isSameAs(span);
   }
 
-
   @Test
   public void checkRemoteSpan() {
     Map<String, String> headers = new HashMap<>();
