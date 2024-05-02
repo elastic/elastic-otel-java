@@ -97,6 +97,19 @@ public class LocalRootSpanTest {
     assertThat(LocalRootSpan.getFor((ReadableSpan) span)).isSameAs(span);
   }
 
+
+  @Test
+  public void checkRemoteSpan() {
+    Map<String, String> headers = new HashMap<>();
+    headers.put("traceparent", "00-0af7651916cd43dd8448eb211c80319c-00f067aa0ba902b7-01");
+    Context remoteParent =
+        sdk.getPropagators()
+            .getTextMapPropagator()
+            .extract(Context.root(), headers, new MapGetter());
+
+    assertThat(LocalRootSpan.getFor(Span.fromContext(remoteParent))).isNull();
+  }
+
   @Test
   public void checkInferredSpanDetected() {
     Map<String, String> headers = new HashMap<>();
