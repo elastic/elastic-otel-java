@@ -29,6 +29,7 @@ import java.io.StringWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Deprecated
 public class SpanStackTraceProcessor extends AbstractSimpleChainingSpanProcessor {
 
   private static final Logger logger = Logger.getLogger(SpanStackTraceProcessor.class.getName());

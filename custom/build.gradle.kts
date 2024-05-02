@@ -14,6 +14,8 @@ dependencies {
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
   compileOnly(libs.bundles.semconv)
 
+  implementation(libs.contribSpanStacktrace)
+
   annotationProcessor(libs.autoservice.processor)
   compileOnly(libs.autoservice.annotations)
 

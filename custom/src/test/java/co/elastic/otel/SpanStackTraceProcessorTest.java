@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@Deprecated
 public class SpanStackTraceProcessorTest {
 
   InMemorySpanExporter spans;

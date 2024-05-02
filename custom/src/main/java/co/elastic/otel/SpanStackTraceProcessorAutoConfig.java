@@ -24,6 +24,8 @@ import com.google.auto.service.AutoService;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import java.time.Duration;
 
+import io.opentelemetry.contrib.stacktrace.StackTraceSpanProcessor;
+
 @AutoService(ChainingSpanProcessorAutoConfiguration.class)
 public class SpanStackTraceProcessorAutoConfig implements ChainingSpanProcessorAutoConfiguration {
 
@@ -35,7 +37,9 @@ public class SpanStackTraceProcessorAutoConfig implements ChainingSpanProcessorA
 
     Duration minDuration = properties.getDuration(MIN_DURATION_CONFIG_OPTION, Duration.ofMillis(5));
     registerer.register(
-        next -> new SpanStackTraceProcessor(next, minDuration.toNanos()),
+        next -> new StackTraceSpanProcessor(next, minDuration.toNanos(), span -> {
+          return true; // TODO use real heuristic to avoid inferred spans
+        }),
         ChainingSpanProcessorRegisterer.ORDER_FIRST);
   }
 }
