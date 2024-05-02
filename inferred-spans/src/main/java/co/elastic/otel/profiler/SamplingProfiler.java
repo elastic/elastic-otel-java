@@ -23,7 +23,6 @@ import static java.nio.file.StandardOpenOption.WRITE;
 
 import co.elastic.otel.common.config.WildcardMatcher;
 import co.elastic.otel.common.util.ExecutorUtils;
-import co.elastic.otel.profiler.asyncprofiler.AsyncProfiler;
 import co.elastic.otel.profiler.asyncprofiler.JfrParser;
 import co.elastic.otel.profiler.collections.Long2ObjectHashMap;
 import co.elastic.otel.profiler.pooling.Allocator;
@@ -60,6 +59,7 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
+import one.profiler.AsyncProfiler;
 
 /**
  * Correlates {@link ActivationEvent}s with {@link StackFrame}s which are recorded by {@link
@@ -111,6 +111,8 @@ import javax.annotation.Nullable;
  * the full stack trace}.
  */
 class SamplingProfiler implements Runnable {
+
+  private static final
 
   private static final Logger logger = Logger.getLogger(SamplingProfiler.class.getName());
   private static final int ACTIVATION_EVENTS_IN_FILE = 1_000_000;
@@ -309,6 +311,8 @@ class SamplingProfiler implements Runnable {
   public boolean onActivation(Span activeSpan, @Nullable Span previouslyActive) {
     if (profilingSessionOngoing) {
       if (previouslyActive == null) {
+        //TODO: provide safe mode on sessions start via --safemode arg
+
         AsyncProfiler.getInstance(
                 config.getProfilerLibDirectory(), config.getAsyncProfilerSafeMode())
             .enableProfilingCurrentThread();
