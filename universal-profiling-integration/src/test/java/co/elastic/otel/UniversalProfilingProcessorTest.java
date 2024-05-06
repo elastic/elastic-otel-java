@@ -88,7 +88,8 @@ public class UniversalProfilingProcessorTest {
   }
 
   private OpenTelemetrySdk initSdk() {
-    return initSdk(builder -> {});
+    return initSdk(builder -> {
+    });
   }
 
   private OpenTelemetrySdk initSdk(Consumer<UniversalProfilingProcessorBuilder> customizer) {
@@ -218,13 +219,15 @@ public class UniversalProfilingProcessorTest {
               .put(ResourceAttributes.SERVICE_NAME, "service Ä 1")
               .put(ResourceAttributes.SERVICE_NAMESPACE, "my nameßspace")
               .build();
-      try (OpenTelemetrySdk sdk = initSdk(withNamespace, b -> {}, Sampler.alwaysOn())) {
+      try (OpenTelemetrySdk sdk = initSdk(withNamespace, b -> {
+      }, Sampler.alwaysOn())) {
         checkProcessStorage("service Ä 1", "my nameßspace");
       }
 
       Resource withoutNamespace =
           Resource.builder().put(ResourceAttributes.SERVICE_NAME, "service Ä 2").build();
-      try (OpenTelemetrySdk sdk = initSdk(withoutNamespace, b -> {}, Sampler.alwaysOn())) {
+      try (OpenTelemetrySdk sdk = initSdk(withoutNamespace, b -> {
+      }, Sampler.alwaysOn())) {
         checkProcessStorage("service Ä 2", "");
       }
     }
@@ -338,7 +341,7 @@ public class UniversalProfilingProcessorTest {
                           .findFirst()
                           .get();
                   assertThat(
-                          sp1Data.getAttributes().get(ElasticAttributes.PROFILER_STACK_TRACE_IDS))
+                      sp1Data.getAttributes().get(ElasticAttributes.PROFILER_STACK_TRACE_IDS))
                       .containsExactlyInAnyOrder(base64(st1), base64(st3), base64(st3));
 
                   SpanData sp2Data =
@@ -347,7 +350,7 @@ public class UniversalProfilingProcessorTest {
                           .findFirst()
                           .get();
                   assertThat(
-                          sp2Data.getAttributes().get(ElasticAttributes.PROFILER_STACK_TRACE_IDS))
+                      sp2Data.getAttributes().get(ElasticAttributes.PROFILER_STACK_TRACE_IDS))
                       .containsExactlyInAnyOrder(
                           base64(st2), base64(st2), base64(st2), base64(st3));
                 });
@@ -546,15 +549,23 @@ public class UniversalProfilingProcessorTest {
 
         Span span1 = tracer.spanBuilder("span1").startSpan();
         span1.end();
+
+        // This call is required to avoid flakyness of the test
+        // span1 will be picked up by the PeekingPooler, therefore the queue is now empty again
+        processor.pollMessagesAndFlushPendingSpans();
+
         Span span2 = tracer.spanBuilder("span2").startSpan();
         span2.end();
-        // now the buffer should be full, span 3 should be sent immediately
         Span span3 = tracer.spanBuilder("span3").startSpan();
         span3.end();
 
+        // now the buffer should be full, span 4 should be sent immediately
+        Span span4 = tracer.spanBuilder("span4").startSpan();
+        span4.end();
+
         assertThat(spans.getFinishedSpanItems())
             .hasSize(1)
-            .anySatisfy(sp -> assertThat(sp).hasName("span3"));
+            .anySatisfy(sp -> assertThat(sp).hasName("span4"));
       }
     }
 
@@ -565,9 +576,10 @@ public class UniversalProfilingProcessorTest {
       String absPath = notADir.toAbsolutePath().toString();
 
       assertThatThrownBy(
-              () -> {
-                try (OpenTelemetrySdk sdk = initSdk(builder -> builder.socketDir(absPath))) {}
-              })
+          () -> {
+            try (OpenTelemetrySdk sdk = initSdk(builder -> builder.socketDir(absPath))) {
+            }
+          })
           .hasMessageContaining("socket");
 
       // Ensure no garbage is left behind, we can cleanly start again with good settings
