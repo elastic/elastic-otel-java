@@ -36,9 +36,8 @@ class JfrParserTest {
 
   @Test
   void name() throws Exception {
-    // using the smallest prime number possible for the buffer
-    // should trigger most edge cases in the buffer being exhausted
-    JfrParser jfrParser = new JfrParser(ByteBuffer.allocate(113), ByteBuffer.allocate(113));
+    // Using a small buffer, but big enough to fit the largest string in the JFR file to test edge cases
+    JfrParser jfrParser = new JfrParser(ByteBuffer.allocate(368), ByteBuffer.allocate(368));
 
     File file =
         Paths.get(JfrParserTest.class.getClassLoader().getResource("recording.jfr").toURI())
@@ -47,12 +46,12 @@ class JfrParserTest {
     jfrParser.parse(
         file,
         Collections.emptyList(),
-        Collections.singletonList(caseSensitiveMatcher("co.elastic.apm.*")));
+        Collections.singletonList(caseSensitiveMatcher("co.elastic.otel.*")));
     AtomicInteger stackTraces = new AtomicInteger();
     ArrayList<StackFrame> stackFrames = new ArrayList<>();
     jfrParser.consumeStackTraces(
         (threadId, stackTraceId, nanoTime) -> {
-          jfrParser.resolveStackTrace(stackTraceId, true, stackFrames, MAX_STACK_DEPTH);
+          jfrParser.resolveStackTrace(stackTraceId, stackFrames, MAX_STACK_DEPTH);
           if (!stackFrames.isEmpty()) {
             stackTraces.incrementAndGet();
             assertThat(stackFrames.get(stackFrames.size() - 1).getMethodName())
@@ -61,6 +60,6 @@ class JfrParserTest {
           }
           stackFrames.clear();
         });
-    assertThat(stackTraces.get()).isEqualTo(97);
+    assertThat(stackTraces.get()).isEqualTo(98);
   }
 }

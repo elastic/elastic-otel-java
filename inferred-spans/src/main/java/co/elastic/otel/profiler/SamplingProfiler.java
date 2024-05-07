@@ -535,7 +535,7 @@ class SamplingProfiler implements Runnable {
         processActivationEventsUpTo(stackTrace.nanoTime, event, eof);
         CallTree.Root root = profiledThreads.get(stackTrace.threadId);
         if (root != null) {
-          jfrParser.resolveStackTrace(stackTrace.stackTraceId, true, stackFrames, MAX_STACK_DEPTH);
+          jfrParser.resolveStackTrace(stackTrace.stackTraceId, stackFrames, MAX_STACK_DEPTH);
           if (stackFrames.size() == MAX_STACK_DEPTH) {
             logger.fine(
                 "Max stack depth reached. Set profiling_included_classes or profiling_excluded_classes.");

@@ -21,7 +21,6 @@ package co.elastic.otel.profiler;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import co.elastic.otel.testing.DisabledOnOpenJ9;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
@@ -50,7 +49,6 @@ import org.junit.jupiter.api.condition.OS;
 
 // async-profiler doesn't work on Windows
 @DisabledOnOs(OS.WINDOWS)
-@DisabledOnOpenJ9
 class SamplingProfilerTest {
 
   private ProfilerTestSetup setup;

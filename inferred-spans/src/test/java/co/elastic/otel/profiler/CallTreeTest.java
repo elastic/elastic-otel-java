@@ -23,7 +23,6 @@ import static java.util.stream.Collectors.toMap;
 
 import co.elastic.otel.common.ElasticAttributes;
 import co.elastic.otel.profiler.pooling.ObjectPool;
-import co.elastic.otel.testing.DisabledOnOpenJ9;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.Tracer;
@@ -52,7 +51,6 @@ import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
 @DisabledOnOs(OS.WINDOWS)
-@DisabledOnOpenJ9
 class CallTreeTest {
 
   private ProfilerTestSetup profilerSetup;

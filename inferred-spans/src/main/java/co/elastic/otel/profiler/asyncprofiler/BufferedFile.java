@@ -25,6 +25,7 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.StandardOpenOption;
 import javax.annotation.Nullable;
 
@@ -110,6 +111,93 @@ class BufferedFile implements Recyclable {
     position(position() + bytesToSkip);
   }
 
+  public void skipString() throws IOException {
+    readOrSkipString(get(), null);
+  }
+
+  /**
+   * @param output the buffer to place the string intro
+   * @return false, if the string to read is null, true otherwise
+   */
+  @Nullable
+  public boolean readString(StringBuilder output) throws IOException {
+    byte encoding = get();
+    if (encoding == 0) { //NULL encoding represent a null string
+      return false;
+    }
+    readOrSkipString(encoding, output);
+    return true;
+  }
+
+  @Nullable
+  public String readString() throws IOException {
+    byte encoding = get();
+    if (encoding == 0) { //NULL encoding represent a null string
+      return null;
+    }
+    if (encoding == 1) { //1 encoding represent an empty string
+      return "";
+    }
+    StringBuilder output = new StringBuilder();
+    readOrSkipString(encoding, output);
+    return output.toString();
+  }
+
+
+  private void readOrSkipString(byte encoding, @Nullable StringBuilder output) throws IOException {
+    switch (encoding) {
+      case 0: //NULL
+      case 1: //empty
+        return;
+      case 2: //constant pool reference
+        if (output != null) {
+          throw new IllegalStateException("Reading constant pool string is not supported");
+        }
+        getVarLong();
+        return;
+      case 3: //UTF8-encoded byte array
+        readOrSkipUtf8(output);
+        return;
+      case 4: //char array
+        throw new IllegalStateException("Char-array encoding is not supported by the parser yet");
+      case 5: //LATIN1-encoded byte array
+        if (output != null) {
+          throw new IllegalStateException("Reading LATIN1 encoded string is not supported");
+        }
+        skip(getVarInt());
+        return;
+      default:
+        throw new IllegalStateException("Unknown string encoding type: " + encoding);
+    }
+  }
+
+  private void readOrSkipUtf8(@Nullable StringBuilder output) throws IOException {
+    int len = getVarInt();
+    if (output == null) {
+      skip(len);
+      return;
+    }
+    ensureRemaining(len, len);
+
+    for (int i = 0; i < len; i++) {
+      byte hopefullyAscii = getUnsafe();
+      if (hopefullyAscii > 0) {
+        output.append((char) hopefullyAscii);
+      } else {
+        //encounted non-ascii character: fallback to allocation and UTF8-decoding
+        position(position() - 1); //reset position before the just read byte
+        byte[] utf8Data = new byte[len - i];
+        buffer.get(utf8Data);
+        output.append(new String(utf8Data, StandardCharsets.UTF_8));
+        return;
+      }
+    }
+
+    int startPos = buffer.position();
+    //allocation-free path: everything is ASCII
+
+  }
+
   /**
    * Sets the position of the file without reading new data.
    *
@@ -173,7 +261,7 @@ class BufferedFile implements Recyclable {
    * @return The byte at the file's current position
    * @throws IOException If some I/O error occurs
    */
-  public short get() throws IOException {
+  public byte get() throws IOException {
     ensureRemaining(SIZE_OF_BYTE);
     return buffer.get();
   }
@@ -227,6 +315,30 @@ class BufferedFile implements Recyclable {
   public long getLong() throws IOException {
     ensureRemaining(SIZE_OF_LONG);
     return buffer.getLong();
+  }
+
+  /**
+   * Reads LEB-128 variable length encoded values of a size of up to 64 bit.
+   */
+  public long getVarLong() throws IOException {
+    long value = 0;
+    boolean hasNext = true;
+    int shift = 0;
+    while (hasNext) {
+      long byteVal = ((int) get());
+      hasNext = (byteVal & 0x80) != 0;
+      value |= (byteVal & 0x7F) << shift;
+      shift += 7;
+    }
+    return value;
+  }
+
+  public int getVarInt() throws IOException {
+    long val = getVarLong();
+    if ((int) val != val) {
+      throw new IllegalArgumentException("The LEB128 encoded value does not fit in an int");
+    }
+    return (int) val;
   }
 
   /**
