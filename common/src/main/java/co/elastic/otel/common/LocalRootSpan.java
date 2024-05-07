@@ -111,7 +111,7 @@ public class LocalRootSpan {
     if (span instanceof ReadableSpan) {
       return getFor((ReadableSpan) span);
     } else {
-      //This can happen when invoked for a PropagatedSpan (e.g. Span.fromContext())
+      // This can happen when invoked for a PropagatedSpan (e.g. Span.fromContext())
       return null;
     }
   }
