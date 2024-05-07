@@ -442,7 +442,7 @@ class SamplingProfiler implements Runnable {
             .append(",safemode=")
             .append(config.getAsyncProfilerSafeMode());
     if (!config.isProfilingLoggingEnabled()) {
-      startCommand.append(",log=none");
+      startCommand.append(",loglevel=none");
     }
     return startCommand.toString();
   }
