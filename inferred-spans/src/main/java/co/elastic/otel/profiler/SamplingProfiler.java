@@ -239,7 +239,13 @@ class SamplingProfiler implements Runnable {
   }
 
   private AsyncProfiler loadProfiler() {
-    System.setProperty(LIB_DIR_PROPERTY_NAME, config.getProfilerLibDirectory());
+    String libDir = config.getProfilerLibDirectory();
+    try {
+      Files.createDirectories(Paths.get(libDir));
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to create directory to extract lib to", e);
+    }
+    System.setProperty(LIB_DIR_PROPERTY_NAME, libDir);
     return AsyncProfiler.getInstance();
   }
 
