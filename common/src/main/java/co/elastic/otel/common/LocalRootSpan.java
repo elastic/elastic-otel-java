@@ -108,10 +108,12 @@ public class LocalRootSpan {
    */
   @Nullable
   public static ReadableSpan getFor(Span span) {
-    if (span.getSpanContext().isRemote()) {
+    if (span instanceof ReadableSpan) {
+      return getFor((ReadableSpan) span);
+    } else {
+      // This can happen when invoked for a PropagatedSpan (e.g. Span.fromContext())
       return null;
     }
-    return getFor((ReadableSpan) span);
   }
 
   /** See {@link LocalRootSpan#getFor(Span)}. */
