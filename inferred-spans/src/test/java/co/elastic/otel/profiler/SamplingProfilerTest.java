@@ -158,7 +158,7 @@ class SamplingProfilerTest {
     setupProfiler(config -> config.startScheduledProfiling(false).profilerLoggingEnabled(false));
     assertThat(setup.profiler.createStartCommand())
         .isEqualTo(
-            "start,jfr,event=wall,cstack=n,interval=5ms,filter,file=null,safemode=0,log=none");
+            "start,jfr,event=wall,cstack=n,interval=5ms,filter,file=null,safemode=0,loglevel=none");
 
     setup.close();
     setupProfiler(
@@ -170,7 +170,7 @@ class SamplingProfilerTest {
                 .asyncProfilerSafeMode(14));
     assertThat(setup.profiler.createStartCommand())
         .isEqualTo(
-            "start,jfr,event=wall,cstack=n,interval=10ms,filter,file=null,safemode=14,log=none");
+            "start,jfr,event=wall,cstack=n,interval=10ms,filter,file=null,safemode=14,loglevel=none");
   }
 
   @Test
