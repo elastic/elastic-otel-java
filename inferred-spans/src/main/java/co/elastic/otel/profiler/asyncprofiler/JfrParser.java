@@ -111,8 +111,6 @@ public class JfrParser implements Recyclable {
       throw new IllegalStateException(
           "This implementation does not support reading JFR files containing multiple chunks");
     }
-
-
   }
 
   private int readChunk(int position) throws IOException {
@@ -140,7 +138,7 @@ public class JfrParser implements Recyclable {
     long ticksPerSecond = bufferedFile.getLong();
     int features = bufferedFile.getInt();
 
-    //Events start right after metadata
+    // Events start right after metadata
     eventsFilePosition = metadataFilePosition + parseMetadata(metadataFilePosition);
     parseCheckpointEvents(position + constantPoolOffset);
     return (int) chunkSize;
@@ -198,7 +196,7 @@ public class JfrParser implements Recyclable {
       case ContentTypeId.CONTENT_THREAD_STATE:
       case ContentTypeId.CONTENT_GC_WHEN:
       case ContentTypeId.CONTENT_LOG_LEVELS:
-        //We are not interested in those types, but still have to consume the bytes
+        // We are not interested in those types, but still have to consume the bytes
         for (int i = 0; i < count; i++) {
           bufferedFile.getVarInt();
           bufferedFile.skipString();
@@ -240,7 +238,7 @@ public class JfrParser implements Recyclable {
   private void readClassConstants(int count) throws IOException {
     for (int i = 0; i < count; i++) {
       int classId = bufferedFile.getVarInt();
-      bufferedFile.getVarInt(); //classloader, always zero in async-profiler JFR files
+      bufferedFile.getVarInt(); // classloader, always zero in async-profiler JFR files
       int classNameSymbolId = bufferedFile.getVarInt();
       classIdToClassNameSymbolId.put(classId, classNameSymbolId); // class name
       bufferedFile.getVarInt(); // package symbol id
@@ -264,22 +262,21 @@ public class JfrParser implements Recyclable {
     }
   }
 
-
   private void readPackageConstants(int count) throws IOException {
     for (int i = 0; i < count; i++) {
       bufferedFile.getVarLong(); // id
-      bufferedFile.getVarLong(); //symbol-id of package name
+      bufferedFile.getVarLong(); // symbol-id of package name
     }
   }
 
   private void readThreadConstants(int count) throws IOException {
     for (int i = 0; i < count; i++) {
       int nativeThreadId = bufferedFile.getVarInt();
-      bufferedFile.skipString(); //native thread name
-      bufferedFile.getVarInt(); //native thread ID again
-      bufferedFile.skipString(); //java thread name
+      bufferedFile.skipString(); // native thread name
+      bufferedFile.getVarInt(); // native thread ID again
+      bufferedFile.skipString(); // java thread name
       long javaThreadId = bufferedFile.getVarLong();
-      if (javaThreadId != 0) { //javaThreadId will be null for native-only threads
+      if (javaThreadId != 0) { // javaThreadId will be null for native-only threads
         nativeTidToJavaTid.put(nativeThreadId, javaThreadId);
       }
     }
@@ -289,13 +286,12 @@ public class JfrParser implements Recyclable {
     for (int i = 0; i < count; i++) {
 
       int stackTraceId = bufferedFile.getVarInt();
-      bufferedFile.get(); //truncated byte, always zero anyway
+      bufferedFile.get(); // truncated byte, always zero anyway
 
       this.stackTraceIdToFilePositions.put(stackTraceId, (int) bufferedFile.position());
-      //We need to skip the stacktrace to get to the position of the next one
+      // We need to skip the stacktrace to get to the position of the next one
       readOrSkipStacktraceFrames(null, 0);
     }
-
   }
 
   private void readFrameTypeConstants(int count) throws IOException {
@@ -330,7 +326,7 @@ public class JfrParser implements Recyclable {
         long nanoTime = bufferedFile.getVarLong();
         int tid = bufferedFile.getVarInt();
         int stackTraceId = bufferedFile.getVarInt();
-        bufferedFile.getVarInt(); //thread state
+        bufferedFile.getVarInt(); // thread state
         long javaThreadId = nativeTidToJavaTid.get(tid);
         callback.onCallTree(javaThreadId, stackTraceId, nanoTime);
       }
@@ -375,8 +371,8 @@ public class JfrParser implements Recyclable {
     int frameCount = bufferedFile.getVarInt();
     for (int i = 0; i < frameCount; i++) {
       int methodId = bufferedFile.getVarInt();
-      bufferedFile.getVarInt(); //line number
-      bufferedFile.getVarInt(); //bytecode index
+      bufferedFile.getVarInt(); // line number
+      bufferedFile.getVarInt(); // bytecode index
       byte type = bufferedFile.get();
       if (stackFrames != null) {
         addFrameIfIncluded(stackFrames, methodId, type);
@@ -387,8 +383,7 @@ public class JfrParser implements Recyclable {
     }
   }
 
-  private void addFrameIfIncluded(
-      List<StackFrame> stackFrames, int methodId, byte frameType)
+  private void addFrameIfIncluded(List<StackFrame> stackFrames, int methodId, byte frameType)
       throws IOException {
     if (isJavaFrameType(frameType)) {
       StackFrame stackFrame = resolveStackFrame(methodId);
@@ -458,7 +453,6 @@ public class JfrParser implements Recyclable {
     return stackFrame;
   }
 
-
   @Override
   public void resetState() {
     bufferedFile.resetState();
@@ -495,8 +489,9 @@ public class JfrParser implements Recyclable {
     int EVENT_METADATA = 0;
     int EVENT_CHECKPOINT = 1;
 
-    //The following event types actually are defined in thhe metadata of the JFR file itself
-    // for simplicity and performance, we hardcode the values used by the async-profiler implementation
+    // The following event types actually are defined in thhe metadata of the JFR file itself
+    // for simplicity and performance, we hardcode the values used by the async-profiler
+    // implementation
     int EVENT_EXECUTION_SAMPLE = 101;
   }
 

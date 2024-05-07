@@ -36,7 +36,8 @@ class JfrParserTest {
 
   @Test
   void name() throws Exception {
-    // Using a small buffer, but big enough to fit the largest string in the JFR file to test edge cases
+    // Using a small buffer, but big enough to fit the largest string in the JFR file to test edge
+    // cases
     JfrParser jfrParser = new JfrParser(ByteBuffer.allocate(368), ByteBuffer.allocate(368));
 
     File file =

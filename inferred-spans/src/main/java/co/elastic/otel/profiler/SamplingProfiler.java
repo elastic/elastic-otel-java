@@ -240,7 +240,7 @@ class SamplingProfiler implements Runnable {
 
   private AsyncProfiler loadProfiler() {
     System.setProperty(LIB_DIR_PROPERTY_NAME, config.getProfilerLibDirectory());
-    //TODO provide safemode as startup arg when starting profiling sessions
+    // TODO provide safemode as startup arg when starting profiling sessions
     return AsyncProfiler.getInstance();
   }
 

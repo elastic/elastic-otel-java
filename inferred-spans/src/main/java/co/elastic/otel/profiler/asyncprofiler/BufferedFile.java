@@ -122,7 +122,7 @@ class BufferedFile implements Recyclable {
   @Nullable
   public boolean readString(StringBuilder output) throws IOException {
     byte encoding = get();
-    if (encoding == 0) { //NULL encoding represent a null string
+    if (encoding == 0) { // NULL encoding represent a null string
       return false;
     }
     readOrSkipString(encoding, output);
@@ -132,10 +132,10 @@ class BufferedFile implements Recyclable {
   @Nullable
   public String readString() throws IOException {
     byte encoding = get();
-    if (encoding == 0) { //NULL encoding represent a null string
+    if (encoding == 0) { // NULL encoding represent a null string
       return null;
     }
-    if (encoding == 1) { //1 encoding represent an empty string
+    if (encoding == 1) { // 1 encoding represent an empty string
       return "";
     }
     StringBuilder output = new StringBuilder();
@@ -143,24 +143,23 @@ class BufferedFile implements Recyclable {
     return output.toString();
   }
 
-
   private void readOrSkipString(byte encoding, @Nullable StringBuilder output) throws IOException {
     switch (encoding) {
-      case 0: //NULL
-      case 1: //empty
+      case 0: // NULL
+      case 1: // empty
         return;
-      case 2: //constant pool reference
+      case 2: // constant pool reference
         if (output != null) {
           throw new IllegalStateException("Reading constant pool string is not supported");
         }
         getVarLong();
         return;
-      case 3: //UTF8-encoded byte array
+      case 3: // UTF8-encoded byte array
         readOrSkipUtf8(output);
         return;
-      case 4: //char array
+      case 4: // char array
         throw new IllegalStateException("Char-array encoding is not supported by the parser yet");
-      case 5: //LATIN1-encoded byte array
+      case 5: // LATIN1-encoded byte array
         if (output != null) {
           throw new IllegalStateException("Reading LATIN1 encoded string is not supported");
         }
@@ -184,8 +183,8 @@ class BufferedFile implements Recyclable {
       if (hopefullyAscii > 0) {
         output.append((char) hopefullyAscii);
       } else {
-        //encounted non-ascii character: fallback to allocation and UTF8-decoding
-        position(position() - 1); //reset position before the just read byte
+        // encounted non-ascii character: fallback to allocation and UTF8-decoding
+        position(position() - 1); // reset position before the just read byte
         byte[] utf8Data = new byte[len - i];
         buffer.get(utf8Data);
         output.append(new String(utf8Data, StandardCharsets.UTF_8));
@@ -194,7 +193,7 @@ class BufferedFile implements Recyclable {
     }
 
     int startPos = buffer.position();
-    //allocation-free path: everything is ASCII
+    // allocation-free path: everything is ASCII
 
   }
 
@@ -317,9 +316,7 @@ class BufferedFile implements Recyclable {
     return buffer.getLong();
   }
 
-  /**
-   * Reads LEB-128 variable length encoded values of a size of up to 64 bit.
-   */
+  /** Reads LEB-128 variable length encoded values of a size of up to 64 bit. */
   public long getVarLong() throws IOException {
     long value = 0;
     boolean hasNext = true;
