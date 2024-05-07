@@ -88,14 +88,14 @@ public class JfrParser implements Recyclable {
   }
 
   /**
-   * Initializes the parser to make it ready for {@link #resolveStackTrace(long, boolean, List,
-   * int)} to be called.
+   * Initializes the parser to make it ready for {@link #resolveStackTrace(long, List, int)} to be
+   * called.
    *
    * @param file the JFR file to parse
    * @param excludedClasses Class names to exclude in stack traces (has an effect on {@link
-   *     #resolveStackTrace(long, boolean, List, int)})
+   *     #resolveStackTrace(long, List, int)})
    * @param includedClasses Class names to include in stack traces (has an effect on {@link
-   *     #resolveStackTrace(long, boolean, List, int)})
+   *     #resolveStackTrace(long, List, int)})
    * @throws IOException if some I/O error occurs
    */
   public void parse(
@@ -335,7 +335,8 @@ public class JfrParser implements Recyclable {
   }
 
   /**
-   * Resolves the stack trace with the given {@code stackTraceId}.
+   * Resolves the stack trace with the given {@code stackTraceId}. Only java frames will be
+   * included.
    *
    * <p>Note that his allocates strings for symbols in case a stack frame has not already been
    * resolved for the current JFR file yet. These strings are currently not cached so this can
@@ -346,9 +347,6 @@ public class JfrParser implements Recyclable {
    *
    * @param stackTraceId The id of the stack traced. Used to look up the position of the file in
    *     which the given stack trace is stored via {@link #stackTraceIdToFilePositions}.
-   * @param onlyJavaFrames If {@code true}, will only resolve {@code Interpreted}, {@code JIT
-   *     compiled} and {@code Inlined} frames. If {@code false}, will also resolve {@code Native},
-   *     {@code Kernel} and {@code C++} frames.
    * @param stackFrames The mutable list where the stack frames are written to. Don't forget to
    *     {@link List#clear()} the list before calling this method if the list is reused.
    * @param maxStackDepth The max size of the stackFrames list (excluded frames don't take up
@@ -477,7 +475,7 @@ public class JfrParser implements Recyclable {
      * @param threadId The {@linkplain Thread#getId() Java thread id} for with the event was
      *     recorded.
      * @param stackTraceId The id of the stack trace event. Can be used to resolve the stack trace
-     *     via {@link #resolveStackTrace(long, boolean, List, int)}
+     *     via {@link #resolveStackTrace(long, List, int)}
      * @param nanoTime The timestamp of the event which can be correlated with {@link
      *     System#nanoTime()}
      * @throws IOException if there is any error reading stack trace
