@@ -132,11 +132,11 @@ public class JfrParser implements Recyclable {
     long chunkSize = bufferedFile.getLong();
     long constantPoolOffset = bufferedFile.getLong();
     metadataFilePosition = position + bufferedFile.getLong();
-    long startTimeNanos = bufferedFile.getLong();
-    long durationNanos = bufferedFile.getLong();
-    long startTicks = bufferedFile.getLong();
-    long ticksPerSecond = bufferedFile.getLong();
-    int features = bufferedFile.getInt();
+    bufferedFile.getLong(); // startTimeNanos
+    bufferedFile.getLong(); // durationNanos
+    bufferedFile.getLong(); // startTicks
+    bufferedFile.getLong(); // ticksPerSecond
+    bufferedFile.getInt(); // features
 
     // Events start right after metadata
     eventsFilePosition = metadataFilePosition + parseMetadata(metadataFilePosition);
@@ -148,10 +148,6 @@ public class JfrParser implements Recyclable {
     bufferedFile.position(metadataOffset);
     int size = bufferedFile.getVarInt();
     expectEventType(EventTypeId.EVENT_METADATA);
-    long start = bufferedFile.getVarLong();
-    long duration = bufferedFile.getVarLong();
-    long metadataId = bufferedFile.getVarLong();
-    int stringCount = bufferedFile.getVarInt();
     return size;
   }
 
@@ -164,25 +160,20 @@ public class JfrParser implements Recyclable {
 
   private void parseCheckpointEvents(long checkpointOffset) throws IOException {
     bufferedFile.position(checkpointOffset);
-    int size = bufferedFile.getVarInt();
+    bufferedFile.getVarInt(); // size
     expectEventType(EventTypeId.EVENT_CHECKPOINT);
-    long start = bufferedFile.getVarLong();
-    long duration = bufferedFile.getVarLong();
+    bufferedFile.getVarLong(); // start
+    bufferedFile.getVarLong(); // duration
     long delta = bufferedFile.getVarLong();
     if (delta != 0) {
       throw new IllegalStateException(
           "Expected only one checkpoint event, but file contained multiple, delta is " + delta);
     }
-    byte typeMask = bufferedFile.get();
+    bufferedFile.get(); // typeMask
     long poolCount = bufferedFile.getVarLong();
     for (int i = 0; i < poolCount; i++) {
       parseConstantPool();
     }
-    /*
-    while (bufferedFile.position() < metadataFilePosition) {
-      parseContent();
-    }
-    */
   }
 
   private void parseConstantPool() throws IOException {
