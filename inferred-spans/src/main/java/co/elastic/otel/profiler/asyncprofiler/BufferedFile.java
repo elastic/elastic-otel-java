@@ -122,7 +122,7 @@ class BufferedFile implements Recyclable {
   @Nullable
   public boolean readString(StringBuilder output) throws IOException {
     byte encoding = get();
-    if (encoding == 0) { // NULL encoding represent a null string
+    if (encoding == 0) { // 0 encoding represents a null string
       return false;
     }
     readOrSkipString(encoding, output);
@@ -132,10 +132,10 @@ class BufferedFile implements Recyclable {
   @Nullable
   public String readString() throws IOException {
     byte encoding = get();
-    if (encoding == 0) { // NULL encoding represent a null string
+    if (encoding == 0) { // 0 encoding represents a null string
       return null;
     }
-    if (encoding == 1) { // 1 encoding represent an empty string
+    if (encoding == 1) { // 1 encoding represents an empty string
       return "";
     }
     StringBuilder output = new StringBuilder();
@@ -183,7 +183,7 @@ class BufferedFile implements Recyclable {
       if (hopefullyAscii > 0) {
         output.append((char) hopefullyAscii);
       } else {
-        // encounted non-ascii character: fallback to allocation and UTF8-decoding
+        // encountered non-ascii character: fallback to allocating and UTF8-decoding
         position(position() - 1); // reset position before the just read byte
         byte[] utf8Data = new byte[len - i];
         buffer.get(utf8Data);
@@ -191,10 +191,6 @@ class BufferedFile implements Recyclable {
         return;
       }
     }
-
-    int startPos = buffer.position();
-    // allocation-free path: everything is ASCII
-
   }
 
   /**
