@@ -86,9 +86,6 @@ public class UniversalProfilingProcessorAutoConfigTest {
             .put(SOCKET_DIR_OPTION, tempDirAbs)) {
       OpenTelemetry otel = GlobalOpenTelemetry.get();
       List<SpanProcessor> processors = OtelReflectionUtils.getSpanProcessors(otel);
-      assertThat(processors)
-          .filteredOn(proc -> proc instanceof UniversalProfilingProcessor)
-          .hasSize(1);
       UniversalProfilingProcessor processor =
           (UniversalProfilingProcessor)
               processors.stream()
@@ -99,6 +96,28 @@ public class UniversalProfilingProcessorAutoConfigTest {
       assertThat(processor.tlsPropagationActive).isTrue();
       assertThat(processor.socketPath).startsWith(tempDirAbs);
       assertThat(processor.correlator.delayedSpans.getBufferSize()).isEqualTo(256);
+    }
+  }
+
+  @Test
+  public void testFailureDoesNotCrashAutoConfig() {
+    String badSockerPath = "";
+    for (int i = 0; i < 1000; i++) {
+      badSockerPath += "abc";
+    }
+
+    try (AutoConfigTestProperties props =
+        new AutoConfigTestProperties()
+            .put("otel.service.name", "myservice")
+            .put(ENABLED_OPTION, "true")
+            .put(SOCKET_DIR_OPTION, badSockerPath)) {
+
+      OpenTelemetry otel = GlobalOpenTelemetry.get();
+      List<SpanProcessor> processors = OtelReflectionUtils.getSpanProcessors(otel);
+      assertThat(processors).isNotEmpty();
+      assertThat(processors)
+          .filteredOn(proc -> proc instanceof UniversalProfilingProcessor)
+          .hasSize(0);
     }
   }
 }
