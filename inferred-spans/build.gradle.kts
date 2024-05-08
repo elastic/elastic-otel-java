@@ -10,11 +10,11 @@ dependencies {
   compileOnly(libs.autoservice.annotations)
   compileOnly("io.opentelemetry:opentelemetry-sdk")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
-  compileOnly(libs.bundles.semconv)
   compileOnly(libs.findbugs.jsr305)
   implementation(libs.lmax.disruptor)
   implementation(libs.jctools)
   implementation(libs.asyncprofiler)
+  implementation(libs.bundles.semconv)
   implementation(project(":common"))
 
   testAnnotationProcessor(libs.autoservice.processor)
