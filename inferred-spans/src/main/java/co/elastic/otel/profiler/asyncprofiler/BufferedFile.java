@@ -53,6 +53,15 @@ class BufferedFile implements Recyclable {
   private static final int SIZE_OF_SHORT = 2;
   private static final int SIZE_OF_INT = 4;
   private static final int SIZE_OF_LONG = 8;
+
+  // The following constant are defined by the JFR file format for identifying the string encoding
+  private static final int STRING_ENCODING_NULL = 0;
+  private static final int STRING_ENCODING_EMPTY = 1;
+  private static final int STRING_ENCODING_CONSTANTPOOL = 2;
+  private static final int STRING_ENCODING_UTF8 = 3;
+  private static final int STRING_ENCODING_CHARARRAY = 4;
+  private static final int STRING_ENCODING_LATIN1 = 5;
+
   private ByteBuffer buffer;
   private final ByteBuffer bigBuffer;
   private final ByteBuffer smallBuffer;
@@ -132,10 +141,10 @@ class BufferedFile implements Recyclable {
   @Nullable
   public String readString() throws IOException {
     byte encoding = get();
-    if (encoding == 0) { // 0 encoding represents a null string
+    if (encoding == STRING_ENCODING_NULL) {
       return null;
     }
-    if (encoding == 1) { // 1 encoding represents an empty string
+    if (encoding == STRING_ENCODING_EMPTY) {
       return "";
     }
     StringBuilder output = new StringBuilder();
@@ -145,21 +154,21 @@ class BufferedFile implements Recyclable {
 
   private void readOrSkipString(byte encoding, @Nullable StringBuilder output) throws IOException {
     switch (encoding) {
-      case 0: // NULL
-      case 1: // empty
+      case STRING_ENCODING_NULL:
+      case STRING_ENCODING_EMPTY:
         return;
-      case 2: // constant pool reference
+      case STRING_ENCODING_CONSTANTPOOL:
         if (output != null) {
           throw new IllegalStateException("Reading constant pool string is not supported");
         }
         getVarLong();
         return;
-      case 3: // UTF8-encoded byte array
+      case STRING_ENCODING_UTF8:
         readOrSkipUtf8(output);
         return;
-      case 4: // char array
+      case STRING_ENCODING_CHARARRAY:
         throw new IllegalStateException("Char-array encoding is not supported by the parser yet");
-      case 5: // LATIN1-encoded byte array
+      case STRING_ENCODING_LATIN1:
         if (output != null) {
           throw new IllegalStateException("Reading LATIN1 encoded string is not supported");
         }
