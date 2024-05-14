@@ -6,7 +6,7 @@ junit = "5.10.2"
 autoservice = "1.1.1"
 
 # otel protocol (OTLP)
-opentelemetryProto = "1.2.0-alpha"
+opentelemetryProto = "1.3.1-alpha"
 
 # otel agent, we rely on the '*-alpha' and get the non-alpha dependencies transitively
 # updated from upstream agent with .ci/update-upstream.sh
