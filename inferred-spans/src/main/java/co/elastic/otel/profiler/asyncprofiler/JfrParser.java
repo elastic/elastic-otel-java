@@ -478,7 +478,7 @@ public class JfrParser implements Recyclable {
     int EVENT_METADATA = 0;
     int EVENT_CHECKPOINT = 1;
 
-    // The following event types actually are defined in thhe metadata of the JFR file itself
+    // The following event types actually are defined in the metadata of the JFR file itself
     // for simplicity and performance, we hardcode the values used by the async-profiler
     // implementation
     int EVENT_EXECUTION_SAMPLE = 101;
