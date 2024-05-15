@@ -21,10 +21,16 @@ package co.elastic.otel;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 @AutoService(AutoConfigurationCustomizerProvider.class)
 public class ElasticAutoConfigurationCustomizerprovider
     implements AutoConfigurationCustomizerProvider {
+
+  private static final String DISABLED_RESOURCE_PROVIDERS = "otel.java.disabled.resource.providers";
 
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
@@ -35,6 +41,22 @@ public class ElasticAutoConfigurationCustomizerprovider
                 // span processor registration
                 sdkTracerProviderBuilder.addSpanProcessor(
                     ElasticExtension.INSTANCE.getSpanProcessor()))
+        .addPropertiesCustomizer(
+            configProperties -> {
+              Set<String> disabledConfig =
+                  new HashSet<>(configProperties.getList(DISABLED_RESOURCE_PROVIDERS));
+
+              // disabling embedded resource providers
+
+              // disable upstream distro name & version provider
+              disabledConfig.add(
+                  "io.opentelemetry.javaagent.tooling.DistroVersionResourceProvider");
+
+              Map<String, String> config = new HashMap<>();
+              config.put(DISABLED_RESOURCE_PROVIDERS, String.join(",", disabledConfig));
+
+              return config;
+            })
         .addSpanExporterCustomizer(
             (spanExporter, configProperties) ->
                 // wrap the original span exporter
