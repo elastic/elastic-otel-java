@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
 
-  implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
+  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
 
   // auto-service
