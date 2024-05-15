@@ -65,14 +65,14 @@ public class JfrParser implements Recyclable {
   private final Int2ObjectHashMap<String> symbolIdToString = new Int2ObjectHashMap<String>();
   private final Int2IntHashMap stackTraceIdToFilePositions = new Int2IntHashMap(-1);
   private final Long2LongHashMap nativeTidToJavaTid = new Long2LongHashMap(-1);
-  private final Long2ObjectHashMap<StackFrame> frameIdToFrame =
+  private final Long2ObjectHashMap<StackFrame> methodIdToFrame =
       new Long2ObjectHashMap<StackFrame>();
-  private final Long2LongHashMap frameIdToMethodSymbol = new Long2LongHashMap(-1);
-  private final Long2LongHashMap frameIdToClassId = new Long2LongHashMap(-1);
+  private final Long2LongHashMap methodIdToMethodNameSymbol = new Long2LongHashMap(-1);
+  private final Long2LongHashMap methodIdToClassId = new Long2LongHashMap(-1);
   // used to resolve a symbol with minimal allocations
   private final StringBuilder symbolBuilder = new StringBuilder();
-  private long eventsOffset;
-  private long metadataOffset;
+  private long eventsFilePosition;
+  private long metadataFilePosition;
   @Nullable private boolean[] isJavaFrameType;
   @Nullable private List<WildcardMatcher> excludedClasses;
   @Nullable private List<WildcardMatcher> includedClasses;
@@ -88,14 +88,14 @@ public class JfrParser implements Recyclable {
   }
 
   /**
-   * Initializes the parser to make it ready for {@link #resolveStackTrace(long, boolean, List,
-   * int)} to be called.
+   * Initializes the parser to make it ready for {@link #resolveStackTrace(long, List, int)} to be
+   * called.
    *
    * @param file the JFR file to parse
    * @param excludedClasses Class names to exclude in stack traces (has an effect on {@link
-   *     #resolveStackTrace(long, boolean, List, int)})
+   *     #resolveStackTrace(long, List, int)})
    * @param includedClasses Class names to include in stack traces (has an effect on {@link
-   *     #resolveStackTrace(long, boolean, List, int)})
+   *     #resolveStackTrace(long, List, int)})
    * @throws IOException if some I/O error occurs
    */
   public void parse(
@@ -105,15 +105,19 @@ public class JfrParser implements Recyclable {
     this.includedClasses = includedClasses;
     bufferedFile.setFile(file);
     long fileSize = bufferedFile.size();
-    if (fileSize < 16) {
+
+    int chunkSize = readChunk(0);
+    if (chunkSize < fileSize) {
       throw new IllegalStateException(
-          "Unexpected sampling profiler error, everything else should work as expected. "
-              + "Please report to us with as many details, including OS and JVM details.");
+          "This implementation does not support reading JFR files containing multiple chunks");
     }
+  }
+
+  private int readChunk(int position) throws IOException {
+    bufferedFile.position(position);
     if (logger.isLoggable(Level.FINE)) {
-      logger.log(Level.FINE, "Parsing {0} ({1} bytes)", new Object[] {file, fileSize});
+      logger.log(Level.FINE, "Parsing JFR chunk at offset", new Object[] {position});
     }
-    bufferedFile.ensureRemaining(16, 16);
     for (byte magicByte : MAGIC_BYTES) {
       if (bufferedFile.get() != magicByte) {
         throw new IllegalArgumentException("Not a JFR file");
@@ -121,153 +125,175 @@ public class JfrParser implements Recyclable {
     }
     short major = bufferedFile.getShort();
     short minor = bufferedFile.getShort();
-    if (major != 0 || minor != 9) {
+    if (major != 2 || minor != 0) {
       throw new IllegalArgumentException(
-          String.format("Can only parse version 0.9. Was %d.%d", major, minor));
+          String.format("Can only parse version 2.0. Was %d.%d", major, minor));
     }
-    metadataOffset = bufferedFile.getLong();
-    eventsOffset = bufferedFile.position();
+    long chunkSize = bufferedFile.getLong();
+    long constantPoolOffset = bufferedFile.getLong();
+    metadataFilePosition = position + bufferedFile.getLong();
+    bufferedFile.getLong(); // startTimeNanos
+    bufferedFile.getLong(); // durationNanos
+    bufferedFile.getLong(); // startTicks
+    bufferedFile.getLong(); // ticksPerSecond
+    bufferedFile.getInt(); // features
 
-    long checkpointOffset = parseMetadata(metadataOffset);
-    parseCheckpoint(checkpointOffset);
+    // Events start right after metadata
+    eventsFilePosition = metadataFilePosition + parseMetadata(metadataFilePosition);
+    parseCheckpointEvents(position + constantPoolOffset);
+    return (int) chunkSize;
   }
 
   private long parseMetadata(long metadataOffset) throws IOException {
     bufferedFile.position(metadataOffset);
-    bufferedFile.ensureRemaining(8, 8);
-    int size = bufferedFile.getInt();
+    int size = bufferedFile.getVarInt();
     expectEventType(EventTypeId.EVENT_METADATA);
-    bufferedFile.skip(size - 16);
-    bufferedFile.ensureRemaining(8, 8);
-    return bufferedFile.getLong();
+    return size;
   }
 
   private void expectEventType(int expectedEventType) throws IOException {
-    int eventType = bufferedFile.getInt();
+    long eventType = bufferedFile.getVarLong();
     if (eventType != expectedEventType) {
       throw new IOException("Expected " + expectedEventType + " but got " + eventType);
     }
   }
 
-  private void parseCheckpoint(long checkpointOffset) throws IOException {
+  private void parseCheckpointEvents(long checkpointOffset) throws IOException {
     bufferedFile.position(checkpointOffset);
-    int size = bufferedFile.getInt(); // size
+    bufferedFile.getVarInt(); // size
     expectEventType(EventTypeId.EVENT_CHECKPOINT);
-    bufferedFile.getLong(); // stop timestamp
-    bufferedFile.getLong(); // previous checkpoint - always 0 in async-profiler
-    while (bufferedFile.position() < metadataOffset) {
-      parseContent();
+    bufferedFile.getVarLong(); // start
+    bufferedFile.getVarLong(); // duration
+    long delta = bufferedFile.getVarLong();
+    if (delta != 0) {
+      throw new IllegalStateException(
+          "Expected only one checkpoint event, but file contained multiple, delta is " + delta);
+    }
+    bufferedFile.get(); // typeMask
+    long poolCount = bufferedFile.getVarLong();
+    for (int i = 0; i < poolCount; i++) {
+      parseConstantPool();
     }
   }
 
-  private void parseContent() throws IOException {
-    BufferedFile bufferedFile = this.bufferedFile;
-    int contentTypeId = bufferedFile.getInt();
-    if (logger.isLoggable(Level.FINE)) {
-      logger.log(Level.FINE, "Parsing content type {0}", contentTypeId);
-    }
-    int count = bufferedFile.getInt();
-    switch (contentTypeId) {
+  private void parseConstantPool() throws IOException {
+    long typeId = bufferedFile.getVarLong();
+    int count = bufferedFile.getVarInt();
+
+    switch ((int) typeId) {
+      case ContentTypeId.CONTENT_FRAME_TYPE:
+        readFrameTypeConstants(count);
+        break;
+      case ContentTypeId.CONTENT_THREAD_STATE:
+      case ContentTypeId.CONTENT_GC_WHEN:
+      case ContentTypeId.CONTENT_LOG_LEVELS:
+        // We are not interested in those types, but still have to consume the bytes
+        for (int i = 0; i < count; i++) {
+          bufferedFile.getVarInt();
+          bufferedFile.skipString();
+        }
+        break;
       case ContentTypeId.CONTENT_THREAD:
-        for (int i = 0; i < count; i++) {
-          int threadId = bufferedFile.getInt();
-          String threadName = readUtf8String().toString();
-        }
-        break;
-      case ContentTypeId.CONTENT_JAVA_THREAD:
-        for (int i = 0; i < count; i++) {
-          bufferedFile.ensureRemaining(16);
-          long javaThreadId = bufferedFile.getUnsafeLong();
-          int nativeThreadId = bufferedFile.getUnsafeInt();
-          int threadGroup = bufferedFile.getUnsafeInt();
-          nativeTidToJavaTid.put(nativeThreadId, javaThreadId);
-        }
-        break;
-      case ContentTypeId.CONTENT_THREAD_GROUP:
-        // no info
+        readThreadConstants(count);
         break;
       case ContentTypeId.CONTENT_STACKTRACE:
-        for (int i = 0; i < count; i++) {
-          bufferedFile.ensureRemaining(13);
-          int pos = (int) bufferedFile.position();
-          // always an integer
-          // see profiler.h
-          // MAX_CALLTRACES = 65536
-          int stackTraceKey = (int) bufferedFile.getUnsafeLong();
-          this.stackTraceIdToFilePositions.put(stackTraceKey, pos);
-          bufferedFile.getUnsafe(); // truncated
-          int numFrames = bufferedFile.getUnsafeInt();
-          int sizeOfFrame = 13;
-          bufferedFile.skip(numFrames * sizeOfFrame);
-        }
-        break;
-      case ContentTypeId.CONTENT_CLASS:
-        for (int i = 0; i < count; i++) {
-          bufferedFile.ensureRemaining(26);
-          // classId is an incrementing integer, no way there are more than 2 billion distinct ones
-          int classId = (int) bufferedFile.getUnsafeLong();
-          bufferedFile.getUnsafeLong(); // loader class
-          // symbol ids are incrementing integers, no way there are more than 2 billion distinct
-          // ones
-          int classNameSymbolId = (int) bufferedFile.getUnsafeLong();
-          classIdToClassNameSymbolId.put(classId, classNameSymbolId); // class name
-          bufferedFile.getUnsafeShort(); // access flags
-        }
+        readStackTraceConstants(count);
         break;
       case ContentTypeId.CONTENT_METHOD:
-        for (int i = 1; i <= count; i++) {
-          bufferedFile.ensureRemaining(35);
-          long id = bufferedFile.getUnsafeLong();
-          // classId is an incrementing integer, no way there are more than 2 billion distinct ones
-          int classId = (int) bufferedFile.getUnsafeLong();
-          // symbol ids are incrementing integers, no way there are more than 2 billion distinct
-          // ones
-          int methodNameSymbolId = (int) bufferedFile.getUnsafeLong();
-          frameIdToFrame.put(id, FRAME_NULL);
-          frameIdToClassId.put(id, classId);
-          frameIdToMethodSymbol.put(id, methodNameSymbolId);
-          bufferedFile.getUnsafeLong(); // signature
-          bufferedFile.getUnsafeShort(); // modifiers
-          bufferedFile.getUnsafe(); // hidden
-        }
+        readMethodConstants(count);
+        break;
+      case ContentTypeId.CONTENT_CLASS:
+        readClassConstants(count);
+        break;
+      case ContentTypeId.CONTENT_PACKAGE:
+        readPackageConstants(count);
         break;
       case ContentTypeId.CONTENT_SYMBOL:
-        for (int i = 0; i < count; i++) {
-          // symbol ids are incrementing integers, no way there are more than 2 billion distinct
-          // ones
-          int symbolId = (int) bufferedFile.getLong();
-          int pos = (int) bufferedFile.position();
-          symbolIdToPos.put(symbolId, pos);
-          symbolIdToString.put(symbolId, SYMBOL_NULL);
-          skipString();
-        }
-        break;
-      case ContentTypeId.CONTENT_STATE:
-        // we're not really interested in the thread states
-        // but we sill have to consume the bytes
-        for (int i = 1; i <= count; i++) {
-          bufferedFile.getShort();
-          skipString();
-        }
-        break;
-      case ContentTypeId.CONTENT_FRAME_TYPE:
-        isJavaFrameType = new boolean[count + 1];
-        for (int i = 1; i <= count; i++) {
-          int id = bufferedFile.get();
-          if (i != id) {
-            throw new IllegalStateException("Expecting ids to be incrementing");
-          }
-          isJavaFrameType[id] = JAVA_FRAME_TYPES.contains(readUtf8String().toString());
-        }
+        readSymbolConstants(count);
         break;
       default:
-        throw new IOException("Unknown content type " + contentTypeId);
+        throw new IllegalStateException("Unhandled constant pool type: " + typeId);
     }
   }
 
-  private void skipString() throws IOException {
-    int stringLength = bufferedFile.getUnsignedShort();
-    bufferedFile.skip(stringLength);
+  private void readSymbolConstants(int count) throws IOException {
+    for (int i = 0; i < count; i++) {
+      int symbolId = bufferedFile.getVarInt();
+      int pos = (int) bufferedFile.position();
+      bufferedFile.skipString();
+      symbolIdToPos.put(symbolId, pos);
+      symbolIdToString.put(symbolId, SYMBOL_NULL);
+    }
+  }
+
+  private void readClassConstants(int count) throws IOException {
+    for (int i = 0; i < count; i++) {
+      int classId = bufferedFile.getVarInt();
+      bufferedFile.getVarInt(); // classloader, always zero in async-profiler JFR files
+      int classNameSymbolId = bufferedFile.getVarInt();
+      classIdToClassNameSymbolId.put(classId, classNameSymbolId); // class name
+      bufferedFile.getVarInt(); // package symbol id
+      bufferedFile.getVarInt(); // access flags
+    }
+  }
+
+  private void readMethodConstants(int count) throws IOException {
+    for (int i = 0; i < count; i++) {
+      long id = bufferedFile.getVarLong();
+      int classId = bufferedFile.getVarInt();
+      // symbol ids are incrementing integers, no way there are more than 2 billion distinct
+      // ones
+      int methodNameSymbolId = bufferedFile.getVarInt();
+      methodIdToFrame.put(id, FRAME_NULL);
+      methodIdToClassId.put(id, classId);
+      methodIdToMethodNameSymbol.put(id, methodNameSymbolId);
+      bufferedFile.getVarLong(); // signature
+      bufferedFile.getVarInt(); // modifiers
+      bufferedFile.get(); // hidden
+    }
+  }
+
+  private void readPackageConstants(int count) throws IOException {
+    for (int i = 0; i < count; i++) {
+      bufferedFile.getVarLong(); // id
+      bufferedFile.getVarLong(); // symbol-id of package name
+    }
+  }
+
+  private void readThreadConstants(int count) throws IOException {
+    for (int i = 0; i < count; i++) {
+      int nativeThreadId = bufferedFile.getVarInt();
+      bufferedFile.skipString(); // native thread name
+      bufferedFile.getVarInt(); // native thread ID again
+      bufferedFile.skipString(); // java thread name
+      long javaThreadId = bufferedFile.getVarLong();
+      if (javaThreadId != 0) { // javaThreadId will be null for native-only threads
+        nativeTidToJavaTid.put(nativeThreadId, javaThreadId);
+      }
+    }
+  }
+
+  private void readStackTraceConstants(int count) throws IOException {
+    for (int i = 0; i < count; i++) {
+
+      int stackTraceId = bufferedFile.getVarInt();
+      bufferedFile.get(); // truncated byte, always zero anyway
+
+      this.stackTraceIdToFilePositions.put(stackTraceId, (int) bufferedFile.position());
+      // We need to skip the stacktrace to get to the position of the next one
+      readOrSkipStacktraceFrames(null, 0);
+    }
+  }
+
+  private void readFrameTypeConstants(int count) throws IOException {
+    isJavaFrameType = new boolean[count];
+    for (int i = 0; i < count; i++) {
+      int id = bufferedFile.getVarInt();
+      if (i != id) {
+        throw new IllegalStateException("Expecting ids to be incrementing");
+      }
+      isJavaFrameType[id] = JAVA_FRAME_TYPES.contains(bufferedFile.readString());
+    }
   }
 
   /**
@@ -280,31 +306,28 @@ public class JfrParser implements Recyclable {
     if (!bufferedFile.isSet()) {
       throw new IllegalStateException("consumeStackTraces was called before parse");
     }
-    bufferedFile.position(eventsOffset);
-    while (bufferedFile.position() < metadataOffset) {
-      bufferedFile.ensureRemaining(30);
-      int size = bufferedFile.getUnsafeInt();
-      int eventType = bufferedFile.getUnsafeInt();
-      if (eventType == EventTypeId.EVENT_RECORDING) {
-        return;
-      }
-      if (eventType != EventTypeId.EVENT_EXECUTION_SAMPLE) {
-        throw new IOException(
-            "Expected " + EventTypeId.EVENT_EXECUTION_SAMPLE + " but got " + eventType);
-      }
-      long nanoTime = bufferedFile.getUnsafeLong();
-      int tid = bufferedFile.getUnsafeInt();
-      long stackTraceId = bufferedFile.getUnsafeLong();
-      short threadState = bufferedFile.getUnsafeShort();
-      long javaThreadId = nativeTidToJavaTid.get(tid);
-      if (javaThreadId != -1) {
+    bufferedFile.position(eventsFilePosition);
+    long fileSize = bufferedFile.size();
+    long eventStart = eventsFilePosition;
+    while (eventStart < fileSize) {
+      bufferedFile.position(eventStart);
+      int eventSize = bufferedFile.getVarInt();
+      long eventType = bufferedFile.getVarLong();
+      if (eventType == EventTypeId.EVENT_EXECUTION_SAMPLE) {
+        long nanoTime = bufferedFile.getVarLong();
+        int tid = bufferedFile.getVarInt();
+        int stackTraceId = bufferedFile.getVarInt();
+        bufferedFile.getVarInt(); // thread state
+        long javaThreadId = nativeTidToJavaTid.get(tid);
         callback.onCallTree(javaThreadId, stackTraceId, nanoTime);
       }
+      eventStart += eventSize;
     }
   }
 
   /**
-   * Resolves the stack trace with the given {@code stackTraceId}.
+   * Resolves the stack trace with the given {@code stackTraceId}. Only java frames will be
+   * included.
    *
    * <p>Note that his allocates strings for symbols in case a stack frame has not already been
    * resolved for the current JFR file yet. These strings are currently not cached so this can
@@ -315,9 +338,6 @@ public class JfrParser implements Recyclable {
    *
    * @param stackTraceId The id of the stack traced. Used to look up the position of the file in
    *     which the given stack trace is stored via {@link #stackTraceIdToFilePositions}.
-   * @param onlyJavaFrames If {@code true}, will only resolve {@code Interpreted}, {@code JIT
-   *     compiled} and {@code Inlined} frames. If {@code false}, will also resolve {@code Native},
-   *     {@code Kernel} and {@code C++} frames.
    * @param stackFrames The mutable list where the stack frames are written to. Don't forget to
    *     {@link List#clear()} the list before calling this method if the list is reused.
    * @param maxStackDepth The max size of the stackFrames list (excluded frames don't take up
@@ -326,37 +346,36 @@ public class JfrParser implements Recyclable {
    *     without making it overly complex.
    * @throws IOException if there is an error reading in current buffer
    */
-  public void resolveStackTrace(
-      long stackTraceId, boolean onlyJavaFrames, List<StackFrame> stackFrames, int maxStackDepth)
+  public void resolveStackTrace(long stackTraceId, List<StackFrame> stackFrames, int maxStackDepth)
       throws IOException {
     if (!bufferedFile.isSet()) {
       throw new IllegalStateException("getStackTrace was called before parse");
     }
-    long position = bufferedFile.position();
     bufferedFile.position(stackTraceIdToFilePositions.get((int) stackTraceId));
-    bufferedFile.ensureRemaining(13);
-    long stackTraceIdFromFile = bufferedFile.getUnsafeLong();
-    assert stackTraceId == stackTraceIdFromFile;
-    bufferedFile.getUnsafe(); // truncated
-    int numFrames = bufferedFile.getUnsafeInt();
-    for (int i = 0; i < numFrames; i++) {
-      bufferedFile.ensureRemaining(13);
-      long frameId = bufferedFile.getUnsafeLong();
-      bufferedFile.getUnsafeInt(); // bci (always set to 0 by async-profiler)
-      byte frameType = bufferedFile.getUnsafe();
-      addFrameIfIncluded(stackFrames, onlyJavaFrames, frameId, frameType);
-      if (stackFrames.size() > maxStackDepth) {
-        stackFrames.remove(0);
-      }
-    }
-    bufferedFile.position(position);
+    readOrSkipStacktraceFrames(stackFrames, maxStackDepth);
   }
 
-  private void addFrameIfIncluded(
-      List<StackFrame> stackFrames, boolean onlyJavaFrames, long frameId, byte frameType)
+  private void readOrSkipStacktraceFrames(@Nullable List<StackFrame> stackFrames, int maxStackDepth)
       throws IOException {
-    if (!onlyJavaFrames || isJavaFrameType(frameType)) {
-      StackFrame stackFrame = resolveStackFrame(frameId);
+    int frameCount = bufferedFile.getVarInt();
+    for (int i = 0; i < frameCount; i++) {
+      int methodId = bufferedFile.getVarInt();
+      bufferedFile.getVarInt(); // line number
+      bufferedFile.getVarInt(); // bytecode index
+      byte type = bufferedFile.get();
+      if (stackFrames != null) {
+        addFrameIfIncluded(stackFrames, methodId, type);
+        if (stackFrames.size() > maxStackDepth) {
+          stackFrames.remove(0);
+        }
+      }
+    }
+  }
+
+  private void addFrameIfIncluded(List<StackFrame> stackFrames, int methodId, byte frameType)
+      throws IOException {
+    if (isJavaFrameType(frameType)) {
+      StackFrame stackFrame = resolveStackFrame(methodId);
       if (stackFrame != FRAME_EXCLUDED) {
         stackFrames.add(stackFrame);
       }
@@ -372,7 +391,18 @@ public class JfrParser implements Recyclable {
     if (symbol != SYMBOL_NULL) {
       return symbol;
     }
-    StringBuilder symbolBuilder = resolveSymbolBuilder(symbolIdToPos.get(id), classSymbol);
+
+    long previousPosition = bufferedFile.position();
+    int position = symbolIdToPos.get(id);
+    bufferedFile.position(position);
+    symbolBuilder.setLength(0);
+    bufferedFile.readString(symbolBuilder);
+    bufferedFile.position(previousPosition);
+
+    if (classSymbol) {
+      replaceSlashesWithDots(symbolBuilder);
+    }
+
     if (classSymbol && !isClassIncluded(symbolBuilder)) {
       symbol = SYMBOL_EXCLUDED;
     } else {
@@ -382,14 +412,11 @@ public class JfrParser implements Recyclable {
     return symbol;
   }
 
-  private StringBuilder resolveSymbolBuilder(int pos, boolean replaceSlashWithDot)
-      throws IOException {
-    long currentPos = bufferedFile.position();
-    bufferedFile.position(pos);
-    try {
-      return readUtf8String(replaceSlashWithDot);
-    } finally {
-      bufferedFile.position(currentPos);
+  private static void replaceSlashesWithDots(StringBuilder builder) {
+    for (int i = 0; i < builder.length(); i++) {
+      if (builder.charAt(i) == '/') {
+        builder.setCharAt(i, '.');
+      }
     }
   }
 
@@ -399,53 +426,33 @@ public class JfrParser implements Recyclable {
   }
 
   private StackFrame resolveStackFrame(long frameId) throws IOException {
-    StackFrame stackFrame = frameIdToFrame.get(frameId);
+    StackFrame stackFrame = methodIdToFrame.get(frameId);
     if (stackFrame != FRAME_NULL) {
       return stackFrame;
     }
     String className =
-        resolveSymbol(classIdToClassNameSymbolId.get((int) frameIdToClassId.get(frameId)), true);
+        resolveSymbol(classIdToClassNameSymbolId.get((int) methodIdToClassId.get(frameId)), true);
     if (className == SYMBOL_EXCLUDED) {
       stackFrame = FRAME_EXCLUDED;
     } else {
-      String method = resolveSymbol((int) frameIdToMethodSymbol.get(frameId), false);
+      String method = resolveSymbol((int) methodIdToMethodNameSymbol.get(frameId), false);
       stackFrame = new StackFrame(className, Objects.requireNonNull(method));
     }
-    frameIdToFrame.put(frameId, stackFrame);
+    methodIdToFrame.put(frameId, stackFrame);
     return stackFrame;
-  }
-
-  private StringBuilder readUtf8String() throws IOException {
-    return readUtf8String(false);
-  }
-
-  private StringBuilder readUtf8String(boolean replaceSlashWithDot) throws IOException {
-    int size = bufferedFile.getUnsignedShort();
-    bufferedFile.ensureRemaining(size);
-    StringBuilder symbolBuilder = this.symbolBuilder;
-    symbolBuilder.setLength(0);
-    for (int i = 0; i < size; i++) {
-      char c = (char) bufferedFile.getUnsafe();
-      if (replaceSlashWithDot && c == '/') {
-        symbolBuilder.append('.');
-      } else {
-        symbolBuilder.append(c);
-      }
-    }
-    return symbolBuilder;
   }
 
   @Override
   public void resetState() {
     bufferedFile.resetState();
-    eventsOffset = 0;
-    metadataOffset = 0;
+    eventsFilePosition = 0;
+    metadataFilePosition = 0;
     isJavaFrameType = null;
     classIdToClassNameSymbolId.clear();
     stackTraceIdToFilePositions.clear();
-    frameIdToFrame.clear();
-    frameIdToMethodSymbol.clear();
-    frameIdToClassId.clear();
+    methodIdToFrame.clear();
+    methodIdToMethodNameSymbol.clear();
+    methodIdToClassId.clear();
     symbolBuilder.setLength(0);
     excludedClasses = null;
     includedClasses = null;
@@ -459,7 +466,7 @@ public class JfrParser implements Recyclable {
      * @param threadId The {@linkplain Thread#getId() Java thread id} for with the event was
      *     recorded.
      * @param stackTraceId The id of the stack trace event. Can be used to resolve the stack trace
-     *     via {@link #resolveStackTrace(long, boolean, List, int)}
+     *     via {@link #resolveStackTrace(long, List, int)}
      * @param nanoTime The timestamp of the event which can be correlated with {@link
      *     System#nanoTime()}
      * @throws IOException if there is any error reading stack trace
@@ -470,19 +477,23 @@ public class JfrParser implements Recyclable {
   private interface EventTypeId {
     int EVENT_METADATA = 0;
     int EVENT_CHECKPOINT = 1;
-    int EVENT_RECORDING = 10;
-    int EVENT_EXECUTION_SAMPLE = 20;
+
+    // The following event types actually are defined in the metadata of the JFR file itself
+    // for simplicity and performance, we hardcode the values used by the async-profiler
+    // implementation
+    int EVENT_EXECUTION_SAMPLE = 101;
   }
 
   private interface ContentTypeId {
-    int CONTENT_THREAD = 7;
-    int CONTENT_JAVA_THREAD = 8;
-    int CONTENT_STACKTRACE = 9;
-    int CONTENT_CLASS = 10;
-    int CONTENT_THREAD_GROUP = 31;
-    int CONTENT_METHOD = 32;
-    int CONTENT_SYMBOL = 33;
-    int CONTENT_STATE = 34;
-    int CONTENT_FRAME_TYPE = 47;
+    int CONTENT_THREAD = 22;
+    int CONTENT_LOG_LEVELS = 33;
+    int CONTENT_STACKTRACE = 26;
+    int CONTENT_CLASS = 21;
+    int CONTENT_METHOD = 28;
+    int CONTENT_SYMBOL = 31;
+    int CONTENT_THREAD_STATE = 25;
+    int CONTENT_FRAME_TYPE = 24;
+    int CONTENT_GC_WHEN = 32;
+    int CONTENT_PACKAGE = 30;
   }
 }

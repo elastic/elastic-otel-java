@@ -21,7 +21,6 @@ package co.elastic.otel.profiler;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import co.elastic.otel.testing.DisabledOnAppleSilicon;
 import co.elastic.otel.testing.DisabledOnOpenJ9;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
@@ -51,7 +50,6 @@ import org.junit.jupiter.api.condition.OS;
 
 // async-profiler doesn't work on Windows
 @DisabledOnOs(OS.WINDOWS)
-@DisabledOnAppleSilicon
 @DisabledOnOpenJ9
 class SamplingProfilerTest {
 
@@ -160,7 +158,7 @@ class SamplingProfilerTest {
     setupProfiler(config -> config.startScheduledProfiling(false).profilerLoggingEnabled(false));
     assertThat(setup.profiler.createStartCommand())
         .isEqualTo(
-            "start,jfr,event=wall,cstack=n,interval=5ms,filter,file=null,safemode=0,log=none");
+            "start,jfr,event=wall,cstack=n,interval=5ms,filter,file=null,safemode=0,loglevel=none");
 
     setup.close();
     setupProfiler(
@@ -172,7 +170,7 @@ class SamplingProfilerTest {
                 .asyncProfilerSafeMode(14));
     assertThat(setup.profiler.createStartCommand())
         .isEqualTo(
-            "start,jfr,event=wall,cstack=n,interval=10ms,filter,file=null,safemode=14,log=none");
+            "start,jfr,event=wall,cstack=n,interval=10ms,filter,file=null,safemode=14,loglevel=none");
   }
 
   @Test

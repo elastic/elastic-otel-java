@@ -22,7 +22,6 @@ import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.asser
 
 import co.elastic.otel.common.ElasticAttributes;
 import co.elastic.otel.profiler.pooling.ObjectPool;
-import co.elastic.otel.testing.DisabledOnAppleSilicon;
 import co.elastic.otel.testing.DisabledOnOpenJ9;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.TraceFlags;
@@ -52,7 +51,6 @@ class CallTreeSpanifyTest {
 
   @Test
   @DisabledOnOs(OS.WINDOWS)
-  @DisabledOnAppleSilicon
   @DisabledOnOpenJ9
   void testSpanification() throws Exception {
     FixedClock nanoClock = new FixedClock();

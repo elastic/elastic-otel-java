@@ -23,7 +23,6 @@ import static java.nio.file.StandardOpenOption.WRITE;
 
 import co.elastic.otel.common.config.WildcardMatcher;
 import co.elastic.otel.common.util.ExecutorUtils;
-import co.elastic.otel.profiler.asyncprofiler.AsyncProfiler;
 import co.elastic.otel.profiler.asyncprofiler.JfrParser;
 import co.elastic.otel.profiler.collections.Long2ObjectHashMap;
 import co.elastic.otel.profiler.pooling.Allocator;
@@ -60,6 +59,7 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
+import one.profiler.AsyncProfiler;
 
 /**
  * Correlates {@link ActivationEvent}s with {@link StackFrame}s which are recorded by {@link
@@ -111,6 +111,8 @@ import javax.annotation.Nullable;
  * the full stack trace}.
  */
 class SamplingProfiler implements Runnable {
+
+  private static final String LIB_DIR_PROPERTY_NAME = "one.profiler.extractPath";
 
   private static final Logger logger = Logger.getLogger(SamplingProfiler.class.getName());
   private static final int ACTIVATION_EVENTS_IN_FILE = 1_000_000;
@@ -179,6 +181,8 @@ class SamplingProfiler implements Runnable {
 
   private final Supplier<Tracer> tracerProvider;
 
+  private final AsyncProfiler profiler;
+
   /**
    * Creates a sampling profiler, optionally relying on existing files.
    *
@@ -230,7 +234,19 @@ class SamplingProfiler implements Runnable {
     this.jfrFile = jfrFile;
     activationEventsBuffer = ByteBuffer.allocateDirect(ACTIVATION_EVENTS_BUFFER_SIZE);
     this.activationEventsFile = activationEventsFile;
+    profiler = loadProfiler();
     activationListener = ProfilingActivationListener.register(this);
+  }
+
+  private AsyncProfiler loadProfiler() {
+    String libDir = config.getProfilerLibDirectory();
+    try {
+      Files.createDirectories(Paths.get(libDir));
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to create directory to extract lib to", e);
+    }
+    System.setProperty(LIB_DIR_PROPERTY_NAME, libDir);
+    return AsyncProfiler.getInstance();
   }
 
   /**
@@ -309,9 +325,7 @@ class SamplingProfiler implements Runnable {
   public boolean onActivation(Span activeSpan, @Nullable Span previouslyActive) {
     if (profilingSessionOngoing) {
       if (previouslyActive == null) {
-        AsyncProfiler.getInstance(
-                config.getProfilerLibDirectory(), config.getAsyncProfilerSafeMode())
-            .enableProfilingCurrentThread();
+        profiler.addThread(Thread.currentThread());
       }
       boolean success =
           eventBuffer.tryPublishEvent(ACTIVATION_EVENT_TRANSLATOR, activeSpan, previouslyActive);
@@ -337,9 +351,7 @@ class SamplingProfiler implements Runnable {
   public boolean onDeactivation(Span activeSpan, @Nullable Span previouslyActive) {
     if (profilingSessionOngoing) {
       if (previouslyActive == null) {
-        AsyncProfiler.getInstance(
-                config.getProfilerLibDirectory(), config.getAsyncProfilerSafeMode())
-            .disableProfilingCurrentThread();
+        profiler.removeThread(Thread.currentThread());
       }
       boolean success =
           eventBuffer.tryPublishEvent(DEACTIVATION_EVENT_TRANSLATOR, activeSpan, previouslyActive);
@@ -393,15 +405,12 @@ class SamplingProfiler implements Runnable {
   }
 
   private void profile(Duration profilingDuration) throws Exception {
-    AsyncProfiler asyncProfiler =
-        AsyncProfiler.getInstance(
-            config.getProfilerLibDirectory(), config.getAsyncProfilerSafeMode());
     try {
       String startCommand = createStartCommand();
-      String startMessage = asyncProfiler.execute(startCommand);
+      String startMessage = profiler.execute(startCommand);
       logger.fine(startMessage);
       if (!profiledThreads.isEmpty()) {
-        restoreFilterState(asyncProfiler);
+        restoreFilterState(profiler);
       }
       // Doesn't need to be atomic as this field is being updated only by a single thread
       //noinspection NonAtomicOperationOnVolatileField
@@ -414,7 +423,7 @@ class SamplingProfiler implements Runnable {
       // residual activation events if post-processing is disabled dynamically
       consumeActivationEventsFromRingBufferAndWriteToFile(profilingDuration);
 
-      String stopMessage = asyncProfiler.execute("stop");
+      String stopMessage = profiler.execute("stop");
       logger.fine(stopMessage);
 
       // When post-processing is disabled, jfr file will not be parsed and the heavy processing will
@@ -423,7 +432,7 @@ class SamplingProfiler implements Runnable {
       processTraces();
     } catch (InterruptedException | ClosedByInterruptException e) {
       try {
-        asyncProfiler.stop();
+        profiler.stop();
       } catch (IllegalStateException ignore) {
       }
       Thread.currentThread().interrupt();
@@ -439,7 +448,7 @@ class SamplingProfiler implements Runnable {
             .append(",safemode=")
             .append(config.getAsyncProfilerSafeMode());
     if (!config.isProfilingLoggingEnabled()) {
-      startCommand.append(",log=none");
+      startCommand.append(",loglevel=none");
     }
     return startCommand.toString();
   }
@@ -460,7 +469,7 @@ class SamplingProfiler implements Runnable {
         new ThreadMatcher.NonCapturingConsumer<Thread, AsyncProfiler>() {
           @Override
           public void accept(Thread thread, AsyncProfiler asyncProfiler) {
-            asyncProfiler.enableProfilingThread(thread);
+            asyncProfiler.addThread(thread);
           }
         },
         asyncProfiler);
@@ -531,7 +540,7 @@ class SamplingProfiler implements Runnable {
         processActivationEventsUpTo(stackTrace.nanoTime, event, eof);
         CallTree.Root root = profiledThreads.get(stackTrace.threadId);
         if (root != null) {
-          jfrParser.resolveStackTrace(stackTrace.stackTraceId, true, stackFrames, MAX_STACK_DEPTH);
+          jfrParser.resolveStackTrace(stackTrace.stackTraceId, stackFrames, MAX_STACK_DEPTH);
           if (stackFrames.size() == MAX_STACK_DEPTH) {
             logger.fine(
                 "Max stack depth reached. Set profiling_included_classes or profiling_excluded_classes.");

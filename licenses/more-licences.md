@@ -106,17 +106,11 @@
 > - **POM License**: Apache License, Version 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 > - **POM License**: The 3-Clause BSD License - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
+**24** **Group:** `tools.profiler` **Name:** `async-profiler` **Version:** `3.0` 
+> - **POM Project URL**: [https://profiler.tools](https://profiler.tools)
+> - **POM License**: Apache License, Version 2.0 - [https://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0)
+
 ## Creative Commons Legal Code
-
-**24** **Group:** `org.hdrhistogram` **Name:** `HdrHistogram` **Version:** `2.2.1` 
-> - **Manifest License**: The 2-Clause BSD License (Not Packaged)
-> - **POM Project URL**: [http://hdrhistogram.github.io/HdrHistogram/](http://hdrhistogram.github.io/HdrHistogram/)
-> - **POM License**: Creative Commons Legal Code - [https://creativecommons.org/publicdomain/zero/1.0/legalcode](https://creativecommons.org/publicdomain/zero/1.0/legalcode)
-> - **POM License**: PUBLIC DOMAIN - [http://creativecommons.org/publicdomain/zero/1.0/](http://creativecommons.org/publicdomain/zero/1.0/)
-> - **POM License**: The 2-Clause BSD License - [https://opensource.org/licenses/BSD-2-Clause](https://opensource.org/licenses/BSD-2-Clause)
-> - **Embedded license files**: [HdrHistogram-2.2.1.jar/META-INF/LICENSE.txt](HdrHistogram-2.2.1.jar/META-INF/LICENSE.txt)
-
-## PUBLIC DOMAIN
 
 **25** **Group:** `org.hdrhistogram` **Name:** `HdrHistogram` **Version:** `2.2.1` 
 > - **Manifest License**: The 2-Clause BSD License (Not Packaged)
@@ -126,7 +120,7 @@
 > - **POM License**: The 2-Clause BSD License - [https://opensource.org/licenses/BSD-2-Clause](https://opensource.org/licenses/BSD-2-Clause)
 > - **Embedded license files**: [HdrHistogram-2.2.1.jar/META-INF/LICENSE.txt](HdrHistogram-2.2.1.jar/META-INF/LICENSE.txt)
 
-## The 2-Clause BSD License
+## PUBLIC DOMAIN
 
 **26** **Group:** `org.hdrhistogram` **Name:** `HdrHistogram` **Version:** `2.2.1` 
 > - **Manifest License**: The 2-Clause BSD License (Not Packaged)
@@ -136,16 +130,26 @@
 > - **POM License**: The 2-Clause BSD License - [https://opensource.org/licenses/BSD-2-Clause](https://opensource.org/licenses/BSD-2-Clause)
 > - **Embedded license files**: [HdrHistogram-2.2.1.jar/META-INF/LICENSE.txt](HdrHistogram-2.2.1.jar/META-INF/LICENSE.txt)
 
+## The 2-Clause BSD License
+
+**27** **Group:** `org.hdrhistogram` **Name:** `HdrHistogram` **Version:** `2.2.1` 
+> - **Manifest License**: The 2-Clause BSD License (Not Packaged)
+> - **POM Project URL**: [http://hdrhistogram.github.io/HdrHistogram/](http://hdrhistogram.github.io/HdrHistogram/)
+> - **POM License**: Creative Commons Legal Code - [https://creativecommons.org/publicdomain/zero/1.0/legalcode](https://creativecommons.org/publicdomain/zero/1.0/legalcode)
+> - **POM License**: PUBLIC DOMAIN - [http://creativecommons.org/publicdomain/zero/1.0/](http://creativecommons.org/publicdomain/zero/1.0/)
+> - **POM License**: The 2-Clause BSD License - [https://opensource.org/licenses/BSD-2-Clause](https://opensource.org/licenses/BSD-2-Clause)
+> - **Embedded license files**: [HdrHistogram-2.2.1.jar/META-INF/LICENSE.txt](HdrHistogram-2.2.1.jar/META-INF/LICENSE.txt)
+
 ## The 3-Clause BSD License
 
-**27** **Group:** `org.ow2.asm` **Name:** `asm` **Version:** `9.6` 
+**28** **Group:** `org.ow2.asm` **Name:** `asm` **Version:** `9.6` 
 > - **Manifest Project URL**: [http://asm.ow2.org](http://asm.ow2.org)
 > - **Manifest License**: The 3-Clause BSD License (Not Packaged)
 > - **POM Project URL**: [http://asm.ow2.io/](http://asm.ow2.io/)
 > - **POM License**: Apache License, Version 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 > - **POM License**: The 3-Clause BSD License - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-**28** **Group:** `org.ow2.asm` **Name:** `asm-commons` **Version:** `9.6` 
+**29** **Group:** `org.ow2.asm` **Name:** `asm-commons` **Version:** `9.6` 
 > - **Manifest Project URL**: [http://asm.ow2.org](http://asm.ow2.org)
 > - **Manifest License**: The 3-Clause BSD License (Not Packaged)
 > - **POM Project URL**: [http://asm.ow2.io/](http://asm.ow2.io/)

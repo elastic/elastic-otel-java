@@ -13,8 +13,9 @@ dependencies {
   compileOnly(libs.findbugs.jsr305)
   implementation(libs.lmax.disruptor)
   implementation(libs.jctools)
-  implementation(project(":common"))
+  implementation(libs.asyncprofiler)
   implementation(libs.bundles.semconv)
+  implementation(project(":common"))
 
   testAnnotationProcessor(libs.autoservice.processor)
   testCompileOnly(libs.autoservice.annotations)
@@ -25,7 +26,6 @@ dependencies {
   testImplementation(libs.awaitility)
   testImplementation(libs.github.api)
   testImplementation(libs.apachecommons.compress)
-  testImplementation(libs.asyncprofiler)
   testImplementation(libs.bundles.semconv)
 }
 
