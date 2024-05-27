@@ -39,7 +39,7 @@ opentelemetrySemconvIncubating = { group = "io.opentelemetry.semconv", name = "o
 autoservice-processor = { group = "com.google.auto.service", name = "auto-service", version.ref = "autoservice" }
 autoservice-annotations = { group = "com.google.auto.service", name = "auto-service-annotations", version.ref = "autoservice" }
 
-assertj-core = "org.assertj:assertj-core:3.25.3"
+assertj-core = "org.assertj:assertj-core:3.26.0"
 awaitility = "org.awaitility:awaitility:4.2.1"
 findbugs-jsr305 = "com.google.code.findbugs:jsr305:3.0.2"
 testcontainers = "org.testcontainers:testcontainers:1.19.8"
