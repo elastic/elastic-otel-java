@@ -128,6 +128,63 @@ jobs:
             :ghost: [${{ github.repository }}] Release *${{ github.ref_name }}* didn't get triggered in Buildkite.
             Build: (<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|here>)
 
+  build-and-push-docker-images:
+    name: "Build and push docker images"
+    runs-on: ubuntu-latest
+    needs:
+      - await-maven-central-artifact
+      - create-github-release
+    env:
+      DOCKER_IMAGE_NAME: docker.elastic.co/observability/elastic-otel-javaagent
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0 # Load entire history as it is required for the get latest tag
+
+      - name: Get latest tag
+        run: echo "LATEST_TAG=$(git tag --list --sort=version:refname "v*" | grep -v RC | sed s/^v// | tail -n 1)" >> "${GITHUB_ENV}"
+
+      - uses: elastic/apm-pipeline-library/.github/actions/docker-login@current
+        with:
+          registry: docker.elastic.co
+          secret: secret/apm-team/ci/docker-registry/prod
+          url: ${{ secrets.VAULT_ADDR }}
+          roleId: ${{ secrets.VAULT_ROLE_ID }}
+          secretId: ${{ secrets.VAULT_SECRET_ID }}
+
+      - name: Extract metadata (tags, labels)
+        id: docker-meta
+        uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81  # v5.5.1
+        with:
+          images: ${{ env.DOCKER_IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ env.RELEASE_VERSION }}
+            type=raw,value=latest,enable=${{ contains(env.LATEST_TAG,env.RELEASE_VERSION) }}
+
+      - name: Copy build jars
+        run: bash docker/copy_artifacts.sh env.RELEASE_VERSION
+
+      - name: Build and push image
+        id: push
+        uses: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0  # v5.3.0
+        with:
+          context: .
+          file: "docker/Dockerfile"
+          push: false
+          tags: ${{ steps.docker-meta.outputs.tags }}
+          labels: ${{ steps.docker-meta.outputs.labels }}
+          build-args: |
+            JAR_FILE=elastic-otel-javaagent.jar
+            EXTENSION_JAR_FILE=elastic-otel-agentextension.jar
+
+      - name: generate build provenance (containers)
+        uses: github-early-access/generate-build-provenance@main
+        with:
+          subject-name: "${{ env.DOCKER_IMAGE_NAME }}"
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+
   await-maven-central-artifact:
     runs-on: ubuntu-latest
     name: Wait for release to be available on maven-central
