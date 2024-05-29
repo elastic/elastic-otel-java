@@ -137,6 +137,10 @@ jobs:
       - create-github-release
     env:
       DOCKER_IMAGE_NAME: docker.elastic.co/observability/elastic-otel-javaagent
+    permissions:
+      attestations: write
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
         with:
