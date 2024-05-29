@@ -192,5 +192,9 @@ public class LegacyConfigurations {
     addUnspecifiedOption("jmx_failed_retry_interval");
     addUnspecifiedOption("safe_exceptions");
     addUnspecifiedOption("exclude_from_getting_username");
+    addUnspecifiedOption("thread_dump_interval");
+    addUnspecifiedOption("universal_profiling_integration_enabled");
+    addUnspecifiedOption("universal_profiling_integration_buffer_size");
+    addUnspecifiedOption("universal_profiling_integration_socket_dir");
   }
 }
