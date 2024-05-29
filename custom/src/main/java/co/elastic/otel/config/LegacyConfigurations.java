@@ -77,6 +77,10 @@ public class LegacyConfigurations {
     addUnspecifiedOption("log_format_sout");
     addUnspecifiedOption("log_format_file");
 
+    addUnspecifiedOption("thread_dump_interval");
+    addUnspecifiedOption("universal_profiling_integration_enabled");
+    addUnspecifiedOption("universal_profiling_integration_buffer_size");
+    addUnspecifiedOption("universal_profiling_integration_socket_dir");
     addUnspecifiedOption("recording");
     addUnspecifiedOption("instrument");
     addUnspecifiedOption("service_node_name");
