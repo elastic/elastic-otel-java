@@ -164,7 +164,9 @@ jobs:
             type=raw,value=latest,enable=${{ contains(env.LATEST_TAG,env.RELEASE_VERSION) }}
 
       - name: Copy build jars
-        run: bash docker/copy_artifacts.sh env.RELEASE_VERSION
+        run: |
+          curl -L -s -o elastic-otel-agentextension.jar "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=co.elastic.otel&a=elastic-otel-agentextension&v=${{ env.RELEASE_VERSION }}"
+          curl -L -s -o elastic-otel-javaagent.jar "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=co.elastic.otel&a=elastic-otel-javaagent&v=${{ env.RELEASE_VERSION }}"
 
       - name: Build and push image
         id: push
@@ -172,7 +174,7 @@ jobs:
         with:
           context: .
           file: "docker/Dockerfile"
-          push: false
+          push: true
           tags: ${{ steps.docker-meta.outputs.tags }}
           labels: ${{ steps.docker-meta.outputs.labels }}
           build-args: |
