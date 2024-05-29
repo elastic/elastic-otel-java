@@ -23,7 +23,6 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.sdk.common.CompletableResultCode;
-import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.data.DelegatingSpanData;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
@@ -65,11 +64,6 @@ public class ElasticSpanExporter implements SpanExporter {
               @Override
               public Attributes getAttributes() {
                 return newAttributes;
-              }
-
-              @Override
-              public Resource getResource() {
-                return ElasticExtension.INSTANCE.wrapResource(span.getResource());
               }
             });
       }

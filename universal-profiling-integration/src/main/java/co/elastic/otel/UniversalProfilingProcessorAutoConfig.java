@@ -26,6 +26,7 @@ import io.opentelemetry.sdk.autoconfigure.ResourceConfiguration;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.semconv.ResourceAttributes;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @AutoService(ChainingSpanProcessorAutoConfiguration.class)
@@ -69,12 +70,20 @@ public class UniversalProfilingProcessorAutoConfig
     PropertiesApplier props = new PropertiesApplier(properties);
     registerer.register(
         next -> {
-          UniversalProfilingProcessorBuilder builder =
-              UniversalProfilingProcessor.builder(next, resource);
-          builder.delayActivationAfterProfilerRegistration(enabled == EnabledOptions.AUTO);
-          props.applyInt(BUFFER_SIZE_OPTION, builder::bufferSize);
-          props.applyString(SOCKET_DIR_OPTION, builder::socketDir);
-          return builder.build();
+          try {
+            UniversalProfilingProcessorBuilder builder =
+                UniversalProfilingProcessor.builder(next, resource);
+            builder.delayActivationAfterProfilerRegistration(enabled == EnabledOptions.AUTO);
+            props.applyInt(BUFFER_SIZE_OPTION, builder::bufferSize);
+            props.applyString(SOCKET_DIR_OPTION, builder::socketDir);
+            return builder.build();
+          } catch (Exception e) {
+            logger.log(
+                Level.SEVERE,
+                "Failed to initialize universal profiling integration, the feature won't work",
+                e);
+            return next;
+          }
         });
   }
 }

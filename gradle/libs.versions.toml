@@ -6,7 +6,7 @@ junit = "5.10.2"
 autoservice = "1.1.1"
 
 # otel protocol (OTLP)
-opentelemetryProto = "1.2.0-alpha"
+opentelemetryProto = "1.3.1-alpha"
 
 # otel agent, we rely on the '*-alpha' and get the non-alpha dependencies transitively
 # updated from upstream agent with .ci/update-upstream.sh
@@ -43,9 +43,9 @@ autoservice-annotations = { group = "com.google.auto.service", name = "auto-serv
 assertj-core = "org.assertj:assertj-core:3.25.3"
 awaitility = "org.awaitility:awaitility:4.2.1"
 findbugs-jsr305 = "com.google.code.findbugs:jsr305:3.0.2"
-testcontainers = "org.testcontainers:testcontainers:1.19.7"
+testcontainers = "org.testcontainers:testcontainers:1.19.8"
 logback = "ch.qos.logback:logback-classic:1.5.6"
-jackson = "com.fasterxml.jackson.core:jackson-databind:2.17.0"
+jackson = "com.fasterxml.jackson.core:jackson-databind:2.17.1"
 protobuf-util = "com.google.protobuf:protobuf-java-util:3.25.3"
 # last version supporting Java 8
 mockito = "org.mockito:mockito-core:4.11.0"
@@ -55,12 +55,12 @@ junitBom = { group = "org.junit", name = "junit-bom", version.ref = "junit" }
 
 okhttp = "com.squareup.okhttp3:okhttp:4.12.0"
 
-hdrhistogram = "org.hdrhistogram:HdrHistogram:2.1.12"
+hdrhistogram = "org.hdrhistogram:HdrHistogram:2.2.1"
 lmax-disruptor = "com.lmax:disruptor:3.4.4"
 jctools = "org.jctools:jctools-core:4.0.3"
 github-api = "org.kohsuke:github-api:1.321"
 apachecommons-compress = "org.apache.commons:commons-compress:1.26.1"
-asyncprofiler = "tools.profiler:async-profiler:1.8.3"
+asyncprofiler = "tools.profiler:async-profiler:3.0"
 
 freemarker = "org.freemarker:freemarker:2.3.32"
 

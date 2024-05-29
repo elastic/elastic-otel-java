@@ -103,7 +103,7 @@ jobs:
         run: tar xvf ${{ env.TARBALL_FILE }}
 
       - name: generate build provenance
-        uses: github-early-access/generate-build-provenance@main
+        uses: actions/attest-build-provenance@173725a1209d09b31f9d30a3890cf2757ebbff0d  # v1.1.2
         with:
           subject-path: "${{ github.workspace }}/**/*.jar"
 
@@ -158,7 +158,7 @@ jobs:
   create-github-release:
     name: "Create GitHub Release"
     needs:
-      - await-maven-central-artifact
+      - post-release
     runs-on: ubuntu-latest
     if: ${{ ! inputs.dry_run }}
     permissions:
@@ -172,5 +172,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create ${{ env.RELEASE_VERSION_TAG }} \
+            --verify-tag \
             --title="Release ${{ env.RELEASE_VERSION }}" \
             --notes=""

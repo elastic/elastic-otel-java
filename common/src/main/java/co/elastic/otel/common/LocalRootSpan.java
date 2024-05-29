@@ -103,11 +103,17 @@ public class LocalRootSpan {
    *       parents
    *   <li>The provided span or one if its parents is a delayed inferred span where the parent was
    *       provided as a remote span
+   *   <li>The provided span is a remote span
    * </ul>
    */
   @Nullable
   public static ReadableSpan getFor(Span span) {
-    return getFor((ReadableSpan) span);
+    if (span instanceof ReadableSpan) {
+      return getFor((ReadableSpan) span);
+    } else {
+      // This can happen when invoked for a PropagatedSpan (e.g. Span.fromContext())
+      return null;
+    }
   }
 
   /** See {@link LocalRootSpan#getFor(Span)}. */

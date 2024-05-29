@@ -546,15 +546,23 @@ public class UniversalProfilingProcessorTest {
 
         Span span1 = tracer.spanBuilder("span1").startSpan();
         span1.end();
+
+        // This call is required to avoid flakyness of the test
+        // span1 will be picked up by the PeekingPooler, therefore the queue is now empty again
+        processor.pollMessagesAndFlushPendingSpans();
+
         Span span2 = tracer.spanBuilder("span2").startSpan();
         span2.end();
-        // now the buffer should be full, span 3 should be sent immediately
         Span span3 = tracer.spanBuilder("span3").startSpan();
         span3.end();
 
+        // now the buffer should be full, span 4 should be sent immediately
+        Span span4 = tracer.spanBuilder("span4").startSpan();
+        span4.end();
+
         assertThat(spans.getFinishedSpanItems())
             .hasSize(1)
-            .anySatisfy(sp -> assertThat(sp).hasName("span3"));
+            .anySatisfy(sp -> assertThat(sp).hasName("span4"));
       }
     }
 

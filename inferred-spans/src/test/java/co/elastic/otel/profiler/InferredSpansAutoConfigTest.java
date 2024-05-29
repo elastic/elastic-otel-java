@@ -24,7 +24,6 @@ import static org.awaitility.Awaitility.await;
 import co.elastic.otel.common.config.WildcardMatcher;
 import co.elastic.otel.testing.AutoConfigTestProperties;
 import co.elastic.otel.testing.AutoConfiguredDataCapture;
-import co.elastic.otel.testing.DisabledOnAppleSilicon;
 import co.elastic.otel.testing.DisabledOnOpenJ9;
 import co.elastic.otel.testing.OtelReflectionUtils;
 import io.opentelemetry.api.GlobalOpenTelemetry;
@@ -33,6 +32,7 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.trace.SpanProcessor;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -42,6 +42,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.io.TempDir;
 
 public class InferredSpansAutoConfigTest {
 
@@ -53,7 +54,9 @@ public class InferredSpansAutoConfigTest {
   }
 
   @Test
-  public void checkAllOptions() {
+  @DisabledOnOpenJ9
+  public void checkAllOptions(@TempDir Path tmpDir) {
+    String libDir = tmpDir.resolve("foo").resolve("bar").toString();
     try (AutoConfigTestProperties props =
         new AutoConfigTestProperties()
             .put(InferredSpansAutoConfig.ENABLED_OPTION, "true")
@@ -67,7 +70,7 @@ public class InferredSpansAutoConfigTest {
             .put(InferredSpansAutoConfig.EXCLUDED_CLASSES_OPTION, "blub,test*.test2")
             .put(InferredSpansAutoConfig.INTERVAL_OPTION, "2s")
             .put(InferredSpansAutoConfig.DURATION_OPTION, "3s")
-            .put(InferredSpansAutoConfig.LIB_DIRECTORY_OPTION, "/tmp/somewhere")) {
+            .put(InferredSpansAutoConfig.LIB_DIRECTORY_OPTION, libDir)) {
 
       OpenTelemetry otel = GlobalOpenTelemetry.get();
       List<SpanProcessor> processors = OtelReflectionUtils.getSpanProcessors(otel);
@@ -90,7 +93,7 @@ public class InferredSpansAutoConfigTest {
           .containsExactly("blub", "test*.test2");
       assertThat(config.getProfilingInterval()).isEqualTo(Duration.ofSeconds(2));
       assertThat(config.getProfilingDuration()).isEqualTo(Duration.ofSeconds(3));
-      assertThat(config.getProfilerLibDirectory()).isEqualTo("/tmp/somewhere");
+      assertThat(config.getProfilerLibDirectory()).isEqualTo(libDir);
     }
   }
 
@@ -103,7 +106,6 @@ public class InferredSpansAutoConfigTest {
     }
   }
 
-  @DisabledOnAppleSilicon
   @DisabledOnOpenJ9
   @DisabledOnOs(OS.WINDOWS)
   @Test
