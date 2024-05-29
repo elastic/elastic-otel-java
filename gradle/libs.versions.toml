@@ -10,11 +10,11 @@ opentelemetryProto = "1.2.0-alpha"
 
 # otel agent, we rely on the '*-alpha' and get the non-alpha dependencies transitively
 # updated from upstream agent with .ci/update-upstream.sh
-opentelemetryJavaagentAlpha = "2.3.0-alpha"
+opentelemetryJavaagentAlpha = "2.4.0-alpha"
 
 # otel contrib
 # updated from upstream agent with .ci/update-upstream.sh
-opentelemetryContribAlpha = "1.36.0-alpha-SNAPSHOT"
+opentelemetryContribAlpha = "1.36.0-alpha"
 
 # otel semconv
 # updated from upstream agent with .ci/update-upstream.sh
