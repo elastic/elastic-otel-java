@@ -87,12 +87,12 @@ public class ConfigurationExporterTest {
     Template temp = cfg.getTemplate("configure.mdx.ftl");
     StringWriter tempRenderedFile = new StringWriter();
     tempRenderedFile.write(
-      "---\n"
-      + "id: otelJavaConfigure\n"
-      + "slug: /otel-java/configure\n"
-      + "title: Configure\n"
-      + "---\n"
-      + "{/* This file is auto generated. Please only make changes in `configure.mdx.ftl`*/}\n");
+        "---\n"
+            + "id: otelJavaConfigure\n"
+            + "slug: /otel-java/configure\n"
+            + "title: Configure\n"
+            + "---\n"
+            + "{/* This file is auto generated. Please only make changes in `configure.mdx.ftl`*/}\n");
     final Map<String, List<ConfigurationOption>> optionsByCategory = new HashMap<>();
     optionsByCategory.put("Elastic to OpenTelemetry mapping", configurationRegistry);
     Map<String, Object> map = new HashMap<>();
