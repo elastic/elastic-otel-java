@@ -1,6 +1,6 @@
 ---
 
-name: Pre release
+name: release-step-1
   
 on:
   workflow_dispatch:
