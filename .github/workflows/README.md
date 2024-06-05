@@ -28,11 +28,19 @@ Whenever a merge to the main or branches, the whole workflow will be compiled an
 
 ### Release process
 
-This process has been fully automated, and it gets triggered manually when the [release](https://github.com/elastic/elastic-otel-java/actions/workflows/release.yml) workflow is being run. It runs a Buildkite pipeline in charge of generating and publishing the artifacts; for further details, please go to [the Buildkite folder](../../.buildkite/README.md). 
+To release a new version of elastic-otel-java, you must use two GitHub Workflows.
+
+- Trigger the `release-step-1` GH workflow
+  - parameters: version to release
+  - will open `release-step-2` PR
+- Review and merge the `release-step-2` PR to `main` (version bump to release)
+- Trigger the `release-step-3` GH workflow
+  - parameters: version to release and the `main` branch (or merge commit/ref of `release-step-2` PR merge).
+  - will generate and publish release artifact through [buildkite](../../.buildkite/release.yml).
+  - will open `release-step-4` PR
+- Review and merge the `release-step-4` PR to `main` (version bump from release to next snapshot version)
 
 The tag release follows the naming convention: `v.<major>.<minor>.<patch>`, where `<major>`, `<minor>` and `<patch>`.
-
-The release automation raises a Pull Request with the next version.
 
 ### OpenTelemetry
 
