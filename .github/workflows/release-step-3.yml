@@ -52,7 +52,7 @@ jobs:
         uses: ./.github/workflows/validate-tag
         with:
           tag: ${{ env.RELEASE_VERSION_TAG }}
-      - name: Validate tag match current version
+      - name: Validate tag match current gradle project version
         run: |
           if [ "$(./gradlew -q currentVersion)" != "${{ env.RELEASE_VERSION }}" ]; then
             echo "Tag should match version set in 'version.properties'"
