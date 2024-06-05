@@ -58,7 +58,7 @@ hdrhistogram = "org.hdrhistogram:HdrHistogram:2.2.2"
 lmax-disruptor = "com.lmax:disruptor:3.4.4"
 jctools = "org.jctools:jctools-core:4.0.5"
 github-api = "org.kohsuke:github-api:1.321"
-apachecommons-compress = "org.apache.commons:commons-compress:1.26.1"
+apachecommons-compress = "org.apache.commons:commons-compress:1.26.2"
 asyncprofiler = "tools.profiler:async-profiler:3.0"
 
 freemarker = "org.freemarker:freemarker:2.3.32"
