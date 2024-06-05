@@ -20,6 +20,7 @@ package co.elastic.otel.profiler;
 
 import co.elastic.otel.profiler.util.ThreadUtils;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.ContextStorage;
 import io.opentelemetry.context.Scope;
@@ -129,17 +130,24 @@ public class ProfilingActivationListener implements Closeable {
   public void beforeActivate(Span oldContext, Span newContext) {
     if (newContext.getSpanContext().isValid()
         && newContext.getSpanContext().isSampled()
+        && !newContext.getSpanContext().isRemote()
         && !ThreadUtils.isVirtual(Thread.currentThread())) {
-      profiler.onActivation(newContext, oldContext.getSpanContext().isValid() ? oldContext : null);
+
+      SpanContext oldSpanContext = oldContext.getSpanContext();
+      boolean isOldContextLocalSpan = oldSpanContext.isValid() && !oldSpanContext.isRemote();
+      profiler.onActivation(newContext, isOldContextLocalSpan ? oldContext : null);
     }
   }
 
   public void afterDeactivate(Span deactivatedContext, Span newContext) {
     if (deactivatedContext.getSpanContext().isValid()
         && deactivatedContext.getSpanContext().isSampled()
+        && !deactivatedContext.getSpanContext().isRemote()
         && !ThreadUtils.isVirtual(Thread.currentThread())) {
-      profiler.onDeactivation(
-          deactivatedContext, newContext.getSpanContext().isValid() ? newContext : null);
+
+      SpanContext newSpanContext = newContext.getSpanContext();
+      boolean isNewContextLocalSpan = newSpanContext.isValid() && !newSpanContext.isRemote();
+      profiler.onDeactivation(deactivatedContext, isNewContextLocalSpan ? newContext : null);
     }
   }
 }

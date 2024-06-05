@@ -21,8 +21,12 @@ package co.elastic.otel.profiler;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
+import co.elastic.otel.common.ElasticAttributes;
 import co.elastic.otel.testing.DisabledOnOpenJ9;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.TraceFlags;
+import io.opentelemetry.api.trace.TraceState;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
@@ -273,6 +277,49 @@ class SamplingProfilerTest {
     virtual.join();
 
     assertThat(profilingActive.get()).isFalse();
+  }
+
+  @Test
+  void testTransactionWithRemoteParent() throws Exception {
+    setupProfiler(true);
+    awaitProfilerStarted(setup.profiler);
+
+    SpanContext dummyParentCtx =
+        SpanContext.createFromRemoteParent(
+            "a1a2a3a4a5a6a7a8b1b2b3b4b5b6b7b8",
+            "c1c2c3c4c5c6c7c8",
+            TraceFlags.getSampled(),
+            TraceState.getDefault());
+    Span remoteParent = Span.wrap(dummyParentCtx);
+    try (Scope scope = remoteParent.makeCurrent()) {
+      // ensure that a remote span activation does not trigger profiling
+      assertThat(setup.profiler.isProfilingActiveOnThread(Thread.currentThread())).isFalse();
+
+      Tracer tracer = setup.sdk.getTracer("manual-spans");
+      Span localRoot = tracer.spanBuilder("local-root").startSpan();
+      try (Scope scope2 = localRoot.makeCurrent()) {
+        Thread.sleep(500);
+      }
+      localRoot.end();
+    }
+
+    await()
+        .pollDelay(10, TimeUnit.MILLISECONDS)
+        .timeout(5000, TimeUnit.MILLISECONDS)
+        .untilAsserted(() -> assertThat(setup.getSpans()).hasSizeGreaterThanOrEqualTo(2));
+
+    List<SpanData> spans = setup.getSpans();
+    Optional<SpanData> localRoot =
+        spans.stream().filter(s -> s.getName().equals("local-root")).findAny();
+    assertThat(localRoot).isPresent();
+    assertThat(localRoot.get()).hasParentSpanId("c1c2c3c4c5c6c7c8");
+
+    assertThat(spans)
+        .anySatisfy(
+            span -> {
+              assertThat(span).hasParent(localRoot.get());
+              assertThat(span).hasAttribute(ElasticAttributes.IS_INFERRED, true);
+            });
   }
 
   @Test
