@@ -1,6 +1,6 @@
 ---
 
-name: Release
+name: release-step-3
 
 on:
   workflow_dispatch:
