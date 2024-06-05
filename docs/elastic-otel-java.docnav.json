@@ -1,0 +1,17 @@
+{
+  "mission": "Java",
+  "id": "elastic-otel-java",
+  "landingPageId": "otelJavaLanding",
+  "icon": "faceHappy",
+  "description": "Elastic OpenTelemetry Distribution for Java",
+  "items": [
+    {
+      "label": "Get started",
+      "pageId": "otelJavaGetStarted"
+    },
+    {
+      "label": "Configure",
+      "pageId": "otelJavaConfigure"
+    }
+  ]
+}

@@ -43,7 +43,7 @@ public class ConfigurationExporterTest {
 
   @BeforeEach
   void setUp() {
-    currentDocumentationPath = Paths.get("../docs/configuration.asciidoc");
+    currentDocumentationPath = Paths.get("../docs/configure.mdx");
   }
 
   /**
@@ -69,7 +69,7 @@ public class ConfigurationExporterTest {
 
     assertThat(renderedDocumentation)
         .withFailMessage(
-            "The rendered configuration documentation (/docs/configuration.asciidoc) is not up-to-date.\n"
+            "The rendered configuration documentation (/docs/configure.mdx) is not up-to-date.\n"
                 + "If you see this error, it means you have to execute the tests locally with overwrite enabled "
                 + "(gradlew.bat clean :custom:test --tests \"*ConfigurationExporterTest\" -Pelastic.otel.overwrite.config.docs=true) "
                 + "which will update the rendered docs (and then you probably need to commit the change).\n")
@@ -84,16 +84,17 @@ public class ConfigurationExporterTest {
     cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
     cfg.setLogTemplateExceptions(false);
 
-    Template temp = cfg.getTemplate("configuration.asciidoc.ftl");
+    Template temp = cfg.getTemplate("configure.mdx.ftl");
     StringWriter tempRenderedFile = new StringWriter();
     tempRenderedFile.write(
-        "////\n"
-            + "This file is auto generated\n"
-            + "\n"
-            + "Please only make changes in configuration.asciidoc.ftl\n"
-            + "////\n");
+        "---\n"
+            + "id: otelJavaConfigure\n"
+            + "slug: /otel-java/configure\n"
+            + "title: Configure\n"
+            + "---\n"
+            + "{/* This file is auto generated. Please only make changes in `configure.mdx.ftl`*/}\n");
     final Map<String, List<ConfigurationOption>> optionsByCategory = new HashMap<>();
-    optionsByCategory.put("Elastic to Opentelemetry mapping", configurationRegistry);
+    optionsByCategory.put("Elastic to OpenTelemetry mapping", configurationRegistry);
     Map<String, Object> map = new HashMap<>();
     map.put("config", optionsByCategory);
     map.put(
