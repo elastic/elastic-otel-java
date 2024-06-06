@@ -13,7 +13,11 @@ dependencies {
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
   compileOnly(libs.bundles.semconv)
 
-  implementation(libs.contribSpanStacktrace)
+  implementation(libs.contribSpanStacktrace) {
+    // exclude transitive dependency as it's provided through agent packaging
+    exclude(group = "io.opentelemetry", module = "opentelemetry-sdk")
+  }
+  testImplementation(libs.contribSpanStacktrace)
 
   annotationProcessor(libs.autoservice.processor)
   compileOnly(libs.autoservice.annotations)

@@ -66,6 +66,10 @@ tasks {
     dependsOn(shadowJar)
   }
 
+  javaagentLibs.resolvedConfiguration.firstLevelModuleDependencies.forEach {
+    println(it.children)
+  }
+
   // building the final javaagent jar is done in 3 steps:
 
   // 1. all distro specific javaagent libs are relocated
@@ -81,15 +85,15 @@ tasks {
     relocatePackages(this)
 
     // exclude known bootstrap dependencies - they can't appear in the inst/ directory
-
-    exclude("io/opentelemetry/api/")
-    // SDK should not be included, but we have one extra addition to it
-    exclude { it.path.startsWith("io/opentelemetry/sdk") and !it.name.contains("FieldBackedSpanValueStorageProvider.class") }
-    exclude("io/opentelemetry/semconv/")
-    exclude("io/opentelemetry/context/")
-    exclude("io/opentelemetry/internal/")
-    // metrics advice API
-    exclude("io/opentelemetry/extension/incubator/")
+    dependencies {
+      exclude("io.opentelemetry:opentelemetry-api")
+      exclude("io.opentelemetry:opentelemetry-api-incubator")
+      exclude("io.opentelemetry:opentelemetry-context")
+      exclude("io.opentelemetry:opentelemetry-semconv")
+      exclude("io.opentelemetry:opentelemetry-semconv-incubating")
+      // metrics advice API
+      exclude("io.opentelemetry:opentelemetry-extension-incubator")
+    }
   }
 
   // 2. the distro javaagent libs are then isolated - moved to the inst/ directory
