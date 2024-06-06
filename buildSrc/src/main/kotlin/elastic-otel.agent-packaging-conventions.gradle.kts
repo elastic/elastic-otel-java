@@ -66,10 +66,6 @@ tasks {
     dependsOn(shadowJar)
   }
 
-  javaagentLibs.resolvedConfiguration.firstLevelModuleDependencies.forEach {
-    println(it.children)
-  }
-
   // building the final javaagent jar is done in 3 steps:
 
   // 1. all distro specific javaagent libs are relocated
