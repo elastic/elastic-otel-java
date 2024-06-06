@@ -16,7 +16,7 @@
 **3** **Group:** `com.google.code.findbugs` **Name:** `jsr305` **Version:** `3.0.2` 
 > - **Manifest License**: Apache License, Version 2.0 (Not Packaged)
 > - **POM Project URL**: [http://findbugs.sourceforge.net/](http://findbugs.sourceforge.net/)
-> - **POM License**: Apache License, Version 2.0 - [https://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0)
+> - **POM License**: Apache License, Version 2.0 - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 **4** **Group:** `com.lmax` **Name:** `disruptor` **Version:** `3.4.4` 
 > - **Project URL**: [http://lmax-exchange.github.com/disruptor](http://lmax-exchange.github.com/disruptor)

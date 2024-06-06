@@ -16,6 +16,7 @@ dependencies {
     implementation(libs.bundles.semconv)
 
     implementation(libs.contribSpanStacktrace)
+    testImplementation(libs.contribSpanStacktrace)
 
     testAnnotationProcessor(libs.autoservice.processor)
     testCompileOnly(libs.autoservice.annotations)

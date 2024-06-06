@@ -24,6 +24,8 @@ dependencies {
   implementation(libs.lmax.disruptor)
   implementation(libs.hdrhistogram) //only used for the WriterReaderPhaser
 
+  implementation(libs.contribSpanStacktrace) // for MutableSpan
+
   compileOnly("io.opentelemetry:opentelemetry-sdk")
   compileOnly(libs.findbugs.jsr305)
 

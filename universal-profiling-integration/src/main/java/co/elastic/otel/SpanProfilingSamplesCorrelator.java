@@ -20,7 +20,6 @@ package co.elastic.otel;
 
 import co.elastic.otel.common.ElasticAttributes;
 import co.elastic.otel.common.LocalRootSpan;
-import co.elastic.otel.common.MutableSpan;
 import co.elastic.otel.common.SpanValue;
 import co.elastic.otel.disruptor.FreezableList;
 import co.elastic.otel.disruptor.MoveableEvent;
@@ -29,6 +28,7 @@ import com.lmax.disruptor.EventPoller;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.YieldingWaitStrategy;
 import io.opentelemetry.context.Context;
+import io.opentelemetry.contrib.stacktrace.internal.MutableSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
