@@ -15,7 +15,7 @@ dependencies {
     compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
     implementation(libs.bundles.semconv)
 
-    implementation(libs.contribSpanStacktrace)
+    compileOnly(libs.contribSpanStacktrace)
     testImplementation(libs.contribSpanStacktrace)
 
     testAnnotationProcessor(libs.autoservice.processor)
