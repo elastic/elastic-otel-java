@@ -70,7 +70,7 @@ tasks {
 
   // 1. all distro specific javaagent libs are relocated
   val relocateJavaagentLibs = register<ShadowJar>("relocateJavaagentLibs") {
-    configurations= listOf(javaagentLibs)
+    configurations = listOf(javaagentLibs)
 
     duplicatesStrategy = DuplicatesStrategy.FAIL
 
