@@ -19,6 +19,7 @@
 package co.elastic.otel.common;
 
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.contrib.stacktrace.internal.MutableSpan;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import java.util.concurrent.atomic.AtomicReferenceArray;
@@ -270,10 +271,6 @@ public class SpanValue<V> {
     }
     if (span instanceof MutableSpan) {
       return unwrap(((MutableSpan) span).getOriginalSpan());
-    }
-    if (span instanceof io.opentelemetry.contrib.stacktrace.internal.MutableSpan) {
-      return unwrap(
-          ((io.opentelemetry.contrib.stacktrace.internal.MutableSpan) span).getOriginalSpan());
     }
     if (span instanceof Span && !((Span) span).getSpanContext().isValid()) {
       throw new IllegalArgumentException("SpanValues don't work with invalid spans!");
