@@ -16,7 +16,7 @@ plugins {
 dependencies {
   testImplementation(libs.assertj.core)
   testImplementation(libs.awaitility)
-  implementation(libs.findbugs.jsr305)
+  compileOnly(libs.findbugs.jsr305)
 }
 
 description = "Library for exposing JVMTI and JNI functionality to Java"

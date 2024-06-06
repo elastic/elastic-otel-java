@@ -6,7 +6,6 @@ dependencies {
   implementation(project(":common"))
   implementation(project(":inferred-spans"))
   implementation(project(":universal-profiling-integration"))
-  compileOnly(project(":bootstrap"))
   implementation(project(":resources"))
   compileOnly("io.opentelemetry:opentelemetry-sdk")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
