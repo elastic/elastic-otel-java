@@ -89,8 +89,8 @@ tasks {
       exclude("io.opentelemetry:opentelemetry-api")
       exclude("io.opentelemetry:opentelemetry-api-incubator")
       exclude("io.opentelemetry:opentelemetry-context")
-      exclude("io.opentelemetry:opentelemetry-semconv")
-      exclude("io.opentelemetry:opentelemetry-semconv-incubating")
+      exclude("io.opentelemetry.semconv:opentelemetry-semconv")
+      exclude("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
       // metrics advice API
       exclude("io.opentelemetry:opentelemetry-extension-incubator")
     }
