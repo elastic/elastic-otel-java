@@ -40,8 +40,6 @@ tasks {
       include("LICENSE")
       include("NOTICE")
       include("licenses/**")
-
-      // TODO : ignore classes that must remain in the agent as we do in 'relocateJavaagentLibs'
     }
   }
 }
