@@ -6,13 +6,18 @@ dependencies {
   implementation(project(":common"))
   implementation(project(":inferred-spans"))
   implementation(project(":universal-profiling-integration"))
-  compileOnly(project(":bootstrap"))
   implementation(project(":resources"))
   compileOnly("io.opentelemetry:opentelemetry-sdk")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-extension-api")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
   compileOnly(libs.bundles.semconv)
+
+  implementation(libs.contribSpanStacktrace) {
+    // exclude transitive dependency as it's provided through agent packaging
+    exclude(group = "io.opentelemetry", module = "opentelemetry-sdk")
+  }
+  testImplementation(libs.contribSpanStacktrace)
 
   annotationProcessor(libs.autoservice.processor)
   compileOnly(libs.autoservice.annotations)

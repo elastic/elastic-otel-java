@@ -20,7 +20,9 @@ package co.elastic.otel;
 
 import co.elastic.otel.common.ChainingSpanProcessorAutoConfiguration;
 import co.elastic.otel.common.ChainingSpanProcessorRegisterer;
+import co.elastic.otel.common.ElasticAttributes;
 import com.google.auto.service.AutoService;
+import io.opentelemetry.contrib.stacktrace.StackTraceSpanProcessor;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import java.time.Duration;
 
@@ -35,7 +37,15 @@ public class SpanStackTraceProcessorAutoConfig implements ChainingSpanProcessorA
 
     Duration minDuration = properties.getDuration(MIN_DURATION_CONFIG_OPTION, Duration.ofMillis(5));
     registerer.register(
-        next -> new SpanStackTraceProcessor(next, minDuration.toNanos()),
+        next ->
+            new StackTraceSpanProcessor(
+                next,
+                minDuration.toNanos(),
+                span -> {
+                  // Do not add a stacktrace for inferred spans: If a good one was available
+                  // it would have been added by the module creating this span
+                  return !Boolean.TRUE.equals(span.getAttribute(ElasticAttributes.IS_INFERRED));
+                }),
         ChainingSpanProcessorRegisterer.ORDER_FIRST);
   }
 }

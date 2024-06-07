@@ -118,7 +118,14 @@ public class SpanValueTest {
                 "MutableSpan, sparse SpanValue",
                 ValueAccess.create(
                     SpanValue.<String>createSparse(),
-                    MutableSpan.makeMutable((ReadableSpan) newSpan())))));
+                    MutableSpan.makeMutable((ReadableSpan) newSpan())))),
+        Arguments.of(
+            Named.of(
+                "Contrib MutableSpan, sparse SpanValue",
+                ValueAccess.create(
+                    SpanValue.<String>createSparse(),
+                    io.opentelemetry.contrib.stacktrace.internal.MutableSpan.makeMutable(
+                        (ReadableSpan) newSpan())))));
   }
 
   @ParameterizedTest

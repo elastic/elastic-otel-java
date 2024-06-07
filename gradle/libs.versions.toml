@@ -10,11 +10,11 @@ opentelemetryProto = "1.3.1-alpha"
 
 # otel agent, we rely on the '*-alpha' and get the non-alpha dependencies transitively
 # updated from upstream agent with .ci/update-upstream.sh
-opentelemetryJavaagentAlpha = "2.3.0-alpha"
+opentelemetryJavaagentAlpha = "2.4.0-alpha"
 
 # otel contrib
 # updated from upstream agent with .ci/update-upstream.sh
-opentelemetryContribAlpha = "1.34.0-alpha"
+opentelemetryContribAlpha = "1.36.0-alpha"
 
 # otel semconv
 # updated from upstream agent with .ci/update-upstream.sh
@@ -32,6 +32,7 @@ opentelemetryProto = { group = "io.opentelemetry.proto", name = "opentelemetry-p
 awsContribResources = { group = "io.opentelemetry.contrib", name = "opentelemetry-aws-resources", version.ref = "opentelemetryContribAlpha" }
 gcpContribResources = { group = "io.opentelemetry.contrib", name = "opentelemetry-gcp-resources", version.ref = "opentelemetryContribAlpha" }
 contribResources = { group = "io.opentelemetry.contrib", name = "opentelemetry-resource-providers", version.ref = "opentelemetryContribAlpha" }
+contribSpanStacktrace = { group = "io.opentelemetry.contrib", name = "opentelemetry-span-stacktrace", version.ref = "opentelemetryContribAlpha" }
 
 opentelemetrySemconv = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv", version.ref = "opentelemetrySemconvAlpha"}
 opentelemetrySemconvIncubating = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv-incubating", version.ref = "opentelemetrySemconvAlpha"}
