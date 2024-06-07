@@ -87,7 +87,7 @@
 > - **Embedded license files**: [byte-buddy-dep-1.14.15.jar/META-INF/LICENSE](byte-buddy-dep-1.14.15.jar/META-INF/LICENSE) 
     - [byte-buddy-dep-1.14.15.jar/META-INF/NOTICE](byte-buddy-dep-1.14.15.jar/META-INF/NOTICE)
 
-**21** **Group:** `org.jctools` **Name:** `jctools-core` **Version:** `4.0.3` 
+**21** **Group:** `org.jctools` **Name:** `jctools-core` **Version:** `4.0.5` 
 > - **Manifest License**: Apache License, Version 2.0 (Not Packaged)
 > - **POM Project URL**: [https://github.com/JCTools](https://github.com/JCTools)
 > - **POM License**: Apache License, Version 2.0 - [https://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0)
@@ -112,33 +112,33 @@
 
 ## Creative Commons Legal Code
 
-**25** **Group:** `org.hdrhistogram` **Name:** `HdrHistogram` **Version:** `2.2.1` 
+**25** **Group:** `org.hdrhistogram` **Name:** `HdrHistogram` **Version:** `2.2.2` 
 > - **Manifest License**: The 2-Clause BSD License (Not Packaged)
 > - **POM Project URL**: [http://hdrhistogram.github.io/HdrHistogram/](http://hdrhistogram.github.io/HdrHistogram/)
 > - **POM License**: Creative Commons Legal Code - [https://creativecommons.org/publicdomain/zero/1.0/legalcode](https://creativecommons.org/publicdomain/zero/1.0/legalcode)
 > - **POM License**: PUBLIC DOMAIN - [http://creativecommons.org/publicdomain/zero/1.0/](http://creativecommons.org/publicdomain/zero/1.0/)
 > - **POM License**: The 2-Clause BSD License - [https://opensource.org/licenses/BSD-2-Clause](https://opensource.org/licenses/BSD-2-Clause)
-> - **Embedded license files**: [HdrHistogram-2.2.1.jar/META-INF/LICENSE.txt](HdrHistogram-2.2.1.jar/META-INF/LICENSE.txt)
+> - **Embedded license files**: [HdrHistogram-2.2.2.jar/META-INF/LICENSE.txt](HdrHistogram-2.2.2.jar/META-INF/LICENSE.txt)
 
 ## PUBLIC DOMAIN
 
-**26** **Group:** `org.hdrhistogram` **Name:** `HdrHistogram` **Version:** `2.2.1` 
+**26** **Group:** `org.hdrhistogram` **Name:** `HdrHistogram` **Version:** `2.2.2` 
 > - **Manifest License**: The 2-Clause BSD License (Not Packaged)
 > - **POM Project URL**: [http://hdrhistogram.github.io/HdrHistogram/](http://hdrhistogram.github.io/HdrHistogram/)
 > - **POM License**: Creative Commons Legal Code - [https://creativecommons.org/publicdomain/zero/1.0/legalcode](https://creativecommons.org/publicdomain/zero/1.0/legalcode)
 > - **POM License**: PUBLIC DOMAIN - [http://creativecommons.org/publicdomain/zero/1.0/](http://creativecommons.org/publicdomain/zero/1.0/)
 > - **POM License**: The 2-Clause BSD License - [https://opensource.org/licenses/BSD-2-Clause](https://opensource.org/licenses/BSD-2-Clause)
-> - **Embedded license files**: [HdrHistogram-2.2.1.jar/META-INF/LICENSE.txt](HdrHistogram-2.2.1.jar/META-INF/LICENSE.txt)
+> - **Embedded license files**: [HdrHistogram-2.2.2.jar/META-INF/LICENSE.txt](HdrHistogram-2.2.2.jar/META-INF/LICENSE.txt)
 
 ## The 2-Clause BSD License
 
-**27** **Group:** `org.hdrhistogram` **Name:** `HdrHistogram` **Version:** `2.2.1` 
+**27** **Group:** `org.hdrhistogram` **Name:** `HdrHistogram` **Version:** `2.2.2` 
 > - **Manifest License**: The 2-Clause BSD License (Not Packaged)
 > - **POM Project URL**: [http://hdrhistogram.github.io/HdrHistogram/](http://hdrhistogram.github.io/HdrHistogram/)
 > - **POM License**: Creative Commons Legal Code - [https://creativecommons.org/publicdomain/zero/1.0/legalcode](https://creativecommons.org/publicdomain/zero/1.0/legalcode)
 > - **POM License**: PUBLIC DOMAIN - [http://creativecommons.org/publicdomain/zero/1.0/](http://creativecommons.org/publicdomain/zero/1.0/)
 > - **POM License**: The 2-Clause BSD License - [https://opensource.org/licenses/BSD-2-Clause](https://opensource.org/licenses/BSD-2-Clause)
-> - **Embedded license files**: [HdrHistogram-2.2.1.jar/META-INF/LICENSE.txt](HdrHistogram-2.2.1.jar/META-INF/LICENSE.txt)
+> - **Embedded license files**: [HdrHistogram-2.2.2.jar/META-INF/LICENSE.txt](HdrHistogram-2.2.2.jar/META-INF/LICENSE.txt)
 
 ## The 3-Clause BSD License
 
