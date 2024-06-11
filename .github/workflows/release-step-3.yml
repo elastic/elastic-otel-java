@@ -201,7 +201,6 @@ jobs:
     name: "Bump versions and create PR"
     needs:
       - await-maven-central-artifact
-      - build-and-push-docker-images
     uses: ./.github/workflows/pre-post-release.yml
     permissions:
       contents: write
