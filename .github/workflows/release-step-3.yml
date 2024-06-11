@@ -71,7 +71,6 @@ jobs:
     if: ${{ ! inputs.skip_maven_deploy }}
     needs:
       - validate-tag
-      - build-and-push-docker-images
     permissions:
       attestations: write
       contents: write
@@ -202,6 +201,7 @@ jobs:
     name: "Bump versions and create PR"
     needs:
       - await-maven-central-artifact
+      - build-and-push-docker-images
     uses: ./.github/workflows/pre-post-release.yml
     permissions:
       contents: write
