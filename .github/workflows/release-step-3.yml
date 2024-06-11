@@ -71,7 +71,6 @@ jobs:
     if: ${{ ! inputs.skip_maven_deploy }}
     needs:
       - validate-tag
-      - build-and-push-docker-images
     permissions:
       attestations: write
       contents: write

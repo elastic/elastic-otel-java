@@ -42,6 +42,6 @@ public class DisabledOnOpenJ9Condition implements ExecutionCondition {
   }
 
   public boolean isOnOpenJ9() {
-    return System.getProperty("java.vm.name").contains("J9");
+    return System.getProperty("java.vm.name").toUpperCase().contains("J9");
   }
 }
