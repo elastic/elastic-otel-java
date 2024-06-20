@@ -1,0 +1,62 @@
+name: "Issue Labeler"
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Add agent-java label
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.addLabels({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            labels: ["agent-java"]
+          })
+    - id: is_elastic_member
+      uses: elastic/apm-pipeline-library/.github/actions/is-member-elastic-org@current
+      with:
+        username: ${{ github.actor }}
+        token: ${{ secrets.APM_TECH_USER_TOKEN }}
+    - name: Add community and triage lables
+      if: contains(steps.is_elastic_member.outputs.result, 'false') && github.actor != 'dependabot[bot]'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.addLabels({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            labels: ["community", "triage"]
+          })
+    - name: Add comment for community PR
+      if: contains(steps.is_elastic_member.outputs.result, 'false') && github.actor != 'dependabot[bot]'
+      uses: wow-actions/auto-comment@v1
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        pullRequestOpened: |
+          👋 @{{ author }} Thanks a lot for your contribution! 
+          
+          It may take some time before we review a PR, so even if you don’t see activity for some time, it **does not** mean that we have forgotten about it. 
+          
+          Every once in a while we go through a process of prioritization, after which we are focussing on the tasks that were planned for the upcoming [milestone](https://github.com/elastic/apm-agent-java/milestones). The prioritization status is typically reflected through the PR labels. It could be pending triage, a candidate for a future milestone, or have a target milestone set to it.
+    - name: Assign new internal pull requests to project
+      uses: elastic/assign-one-project-github-action@1.2.2
+      if: contains(steps.is_elastic_member.outputs.result, 'true') && github.event.pull_request
+      env:
+        MY_GITHUB_TOKEN: ${{ secrets.APM_TECH_USER_TOKEN }}
+      with:
+        project: 'https://github.com/orgs/elastic/projects/454'
+        project_id: '5882982'
+        column_name: 'In Progress'
