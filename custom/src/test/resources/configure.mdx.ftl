@@ -1,7 +1,7 @@
 <#-- @ftlvariable name="config" type="java.util.Map<java.lang.String,java.util.List<co.elastic.otel.config.ConfigurationOption>>" -->
 <#-- @ftlvariable name="keys" type="java.util.Collection<java.lang.String>" -->
 
-The Elastic OpenTelemetry Distribution for Java (the distro) supports the
+The Elastic Distribution for OpenTelemetry Java (the distro) supports the
 [OpenTelemetry SDK configuration variables](https://opentelemetry.io/docs/languages/sdk-configuration/general/).
 
 This documentation describes how the [Elastic APM Java agent configuration options](https://www.elastic.co/guide/en/apm/agent/java/current/index.html)
