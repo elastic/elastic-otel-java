@@ -3,7 +3,7 @@
   "id": "elastic-otel-java",
   "landingPageId": "otelJavaLanding",
   "icon": "faceHappy",
-  "description": "Elastic OpenTelemetry Distribution for Java",
+  "description": "Elastic Distribution for OpenTelemetry Java",
   "items": [
     {
       "label": "Get started",

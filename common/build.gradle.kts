@@ -4,7 +4,7 @@ plugins {
   id("elastic-otel.sign-and-publish-conventions")
 }
 
-description = "Elastic OpenTelemetry common utilities"
+description = "Elastic common utilities for OpenTelemetry Java"
 
 dependencies {
     annotationProcessor(libs.autoservice.processor)

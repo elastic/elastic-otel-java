@@ -3,7 +3,7 @@ plugins {
   id("elastic-otel.sign-and-publish-conventions")
 }
 
-description = "Elastic OpenTelemetry Inferred Spans extension"
+description = "Elastic Inferred Spans extension for OpenTelemetry Java"
 
 dependencies {
   annotationProcessor(libs.autoservice.processor)

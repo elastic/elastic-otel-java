@@ -1,4 +1,4 @@
-# Elastic OpenTelemetry Java distribution
+# Elastic Distribution for OpenTelemetry Java
 
 [![Snapshot status](https://badge.buildkite.com/e527255a5d6e7f5a940bc71911d8bc2be25d16702d7642c0d6.svg)](https://buildkite.com/elastic/elastic-otel-java-snapshot)
 [![Release status](https://badge.buildkite.com/8bac74f475ea0d5d17ea3ea2ecf2c27a319414b97ce03dbd21.svg)](https://buildkite.com/elastic/elastic-otel-java-release)
