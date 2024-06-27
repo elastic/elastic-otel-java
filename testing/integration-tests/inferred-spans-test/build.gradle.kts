@@ -8,6 +8,10 @@ dependencies {
   testImplementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations")
 }
 
+javaVersionTesting {
+  enableTestsOnOpenJ9 = false
+}
+
 tasks.withType<Test>() {
   jvmArgs(
     //"-Dotel.javaagent.debug=true",
