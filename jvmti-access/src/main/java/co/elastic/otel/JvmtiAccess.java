@@ -18,9 +18,14 @@
  */
 package co.elastic.otel;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
@@ -28,6 +33,8 @@ import javax.annotation.Nullable;
 public class JvmtiAccess {
 
   private static final Logger logger = Logger.getLogger(JvmtiAccess.class.getName());
+
+  private static volatile LibraryLookupResult libraryLookupResult = null;
 
   private enum State {
     NOT_LOADED,
@@ -82,7 +89,7 @@ public class JvmtiAccess {
         doInit();
     }
     if (state != State.INITIALIZED) {
-      throw new IllegalStateException("Agent could not be initialized");
+      throw new IllegalStateException("jvmti native library could not be initialized");
     }
   }
 
@@ -125,36 +132,27 @@ public class JvmtiAccess {
 
   private static void checkError(int returnCode) {
     if (returnCode < 0) {
-      throw new RuntimeException("Elastic JVMTI Agent returned error code " + returnCode);
+      throw new RuntimeException("Elastic jvmti native library returned error code " + returnCode);
     }
   }
 
+  /**
+   * @return null, if the current system is supported. Otherwise a String with a reason why the
+   *     system is not supported.
+   */
+  @Nullable
+  public static String getSystemUnsupportedReason() {
+    return lookupLibrary().failureReason;
+  }
+
   private static void loadNativeLibrary() {
-    String os = System.getProperty("os.name").toLowerCase();
-    String arch = System.getProperty("os.arch").toLowerCase();
-    String libraryName;
-    if (os.contains("linux")) {
-      if (arch.contains("arm") || arch.contains("aarch32")) {
-        throw new IllegalStateException("Unsupported architecture for Linux: " + arch);
-      } else if (arch.contains("aarch")) {
-        libraryName = "linux-arm64";
-      } else if (arch.contains("64")) {
-        libraryName = "linux-x64";
-      } else {
-        throw new IllegalStateException("Unsupported architecture for Linux: " + arch);
-      }
-    } else if (os.contains("mac")) {
-      if (arch.contains("aarch")) {
-        libraryName = "darwin-arm64";
-      } else {
-        libraryName = "darwin-x64";
-      }
-    } else {
-      throw new IllegalStateException("Native agent does not work on " + os);
+    LibraryLookupResult lib = lookupLibrary();
+    if (lib.failureReason != null) {
+      throw new IllegalStateException(lib.failureReason);
     }
 
     String libraryDirectory = System.getProperty("java.io.tmpdir");
-    libraryName = "elastic-jvmti-" + libraryName;
+    String libraryName = "elastic-jvmti-" + lib.libraryName;
     Path file =
         ResourceExtractionUtil.extractResourceToDirectory(
             "elastic-jvmti/" + libraryName + ".so",
@@ -162,5 +160,95 @@ public class JvmtiAccess {
             ".so",
             Paths.get(libraryDirectory));
     System.load(file.toString());
+  }
+
+  private static LibraryLookupResult lookupLibrary() {
+    if (libraryLookupResult == null) {
+      libraryLookupResult = doLookupLibrary();
+    }
+    return libraryLookupResult;
+  }
+
+  private static LibraryLookupResult doLookupLibrary() {
+    String os = System.getProperty("os.name").toLowerCase();
+    String arch = System.getProperty("os.arch").toLowerCase();
+    if (os.contains("linux")) {
+      if (isMusl()) {
+        return LibraryLookupResult.failure("Musl Linux is not supported yet");
+      }
+      if (arch.contains("arm") || arch.contains("aarch32")) {
+        return LibraryLookupResult.failure("Unsupported architecture for Linux: " + arch);
+      } else if (arch.contains("aarch")) {
+        return LibraryLookupResult.success("linux-arm64");
+      } else if (arch.contains("64")) {
+        return LibraryLookupResult.success("linux-x64");
+      } else {
+        return LibraryLookupResult.failure("Unsupported architecture for Linux: " + arch);
+      }
+    } else if (os.contains("mac")) {
+      if (arch.contains("aarch")) {
+        return LibraryLookupResult.success("darwin-arm64");
+      } else {
+        return LibraryLookupResult.success("darwin-x64");
+      }
+    } else {
+      return LibraryLookupResult.failure("jvmti native library does not work on " + os);
+    }
+  }
+
+  // The isMusl() and isAlpineLinux() methods are based on the approach taken by the sqlite-jdbc
+  // project:
+  // https://github.com/xerial/sqlite-jdbc/pull/675
+  private static boolean isMusl() {
+    Path mapFilesDir = Paths.get("/proc/self/map_files");
+    try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(mapFilesDir)) {
+      for (Path file : dirStream) {
+        try {
+          if (file.toRealPath().toString().toLowerCase().contains("musl")) {
+            return true;
+          }
+        } catch (IOException e) {
+          // ignore
+        }
+      }
+      return false;
+    } catch (Exception ignored) {
+      // fall back to checking for alpine linux in the event we're using an older kernel which
+      // may not fail the above check
+      return isAlpineLinux();
+    }
+  }
+
+  private static boolean isAlpineLinux() {
+    try {
+      List<String> lines = Files.readAllLines(Paths.get("/etc/os-release"), StandardCharsets.UTF_8);
+      for (String l : lines) {
+        if (l.startsWith("ID") && l.contains("alpine")) {
+          return true;
+        }
+      }
+    } catch (Exception ignored) {
+    }
+    return false;
+  }
+
+  private static class LibraryLookupResult {
+
+    // Either failureReason or libraryName are not null
+    @Nullable final String failureReason;
+    @Nullable final String libraryName;
+
+    public LibraryLookupResult(@Nullable String libraryName, @Nullable String failureReason) {
+      this.failureReason = failureReason;
+      this.libraryName = libraryName;
+    }
+
+    static LibraryLookupResult failure(String reason) {
+      return new LibraryLookupResult(null, reason);
+    }
+
+    static LibraryLookupResult success(String libraryName) {
+      return new LibraryLookupResult(libraryName, null);
+    }
   }
 }
