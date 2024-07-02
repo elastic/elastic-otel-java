@@ -196,7 +196,7 @@ public class JvmtiAccess {
   }
 
 
-  // The isMusl() and isAlpineLinux() methods are based on the approach taken by the sqlite-jdbc proejct:
+  // The isMusl() and isAlpineLinux() methods are based on the approach taken by the sqlite-jdbc project:
   // https://github.com/xerial/sqlite-jdbc/pull/675
   private static boolean isMusl() {
     Path mapFilesDir = Paths.get("/proc/self/map_files");
