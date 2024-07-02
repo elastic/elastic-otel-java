@@ -137,7 +137,8 @@ public class JvmtiAccess {
   }
 
   /**
-   * @return null, if the current system is supported. Otherwise a String with a reason why the system is not supported.
+   * @return null, if the current system is supported. Otherwise a String with a reason why the
+   *     system is not supported.
    */
   @Nullable
   public static String getSystemUnsupportedReason() {
@@ -195,8 +196,8 @@ public class JvmtiAccess {
     }
   }
 
-
-  // The isMusl() and isAlpineLinux() methods are based on the approach taken by the sqlite-jdbc project:
+  // The isMusl() and isAlpineLinux() methods are based on the approach taken by the sqlite-jdbc
+  // project:
   // https://github.com/xerial/sqlite-jdbc/pull/675
   private static boolean isMusl() {
     Path mapFilesDir = Paths.get("/proc/self/map_files");
@@ -207,7 +208,7 @@ public class JvmtiAccess {
             return true;
           }
         } catch (IOException e) {
-          //ignore
+          // ignore
         }
       }
       return false;
@@ -220,8 +221,7 @@ public class JvmtiAccess {
 
   private static boolean isAlpineLinux() {
     try {
-      List<String> lines = Files.readAllLines(Paths.get("/etc/os-release"),
-          StandardCharsets.UTF_8);
+      List<String> lines = Files.readAllLines(Paths.get("/etc/os-release"), StandardCharsets.UTF_8);
       for (String l : lines) {
         if (l.startsWith("ID") && l.contains("alpine")) {
           return true;
@@ -250,7 +250,5 @@ public class JvmtiAccess {
     static LibraryLookupResult success(String libraryName) {
       return new LibraryLookupResult(libraryName, null);
     }
-
   }
-
 }
