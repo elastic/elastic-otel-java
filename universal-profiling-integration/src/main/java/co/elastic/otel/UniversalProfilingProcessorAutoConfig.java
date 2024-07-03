@@ -51,8 +51,17 @@ public class UniversalProfilingProcessorAutoConfig
   public void registerSpanProcessors(
       ConfigProperties properties, ChainingSpanProcessorRegisterer registerer) {
 
-    String enabledString =
-        properties.getString(ENABLED_OPTION, EnabledOptions.AUTO.toString()).toUpperCase();
+    String enabledDefault = EnabledOptions.AUTO.toString();
+    String unsupportedReason = JvmtiAccess.getSystemUnsupportedReason();
+    if (unsupportedReason != null) {
+      logger.log(
+          Level.FINE,
+          "Default value for {0} is false, because the system is unsupported: {1}",
+          new Object[] {ENABLED_OPTION, unsupportedReason});
+      enabledDefault = EnabledOptions.FALSE.toString();
+    }
+
+    String enabledString = properties.getString(ENABLED_OPTION, enabledDefault).toUpperCase();
     EnabledOptions enabled = EnabledOptions.valueOf(enabledString);
 
     if (enabled == EnabledOptions.FALSE) {
