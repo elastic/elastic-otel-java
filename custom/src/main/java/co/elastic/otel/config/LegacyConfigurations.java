@@ -71,6 +71,9 @@ public class LegacyConfigurations {
     addDocumentationOption(
         "environment",
         "The Elastic [`environment`](https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-environment) option corresponds to setting the `deployment.environment` key in [OTEL_RESOURCE_ATTRIBUTES](https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes). For example: `OTEL_RESOURCE_ATTRIBUTES=deployment.environment=testing`.");
+    addDocumentationOption(
+        "global_labels",
+        "The Elastic [`global_labels`](https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-global-labels) option corresponds to adding `key=value` comma separated pairs in [OTEL_RESOURCE_ATTRIBUTES](https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes). For example: `OTEL_RESOURCE_ATTRIBUTES=alice=first,bob=second`. Such labels will result in labels.key=value attributes on the server, eg labels.alice=first");
     addUnspecifiedOption("log_level");
     addUnspecifiedOption("log_file");
     addUnspecifiedOption("log_file_size");
@@ -99,7 +102,6 @@ public class LegacyConfigurations {
     addUnspecifiedOption("capture_exception_details");
     addUnspecifiedOption("capture_body");
     addUnspecifiedOption("capture_headers");
-    addUnspecifiedOption("global_labels");
     addUnspecifiedOption("enable_type_pool_cache");
     addUnspecifiedOption("instrument_ancient_bytecode");
     addUnspecifiedOption("warmup_byte_buddy");
