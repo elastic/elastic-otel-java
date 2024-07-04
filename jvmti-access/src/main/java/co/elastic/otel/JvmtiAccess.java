@@ -173,15 +173,16 @@ public class JvmtiAccess {
     String os = System.getProperty("os.name").toLowerCase();
     String arch = System.getProperty("os.arch").toLowerCase();
     if (os.contains("linux")) {
+      String linuxVariant = "linux";
       if (isMusl()) {
-        return LibraryLookupResult.failure("Musl Linux is not supported yet");
+        linuxVariant = "linux-musl";
       }
       if (arch.contains("arm") || arch.contains("aarch32")) {
         return LibraryLookupResult.failure("Unsupported architecture for Linux: " + arch);
       } else if (arch.contains("aarch")) {
-        return LibraryLookupResult.success("linux-arm64");
+        return LibraryLookupResult.success(linuxVariant + "-arm64");
       } else if (arch.contains("64")) {
-        return LibraryLookupResult.success("linux-x64");
+        return LibraryLookupResult.success(linuxVariant + "-x64");
       } else {
         return LibraryLookupResult.failure("Unsupported architecture for Linux: " + arch);
       }
