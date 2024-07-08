@@ -27,6 +27,7 @@ import co.elastic.otel.testing.OtelReflectionUtils;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.contrib.stacktrace.StackTraceSpanProcessor;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.semconv.incubating.CodeIncubatingAttributes;
 import java.util.List;
@@ -62,6 +63,18 @@ public class SpanStackTraceProcessorAutoConfigTest {
           .hasName("my-span")
           .hasAttribute(
               satisfies(CodeIncubatingAttributes.CODE_STACKTRACE, att -> att.isNotBlank()));
+    }
+  }
+
+  @Test
+  void featureCanBeDisabled() {
+    try (AutoConfigTestProperties testProps =
+        new AutoConfigTestProperties()
+            .put(SpanStackTraceProcessorAutoConfig.MIN_DURATION_CONFIG_OPTION, "-1")) {
+      OpenTelemetry otel = GlobalOpenTelemetry.get();
+
+      assertThat(OtelReflectionUtils.getSpanProcessors(otel))
+          .noneSatisfy(proc -> assertThat(proc).isInstanceOf(StackTraceSpanProcessor.class));
     }
   }
 
