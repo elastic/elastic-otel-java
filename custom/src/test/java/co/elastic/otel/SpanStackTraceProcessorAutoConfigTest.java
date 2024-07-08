@@ -93,7 +93,9 @@ public class SpanStackTraceProcessorAutoConfigTest {
       tracer.spanBuilder("my-span").startSpan().end();
 
       List<SpanData> spans = AutoConfiguredDataCapture.getSpans();
-      assertThat(spans).hasSize(0);
+      assertThat(spans).hasSize(1);
+      assertThat(spans.get(0).getAttributes().get(CodeIncubatingAttributes.CODE_STACKTRACE))
+          .isNull();
     }
   }
 }
