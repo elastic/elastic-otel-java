@@ -30,7 +30,7 @@ import java.util.List;
 @AutoService(AutoConfigurationCustomizerProvider.class)
 public class AutoConfiguredDataCapture implements AutoConfigurationCustomizerProvider {
 
-  private static final InMemorySpanExporter inMemorySpanExporter = InMemorySpanExporter.create();
+  private static volatile InMemorySpanExporter inMemorySpanExporter = InMemorySpanExporter.create();
 
   /*
    Returns the spans which have been exported by the autoconfigured global OpenTelemetry SDK.
@@ -46,7 +46,7 @@ public class AutoConfiguredDataCapture implements AutoConfigurationCustomizerPro
           // we piggy-back onto the autoconfigured logging exporter for now,
           // because that one uses a SimpleSpanProcessor which does not impose a batching delay
           if (spanExporter instanceof LoggingSpanExporter) {
-            inMemorySpanExporter.reset();
+            inMemorySpanExporter = InMemorySpanExporter.create();
             return SpanExporter.composite(inMemorySpanExporter, spanExporter);
           }
           return spanExporter;

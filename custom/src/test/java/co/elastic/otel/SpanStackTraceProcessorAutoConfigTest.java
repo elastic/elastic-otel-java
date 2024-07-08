@@ -27,6 +27,7 @@ import co.elastic.otel.testing.OtelReflectionUtils;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.contrib.stacktrace.StackTraceSpanProcessor;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.semconv.incubating.CodeIncubatingAttributes;
 import java.util.List;
@@ -66,6 +67,18 @@ public class SpanStackTraceProcessorAutoConfigTest {
   }
 
   @Test
+  void featureCanBeDisabled() {
+    try (AutoConfigTestProperties testProps =
+        new AutoConfigTestProperties()
+            .put(SpanStackTraceProcessorAutoConfig.MIN_DURATION_CONFIG_OPTION, "-1")) {
+      OpenTelemetry otel = GlobalOpenTelemetry.get();
+
+      assertThat(OtelReflectionUtils.getSpanProcessors(otel))
+          .noneSatisfy(proc -> assertThat(proc).isInstanceOf(StackTraceSpanProcessor.class));
+    }
+  }
+
+  @Test
   void checkMinDurationRespected() {
     try (AutoConfigTestProperties testProps =
         new AutoConfigTestProperties()
@@ -80,7 +93,9 @@ public class SpanStackTraceProcessorAutoConfigTest {
       tracer.spanBuilder("my-span").startSpan().end();
 
       List<SpanData> spans = AutoConfiguredDataCapture.getSpans();
-      assertThat(spans).hasSize(0);
+      assertThat(spans).hasSize(1);
+      assertThat(spans.get(0).getAttributes().get(CodeIncubatingAttributes.CODE_STACKTRACE))
+          .isNull();
     }
   }
 }
