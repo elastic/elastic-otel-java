@@ -441,7 +441,7 @@ class SamplingProfiler implements Runnable {
 
   String createStartCommand() {
     StringBuilder startCommand =
-        new StringBuilder("start,jfr,event=wall,cstack=n,interval=")
+        new StringBuilder("start,jfr,clock=m,event=wall,cstack=n,interval=")
             .append(config.getSamplingInterval().toMillis())
             .append("ms,filter,file=")
             .append(jfrFile)
