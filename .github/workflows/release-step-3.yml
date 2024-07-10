@@ -114,7 +114,7 @@ jobs:
             :runner: [${{ github.repository }}] Release *${{ github.ref_name }}* has been triggered in Buildkite: (<${{ steps.buildkite-run.outputs.build }}|build>)
 
       - if: ${{ failure() && ! inputs.dry_run }}
-        uses: elastic/oblt-actions/slack/send@v
+        uses: elastic/oblt-actions/slack/send@v1
         with:
           bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
           channel-id: "#apm-agent-java"
