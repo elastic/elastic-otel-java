@@ -1,0 +1,46 @@
+[[intro]]
+== Elastic Distribution for OpenTelemetry Java
+
+++++
+<titleabbrev>Introduction</titleabbrev>
+++++
+
+:language: Java
+:language_lc: java
+
+.Alpha release
+[WARNING]
+====
+This project is not yet recommended for production use.
+Functionality may be changed or removed in future releases.
+Alpha releases are not subject to the support SLA of official GA features.
+
+We welcome your feedback! You can reach us by https://github.com/elastic/elastic-otel-{language_lc}/issues[opening a GitHub issue] or starting a discussion thread on the https://discuss.elastic.co/tags/c/observability/apm/58/{language_lc}[Elastic Discuss forum].
+====
+
+////
+What is it?
+////
+The Elastic Distribution for OpenTelemetry {language} ("the distro") is a {language} package that provides:
+
+* An easy way to instrument your application with OpenTelemetry.
+* Configuration defaults for best usage.
+
+A _distribution_ is a wrapper around an upstream OpenTelemetry repository with some customizations. In the Elastic Distribution for OpenTelemetry {language}, customizations include:
+////
+Why use it?
+////
+* Using Elastic-specific processors that ensure optimal compatibility when exporting OpenTelemetry signal data to an Elastic backend like Elastic APM server.
+* Preconfiguring the collection of tracing and metrics signals, applying some opinionated defaults, such as which sources are collected by default.
+* Ensuring that the OpenTelemetry protocol (OTLP) exporter is enabled by default.
+
+NOTE: For more details about OpenTelemetry distributions in general, visit the https://opentelemetry.io/docs/concepts/distributions[OpenTelemetry documentation].
+
+////
+How to use it?
+////
+Use the Distro to start the OpenTelemetry SDK with your {language} application to automatically capture tracing data, performance metrics, and logs. Traces, metrics, and logs are sent to any OTLP collector you choose.
+
+Start with helpful defaults to begin collecting and exporting OpenTelemetry signals quickly. Then, further refine how you use the Distro using extension methods that allow you to fully control the creation of the underlying tracer and metric providers.
+
+After you start sending data to Elastic, use an {observability-guide}/index.html[Elastic Observability] deployment -- hosted on Elastic Cloud or on-premises -- to monitor your applications, create alerts, and quickly identify root causes of service issues.

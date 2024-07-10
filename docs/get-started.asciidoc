@@ -3,12 +3,21 @@
 
 This guide shows you how to use the Elastic Distribution for OpenTelemetry Java to instrument your Java application and send OpenTelemetry data to an Elastic Observability deployment.
 
+////
+[discrete]
+[[get-started-prereq]]
+=== Prerequisites
+
+Do they need anything else before they install?
+An Elastic Observability deployment?
+////
+
 [discrete]
 [[get-started-install]]
 === Install
 
-. Download the latest release https://mvnrepository.com/artifact/co.elastic.otel/elastic-otel-javaagent/latest[here].
-. Run the distro by using the `-javaagent:` JVM argument with the path to the distro jar:
+. Download the https://mvnrepository.com/artifact/co.elastic.otel/elastic-otel-javaagent/latest[latest release].
+. Run the distro using the `-javaagent:` JVM argument with the path to the distro jar:
 +
 [source,bash]
 ----
@@ -16,8 +25,21 @@ java -javaagent:/path/to/agent.jar \
 -jar myapp.jar
 ----
 
+////
+What should they expect to see after running this?
+How do they know it worked as expected?
+////
+
+////
+Are there any configuration options that are required?
+If yes, should we call those out here in "getting started"
+in addition to having them in the generated configuration
+reference page?
+////
+
 [discrete]
 [[get-started-configure]]
-=== Configure
+=== Next steps
 
-See <<configure>>.
+* <<configuration-options,Configure the distro>> to send data to Elastic.
+* Learn more about viewing and interpreting data in the {observability-guide}/apm.html[Observability guide].

@@ -1,3 +1,15 @@
+////
+I'm confused about the goal of this doc.
+
+With a title like "Configure" I expected to see a list of the
+valid configuration options. Instead it seems to be a list of
+APM Java agent configuration options, and how to update them
+to migrate from the agent to the distro.
+
+Is that the intention of this doc? To be a migration guide from
+the APM Java agent to the Elastic Distribution for OpenTelemetry Java?
+////
+
 [[configure]]
 == Configure
 

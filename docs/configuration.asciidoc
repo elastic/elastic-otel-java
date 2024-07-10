@@ -1,0 +1,41 @@
+[[configuration-options]]
+== Configuration options
+
+////
+Are there Elastic-specific custom configuration options
+in addition to the general OpenTelemetry SDK
+configuration options? Or are all the customizations
+"behind the scenes"?
+
+If there are custom configuration options,
+use the following outline...
+////
+
+////
+Is this true? Is the distro a wrapper around the OpenTelemetry Java agent
+which is a wrapper around the general OpenTelemetry SDK? 🌀
+////
+Because the Elastic Distribution for OpenTelemetry Java (the distro) is a wrapper around the https://github.com/open-telemetry/opentelemetry-java-instrumentation[OpenTelemetry Java agent], it supports both:
+
+* General OpenTelemetry SDK configuration options
+* Elastic-specific configuration options that are only available when using the distro
+
+[discrete]
+[[configure-otel-sdk-options]]
+=== OpenTelemetry SDK configuration options
+
+////
+Is this true? Are there any options that aren't supported?
+Any options that shouldn't be used?
+////
+The distro supports all configuration options listed in the https://opentelemetry.io/docs/languages/sdk-configuration/general/[OpenTelemetry General SDK Configuration documentation].
+
+[discrete]
+[[configure-distro-options]]
+=== Elastic-specific configuration options
+
+The distro supports the following custom options:
+
+////
+List of configuration options?
+////

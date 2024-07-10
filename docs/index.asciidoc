@@ -9,7 +9,8 @@ endif::[]
 = Elastic Distribution for OpenTelemetry Java
 
 ifndef::env-github[]
-include::./landing-page.asciidoc[]
+include::./intro.asciidoc[]
 include::./get-started.asciidoc[]
+include::./configuration.asciidoc[]
 include::./configure.asciidoc[]
 endif::[]
