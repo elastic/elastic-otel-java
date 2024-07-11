@@ -82,6 +82,20 @@ public class JvmtiAccess {
     return numRead;
   }
 
+  /**
+   * Checks if virtual thread mount/unmount events are supported.
+   *
+   * @return null, if those events are supported. A string with a reason if not supported.
+   */
+  public static String getVirtualThreadsUnsupportedReason() {
+    ensureInitialized();
+    String reason = JvmtiAccessImpl.checkVirtualThreadSupport();
+    if (reason.isEmpty()) {
+      return null;
+    }
+    return reason;
+  }
+
   public static void ensureInitialized() {
     switch (state) {
       case NOT_LOADED:

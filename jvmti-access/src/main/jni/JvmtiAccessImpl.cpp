@@ -13,6 +13,10 @@ JNIEXPORT jint JNICALL Java_co_elastic_otel_JvmtiAccessImpl_destroy0(JNIEnv* env
     return toJint(elastic::jvmti_agent::destroy(env));
 }
 
+JNIEXPORT jstring JNICALL Java_co_elastic_otel_JvmtiAccessImpl_checkVirtualThreadSupport(JNIEnv* env, jclass) {
+    return elastic::jvmti_agent::getVirtualThreadsUnsupportedReason(env);
+}
+
 JNIEXPORT void JNICALL Java_co_elastic_otel_JvmtiAccessImpl_setThreadProfilingCorrelationBuffer0(JNIEnv* env, jclass, jobject bytebuffer) {
     elastic::jvmti_agent::setThreadProfilingCorrelationBuffer(env, bytebuffer);
 }

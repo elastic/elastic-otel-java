@@ -19,6 +19,7 @@ namespace elastic {
 
         ReturnCode init(JNIEnv* jniEnv);
         ReturnCode destroy(JNIEnv* jniEnv);
+        jstring getVirtualThreadsUnsupportedReason(JNIEnv* jniEnv);
 
         void setThreadProfilingCorrelationBuffer(JNIEnv* jniEnv, jobject bytebuffer);
         void setProcessProfilingCorrelationBuffer(JNIEnv* jniEnv, jobject bytebuffer);
@@ -33,6 +34,7 @@ namespace elastic {
         jint readProfilerSocketMessage(JNIEnv* jniEnv, jobject outputBuffer);
         ReturnCode writeProfilerSocketMessage(JNIEnv* jniEnv, jbyteArray message);
 
+        
 
         template <typename T>
         typename std::enable_if<

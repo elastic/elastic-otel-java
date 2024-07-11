@@ -1,5 +1,6 @@
 #include "ElasticJvmtiAgent.h"
 #include "ProfilerSocket.h"
+#include "VirtualThreadSupport.h"
 
 // These two global variables have symbol names which will be recognized by
 // the elastic universal profiling host-agent. The host-agent will be able
@@ -12,26 +13,31 @@ namespace elastic
     namespace jvmti_agent
     {
 
-        static ProfilerSocket profilerSocket;
-        static jvmtiEnv* jvmti;
+        namespace {
+            static ProfilerSocket profilerSocket;
+            static VirtualThreadSupport virtualThreads;
+            static jvmtiEnv* jvmti;
+        }
 
 
         ReturnCode init(JNIEnv* jniEnv) {
             if(jvmti != nullptr) {
                 return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR, "JVMTI environment is already initialized!");
             }
-
             JavaVM* vm;
             auto vmError = jniEnv->GetJavaVM(&vm);
             if(vmError != JNI_OK) {
                 return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR, "jniEnv->GetJavaVM() failed, return code is ", vmError);
             }
 
-            auto getEnvErr = vm->GetEnv(reinterpret_cast<void**>(&jvmti), JVMTI_VERSION_1_2);
+            auto getEnvErr = vm->GetEnv(reinterpret_cast<void**>(&jvmti), JVMTI_VERSION_21);
+            if(getEnvErr == JNI_EVERSION) {
+                getEnvErr = vm->GetEnv(reinterpret_cast<void**>(&jvmti), JVMTI_VERSION_1_2);
+            }
             if(getEnvErr != JNI_OK) {
                 return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR, "JavaVM->GetEnv() failed, return code is ", getEnvErr);
             }
-            return ReturnCode::SUCCESS;
+            return virtualThreads.init(jniEnv, jvmti);
         }
 
         ReturnCode destroy(JNIEnv* jniEnv) {
@@ -39,16 +45,28 @@ namespace elastic
                 elastic_apm_profiling_correlation_process_storage_v1 = nullptr;
                 profilerSocket.destroy();
 
+                ReturnCode vterror = virtualThreads.destroy(jniEnv);
+                if (vterror != ReturnCode::SUCCESS) {
+                    return vterror;
+                }
+
                 auto error = jvmti->DisposeEnvironment();
                 jvmti = nullptr;
-                if(error != JVMTI_ERROR_NONE) {
+                if (error != JVMTI_ERROR_NONE) {
                     return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR, "jvmti->DisposeEnvironment() failed, return code is: ", error);
                 }
 
                 return ReturnCode::SUCCESS;
             } else {
-                return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR_NOT_INITIALIZED, "Elastic JVMTI Agent has not been initialized!");
+                return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR_NOT_INITIALIZED, "JVMTI environment has not been initialized yet!");
             }
+        }
+
+        jstring getVirtualThreadsUnsupportedReason(JNIEnv* jniEnv) {
+            if(jvmti == nullptr) {
+                return raiseExceptionAndReturn(jniEnv, nullptr, "JVMTI environment has not been initialized yet!");
+            }
+            return virtualThreads.getUnsupportedReason(jniEnv);
         }
 
 
