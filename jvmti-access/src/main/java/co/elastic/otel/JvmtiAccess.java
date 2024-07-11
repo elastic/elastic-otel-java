@@ -106,7 +106,7 @@ public class JvmtiAccess {
         }
       case LOADED:
         try {
-          // TODO: call an initialization method and check the results
+          JvmtiAccessImpl.init0();
           state = State.INITIALIZED;
         } catch (Throwable t) {
           logger.log(Level.SEVERE, "Failed to initialize jvmti native library", t);

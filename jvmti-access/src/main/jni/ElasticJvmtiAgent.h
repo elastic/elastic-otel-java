@@ -10,13 +10,15 @@ namespace elastic {
         enum class ReturnCode {
             SUCCESS = 0,
             ERROR = -1,
+            ERROR_NOT_INITIALIZED = -2,
         };
 
         constexpr jint toJint(ReturnCode rc) noexcept {
             return static_cast<jint>(rc);
         }
 
-        void destroy();
+        ReturnCode init(JNIEnv* jniEnv);
+        ReturnCode destroy(JNIEnv* jniEnv);
 
         void setThreadProfilingCorrelationBuffer(JNIEnv* jniEnv, jobject bytebuffer);
         void setProcessProfilingCorrelationBuffer(JNIEnv* jniEnv, jobject bytebuffer);

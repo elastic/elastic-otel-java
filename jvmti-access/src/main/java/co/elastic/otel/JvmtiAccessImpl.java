@@ -22,7 +22,9 @@ import java.nio.ByteBuffer;
 
 public class JvmtiAccessImpl {
 
-  static native int destroy0();
+  public static native int init0();
+
+  public static native int destroy0();
 
   /**
    * @param threadBuffer the buffer whose address will get stored in the native thread-local-storage

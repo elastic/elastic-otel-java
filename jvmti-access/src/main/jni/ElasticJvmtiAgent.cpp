@@ -13,11 +13,44 @@ namespace elastic
     {
 
         static ProfilerSocket profilerSocket;
+        static jvmtiEnv* jvmti;
 
-        void destroy() {
-            elastic_apm_profiling_correlation_process_storage_v1 = nullptr;
-            profilerSocket.destroy();
+
+        ReturnCode init(JNIEnv* jniEnv) {
+            if(jvmti != nullptr) {
+                return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR, "JVMTI environment is already initialized!");
+            }
+
+            JavaVM* vm;
+            auto vmError = jniEnv->GetJavaVM(&vm);
+            if(vmError != JNI_OK) {
+                return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR, "jniEnv->GetJavaVM() failed, return code is ", vmError);
+            }
+
+            auto getEnvErr = vm->GetEnv(reinterpret_cast<void**>(&jvmti), JVMTI_VERSION_1_2);
+            if(getEnvErr != JNI_OK) {
+                return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR, "JavaVM->GetEnv() failed, return code is ", getEnvErr);
+            }
+            return ReturnCode::SUCCESS;
         }
+
+        ReturnCode destroy(JNIEnv* jniEnv) {
+            if(jvmti != nullptr) {
+                elastic_apm_profiling_correlation_process_storage_v1 = nullptr;
+                profilerSocket.destroy();
+
+                auto error = jvmti->DisposeEnvironment();
+                jvmti = nullptr;
+                if(error != JVMTI_ERROR_NONE) {
+                    return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR, "jvmti->DisposeEnvironment() failed, return code is: ", error);
+                }
+
+                return ReturnCode::SUCCESS;
+            } else {
+                return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR_NOT_INITIALIZED, "Elastic JVMTI Agent has not been initialized!");
+            }
+        }
+
 
         void setThreadProfilingCorrelationBuffer(JNIEnv* jniEnv, jobject bytebuffer) {
             if(bytebuffer == nullptr) {
