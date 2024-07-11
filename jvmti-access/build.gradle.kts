@@ -74,6 +74,16 @@ val nativeTargets = listOf(
     "linux-x64.so",
     "jni_linux_x64.Dockerfile",
     "-static-libstdc++ -static-libgcc -mtls-dialect=gnu2 $sharedCompilerArgs"
+  ),
+  NativeTarget(
+    "linux-musl-arm64.so",
+    "jni_linux_musl_arm64.Dockerfile",
+    "-static-libstdc++ -static-libgcc -mtls-dialect=desc $sharedCompilerArgs"
+  ),
+  NativeTarget(
+    "linux-musl-x64.so",
+    "jni_linux_musl_x64.Dockerfile",
+    "-static-libstdc++ -static-libgcc -mtls-dialect=gnu2 $sharedCompilerArgs"
   )
 )
 
