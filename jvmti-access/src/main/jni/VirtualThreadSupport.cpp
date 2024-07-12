@@ -86,6 +86,7 @@ namespace elastic {
         ReturnCode VirtualThreadSupport::init(JNIEnv* env, jvmtiEnv* jvmti) {
             this->jvmti = jvmti;
             this->unsupportedReason = "Not yet initialized";
+            this->eventsEnabled = false;
 
             jint version;
             auto error = jvmti->GetVersionNumber(&version);
@@ -114,7 +115,7 @@ namespace elastic {
             caps.can_support_virtual_threads = 1;
             auto capErr = jvmti->AddCapabilities(&caps);
             if(capErr != JVMTI_ERROR_NONE) {
-                return raiseExceptionAndReturn(env, ReturnCode::ERROR, "Failed to add virtual threads capability", capErr);
+                return raiseExceptionAndReturn(env, ReturnCode::ERROR, "Failed to add virtual threads capability, return code is", capErr);
             }
 
             jint extensionCount;
