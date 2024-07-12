@@ -184,7 +184,7 @@ public class UniversalProfilingCorrelationTest {
 
     @Test
     @EnabledForJreRange(min = JRE.JAVA_21)
-    public void testVirtualThreadsExcludedByDefault() throws Exception {
+    public void testVirtualThreadsExcludedWhenDisabled() throws Exception {
       UniversalProfilingCorrelation.setVirtualThreadSupportEnabled(false);
 
       ExecutorService exec =
