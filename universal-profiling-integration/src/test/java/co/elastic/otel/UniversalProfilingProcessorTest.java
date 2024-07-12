@@ -62,12 +62,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.EnabledForJreRange;
+import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -88,7 +92,8 @@ public class UniversalProfilingProcessorTest {
   }
 
   private OpenTelemetrySdk initSdk() {
-    return initSdk(builder -> {});
+    return initSdk(builder -> {
+    });
   }
 
   private OpenTelemetrySdk initSdk(Consumer<UniversalProfilingProcessorBuilder> customizer) {
@@ -211,6 +216,38 @@ public class UniversalProfilingProcessorTest {
       }
     }
 
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    @EnabledForJreRange(min = JRE.JAVA_21)
+    public void testVirtualThreadSupport(boolean enableSupport) throws Exception {
+
+      ExecutorService exec =
+          (ExecutorService)
+              Executors.class.getMethod("newVirtualThreadPerTaskExecutor").invoke(null);
+
+      try (OpenTelemetrySdk sdk = initSdk(
+          builder -> builder.virtualThreadSupportEnabled(enableSupport))) {
+
+        exec.submit(() -> {
+          Tracer tracer = sdk.getTracer("test-tracer");
+
+          Span span = tracer.spanBuilder("first").startSpan();
+
+          checkTlsIs(Span.getInvalid(), null);
+          try (Scope s1 = span.makeCurrent()) {
+            Thread.yield();
+            if (enableSupport) {
+              checkTlsIs(span, span);
+            } else {
+              checkTlsIs(Span.getInvalid(), null);
+            }
+          }
+        }).get();
+
+      }
+    }
+
     @Test
     public void testProcessStoragePopulated() {
       Resource withNamespace =
@@ -218,13 +255,15 @@ public class UniversalProfilingProcessorTest {
               .put(ResourceAttributes.SERVICE_NAME, "service Ä 1")
               .put(ResourceAttributes.SERVICE_NAMESPACE, "my nameßspace")
               .build();
-      try (OpenTelemetrySdk sdk = initSdk(withNamespace, b -> {}, Sampler.alwaysOn())) {
+      try (OpenTelemetrySdk sdk = initSdk(withNamespace, b -> {
+      }, Sampler.alwaysOn())) {
         checkProcessStorage("service Ä 1", "my nameßspace");
       }
 
       Resource withoutNamespace =
           Resource.builder().put(ResourceAttributes.SERVICE_NAME, "service Ä 2").build();
-      try (OpenTelemetrySdk sdk = initSdk(withoutNamespace, b -> {}, Sampler.alwaysOn())) {
+      try (OpenTelemetrySdk sdk = initSdk(withoutNamespace, b -> {
+      }, Sampler.alwaysOn())) {
         checkProcessStorage("service Ä 2", "");
       }
     }
@@ -338,7 +377,7 @@ public class UniversalProfilingProcessorTest {
                           .findFirst()
                           .get();
                   assertThat(
-                          sp1Data.getAttributes().get(ElasticAttributes.PROFILER_STACK_TRACE_IDS))
+                      sp1Data.getAttributes().get(ElasticAttributes.PROFILER_STACK_TRACE_IDS))
                       .containsExactlyInAnyOrder(base64(st1), base64(st3), base64(st3));
 
                   SpanData sp2Data =
@@ -347,7 +386,7 @@ public class UniversalProfilingProcessorTest {
                           .findFirst()
                           .get();
                   assertThat(
-                          sp2Data.getAttributes().get(ElasticAttributes.PROFILER_STACK_TRACE_IDS))
+                      sp2Data.getAttributes().get(ElasticAttributes.PROFILER_STACK_TRACE_IDS))
                       .containsExactlyInAnyOrder(
                           base64(st2), base64(st2), base64(st2), base64(st3));
                 });
@@ -573,9 +612,10 @@ public class UniversalProfilingProcessorTest {
       String absPath = notADir.toAbsolutePath().toString();
 
       assertThatThrownBy(
-              () -> {
-                try (OpenTelemetrySdk sdk = initSdk(builder -> builder.socketDir(absPath))) {}
-              })
+          () -> {
+            try (OpenTelemetrySdk sdk = initSdk(builder -> builder.socketDir(absPath))) {
+            }
+          })
           .hasMessageContaining("socket");
 
       // Ensure no garbage is left behind, we can cleanly start again with good settings
