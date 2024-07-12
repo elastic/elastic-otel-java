@@ -49,31 +49,31 @@ public class LegacyConfigurations {
   private void addAllOptions() {
     addDocumentationOption(
         "server_url",
-        "The Elastic [`server_url`](https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-server-url) option corresponds to the OpenTelemetry [`OTEL_EXPORTER_OTLP_ENDPOINT`](https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_endpoint) option.");
+        "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-server-url[`server_url`] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_endpoint[`OTEL_EXPORTER_OTLP_ENDPOINT`] option.");
     addDocumentationOption(
         "server_urls",
-        "The Elastic [`server_urls`](https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-server-urls) option has no equivalent OpenTelemetry option - you can only specify one endpoint. Use [OTEL_EXPORTER_OTLP_ENDPOINT](https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_endpoint) instead.");
+        "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-server-urls[`server_urls`] option has no equivalent OpenTelemetry option - you can only specify one endpoint. Use https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_endpoint[OTEL_EXPORTER_OTLP_ENDPOINT] instead.");
     addDocumentationOption(
         "secret_token",
-        "The Elastic [`secret_token`](https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-secret-token) option corresponds to the OpenTelemetry [OTEL_EXPORTER_OTLP_HEADERS](https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_headers) option. For example: `OTEL_EXPORTER_OTLP_HEADERS=\"Authorization=Bearer an_apm_secret_token\"`.");
+        "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-secret-token[`secret_token`] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_headers[OTEL_EXPORTER_OTLP_HEADERS] option. For example: `OTEL_EXPORTER_OTLP_HEADERS=\"Authorization=Bearer an_apm_secret_token\"`.");
     addDocumentationOption(
         "api_key",
-        "The Elastic [`api_key`](https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-api-key) option corresponds to the OpenTelemetry [OTEL_EXPORTER_OTLP_HEADERS](https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_headers) option. For example:`OTEL_EXPORTER_OTLP_HEADERS=\"Authorization=ApiKey an_api_key\"`.");
+        "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-api-key[`api_key`] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_headers[OTEL_EXPORTER_OTLP_HEADERS] option. For example:`OTEL_EXPORTER_OTLP_HEADERS=\"Authorization=ApiKey an_api_key\"`.");
     addDocumentationOption(
         "service_name",
-        "The Elastic [`service_name`](https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-service-name) option corresponds to the OpenTelemetry [OTEL_SERVICE_NAME](https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_service_name) option. The service name value can also be set using [OTEL_RESOURCE_ATTRIBUTES](https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes), for example, `OTEL_RESOURCE_ATTRIBUTES=service.name=myservice`. If `OTEL_SERVICE_NAME` is set, it takes precedence over the resource attribute.");
+        "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-service-name[`service_name`] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_service_name[OTEL_SERVICE_NAME] option. The service name value can also be set using https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes[OTEL_RESOURCE_ATTRIBUTES], for example, `OTEL_RESOURCE_ATTRIBUTES=service.name=myservice`. If `OTEL_SERVICE_NAME` is set, it takes precedence over the resource attribute.");
     addDocumentationOption(
         "enabled",
-        "The Elastic [`enabled`](https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-enabled) option corresponds to the OpenTelemetry [OTEL_JAVAAGENT_ENABLED](https://opentelemetry.io/docs/languages/java/automatic/agent-config/#suppressing-specific-auto-instrumentation) option.");
+        "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-enabled[`enabled`] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/languages/java/automatic/agent-config/#suppressing-specific-auto-instrumentation[OTEL_JAVAAGENT_ENABLED] option.");
     addDocumentationOption(
         "service_version",
-        "The Elastic [`service_version`](https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-service-version) option corresponds to setting the `service.version` key in [OTEL_RESOURCE_ATTRIBUTES](https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes). For example: `OTEL_RESOURCE_ATTRIBUTES=service.version=1.2.3`.");
+        "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-service-version[`service_version`] option corresponds to setting the `service.version` key in https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes[OTEL_RESOURCE_ATTRIBUTES]. For example: `OTEL_RESOURCE_ATTRIBUTES=service.version=1.2.3`.");
     addDocumentationOption(
         "environment",
-        "The Elastic [`environment`](https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-environment) option corresponds to setting the `deployment.environment` key in [OTEL_RESOURCE_ATTRIBUTES](https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes). For example: `OTEL_RESOURCE_ATTRIBUTES=deployment.environment=testing`.");
+        "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-environment[`environment`] option corresponds to setting the `deployment.environment` key in https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes[OTEL_RESOURCE_ATTRIBUTES]. For example: `OTEL_RESOURCE_ATTRIBUTES=deployment.environment=testing`.");
     addDocumentationOption(
         "global_labels",
-        "The Elastic [`global_labels`](https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-global-labels) option corresponds to adding `key=value` comma separated pairs in [OTEL_RESOURCE_ATTRIBUTES](https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes). For example: `OTEL_RESOURCE_ATTRIBUTES=alice=first,bob=second`. Such labels will result in labels.key=value attributes on the server, eg labels.alice=first");
+        "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-global-labels[`global_labels`] option corresponds to adding `key=value` comma separated pairs in https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes[OTEL_RESOURCE_ATTRIBUTES]. For example: `OTEL_RESOURCE_ATTRIBUTES=alice=first,bob=second`. Such labels will result in labels.key=value attributes on the server, eg labels.alice=first");
     addUnspecifiedOption("log_level");
     addUnspecifiedOption("log_file");
     addUnspecifiedOption("log_file_size");
