@@ -1,6 +1,12 @@
 [[configuration-options]]
 == Configuration options
 
+:language: Java
+:language_lc: java
+:distro_name: Elastic Distribution for OpenTelemetry {language}
+
+include::release-status.asciidoc[]
+
 ////
 Are there Elastic-specific custom configuration options
 in addition to the general OpenTelemetry SDK
@@ -39,3 +45,7 @@ The distro supports the following custom options:
 ////
 List of configuration options?
 ////
+
+:!language:
+:!language_lc:
+:!distro_name:

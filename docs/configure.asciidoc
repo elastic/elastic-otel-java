@@ -13,6 +13,17 @@ the APM Java agent to the Elastic Distribution for OpenTelemetry Java?
 [[configure]]
 == Configure
 
+// I'll add this to the automation if we're sure we want this on every page.
+:language: Java
+:language_lc: java
+:distro_name: Elastic Distribution for OpenTelemetry {language}
+
+include::release-status.asciidoc[]
+
+:!language:
+:!language_lc:
+:!distro_name:
+
 ////
 This file is auto generated. Please only make changes in `configure.asciidoc.ftl`
 ////

@@ -1,21 +1,44 @@
 [[get-started]]
 == Get started
 
-This guide shows you how to use the Elastic Distribution for OpenTelemetry Java to instrument your Java application and send OpenTelemetry data to an Elastic Observability deployment.
+:language: Java
+:language_lc: java
+:distro_name: Elastic Distribution for OpenTelemetry {language}
 
+include::release-status.asciidoc[]
+
+This guide shows you how to use the Elastic Distribution for OpenTelemetry {language} ("the distro") to instrument your {language} application and send OpenTelemetry data to an Elastic Observability deployment.
+
+////
+What does a user need to know and/or do before they install the distro?
 ////
 [discrete]
 [[get-started-prereq]]
 === Prerequisites
 
-Do they need anything else before they install?
-An Elastic Observability deployment?
+Before getting started:
+
+// Familiarity with OpenTelemetry
+* *Familiarize yourself with the OpenTelemetry SDK.* The distro is a lightweight wrapper around the OpenTelemetry SDK. You should be broadly familiar with the OpenTelemetry SDK concepts and instrumenting applications using the Microsoft diagnostic APIs. If you are not familiar with this, start with the https://opentelemetry.io/docs/languages/net[OpenTelemetry SDK documentation].
+
+////
+// Examples:
+//
+// Any dependencies (including supported versions)
+// Elastic Observability deployment
+// Other
 ////
 
+////
+How does a user install the distro?
+////
 [discrete]
 [[get-started-install]]
 === Install
 
+////
+Step-by-step instructions
+////
 . Download the https://mvnrepository.com/artifact/co.elastic.otel/elastic-otel-javaagent/latest[latest release].
 . Run the distro using the `-javaagent:` JVM argument with the path to the distro jar:
 +
@@ -26,20 +49,38 @@ java -javaagent:/path/to/agent.jar \
 ----
 
 ////
-What should they expect to see after running this?
-How do they know it worked as expected?
+Any additional info related to installation
 ////
+[NOTE]
+.The Elastic distro and the OpenTelemetry SDK
+====
+The distro includes a transitive dependency on the OpenTelemetry SDK, so you do not _need_ to add the
+OpenTelemetry SDK package to your project directly. However, you _can_ explicitly add the OpenTelemetry SDK as a dependency if you want to opt into newer SDK versions. If you do this, the OpenTelemetry SDK dependency must
+be defined _before_ the Elastic OpenTelemetry Distribution for .NET is defined.
+====
 
 ////
-Are there any configuration options that are required?
+Are there any configuration options that are _required_?
 If yes, should we call those out here in "getting started"
 in addition to having them in the generated configuration
 reference page?
 ////
 
+////
+What should they expect to see after running this?
+How do they know it worked as expected?
+////
+
+////
+What should they do next?
+////
 [discrete]
-[[get-started-configure]]
+[[get-started-next-steps]]
 === Next steps
 
 * <<configuration-options,Configure the distro>> to send data to Elastic.
 * Learn more about viewing and interpreting data in the {observability-guide}/apm.html[Observability guide].
+
+:!language:
+:!language_lc:
+:!distro_name:
