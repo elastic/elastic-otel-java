@@ -168,7 +168,8 @@ public class UniversalProfilingCorrelation {
       JvmtiAccess.setProfilingCorrelationProcessStorage(null);
     }
     if (virtualThreadSupportEnabled) {
-      setVirtualThreadSupportEnabled(false);
+      virtualThreadSupportEnabled = false;
+      JvmtiAccessImpl.setProfilingCorrelationVirtualThreadSupportEnabled0(false);
     }
   }
 

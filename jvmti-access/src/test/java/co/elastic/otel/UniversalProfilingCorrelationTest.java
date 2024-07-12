@@ -43,7 +43,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
@@ -57,7 +56,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 @EnabledOnOs({OS.LINUX, OS.MAC})
 public class UniversalProfilingCorrelationTest {
   @AfterEach
-  @BeforeEach
   public void cleanUp() {
     JvmtiAccess.destroy();
   }
