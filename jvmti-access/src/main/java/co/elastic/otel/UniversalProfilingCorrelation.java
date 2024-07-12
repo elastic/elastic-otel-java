@@ -69,7 +69,6 @@ public class UniversalProfilingCorrelation {
     if (virtualThreadSupportEnabled == enable) {
       return;
     }
-    System.out.println("Setting virtual thread support to: " + enable);
     JvmtiAccess.setProfilingCorrelationVirtualThreadSupportEnabled(enable);
     virtualThreadSupportEnabled = enable;
   }
