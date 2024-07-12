@@ -48,7 +48,6 @@ public class UniversalProfilingCorrelation {
     reset();
   }
 
-
   public static synchronized void setProcessStorage(@Nullable ByteBuffer buffer) {
     if (buffer != null) {
       if (!buffer.isDirect()) {
@@ -64,7 +63,7 @@ public class UniversalProfilingCorrelation {
 
   public static synchronized void setVirtualThreadSupportEnabled(boolean enable) {
     if (THREAD_IS_VIRTUAL == null) {
-      //JVM does not have virtual threads, so this method is a NoOp
+      // JVM does not have virtual threads, so this method is a NoOp
       return;
     }
     JvmtiAccess.setProfilingCorrelationVirtualThreadSupportEnabled(enable);

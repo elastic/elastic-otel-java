@@ -200,7 +200,6 @@ public class UniversalProfilingCorrelationTest {
           .get();
     }
 
-
     @Test
     @EnabledForJreRange(min = JRE.JAVA_21)
     public void testVirtualThreadsStoragePropagatedWithMounts() throws Exception {
@@ -218,41 +217,46 @@ public class UniversalProfilingCorrelationTest {
         int threadId = i;
         CountDownLatch latch = new CountDownLatch(1);
         threadLatches.add(latch);
-        threadResults.add(exec.submit(
-            () -> {
-              virtualThreads.add(Thread.currentThread());
-              ByteBuffer buffer =
-                  UniversalProfilingCorrelation.getCurrentThreadStorage(true, 4);
-              buffer.order(ByteOrder.nativeOrder());
-              assertThat(buffer).isNotNull();
-              buffer.putInt(threadId);
+        threadResults.add(
+            exec.submit(
+                () -> {
+                  virtualThreads.add(Thread.currentThread());
+                  ByteBuffer buffer =
+                      UniversalProfilingCorrelation.getCurrentThreadStorage(true, 4);
+                  buffer.order(ByteOrder.nativeOrder());
+                  assertThat(buffer).isNotNull();
+                  buffer.putInt(threadId);
 
-              try {
-                // The waiting on the latch will cause this virtual thread to be unmounted
-                latch.await();
-              } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-              }
+                  try {
+                    // The waiting on the latch will cause this virtual thread to be unmounted
+                    latch.await();
+                  } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                  }
 
-              //Read back the current buffer after being re-mounted and check if it is correct
-              buffer = JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(4);
-              buffer.order(ByteOrder.nativeOrder());
+                  // Read back the current buffer after being re-mounted and check if it is correct
+                  buffer = JvmtiAccessImpl.createThreadProfilingCorrelationBufferAlias(4);
+                  buffer.order(ByteOrder.nativeOrder());
 
-              assertThat(buffer.getInt()).isEqualTo(threadId);
-            }));
+                  assertThat(buffer.getInt()).isEqualTo(threadId);
+                }));
       }
 
-      //Wait until all threads have reached their latch
-      await().atMost(Duration.ofSeconds(10))
-          .until(() -> virtualThreads.size() == threadLatches.size() && virtualThreads.stream()
-              .allMatch(t -> t.getState() == Thread.State.WAITING));
+      // Wait until all threads have reached their latch
+      await()
+          .atMost(Duration.ofSeconds(10))
+          .until(
+              () ->
+                  virtualThreads.size() == threadLatches.size()
+                      && virtualThreads.stream()
+                          .allMatch(t -> t.getState() == Thread.State.WAITING));
 
-      //resume all threads
+      // resume all threads
       for (CountDownLatch latch : threadLatches) {
         latch.countDown();
       }
       for (Future<?> future : threadResults) {
-        future.get(); //this will throw an ExecutionException if any assertions failed
+        future.get(); // this will throw an ExecutionException if any assertions failed
       }
     }
   }
@@ -274,7 +278,7 @@ public class UniversalProfilingCorrelationTest {
         name.append("abc");
       }
       assertThatThrownBy(
-          () -> UniversalProfilingCorrelation.startProfilerReturnChannel(name.toString()))
+              () -> UniversalProfilingCorrelation.startProfilerReturnChannel(name.toString()))
           .isInstanceOf(RuntimeException.class)
           .hasMessageContaining("filepath");
     }

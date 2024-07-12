@@ -153,11 +153,14 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
       return;
     }
     try {
-      log.log(Level.FINE, "Setting virtual thread support to {0}",
+      log.log(
+          Level.FINE,
+          "Setting virtual thread support to {0}",
           new Object[] {tryEnableVirtualThreadSupport});
       UniversalProfilingCorrelation.setVirtualThreadSupportEnabled(tryEnableVirtualThreadSupport);
     } catch (Exception e) {
-      log.log(Level.SEVERE,
+      log.log(
+          Level.SEVERE,
           "Could not enable virtual thread support, correlation will only work for platform threads",
           e);
     }

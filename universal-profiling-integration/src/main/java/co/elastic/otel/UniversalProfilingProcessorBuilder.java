@@ -97,7 +97,8 @@ public class UniversalProfilingProcessorBuilder {
   /**
    * Virtual threads need some extra work for correlation: On mount/unmount the span/trace context
    * of the platform thread needs to be kept in sync. This is done by hooking on to JVMTI-events.
-   * This option allows to disable support for virtual threads in case this mechanism causes any problems.
+   * This option allows to disable support for virtual threads in case this mechanism causes any
+   * problems.
    */
   public UniversalProfilingProcessorBuilder virtualThreadSupportEnabled(boolean enable) {
     this.virtualThreadSupportEnabled = enable;
