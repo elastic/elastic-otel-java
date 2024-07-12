@@ -2,9 +2,7 @@
 #define VIRTUALTHREADSUPPORT_H_
 
 #include <string>
-#include <mutex>
-#include <optional>
-#include <memory>
+#include <jvmti.h>
 #include "ElasticJvmtiAgent.h"
 
 namespace elastic {

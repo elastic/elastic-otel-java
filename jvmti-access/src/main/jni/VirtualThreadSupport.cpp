@@ -98,6 +98,25 @@ namespace elastic {
                 return ReturnCode::SUCCESS;
             }
 
+            jvmtiCapabilities supportedCapabilities;
+            auto supErr =jvmti->GetPotentialCapabilities(&supportedCapabilities);
+            if(supErr != JVMTI_ERROR_NONE) {
+                return raiseExceptionAndReturn(env, ReturnCode::ERROR, "Failed to get JVMTI supported capabilities", supErr);
+            }
+
+            bool virtualThreadsCapabilitySupported = supportedCapabilities.can_support_virtual_threads != 0;
+            if (!virtualThreadsCapabilitySupported) {
+                this->unsupportedReason = "The JVMTI environment can not support the can_support_virtual_threads capability";
+                return ReturnCode::SUCCESS;                
+            }
+
+            jvmtiCapabilities caps = {};
+            caps.can_support_virtual_threads = 1;
+            auto capErr = jvmti->AddCapabilities(&caps);
+            if(capErr != JVMTI_ERROR_NONE) {
+                return raiseExceptionAndReturn(env, ReturnCode::ERROR, "Failed to add virtual threads capability", capErr);
+            }
+
             jint extensionCount;
             jvmtiExtensionEventInfo* extensionInfos;
             error = jvmti->GetExtensionEvents(&extensionCount, &extensionInfos);
