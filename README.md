@@ -57,6 +57,11 @@ The stacktrace is stored in the [`code.stacktrace`](https://opentelemetry.io/doc
 
 The minimum span duration can be configured with `elastic.otel.span.stack.trace.min.duration` (in milliseconds, defaults to 5ms).
 
+### Runtime metrics
+
+Experimental runtime metrics are enabled by default.
+Set `otel.instrumentation.runtime-telemetry.emit-experimental-telemetry` to `false` to disable them.
+
 ### Breakdown metrics
 
 Breakdown metrics currently require a custom Elasticsearch ingest pipeline.
