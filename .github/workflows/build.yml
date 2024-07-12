@@ -98,7 +98,7 @@ jobs:
           # working directory. The up-to-date check of this task checks for the presence of docker
           # images used for compiling the native library, which do not exist because we are in a new
           # environment.
-          command: "./gradlew test -x compileJni -PtestJavaVersion=${{ matrix.version }} -PtestJavaVM=${{ matrix.vm }}"
+          command: "./gradlew test -i -x compileJni -PtestJavaVersion=${{ matrix.version }} -PtestJavaVM=${{ matrix.vm }}"
       - name: Store test results
         if: success() || failure()
         # The test reporting workflow only supports the @v3 artifact mechanism
