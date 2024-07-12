@@ -66,6 +66,10 @@ public class UniversalProfilingCorrelation {
       // JVM does not have virtual threads, so this method is a NoOp
       return;
     }
+    if (virtualThreadSupportEnabled == enable) {
+      return;
+    }
+    System.out.println("Setting virtual thread support to: " + enable);
     JvmtiAccess.setProfilingCorrelationVirtualThreadSupportEnabled(enable);
     virtualThreadSupportEnabled = enable;
   }
@@ -167,10 +171,7 @@ public class UniversalProfilingCorrelation {
       processStorage = null;
       JvmtiAccess.setProfilingCorrelationProcessStorage(null);
     }
-    if (virtualThreadSupportEnabled) {
-      virtualThreadSupportEnabled = false;
-      JvmtiAccessImpl.setProfilingCorrelationVirtualThreadSupportEnabled0(false);
-    }
+    setVirtualThreadSupportEnabled(false);
   }
 
   private static boolean isVirtual(Thread thread) {
