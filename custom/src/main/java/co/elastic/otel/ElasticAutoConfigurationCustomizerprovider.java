@@ -31,6 +31,8 @@ public class ElasticAutoConfigurationCustomizerprovider
     implements AutoConfigurationCustomizerProvider {
 
   private static final String DISABLED_RESOURCE_PROVIDERS = "otel.java.disabled.resource.providers";
+  private static final String RUNTIME_EXPERIMENTAL_TELEMETRY =
+      "otel.instrumentation.runtime-telemetry.emit-experimental-telemetry";
 
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
@@ -43,17 +45,21 @@ public class ElasticAutoConfigurationCustomizerprovider
                     ElasticExtension.INSTANCE.getSpanProcessor()))
         .addPropertiesCustomizer(
             configProperties -> {
-              Set<String> disabledConfig =
+              Set<String> disabledResourceProviders =
                   new HashSet<>(configProperties.getList(DISABLED_RESOURCE_PROVIDERS));
 
-              // disabling embedded resource providers
-
               // disable upstream distro name & version provider
-              disabledConfig.add(
+              disabledResourceProviders.add(
                   "io.opentelemetry.javaagent.tooling.DistroVersionResourceProvider");
 
               Map<String, String> config = new HashMap<>();
-              config.put(DISABLED_RESOURCE_PROVIDERS, String.join(",", disabledConfig));
+
+              // enable experimental telemetry by default if not explicitly disabled
+              boolean experimentalTelemetry =
+                  configProperties.getBoolean(RUNTIME_EXPERIMENTAL_TELEMETRY, true);
+              config.put(RUNTIME_EXPERIMENTAL_TELEMETRY, Boolean.toString(experimentalTelemetry));
+
+              config.put(DISABLED_RESOURCE_PROVIDERS, String.join(",", disabledResourceProviders));
 
               return config;
             })
