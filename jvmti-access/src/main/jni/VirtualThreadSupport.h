@@ -15,12 +15,16 @@ namespace elastic {
             private:
                 std::string unsupportedReason = "Not yet initialized";
                 jvmtiEnv* jvmti;
+
+                jint mountEventIdx;
+                jint unmountEventIdx;
+                bool eventsEnabled;
             public:
 
                 [[nodiscard]] ReturnCode init(JNIEnv* env, jvmtiEnv* jvmti);
                 [[nodiscard]] ReturnCode destroy(JNIEnv* env);
 
-                [[nodiscard]] jstring getUnsupportedReason(JNIEnv* jniEnv);
+                [[nodiscard]] ReturnCode setMountCallbacksEnabled(JNIEnv* jniEnv, bool enabled);
             };
     }
 }

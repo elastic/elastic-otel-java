@@ -57,6 +57,11 @@ public class JvmtiAccess {
     JvmtiAccessImpl.setThreadProfilingCorrelationBuffer0(storage);
   }
 
+  static void setProfilingCorrelationVirtualThreadSupportEnabled(boolean enable) {
+    ensureInitialized();
+    JvmtiAccessImpl.setProfilingCorrelationVirtualThreadSupportEnabled0(enable);
+  }
+
   /**
    * Starts the socket for receiving universal profiler messages on the given filepath. Note that
    * the path has a limitation of about 100 characters, see <a
@@ -80,20 +85,6 @@ public class JvmtiAccess {
       throw new IllegalStateException("Native code returned error: " + numRead);
     }
     return numRead;
-  }
-
-  /**
-   * Checks if virtual thread mount/unmount events are supported.
-   *
-   * @return null, if those events are supported. A string with a reason if not supported.
-   */
-  public static String getVirtualThreadsUnsupportedReason() {
-    ensureInitialized();
-    String reason = JvmtiAccessImpl.checkVirtualThreadSupport();
-    if (reason.isEmpty()) {
-      return null;
-    }
-    return reason;
   }
 
   public static void ensureInitialized() {

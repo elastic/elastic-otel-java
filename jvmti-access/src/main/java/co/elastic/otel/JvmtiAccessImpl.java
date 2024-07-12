@@ -26,13 +26,13 @@ public class JvmtiAccessImpl {
 
   public static native int destroy0();
 
-  public static native String checkVirtualThreadSupport();
-
   /**
    * @param threadBuffer the buffer whose address will get stored in the native thread-local-storage
    *     for APM <-> profiling correlation
    */
   static native void setThreadProfilingCorrelationBuffer0(ByteBuffer threadBuffer);
+
+  static native int setProfilingCorrelationVirtualThreadSupportEnabled0(boolean enable);
 
   /**
    * @param byteBuffer the buffer whose address will get stored in the native global variable for

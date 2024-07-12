@@ -62,20 +62,37 @@ namespace elastic
             }
         }
 
-        jstring getVirtualThreadsUnsupportedReason(JNIEnv* jniEnv) {
-            if(jvmti == nullptr) {
-                return raiseExceptionAndReturn(jniEnv, nullptr, "JVMTI environment has not been initialized yet!");
-            }
-            return virtualThreads.getUnsupportedReason(jniEnv);
+        void onVirtualThreadMount(JNIEnv*, jthread) {
+            void* address = nullptr;
+            jvmti->GetThreadLocalStorage(nullptr, &address);
+            elastic_apm_profiling_correlation_tls_v1 = address;
         }
 
+        void onVirtualThreadUnmount(JNIEnv*, jthread){
+            elastic_apm_profiling_correlation_tls_v1 = nullptr;
+        }
 
-        void setThreadProfilingCorrelationBuffer(JNIEnv* jniEnv, jobject bytebuffer) {
-            if(bytebuffer == nullptr) {
-                elastic_apm_profiling_correlation_tls_v1 = nullptr;
-            } else {
-                elastic_apm_profiling_correlation_tls_v1 = jniEnv->GetDirectBufferAddress(bytebuffer);
+        ReturnCode setVirtualThreadProfilingCorrelationEnabled(JNIEnv* jniEnv, jboolean enable) {
+            if(jvmti == nullptr) {
+                return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR_NOT_INITIALIZED, "JVMTI environment has not been initialized yet!");
             }
+            return virtualThreads.setMountCallbacksEnabled(jniEnv, enable == JNI_TRUE);
+        }
+
+        ReturnCode setThreadProfilingCorrelationBuffer(JNIEnv* jniEnv, jobject bytebuffer) {
+            if(jvmti == nullptr) {
+                return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR_NOT_INITIALIZED, "JVMTI environment has not been initialized yet!");
+            }
+            void* address = nullptr;
+            if (bytebuffer != nullptr) {
+                address = jniEnv->GetDirectBufferAddress(bytebuffer);
+            }
+            auto error = jvmti->SetThreadLocalStorage(nullptr, address);
+            if (error != JVMTI_ERROR_NONE) {
+                return raiseExceptionAndReturn(jniEnv, ReturnCode::ERROR_NOT_INITIALIZED, "jvmti->SetThreadLocalStorage() returned error code ", error);
+            }
+            elastic_apm_profiling_correlation_tls_v1 = address;
+            return ReturnCode::SUCCESS;
         }
 
         void setProcessProfilingCorrelationBuffer(JNIEnv* jniEnv, jobject bytebuffer) {
