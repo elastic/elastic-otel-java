@@ -185,6 +185,8 @@ public class UniversalProfilingCorrelationTest {
     @Test
     @EnabledForJreRange(min = JRE.JAVA_21)
     public void testVirtualThreadsExcludedByDefault() throws Exception {
+      UniversalProfilingCorrelation.setVirtualThreadSupportEnabled(false);
+
       ExecutorService exec =
           (ExecutorService)
               Executors.class.getMethod("newVirtualThreadPerTaskExecutor").invoke(null);
@@ -249,7 +251,7 @@ public class UniversalProfilingCorrelationTest {
               () ->
                   virtualThreads.size() == threadLatches.size()
                       && virtualThreads.stream()
-                          .allMatch(t -> t.getState() == Thread.State.WAITING));
+                      .allMatch(t -> t.getState() == Thread.State.WAITING));
 
       // resume all threads
       for (CountDownLatch latch : threadLatches) {
@@ -278,7 +280,7 @@ public class UniversalProfilingCorrelationTest {
         name.append("abc");
       }
       assertThatThrownBy(
-              () -> UniversalProfilingCorrelation.startProfilerReturnChannel(name.toString()))
+          () -> UniversalProfilingCorrelation.startProfilerReturnChannel(name.toString()))
           .isInstanceOf(RuntimeException.class)
           .hasMessageContaining("filepath");
     }
