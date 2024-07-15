@@ -20,7 +20,7 @@ opentelemetryContribAlpha = "1.36.0-alpha"
 # updated from upstream agent with .ci/update-upstream.sh
 # While the semconv stable artifact is provided transitively by the agent, we still have to explicitly
 # reference the "incubating" version explicitly
-opentelemetrySemconvAlpha = "1.25.0-alpha"
+opentelemetrySemconvAlpha = "1.26.0-alpha"
 
 [libraries]
 
