@@ -1,3 +1,13 @@
+////
+Goal of this doc:
+The user is able to successfully see data from their Java application make it to the Elastic UI via the Elastic Distribution for OpenTelemetry Java
+
+Assumptions we're comfortable making about the reader:
+* They are familiar with Elastic
+* They are familiar with OpenTelemetry
+* They have Java installed
+////
+
 [[get-started]]
 == Get started
 
@@ -10,23 +20,41 @@ include::release-status.asciidoc[]
 This guide shows you how to use the Elastic Distribution for OpenTelemetry {language} ("the distro") to instrument your {language} application and send OpenTelemetry data to an Elastic Observability deployment.
 
 ////
+Is this true?
+////
+[NOTE]
+====
+As an OpenTelemetry SDK, the distro supports sending data to any OpenTelemetry protocol (OTLP) endpoint (for example, an https://opentelemetry.io/docs/collector/[OpenTelemetry Collector]).
+====
+
+////
 What does a user need to know and/or do before they install the distro?
 ////
 [discrete]
-[[get-started-prereq]]
+[[get-started-prerequisites]]
 === Prerequisites
 
 Before getting started:
 
 // Familiarity with OpenTelemetry
 * *Familiarize yourself with the OpenTelemetry SDK.* The distro is a lightweight wrapper around the OpenTelemetry SDK. You should be broadly familiar with the OpenTelemetry SDK concepts and instrumenting applications using the Microsoft diagnostic APIs. If you are not familiar with this, start with the https://opentelemetry.io/docs/languages/net[OpenTelemetry SDK documentation].
++
+* *Set up Elastic Observability*. You'll need somewhere to send the gathered OpenTelemetry data, so it can be viewed and analyzed. This doc assumes you're using an https://www.elastic.co/observability[Elastic Observability] cloud deployment. You can use an existing one or set up a new one.
++
+[[elastic-observability-setup]]
+[%collapsible]
+.*Expand for setup instructions*
+====
+This section shows how to create an https://www.elastic.co/observability[Elastic Observability] cloud deployment and get the data you need to configure the distro to send data to it.
+
+. Register at https://cloud.elastic.co/registration[cloud.elastic.co], if you haven't already. This supports starting **free trial**.
+. After registering, click *Create deployment* at `<https://cloud.elastic.co/home>`.
+. Once that is created, click *Open* to visit your Kibana home page, e.g. `https://{DEPLOYMENT_NAME}.kb.{REGION}.cloud.es.io/app/home#/getting_started`.
+====
 
 ////
-// Examples:
-//
-// Any dependencies (including supported versions)
-// Elastic Observability deployment
-// Other
+// Other examples of prereqs:
+// Any dependencies (including specific supported Java versions)?
 ////
 
 ////
@@ -39,6 +67,8 @@ How does a user install the distro?
 ////
 Step-by-step instructions
 ////
+To get started with the distro:
+
 . Download the https://mvnrepository.com/artifact/co.elastic.otel/elastic-otel-javaagent/latest[latest release].
 . Run the distro using the `-javaagent:` JVM argument with the path to the distro jar:
 +
@@ -56,19 +86,73 @@ Any additional info related to installation
 ====
 The distro includes a transitive dependency on the OpenTelemetry SDK, so you do not _need_ to add the
 OpenTelemetry SDK package to your project directly. However, you _can_ explicitly add the OpenTelemetry SDK as a dependency if you want to opt into newer SDK versions. If you do this, the OpenTelemetry SDK dependency must
-be defined _before_ the Elastic OpenTelemetry Distribution for .NET is defined.
+be defined _before_ the {distro_name} is defined.
 ====
 
 ////
+What does the user need to do in their application to prepare to send data to Elastic?
+////
+[discrete]
+[[get-started-send-data]]
+=== Send data to Elastic
+
+After installing the distro, configure and initialize it to start
+sending data to Elastic.
+
+////
+Are there any dependencies that need to be installed in addition to the distro?
+If yes, does it matter in what order dependencies are defined?
+If no, delete this section.
+////
+[discrete]
+[[get-started-add-dependencies]]
+==== Add dependencies
+
+////
+Step-by-step instructions
+////
+
+////
+What does the _minimal_ configuration / setup look like?
 Are there any configuration options that are _required_?
-If yes, should we call those out here in "getting started"
-in addition to having them in the generated configuration
-reference page?
+////
+[discrete]
+[[get-started-configure]]
+==== Configure the distro
+
+////
+Step-by-step instructions
+////
+
+////
+Does the user need to do something after configuring the distro
+for data to start being sent Elastic?
+If no, delete this section.
+////
+[discrete]
+[[get-started-initialization]]
+==== Initialize the distro
+
+////
+Step-by-step instructions
+////
+
+////
+Optional: Add an image
 ////
 
 ////
 What should they expect to see after running this?
 How do they know it worked as expected?
+////
+[discrete]
+[[get-started-view-traces]]
+=== View traces
+
+To view the traces, you can use the Elastic APM UI:
+
+////
+Step-by-step instructions
 ////
 
 ////
@@ -78,7 +162,7 @@ What should they do next?
 [[get-started-next-steps]]
 === Next steps
 
-* <<configuration-options,Configure the distro>> to send data to Elastic.
+* <<configuration,Configure the distro>> to send data to Elastic.
 * Learn more about viewing and interpreting data in the {observability-guide}/apm.html[Observability guide].
 
 :!language:

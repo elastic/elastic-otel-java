@@ -1,3 +1,12 @@
+////
+Goal of this doc:
+Provide all the information a user needs to determine if the product is a good enough fit for their use case to merit further exploration
+
+Assumptions we're comfortable making about the reader:
+* They are familiar with Elastic
+* They are familiar with OpenTelemetry
+////
+
 [[intro]]
 == Elastic Distribution for OpenTelemetry Java
 
