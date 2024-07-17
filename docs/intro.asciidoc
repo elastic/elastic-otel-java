@@ -21,7 +21,7 @@ Assumptions we're comfortable making about the reader:
 include::release-status.asciidoc[]
 
 ////
-Intro
+✅ Intro
 ////
 The {distro_name} ("the distro") is a {language} package that provides:
 
@@ -29,8 +29,8 @@ The {distro_name} ("the distro") is a {language} package that provides:
 * Configuration defaults for best usage.
 
 ////
-What is it?
-Why use it?
+✅ What is it?
+✅ Why use it?
 ////
 A _distribution_ is a wrapper around an upstream OpenTelemetry repository with some customizations. The {distro_name} is a wrapper around the https://opentelemetry.io/docs/languages/{language_lc}[OpenTelemetry SDK for {language}] and includes the following customizations:
 
@@ -41,7 +41,7 @@ A _distribution_ is a wrapper around an upstream OpenTelemetry repository with s
 NOTE: For more details about OpenTelemetry distributions in general, visit the https://opentelemetry.io/docs/concepts/distributions[OpenTelemetry documentation].
 
 ////
-How to use it?
+✅ How to use it?
 ////
 Use the distro to start the OpenTelemetry SDK with your {language} application to automatically capture tracing data, performance metrics, and logs. Traces, metrics, and logs are sent to any OTLP collector you choose.
 

@@ -17,13 +17,14 @@ Assumptions we're comfortable making about the reader:
 include::release-status.asciidoc[]
 
 ////
-How do users set configuration options?
+TO DO: How do users set configuration options?
 ////
 [discrete]
 [[configure-methods]]
 === Configuration methods
 
 ////
+TO DO:
 Are there multiple ways to set configuration options?
 For example, can they use environment variables OR a config file?
 If there are, what are they and why would you use each method?
@@ -32,18 +33,16 @@ Provide an example to illustrate the syntax.
 ////
 
 ////
-If configuration options are defined using multiple methods, which one takes precedence over the other(s)?
+TO DO:
+If configuration options are defined using multiple methods,
+which one takes precedence over the other(s)?
 ////
 
 [discrete]
 [[configuration-options]]
 === Configuration options
 
-////
-Is this true? Is the distro a wrapper around the OpenTelemetry Java agent
-which is a wrapper around the general OpenTelemetry SDK? 🌀
-////
-Because the Elastic Distribution for OpenTelemetry Java (the distro) is a wrapper around the https://github.com/open-telemetry/opentelemetry-java-instrumentation[OpenTelemetry Java agent], it supports both:
+Because the Elastic Distribution for OpenTelemetry Java ("the distro") is an extension of the https://github.com/open-telemetry/opentelemetry-java-instrumentation[OpenTelemetry Java agent], it supports both:
 
 * General OpenTelemetry SDK configuration options
 * Elastic-specific configuration options that are only available when using the distro
@@ -53,6 +52,7 @@ Because the Elastic Distribution for OpenTelemetry Java (the distro) is a wrappe
 ==== OpenTelemetry SDK configuration options
 
 ////
+TO DO:
 Is this true?
 Are there any options that aren't supported?
 Any options that shouldn't be used?
@@ -60,6 +60,7 @@ Any options that shouldn't be used?
 The distro supports all configuration options listed in the https://opentelemetry.io/docs/languages/sdk-configuration/general/[OpenTelemetry General SDK Configuration documentation].
 
 ////
+TO DO:
 Are there Elastic-specific custom configuration options
 in addition to the general OpenTelemetry SDK
 configuration options? Or are all the customizations
@@ -77,6 +78,7 @@ List config options
 ////
 
 ////
+TO DO:
 Are there multiple authentication methods when sending data to Elastic?
 If not, delete this section.
 ////
@@ -90,27 +92,27 @@ When sending data to Elastic, there are two ways you can authenticate: using a s
 [[configure-secret-token]]
 ==== Use a secret token
 
-// What is this?
+// TO DO: What is this?
 // ??
 
-// Why would you choose this method?
+// TO DO:Why would you choose this method?
 // ??
 
-// How do you authenticate using this method?
+// TO DO:How do you authenticate using this method?
 // ??
 
 [discrete]
 [[configure-api-key]]
 ==== Use an APM agent key (API key)
 
-// What is this?
+// ✅ What is this?
 It is also possible to authenticate to an Elastic Observability endpoint using
 an _APM agent key_. These are revocable API keys.
 
-// Why would you choose this method?
+// TO DO: Why would you choose this method?
 // ??
 
-// How do you authenticate using this method?
+// ✅ How do you authenticate using this method?
 To create and manage APM Agent keys in Kibana:
 
 . Go to *APM Settings*.
@@ -120,7 +122,7 @@ When using an APM Agent key, the `OTEL_EXPORTER_OTLP_HEADERS` is set using a
 different auth schema (`ApiKey` rather than `Bearer`). For example:
 
 ////
-Code example
+TO DO: Code example
 ////
 
 
