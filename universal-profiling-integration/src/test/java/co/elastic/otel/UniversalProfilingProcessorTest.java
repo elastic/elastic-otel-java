@@ -62,12 +62,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.EnabledForJreRange;
+import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -208,6 +212,38 @@ public class UniversalProfilingProcessorTest {
           checkTlsIs(first, first);
         }
         checkTlsIs(Span.getInvalid(), null);
+      }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    @EnabledForJreRange(min = JRE.JAVA_21)
+    public void testVirtualThreadSupport(boolean enableSupport) throws Exception {
+
+      ExecutorService exec =
+          (ExecutorService)
+              Executors.class.getMethod("newVirtualThreadPerTaskExecutor").invoke(null);
+
+      try (OpenTelemetrySdk sdk =
+          initSdk(builder -> builder.virtualThreadSupportEnabled(enableSupport))) {
+
+        exec.submit(
+                () -> {
+                  Tracer tracer = sdk.getTracer("test-tracer");
+
+                  Span span = tracer.spanBuilder("first").startSpan();
+
+                  checkTlsIs(Span.getInvalid(), null);
+                  try (Scope s1 = span.makeCurrent()) {
+                    Thread.yield();
+                    if (enableSupport) {
+                      checkTlsIs(span, span);
+                    } else {
+                      checkTlsIs(Span.getInvalid(), null);
+                    }
+                  }
+                })
+            .get();
       }
     }
 

@@ -78,6 +78,8 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
 
   private static boolean anyInstanceActive = false;
 
+  final boolean tryEnableVirtualThreadSupport;
+
   // Visible for testing
   final SpanProfilingSamplesCorrelator correlator;
   private final ScheduledExecutorService messagePollAndSpanFlushExecutor;
@@ -97,10 +99,12 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
       Resource serviceResource,
       int bufferSize,
       boolean activeOnlyAfterProfilerRegistration,
+      boolean virtualThreadSupportEnabled,
       String socketDir,
       LongSupplier nanoClock) {
     super(next);
     synchronized (UniversalProfilingProcessor.class) {
+      this.tryEnableVirtualThreadSupport = virtualThreadSupportEnabled;
       if (anyInstanceActive) {
         throw new IllegalStateException(
             "Another instance has already been started and not stopped yet."
@@ -110,10 +114,9 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
       long initialSpanDelay;
       if (activeOnlyAfterProfilerRegistration) {
         initialSpanDelay = 0; // do not buffer spans until we know that a profiler is running
-        tlsPropagationActive = false;
       } else {
         initialSpanDelay = INITIAL_SPAN_DELAY_NANOS; // delay conservatively to not miss any data
-        tlsPropagationActive = true;
+        enableTlsPropagation();
       }
 
       correlator =
@@ -143,6 +146,25 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
       }
       anyInstanceActive = true;
     }
+  }
+
+  private synchronized void enableTlsPropagation() {
+    if (tlsPropagationActive) {
+      return;
+    }
+    try {
+      log.log(
+          Level.FINE,
+          "Setting virtual thread support to {0}",
+          new Object[] {tryEnableVirtualThreadSupport});
+      UniversalProfilingCorrelation.setVirtualThreadSupportEnabled(tryEnableVirtualThreadSupport);
+    } catch (Exception e) {
+      log.log(
+          Level.SEVERE,
+          "Could not enable virtual thread support, correlation will only work for platform threads",
+          e);
+    }
+    tlsPropagationActive = true;
   }
 
   private String openProfilerSocket(String socketDir) {
@@ -277,7 +299,7 @@ public class UniversalProfilingProcessor extends AbstractChainingSpanProcessor {
         "Received profiler registration message! host.id is {0} and the span delay is {1} ms",
         new Object[] {message.getHostId(), message.getSamplesDelayMillis()});
 
-    tlsPropagationActive = true;
+    enableTlsPropagation();
     long spanDelayNanos =
         Duration.ofMillis(message.getSamplesDelayMillis() + POLL_FREQUENCY_MS).toNanos();
     correlator.setSpanBufferDurationNanos(spanDelayNanos);

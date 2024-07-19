@@ -57,6 +57,11 @@ public class JvmtiAccess {
     JvmtiAccessImpl.setThreadProfilingCorrelationBuffer0(storage);
   }
 
+  static void setProfilingCorrelationVirtualThreadSupportEnabled(boolean enable) {
+    ensureInitialized();
+    JvmtiAccessImpl.setProfilingCorrelationVirtualThreadSupportEnabled0(enable);
+  }
+
   /**
    * Starts the socket for receiving universal profiler messages on the given filepath. Note that
    * the path has a limitation of about 100 characters, see <a
@@ -106,7 +111,7 @@ public class JvmtiAccess {
         }
       case LOADED:
         try {
-          // TODO: call an initialization method and check the results
+          JvmtiAccessImpl.init0();
           state = State.INITIALIZED;
         } catch (Throwable t) {
           logger.log(Level.SEVERE, "Failed to initialize jvmti native library", t);

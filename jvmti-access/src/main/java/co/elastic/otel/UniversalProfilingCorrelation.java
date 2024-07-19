@@ -31,9 +31,10 @@ import javax.annotation.Nullable;
 
 public class UniversalProfilingCorrelation {
 
-  private static final MethodHandle VIRTUAL_CHECKER = generateVirtualChecker();
+  private static final MethodHandle THREAD_IS_VIRTUAL = generateVirtualChecker();
 
   private static ThreadLocal<ByteBuffer> threadStorage;
+  private static volatile boolean virtualThreadSupportEnabled = false;
 
   // We hold a reference to the configured processStorage to make sure it is not GCed
   private static ByteBuffer processStorage;
@@ -60,11 +61,23 @@ public class UniversalProfilingCorrelation {
     processStorage = buffer;
   }
 
+  public static synchronized void setVirtualThreadSupportEnabled(boolean enable) {
+    if (THREAD_IS_VIRTUAL == null) {
+      // JVM does not have virtual threads, so this method is a NoOp
+      return;
+    }
+    if (virtualThreadSupportEnabled == enable) {
+      return;
+    }
+    JvmtiAccess.setProfilingCorrelationVirtualThreadSupportEnabled(enable);
+    virtualThreadSupportEnabled = enable;
+  }
+
   @Nullable
   public static ByteBuffer getCurrentThreadStorage(
       boolean allocateIfRequired, int expectedCapacity) {
-    if (isVirtual(Thread.currentThread())) {
-      return null; // virtual threads are not supported yet
+    if (!virtualThreadSupportEnabled && isVirtual(Thread.currentThread())) {
+      return null;
     }
     ByteBuffer buffer = threadStorage.get();
     if (buffer == null) {
@@ -86,9 +99,6 @@ public class UniversalProfilingCorrelation {
   }
 
   public static void removeCurrentThreadStorage() {
-    if (isVirtual(Thread.currentThread())) {
-      return; // virtual threads are not supported yet
-    }
     ByteBuffer buffer = threadStorage.get();
     if (buffer != null) {
       try {
@@ -160,11 +170,15 @@ public class UniversalProfilingCorrelation {
       processStorage = null;
       JvmtiAccess.setProfilingCorrelationProcessStorage(null);
     }
+    setVirtualThreadSupportEnabled(false);
   }
 
   private static boolean isVirtual(Thread thread) {
+    if (THREAD_IS_VIRTUAL == null) {
+      return false;
+    }
     try {
-      return (boolean) VIRTUAL_CHECKER.invokeExact(thread);
+      return (boolean) THREAD_IS_VIRTUAL.invokeExact(thread);
     } catch (Throwable e) {
       throw new IllegalStateException("isVirtual is not expected to throw exceptions", e);
     }
@@ -184,8 +198,7 @@ public class UniversalProfilingCorrelation {
       return MethodHandles.lookup().unreflect(isVirtual);
     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
       // virtual threads are not supported, therefore no thread is virtual
-      return MethodHandles.dropArguments(
-          MethodHandles.constant(boolean.class, false), 0, Thread.class);
+      return null;
     }
   }
 }

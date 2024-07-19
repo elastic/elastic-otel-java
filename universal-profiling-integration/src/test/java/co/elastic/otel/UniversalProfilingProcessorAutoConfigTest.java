@@ -21,6 +21,7 @@ package co.elastic.otel;
 import static co.elastic.otel.UniversalProfilingProcessorAutoConfig.BUFFER_SIZE_OPTION;
 import static co.elastic.otel.UniversalProfilingProcessorAutoConfig.ENABLED_OPTION;
 import static co.elastic.otel.UniversalProfilingProcessorAutoConfig.SOCKET_DIR_OPTION;
+import static co.elastic.otel.UniversalProfilingProcessorAutoConfig.VIRTUAL_THREAD_SUPPORT_OPTION;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import co.elastic.otel.testing.AutoConfigTestProperties;
@@ -70,6 +71,7 @@ public class UniversalProfilingProcessorAutoConfigTest {
                   .get();
 
       assertThat(processor.tlsPropagationActive).isFalse();
+      assertThat(processor.tryEnableVirtualThreadSupport).isEqualTo(true);
     }
   }
 
@@ -83,7 +85,8 @@ public class UniversalProfilingProcessorAutoConfigTest {
             .put("otel.service.name", "myservice")
             .put(ENABLED_OPTION, "true")
             .put(BUFFER_SIZE_OPTION, "256")
-            .put(SOCKET_DIR_OPTION, tempDirAbs)) {
+            .put(SOCKET_DIR_OPTION, tempDirAbs)
+            .put(VIRTUAL_THREAD_SUPPORT_OPTION, "false")) {
       OpenTelemetry otel = GlobalOpenTelemetry.get();
       List<SpanProcessor> processors = OtelReflectionUtils.getSpanProcessors(otel);
       UniversalProfilingProcessor processor =
@@ -95,6 +98,7 @@ public class UniversalProfilingProcessorAutoConfigTest {
 
       assertThat(processor.tlsPropagationActive).isTrue();
       assertThat(processor.socketPath).startsWith(tempDirAbs);
+      assertThat(processor.tryEnableVirtualThreadSupport).isEqualTo(false);
       assertThat(processor.correlator.delayedSpans.getBufferSize()).isEqualTo(256);
     }
   }
