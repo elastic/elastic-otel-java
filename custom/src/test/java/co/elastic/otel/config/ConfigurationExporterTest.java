@@ -43,7 +43,7 @@ public class ConfigurationExporterTest {
 
   @BeforeEach
   void setUp() {
-    currentDocumentationPath = Paths.get("../docs/configure.asciidoc");
+    currentDocumentationPath = Paths.get("../docs/migrate.asciidoc");
   }
 
   /**
@@ -69,7 +69,7 @@ public class ConfigurationExporterTest {
 
     assertThat(renderedDocumentation)
         .withFailMessage(
-            "The rendered configuration documentation (/docs/configure.asciidoc) is not up-to-date.\n"
+            "The rendered configuration documentation (/docs/migrate.asciidoc) is not up-to-date.\n"
                 + "If you see this error, it means you have to execute the tests locally with overwrite enabled "
                 + "(gradlew.bat clean :custom:test --tests \"*ConfigurationExporterTest\" -Pelastic.otel.overwrite.config.docs=true) "
                 + "which will update the rendered docs (and then you probably need to commit the change).\n")
@@ -84,13 +84,13 @@ public class ConfigurationExporterTest {
     cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
     cfg.setLogTemplateExceptions(false);
 
-    Template temp = cfg.getTemplate("configure.asciidoc.ftl");
+    Template temp = cfg.getTemplate("migrate.asciidoc.ftl");
     StringWriter tempRenderedFile = new StringWriter();
     tempRenderedFile.write(
-        "[[configure]]\n"
-            + "== Configure\n\n"
+        "[[migrate]]\n"
+            + "== Migrate to the Elastic distro\n\n"
             + "////\n"
-            + "This file is auto generated. Please only make changes in `configure.asciidoc.ftl`\n"
+            + "This file is auto generated. Please only make changes in `migrate.asciidoc.ftl`\n"
             + "////\n");
     final Map<String, List<ConfigurationOption>> optionsByCategory = new HashMap<>();
     optionsByCategory.put("Elastic to OpenTelemetry mapping", configurationRegistry);

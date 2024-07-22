@@ -1,150 +1,131 @@
 ////
-I'm confused about the goal of this doc.
+Goal of this doc:
+Provide a complete reference of all available configuration options and where/how they can be set. (Any Elastic-specific configuration options are listed directly. General OpenTelemetry configuration options are linked.)
 
-With a title like "Configure" I expected to see a list of the
-valid configuration options. Instead it seems to be a list of
-APM Java agent configuration options, and how to update them
-to migrate from the agent to the distro.
-
-Is the intention of this doc to be a migration guide from the APM Java
-agent to the Elastic Distribution for OpenTelemetry Java?
+Assumptions we're comfortable making about the reader:
+* They are familiar with Elastic
+* They are familiar with OpenTelemetry
 ////
 
 [[configure]]
-== Migrate?
+== Configure
 
-// I'll add this to the automation if we're sure we want this on every page.
 :language: Java
 :language_lc: java
 :distro_name: Elastic Distribution for OpenTelemetry {language}
 
 include::release-status.asciidoc[]
 
+////
+TO DO: How do users set configuration options?
+////
+[discrete]
+[[configure-methods]]
+=== Configuration methods
+
+////
+TO DO:
+Are there multiple ways to set configuration options?
+For example, can they use environment variables OR a config file?
+If there are, what are they and why would you use each method?
+Where/how do you use each method?
+Provide an example to illustrate the syntax.
+////
+
+////
+TO DO:
+If configuration options are defined using multiple methods,
+which one takes precedence over the other(s)?
+////
+
+[discrete]
+[[configuration-options]]
+=== Configuration options
+
+Because the Elastic Distribution for OpenTelemetry Java ("the distro") is an extension of the https://github.com/open-telemetry/opentelemetry-java-instrumentation[OpenTelemetry Java agent], it supports both:
+
+* General OpenTelemetry SDK configuration options
+* Elastic-specific configuration options that are only available when using the distro
+
+[discrete]
+[[configure-otel-sdk-options]]
+==== OpenTelemetry SDK configuration options
+
+////
+TO DO:
+Is this true?
+Are there any options that aren't supported?
+Any options that shouldn't be used?
+////
+The distro supports all configuration options listed in the https://opentelemetry.io/docs/languages/sdk-configuration/general/[OpenTelemetry General SDK Configuration documentation].
+
+////
+TO DO:
+Are there Elastic-specific custom configuration options
+in addition to the general OpenTelemetry SDK
+configuration options? Or are all the customizations
+"behind the scenes"?
+If not, you can delete this section.
+////
+[discrete]
+[[configure-distro-options]]
+==== Elastic-specific configuration options
+
+The distro supports the following Elastic-specific options:
+
+////
+List config options
+////
+
+////
+TO DO:
+Are there multiple authentication methods when sending data to Elastic?
+If not, delete this section.
+////
+[discrete]
+[[configure-auth-methods]]
+=== Authentication methods
+
+When sending data to Elastic, there are two ways you can authenticate: using a secret token or using an APM agent key.
+
+[discrete]
+[[configure-secret-token]]
+==== Use a secret token
+
+// TO DO: What is this?
+// ??
+
+// TO DO:Why would you choose this method?
+// ??
+
+// TO DO:How do you authenticate using this method?
+// ??
+
+[discrete]
+[[configure-api-key]]
+==== Use an APM agent key (API key)
+
+// ✅ What is this?
+It is also possible to authenticate to an Elastic Observability endpoint using
+an _APM agent key_. These are revocable API keys.
+
+// TO DO: Why would you choose this method?
+// ??
+
+// ✅ How do you authenticate using this method?
+To create and manage APM Agent keys in Kibana:
+
+. Go to *APM Settings*.
+. Select the *Agent Keys* tab.
+
+When using an APM Agent key, the `OTEL_EXPORTER_OTLP_HEADERS` is set using a
+different auth schema (`ApiKey` rather than `Bearer`). For example:
+
+////
+TO DO: Code example
+////
+
+
 :!language:
 :!language_lc:
 :!distro_name:
-
-////
-This file is auto generated. Please only make changes in `configure.asciidoc.ftl`
-////
-
-The Elastic Distribution for OpenTelemetry Java (the distro) supports the
-https://opentelemetry.io/docs/languages/sdk-configuration/general/[OpenTelemetry SDK configuration variables].
-
-This documentation describes how the https://www.elastic.co/guide/en/apm/agent/java/current/index.html[Elastic APM Java agent configuration options]
-map to the OpenTelemetry options.
-
-[discrete]
-[[option-reference]]
-=== Option reference
-
-This is a list of all configuration options grouped by their category.
-Click on a key to get more information.
-
-* <<server_url>>
-* <<server_urls>>
-* <<secret_token>>
-* <<api_key>>
-* <<service_name>>
-* <<enabled>>
-* <<service_version>>
-* <<environment>>
-* <<global_labels>>
-
-[discrete]
-[[category]]
-=== Elastic to OpenTelemetry mapping
-
-[discrete]
-[[server_url]]
-==== `server_url`
-
-The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-server-url[`server_url`] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_endpoint[`OTEL_EXPORTER_OTLP_ENDPOINT`] option.
-
-////
-This file is auto-generated. Please make changes in *Configuration.java (for example, CoreConfiguration.java) and execute ConfigurationExporter.
-////
-
-[discrete]
-[[server_urls]]
-==== `server_urls`
-
-The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-server-urls[`server_urls`] option has no equivalent OpenTelemetry option - you can only specify one endpoint. Use https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_endpoint[OTEL_EXPORTER_OTLP_ENDPOINT] instead.
-
-////
-This file is auto-generated. Please make changes in *Configuration.java (for example, CoreConfiguration.java) and execute ConfigurationExporter.
-////
-
-[discrete]
-[[secret_token]]
-==== `secret_token`
-
-The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-secret-token[`secret_token`] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_headers[OTEL_EXPORTER_OTLP_HEADERS] option. For example: `OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer an_apm_secret_token"`.
-
-////
-This file is auto-generated. Please make changes in *Configuration.java (for example, CoreConfiguration.java) and execute ConfigurationExporter.
-////
-
-[discrete]
-[[api_key]]
-==== `api_key`
-
-The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-reporter.html#config-api-key[`api_key`] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_headers[OTEL_EXPORTER_OTLP_HEADERS] option. For example:`OTEL_EXPORTER_OTLP_HEADERS="Authorization=ApiKey an_api_key"`.
-
-////
-This file is auto-generated. Please make changes in *Configuration.java (for example, CoreConfiguration.java) and execute ConfigurationExporter.
-////
-
-[discrete]
-[[service_name]]
-==== `service_name`
-
-The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-service-name[`service_name`] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_service_name[OTEL_SERVICE_NAME] option. The service name value can also be set using https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes[OTEL_RESOURCE_ATTRIBUTES], for example, `OTEL_RESOURCE_ATTRIBUTES=service.name=myservice`. If `OTEL_SERVICE_NAME` is set, it takes precedence over the resource attribute.
-
-////
-This file is auto-generated. Please make changes in *Configuration.java (for example, CoreConfiguration.java) and execute ConfigurationExporter.
-////
-
-[discrete]
-[[enabled]]
-==== `enabled`
-
-The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-enabled[`enabled`] option corresponds to the OpenTelemetry https://opentelemetry.io/docs/languages/java/automatic/agent-config/#suppressing-specific-auto-instrumentation[OTEL_JAVAAGENT_ENABLED] option.
-
-////
-This file is auto-generated. Please make changes in *Configuration.java (for example, CoreConfiguration.java) and execute ConfigurationExporter.
-////
-
-[discrete]
-[[service_version]]
-==== `service_version`
-
-The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-service-version[`service_version`] option corresponds to setting the `service.version` key in https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes[OTEL_RESOURCE_ATTRIBUTES]. For example: `OTEL_RESOURCE_ATTRIBUTES=service.version=1.2.3`.
-
-////
-This file is auto-generated. Please make changes in *Configuration.java (for example, CoreConfiguration.java) and execute ConfigurationExporter.
-////
-
-[discrete]
-[[environment]]
-==== `environment`
-
-The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-environment[`environment`] option corresponds to setting the `deployment.environment` key in https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes[OTEL_RESOURCE_ATTRIBUTES]. For example: `OTEL_RESOURCE_ATTRIBUTES=deployment.environment=testing`.
-
-////
-This file is auto-generated. Please make changes in *Configuration.java (for example, CoreConfiguration.java) and execute ConfigurationExporter.
-////
-
-[discrete]
-[[global_labels]]
-==== `global_labels`
-
-The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-global-labels[`global_labels`] option corresponds to adding `key=value` comma separated pairs in https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes[OTEL_RESOURCE_ATTRIBUTES]. For example: `OTEL_RESOURCE_ATTRIBUTES=alice=first,bob=second`. Such labels will result in labels.key=value attributes on the server, eg labels.alice=first
-
-////
-This file is auto-generated. Please make changes in *Configuration.java (for example, CoreConfiguration.java) and execute ConfigurationExporter.
-////
-
-
-
-// Elastic to OpenTelemetry mapping
