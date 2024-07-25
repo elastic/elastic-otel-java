@@ -17,26 +17,72 @@ Assumptions we're comfortable making about the reader:
 include::release-status.asciidoc[]
 
 ////
-TO DO: How do users set configuration options?
+✅ How users set configuration options
 ////
 [discrete]
 [[configure-methods]]
 === Configuration methods
 
-////
-TO DO:
-Are there multiple ways to set configuration options?
-For example, can they use environment variables OR a config file?
-If there are, what are they and why would you use each method?
-Where/how do you use each method?
-Provide an example to illustrate the syntax.
-////
+OpenTelemetry configuration options should be set using one of the mechanisms listed in the
+https://opentelemetry.io/docs/zero-code/java/agent/configuration/[OpenTelemetry documentation],
+including:
 
-////
-TO DO:
-If configuration options are defined using multiple methods,
-which one takes precedence over the other(s)?
-////
+* <<configure-system-properties>>
+* <<configure-environment-variables>>
+* <<configure-configuration-file>>
+
+// ✅ Order of precedence
+Configuration options set using environment variables take precedence over system properties, and
+system properties take precedence over configuration options set using file properties.
+
+[discrete]
+[[configure-environment-variables]]
+==== Environment variables
+
+// ✅ What and why
+The distro can be configured using environment variables.
+This is a cross-platform way to configure the distro and is especially useful in containerized environments.
+
+// ✅ How
+Define environment variables before the start of the JVM:
+
+[source,sh]
+----
+export OTEL_SERVICE_NAME=my-service
+java ...
+----
+
+[discrete]
+[[configure-system-properties]]
+==== System properties
+
+// ✅ What and why
+The distro can be configured using system properties.
+These configuration options can be seen by anything that can see the executed command-line.
+
+// ✅ How
+Define system properties need at the JVM start, usually on the command-line:
+
+[source,sh]
+----
+java -Dotel.service.name=my-service ...
+----
+
+[discrete]
+[[configure-configuration-file]]
+==== Configuration file
+
+// ✅ What and why
+The distro can be configured using a configuration file.
+
+// ✅ How
+Create and populate the configuration file before the JVM is started, and specify where properties are defined at the JVM start:
+
+[source,sh]
+----
+echo otel.service.name=my-service > my.properties
+java -Dotel.javaagent.configuration-file=my.properties ...
+----
 
 [discrete]
 [[configuration-options]]
@@ -51,66 +97,48 @@ Because the Elastic Distribution for OpenTelemetry Java ("the distro") is an ext
 [[configure-otel-sdk-options]]
 ==== OpenTelemetry SDK configuration options
 
-////
-TO DO:
-Is this true?
-Are there any options that aren't supported?
-Any options that shouldn't be used?
-////
 The distro supports all configuration options listed in the https://opentelemetry.io/docs/languages/sdk-configuration/general/[OpenTelemetry General SDK Configuration documentation].
 
 ////
 TO DO:
-Are there Elastic-specific custom configuration options
-in addition to the general OpenTelemetry SDK
-configuration options? Or are all the customizations
-"behind the scenes"?
-If not, you can delete this section.
+Does this approach and language make sense?
 ////
 [discrete]
 [[configure-distro-options]]
-==== Elastic-specific configuration options
+==== Elastic distro configuration options
 
-The distro supports the following Elastic-specific options:
+In addition to general OpenTelemetry SDK configuration options, there are two kinds
+of configuration options that are only available in the {distro_name}:
 
-////
-List config options
-////
+* Additional `OTEL_` options that Elastic plans to contribute upstream to the https://opentelemetry.io/docs/languages/{language_lc}[OpenTelemetry SDK for {language}], but are not yet available in the OpenTelemetry SDK for {language}.
+* `ELASTIC_OTEL_` options that are specific to Elastic and will always live in the {distro_name} (in other words, it will _not_ be added upstream).
 
 ////
 TO DO:
-Are there multiple authentication methods when sending data to Elastic?
-If not, delete this section.
+List config options instead of linking to the README
+////
+Read more about configuration options that are only available in the distro in [the elastic/elastic-otel-java README](https://github.com/elastic/elastic-otel-java?tab=readme-ov-file#features).
+
+////
+✅ List auth methods
 ////
 [discrete]
 [[configure-auth-methods]]
 === Authentication methods
 
-When sending data to Elastic, there are two ways you can authenticate: using a secret token or using an APM agent key.
+When sending data to Elastic, there are two ways you can authenticate: using an APM agent key or using a secret token.
 
-[discrete]
-[[configure-secret-token]]
-==== Use a secret token
-
-// TO DO: What is this?
-// ??
-
-// TO DO:Why would you choose this method?
-// ??
-
-// TO DO:How do you authenticate using this method?
-// ??
+Both the distro and APM Server must be configured with the same secret token for the request to be accepted.
 
 [discrete]
 [[configure-api-key]]
 ==== Use an APM agent key (API key)
 
-// ✅ What is this?
+// ✅ What and why
 It is also possible to authenticate to an Elastic Observability endpoint using
-an _APM agent key_. These are revocable API keys.
-
-// TO DO: Why would you choose this method?
-// ??
+an {observability-guide}/apm-api-key.html[APM agent key].
+APM agent keys are revocable, you can have more than one of them, and
+you can add or remove them without restarting APM Server.
 
 // ✅ How do you authenticate using this method?
 To create and manage APM Agent keys in Kibana:
@@ -121,10 +149,40 @@ To create and manage APM Agent keys in Kibana:
 When using an APM Agent key, the `OTEL_EXPORTER_OTLP_HEADERS` is set using a
 different auth schema (`ApiKey` rather than `Bearer`). For example:
 
-////
-TO DO: Code example
-////
+// ✅ Code example
+[source,sh]
+----
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://my-deployment.apm.us-west1.gcp.cloud.es.io
+export OTEL_EXPORTER_OTLP_HEADERS="Authorization=ApiKey TkpXUkx...dVZGQQ=="
+----
 
+[discrete]
+[[configure-secret-token]]
+==== Use a secret token
+
+// ✅ What and why
+{observability-guide}/apm-secret-token.html[Secret tokens] are used to authorize requests to the APM Server.
+
+// ✅ How do you authenticate using this method?
+// tag::get-auth[]
+You can find the values of these variables in {kib}'s APM tutorial.
+In {kib}:
+
+. Go to *Setup guides*.
+. Select *Observability*.
+. Select *Monitor my application performance*.
+. Scroll down and select the *OpenTelemetry* option.
+. The appropriate values for `OTEL_EXPORTER_OTLP_ENDPOINT` and
+`OTEL_EXPORTER_OTLP_HEADERS` are shown there.
++
+For example:
++
+[source,sh]
+----
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://my-deployment.apm.us-west1.gcp.cloud.es.io
+export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer P....l"
+----
+// end::get-auth[]
 
 :!language:
 :!language_lc:
