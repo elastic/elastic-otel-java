@@ -73,7 +73,7 @@ public class LegacyConfigurations {
         "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-environment[`environment`] option corresponds to setting the `deployment.environment` key in https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes[OTEL_RESOURCE_ATTRIBUTES]. For example: `OTEL_RESOURCE_ATTRIBUTES=deployment.environment=testing`.");
     addDocumentationOption(
         "global_labels",
-        "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-global-labels[`global_labels`] option corresponds to adding `key=value` comma separated pairs in https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes[OTEL_RESOURCE_ATTRIBUTES]. For example: `OTEL_RESOURCE_ATTRIBUTES=alice=first,bob=second`. Such labels will result in labels.key=value attributes on the server, eg labels.alice=first");
+        "The Elastic https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-global-labels[`global_labels`] option corresponds to adding `key=value` comma separated pairs in https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes[OTEL_RESOURCE_ATTRIBUTES]. For example: `OTEL_RESOURCE_ATTRIBUTES=alice=first,bob=second`. Such labels will result in labels.key=value attributes on the server, e.g. labels.alice=first");
     addUnspecifiedOption("log_level");
     addUnspecifiedOption("log_file");
     addUnspecifiedOption("log_file_size");

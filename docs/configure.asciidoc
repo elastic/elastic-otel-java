@@ -117,7 +117,7 @@ of configuration options that are only available in the {distro_name}:
 TO DO:
 List config options instead of linking to the README
 ////
-Read more about configuration options that are only available in the distro in [the elastic/elastic-otel-java README](https://github.com/elastic/elastic-otel-java?tab=readme-ov-file#features).
+Read more about configuration options that are only available in the distro in https://github.com/elastic/elastic-otel-java?tab=readme-ov-file#features[the elastic/elastic-otel-java README].
 
 ////
 ✅ List auth methods
@@ -141,7 +141,7 @@ APM agent keys are revocable, you can have more than one of them, and
 you can add or remove them without restarting APM Server.
 
 // ✅ How do you authenticate using this method?
-To create and manage APM Agent keys in Kibana:
+To create and manage APM Agent keys in {kib}:
 
 . Go to *APM Settings*.
 . Select the *Agent Keys* tab.

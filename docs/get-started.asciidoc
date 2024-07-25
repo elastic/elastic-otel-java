@@ -40,11 +40,12 @@ Before getting started, you'll need somewhere to send the gathered OpenTelemetry
 [%collapsible]
 .*Expand for setup instructions*
 ====
-This section shows how to create an https://www.elastic.co/observability[Elastic Observability] cloud deployment and get the data you need to configure the distro to send data to it.
+To create your first Elastic Observability deployment:
 
-. Register at https://cloud.elastic.co/registration[cloud.elastic.co], if you haven't already. This supports starting **free trial**.
-. After registering, click *Create deployment* at `<https://cloud.elastic.co/home>`.
-. Once that is created, click *Open* to visit your Kibana home page, e.g. `https://{DEPLOYMENT_NAME}.kb.{REGION}.cloud.es.io/app/home#/getting_started`.
+. Sign up for a https://cloud.elastic.co/registration[free Elastic Cloud trial] or sign into an existing account.
+. Go to https://cloud.elastic.co/home.
+. Click *Create deployment*.
+. When the deployment is ready, click *Open* to visit your {kib} home page (for example, `https://{DEPLOYMENT_NAME}.kb.{REGION}.cloud.es.io/app/home#/getting_started`).
 ====
 
 ////
