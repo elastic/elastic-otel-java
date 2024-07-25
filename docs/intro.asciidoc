@@ -46,7 +46,7 @@ TO DO:
 These are true for the .NET distro,
 are they also true for the Java distro?
 ////
-* Elastic-specific processors that ensure optimal compatibility when exporting OpenTelemetry signal data to an Elastic backend like Elastic APM server.
+* Elastic-specific processors that ensure optimal compatibility when exporting OpenTelemetry signal data to an Elastic backend like Elastic Observability deployment.
 * Preconfigures the collection of tracing and metrics signals, applying some opinionated defaults, such as which sources are collected by default.
 * Ensures that the OpenTelemetry protocol (OTLP) exporter is enabled by default.
 
