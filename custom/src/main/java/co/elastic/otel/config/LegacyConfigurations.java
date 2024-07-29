@@ -80,6 +80,7 @@ public class LegacyConfigurations {
     addUnspecifiedOption("log_format_sout");
     addUnspecifiedOption("log_format_file");
 
+    addUnspecifiedOption("capture_http_client_request_body_size");
     addUnspecifiedOption("thread_dump_interval");
     addUnspecifiedOption("universal_profiling_integration_enabled");
     addUnspecifiedOption("universal_profiling_integration_buffer_size");
