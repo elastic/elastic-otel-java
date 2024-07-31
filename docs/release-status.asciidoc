@@ -1,9 +1,0 @@
-.Alpha release
-[WARNING]
-====
-The {distro_name} is not yet recommended for production use.
-Functionality may be changed or removed in future releases.
-Alpha releases are not subject to the support SLA of official GA features.
-
-We welcome your feedback! You can reach us by https://github.com/elastic/elastic-otel-{language_lc}/issues[opening a GitHub issue] or starting a discussion thread on the https://discuss.elastic.co/tags/c/observability/apm/58/{language_lc}[Elastic Discuss forum].
-====
