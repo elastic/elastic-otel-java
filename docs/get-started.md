@@ -1,33 +1,20 @@
 <!--
 Goal of this doc:
 The user is able to successfully see data from their Java application make it to the Elastic UI via the Elastic Distribution for OpenTelemetry Java
-
-Assumptions we're comfortable making about the reader:
-* They are familiar with Elastic?
-* They are familiar with OpenTelemetry?
-* They have Java installed
 -->
 
 # Get started
 
-> [!WARNING]
-> The Elastic Distribution for OpenTelemetry Java is not yet recommended for production use. Functionality may be changed or removed in future releases. Alpha releases are not subject to the support SLA of official GA features.
->
-> We welcome your feedback! You can reach us by [opening a GitHub issue](https://github.com/elastic/elastic-otel-java/issues) or starting a discussion thread on the [Elastic Discuss forum](https://discuss.elastic.co/tags/c/observability/apm/58/java).
+This guide shows you how to use the Elastic Distribution for OpenTelemetry Java (the distro) to instrument your Java application and send OpenTelemetry data to an Elastic Observability deployment.
 
-This guide shows you how to use the Elastic Distribution for OpenTelemetry Java ("the distro") to instrument your Java application and send OpenTelemetry data to an Elastic Observability deployment.
+**Already familiar with OpenTelemetry?** It's an explicit goal of this distribution to introduce _no new concepts_ outside those defined by the wider OpenTelemetry community.
 
-This doc will guide you through the minimal configuration options to get the Elastic distro set up in your application.
-You do _not_ need any existing experience with OpenTelemetry to set up the Elastic distro initially.
-If you need more control over your configuration after getting set up, you can learn more in [OpenTelemetry SDK documentation](https://opentelemetry.io/docs/languages/java/).
-
-> [!NOTE]
-> As an OpenTelemetry SDK, the distro supports sending data to any OpenTelemetry protocol (OTLP) endpoint ([OpenTelemetry Collector](https://opentelemetry.io/docs/collector/)), but this guide assumes you are sending data to Elastic.
+**New to OpenTelemetry?** This section will guide you through the _minimal_ configuration options to get the Elastic distro set up in your application. You do _not_ need any existing experience with OpenTelemetry to set up the Elastic distro initially. If you need more control over your configuration after getting set up, you can learn more in the [OpenTelemetry documentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation).
 
 <!-- ✅ What the user needs to know and/or do before they install the distro -->
 ## Prerequisites
 
-Before getting started, you'll need somewhere to send the gathered OpenTelemetry data, so it can be viewed and analyzed. This doc assumes you're using an [Elastic Observability](https://www.elastic.co/observability) cloud deployment. You can use an existing one or set up a new one.
+Before getting started, you'll need somewhere to send the gathered OpenTelemetry data, so it can be viewed and analyzed. The distro supports sending data to any OpenTelemetry protocol (OTLP) endpoint, but this guide assumes you are sending data to an [Elastic Observability](https://www.elastic.co/observability) cloud deployment. You can use an existing one or set up a new one.
 
 <details>
 <summary><strong>Expand for setup instructions</strong></summary>
@@ -53,14 +40,6 @@ To get started with the distro:
     java -javaagent:/path/to/agent.jar \
     -jar myapp.jar
     ```
-
-<!--
-This is true for the .NET distro,
-is it also true for the Java distro?
-
-> [!NOTE]
-> The distro includes a transitive dependency on the OpenTelemetry SDK, so you do not _need_ to add the OpenTelemetry SDK package to your project directly. However, you _can_ explicitly add the OpenTelemetry SDK as a dependency if you want to opt into newer SDK versions. If you do this, the OpenTelemetry SDK dependency must be defined _before_ the Elastic Distribution for OpenTelemetry Java is defined.
--->
 
 <!-- ✅ Start-to-finish operation -->
 ## Send data to Elastic

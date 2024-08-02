@@ -1,18 +1,9 @@
 <!--
 Goal of this doc:
 Provide a complete reference of all available configuration options and where/how they can be set. (Any Elastic-specific configuration options are listed directly. General OpenTelemetry configuration options are linked.)
-
-Assumptions we're comfortable making about the reader:
-* They are familiar with Elastic
-* They are familiar with OpenTelemetry
 -->
 
 # Configure
-
-> [!WARNING]
-> The Elastic Distribution for OpenTelemetry Java is not yet recommended for production use. Functionality may be changed or removed in future releases. Alpha releases are not subject to the support SLA of official GA features.
->
-> We welcome your feedback! You can reach us by [opening a GitHub issue](https://github.com/elastic/elastic-otel-java/issues) or starting a discussion thread on the [Elastic Discuss forum](https://discuss.elastic.co/tags/c/observability/apm/58/java).
 
 <!-- ✅ How users set configuration options -->
 ## Configuration methods
@@ -89,20 +80,19 @@ Does this approach and language make sense?
 In addition to general OpenTelemetry SDK configuration options, there are two kinds
 of configuration options that are only available in the Elastic Distribution for OpenTelemetry Java:
 
-* Additional `OTEL_` options that Elastic plans to contribute upstream to the [OpenTelemetry SDK for Java](https://opentelemetry.io/docs/languages/java), but are not yet available in the OpenTelemetry SDK for Java.
+* Additional `OTEL_` options that Elastic plans to contribute upstream to the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation), but are not yet available in the OpenTelemetry Java agent.
 * `ELASTIC_OTEL_` options that are specific to Elastic and will always live in the Elastic Distribution for OpenTelemetry Java (in other words, it will _not_ be added upstream).
 
 <!--
 TO DO:
 List config options instead of linking to the README
 -->
-Read more about configuration options that are only available in the distro in [the elastic/elastic-otel-java README](https://github.com/elastic/elastic-otel-java?tab=readme-ov-file#features).
+Find a list of configuration options that are only available in the Elastic distro in [README](https://github.com/elastic/elastic-otel-java?tab=readme-ov-file#features).
 
 <!-- ✅ List auth methods -->
 ## Authentication methods
 
 When sending data to Elastic, there are two ways you can authenticate: using an APM agent key or using a secret token.
-
 Both the distro and APM Server must be configured with the same secret token for the request to be accepted.
 
 ### Use an APM agent key (API key)
@@ -116,8 +106,8 @@ you can add or remove them without restarting APM Server.
 <!-- ✅ How do you authenticate using this method? -->
 To create and manage APM Agent keys in Kibana:
 
-. Go to *APM Settings*.
-. Select the *Agent Keys* tab.
+1. Go to **APM Settings**.
+1. Select the **Agent Keys** tab.
 
 When using an APM Agent key, the `OTEL_EXPORTER_OTLP_HEADERS` is set using a
 different auth schema (`ApiKey` rather than `Bearer`). For example:
