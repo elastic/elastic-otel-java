@@ -1,7 +1,7 @@
 # Migrate to the Elastic distro
 
 <!--
-This file is auto generated. Please only make changes in `migrate.asciidoc.ftl`
+This file is auto generated. Please only make changes in `migrate.md.ftl`
 -->
 
 This documentation describes how applications using the [Elastic APM Java agent](https://www.elastic.co/guide/en/apm/agent/java/current/index.html) can be updated to use the Elastic Distribution for OpenTelemetry Java ("the distro").
