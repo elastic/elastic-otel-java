@@ -9,7 +9,7 @@ This guide shows you how to use the Elastic Distribution for OpenTelemetry Java 
 
 **Already familiar with OpenTelemetry?** It's an explicit goal of this distribution to introduce _no new concepts_ outside those defined by the wider OpenTelemetry community.
 
-**New to OpenTelemetry?** This section will guide you through the _minimal_ configuration options to get the Elastic distro set up in your application. You do _not_ need any existing experience with OpenTelemetry to set up the Elastic distro initially. If you need more control over your configuration after getting set up, you can learn more in the [OpenTelemetry documentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation).
+**New to OpenTelemetry?** This section will guide you through the _minimal_ configuration options to get the Elastic distro set up in your application. You do _not_ need any existing experience with OpenTelemetry to set up the Elastic distro initially. If you need more control over your configuration after getting set up, you can learn more in the [OpenTelemetry documentation](https://opentelemetry.io/docs/zero-code/java/agent/).
 
 <!-- ✅ What the user needs to know and/or do before they install the distro -->
 ## Prerequisites
@@ -35,7 +35,6 @@ To get started with the distro:
 
 1. Download the [latest release](https://mvnrepository.com/artifact/co.elastic.otel/elastic-otel-javaagent/latest).
 1. Run the distro using the `-javaagent:` JVM argument with the path to the distro jar:
-
     ```bash
     java -javaagent:/path/to/agent.jar \
     -jar myapp.jar
@@ -67,7 +66,6 @@ In Kibana:
 1. Scroll down and select the **OpenTelemetry** option.
 1. The appropriate values for `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS` are shown there.
   For example:
-
     ```sh
     export OTEL_EXPORTER_OTLP_ENDPOINT=https://my-deployment.apm.us-west1.gcp.cloud.es.io
     export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer P....l"
@@ -83,8 +81,8 @@ To confirm that the distro has successfully connected to Elastic:
 It can take several minutes after initializing the distro for the service to show up in this list.
 1. Click on the name in the list to see trace data.
 
-    > [!NOTE]
-    > There may be no trace data to visualize unless you have _used_ your application since initializing the distro.
+> [!NOTE]
+> There may be no trace data to visualize unless you have _used_ your application since initializing the distro.
 
 <!-- ✅ What they should do next -->
 ## Next steps
