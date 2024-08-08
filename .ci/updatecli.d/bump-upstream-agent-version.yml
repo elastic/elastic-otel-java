@@ -76,6 +76,7 @@ targets:
       replacepattern: $1"{{ source "upstream-agent-version" }}-alpha"
 
   update-contrib-version:
+    dependson: [update-agent-version]
     name: "Update OpenTelemetry Contrib version"
     conditionids: [update-required]
     sourceid: contrib-version
@@ -87,6 +88,7 @@ targets:
       replacepattern: $1"{{ source "contrib-version" }}"
 
   update-semconv-version:
+    dependson: [update-contrib-version]
     name: "Update OpenTelemetry SemConv version"
     conditionids: [update-required]
     sourceid: semconv-version
