@@ -46,7 +46,6 @@ targets:
 
   update-agent-version:
     name: "Update upstream OpenTelemetry agent version and related dependencies"
-    conditionids: [update-required]
     disablesourceinput: true
     # There is an updatecli toml target kind, however that one currently hast the limitation of erasing comments,
     # which we don't want
