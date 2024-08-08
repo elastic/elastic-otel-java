@@ -10,7 +10,6 @@
 
 The Elastic Distribution for OpenTelemetry Java (the distro) is an extension of the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation). Use the distro to start the OpenTelemetry SDK with your Java application, and automatically capture tracing data, performance metrics, and logs. Traces, metrics, and logs can be sent to any OpenTelemetry Protocol (OTLP) collector you choose.
 
-<!-- TODO: Are these accurate? -->
 With the Elastic distro you have access to all the features of the OpenTelemetry Java agent plus:
 
 * Access to SDK improvements and bug fixes contributed by the Elastic team _before_ the changes are available upstream in OpenTelemetry repositories.
