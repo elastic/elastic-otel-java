@@ -1,0 +1,34 @@
+name: Upgrade the upstream agent version and related transitive dependencies
+
+sources:
+
+  otel-agent-version:
+    kind: githubrelease
+    spec:
+      owner: open-telemetry
+      repository: opentelemetry-java-instrumentation
+      token: '{{ requiredEnv "GITHUB_TOKEN" }}'
+      typefilter:
+        latest: true
+    transformers:
+      - trimprefix: "v"
+
+  semconv-version:
+    dependson: [otel-agent-version]
+    kind: file
+    spec:
+      file: https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-instrumentation/v{{ source "otel-agent-version" }}/dependencyManagement/build.gradle.kts
+    transformers:
+      - findsubmatch:
+          pattern: val\s+semConvVersion\s*=\s*"([^"]*)
+          captureindex: 1
+
+  contrib-version:
+    dependson: [otel-agent-version]
+    kind: file
+    spec:
+      file: https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-instrumentation/v{{ source "otel-agent-version" }}/dependencyManagement/build.gradle.kts
+    transformers:
+      - findsubmatch:
+          pattern: val\s+otelContribVersion\s*=\s*"([^"]*)
+          captureindex: 1
