@@ -14,13 +14,13 @@ opentelemetryJavaagentAlpha = "2.4.0-alpha"
 
 # otel contrib
 # updated from upstream agent with .ci/update-upstream.sh
-opentelemetryContribAlpha = "1.33.0-alpha"
+opentelemetryContribAlpha = "1.36.0-alpha"
 
 # otel semconv
 # updated from upstream agent with .ci/update-upstream.sh
 # While the semconv stable artifact is provided transitively by the agent, we still have to explicitly
 # reference the "incubating" version explicitly
-opentelemetrySemconvAlpha = "1.24.0-alpha"
+opentelemetrySemconvAlpha = "1.25.0-alpha"
 
 [libraries]
 
