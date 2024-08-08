@@ -1,8 +1,20 @@
 name: Upgrade the upstream agent version and related transitive dependencies
 
+scms:
+  githubConfig:
+    kind: github
+    spec:
+      user: '{{ requiredEnv "GITHUB_ACTOR" }}'
+      owner: JonasKunz
+      repository: elastic-otel-java
+      token: '{{ requiredEnv "GITHUB_TOKEN" }}'
+      username: '{{ requiredEnv "GITHUB_ACTOR" }}'
+      branch: main
+      commitusingapi: true
+
 sources:
 
-  otel-agent-version:
+  upstream-agent-version:
     kind: githubrelease
     spec:
       owner: open-telemetry
@@ -13,22 +25,71 @@ sources:
     transformers:
       - trimprefix: "v"
 
+  distro-otel-agent-version:
+    kind: toml
+    scmid: githubConfig
+    spec:
+      file: gradle/libs.versions.toml
+      key: versions.opentelemetryJavaagentAlpha
+
   semconv-version:
-    dependson: [otel-agent-version]
+    dependson: [upstream-agent-version]
     kind: file
     spec:
-      file: https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-instrumentation/v{{ source "otel-agent-version" }}/dependencyManagement/build.gradle.kts
+      file: https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-instrumentation/v{{ source "upstream-agent-version" }}/dependencyManagement/build.gradle.kts
     transformers:
       - findsubmatch:
           pattern: val\s+semConvVersion\s*=\s*"([^"]*)
           captureindex: 1
 
   contrib-version:
-    dependson: [otel-agent-version]
+    dependson: [upstream-agent-version]
     kind: file
     spec:
-      file: https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-instrumentation/v{{ source "otel-agent-version" }}/dependencyManagement/build.gradle.kts
+      file: https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-instrumentation/v{{ source "upstream-agent-version" }}/dependencyManagement/build.gradle.kts
     transformers:
       - findsubmatch:
           pattern: val\s+otelContribVersion\s*=\s*"([^"]*)
           captureindex: 1
+
+conditions:
+  update-required:
+    disablesourceinput: true
+    kind: shell
+    spec:
+      command: test "{{ source "upstream-agent-version" }}-alpha" != "{{ source "distro-otel-agent-version" }}"
+
+targets:
+
+  update-agent-version:
+    name: "Update upstream OpenTelemetry agent version"
+    conditionids: [update-required]
+    sourceid: upstream-agent-version
+    kind: file # toml action currently erases comments, so we fallback to regex-replace
+    scmid: githubConfig
+    spec:
+      file: gradle/libs.versions.toml
+      matchpattern: (opentelemetryJavaagentAlpha\s*=\s*)"(.*)"
+      replacepattern: $1"{{ source "upstream-agent-version" }}-alpha"
+
+  update-contrib-version:
+    name: "Update OpenTelemetry Contrib version"
+    conditionids: [update-required]
+    sourceid: contrib-version
+    kind: file # toml action currently erases comments, so we fallback to regex-replace
+    scmid: githubConfig
+    spec:
+      file: gradle/libs.versions.toml
+      matchpattern: (opentelemetryContribAlpha\s*=\s*)"(.*)"
+      replacepattern: $1"{{ source "contrib-version" }}"
+
+  update-semconv-version:
+    name: "Update OpenTelemetry SemConv version"
+    conditionids: [update-required]
+    sourceid: semconv-version
+    kind: file # toml action currently erases comments, so we fallback to regex-replace
+    scmid: githubConfig
+    spec:
+      file: gradle/libs.versions.toml
+      matchpattern: (opentelemetrySemconvAlpha\s*=\s*)"(.*)"
+      replacepattern: $1"{{ source "semconv-version" }}"
