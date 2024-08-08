@@ -48,9 +48,12 @@ targets:
     name: "Update upstream OpenTelemetry agent version and related dependencies"
     conditionids: [update-required]
     disablesourceinput: true
-    kind: shell # toml action currently erases comments, so we fallback to regex-replace
+    # There is an updatecli toml target kind, however that one currently hast the limitation of erasing comments,
+    # which we don't want
+    kind: shell
     scmid: githubConfig
     spec:
+      # We do the echo add the end to let updatecli know that there have been changes
       command: gradle/update-upstream.sh v{{ source "upstream-agent-version" }} && echo "Update successful"
 
 actions:
@@ -63,4 +66,4 @@ actions:
       labels:
         - dependencies
       description: |
-        @elastic/apm-agent-java, can you please approve and merge this PR?
+        @elastic/apm-agent-java, can you please check and merge this PR?

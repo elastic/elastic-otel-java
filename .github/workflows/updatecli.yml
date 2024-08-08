@@ -6,7 +6,7 @@ on:
     - cron: '0 6 * * *'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   bump:
@@ -18,7 +18,7 @@ jobs:
         with:
           command: "--experimental apply --config .ci/updatecli.d"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.UPDATECLI_GH_TOKEN }}
 
       - if: failure()
         uses: elastic/oblt-actions/slack/send@v1
