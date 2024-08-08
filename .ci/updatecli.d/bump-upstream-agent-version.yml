@@ -51,7 +51,7 @@ targets:
     kind: shell # toml action currently erases comments, so we fallback to regex-replace
     scmid: githubConfig
     spec:
-      command: gradle/update-upstream.sh v{{ source "upstream-agent-version" }} && git add . & git commit -m "Update upstream versions"
+      command: gradle/update-upstream.sh v{{ source "upstream-agent-version" }} && echo "Update successful"
 
 actions:
   open-pr:
