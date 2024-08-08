@@ -35,26 +35,6 @@ sources:
       file: gradle/libs.versions.toml
       key: versions.opentelemetryJavaagentAlpha
 
-  semconv-version:
-    dependson: [upstream-agent-version]
-    kind: file
-    spec:
-      file: https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-instrumentation/v{{ source "upstream-agent-version" }}/dependencyManagement/build.gradle.kts
-    transformers:
-      - findsubmatch:
-          pattern: val\s+semConvVersion\s*=\s*"([^"]*)
-          captureindex: 1
-
-  contrib-version:
-    dependson: [upstream-agent-version]
-    kind: file
-    spec:
-      file: https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-instrumentation/v{{ source "upstream-agent-version" }}/dependencyManagement/build.gradle.kts
-    transformers:
-      - findsubmatch:
-          pattern: val\s+otelContribVersion\s*=\s*"([^"]*)
-          captureindex: 1
-
 conditions:
   update-required:
     disablesourceinput: true
@@ -65,40 +45,13 @@ conditions:
 targets:
 
   update-agent-version:
-    name: "Update upstream OpenTelemetry agent version"
+    name: "Update upstream OpenTelemetry agent version and related dependencies"
     conditionids: [update-required]
-    sourceid: upstream-agent-version
-    kind: file # toml action currently erases comments, so we fallback to regex-replace
+    disablesourceinput: true
+    kind: shell # toml action currently erases comments, so we fallback to regex-replace
     scmid: githubConfig
     spec:
-      file: gradle/libs.versions.toml
-      matchpattern: (opentelemetryJavaagentAlpha\s*=\s*)"(.*)"
-      replacepattern: $1"{{ source "upstream-agent-version" }}-alpha"
-
-  update-contrib-version:
-    dependson: [update-agent-version]
-    name: "Update OpenTelemetry Contrib version"
-    conditionids: [update-required]
-    sourceid: contrib-version
-    kind: file # toml action currently erases comments, so we fallback to regex-replace
-    scmid: githubConfig
-    spec:
-      file: gradle/libs.versions.toml
-      matchpattern: (opentelemetryContribAlpha\s*=\s*)"(.*)"
-      replacepattern: $1"{{ source "contrib-version" }}"
-
-  update-semconv-version:
-    dependson: [update-contrib-version]
-    name: "Update OpenTelemetry SemConv version"
-    conditionids: [update-required]
-    sourceid: semconv-version
-    kind: file # toml action currently erases comments, so we fallback to regex-replace
-    scmid: githubConfig
-    spec:
-      file: gradle/libs.versions.toml
-      matchpattern: (opentelemetrySemconvAlpha\s*=\s*)"(.*)"
-      replacepattern: $1"{{ source "semconv-version" }}"
-
+      command: gradle/update-upstream.sh v"{{ source "upstream-agent-version" }}
 
 actions:
   open-pr:
