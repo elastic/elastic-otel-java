@@ -1,0 +1,11 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "local>elastic/renovate-config"
+  ],
+  "ignorePaths": [
+    ".github/**",
+    ".buildkite/**",
+    "jvmti-access/jni-build/*.Dockerfile"
+  ]
+}
