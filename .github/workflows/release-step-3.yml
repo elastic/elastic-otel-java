@@ -101,7 +101,7 @@ jobs:
         run: tar xvf ${{ env.TARBALL_FILE }}
 
       - name: generate build provenance
-        uses: actions/attest-build-provenance@210c1913531870065f03ce1f9440dd87bc0938cd  # v1.4.0
+        uses: actions/attest-build-provenance@310b0a4a3b0b78ef57ecda988ee04b132db73ef8  # v1.4.1
         with:
           subject-path: "${{ github.workspace }}/**/*.jar"
 
@@ -169,7 +169,7 @@ jobs:
 
       - name: Build and push image
         id: push
-        uses: docker/build-push-action@5176d81f87c23d6fc96624dfdbcd9f3830bbe445  # v6.5.0
+        uses: docker/build-push-action@16ebe778df0e7752d2cfcbd924afdbbd89c1a755  # v6.6.1
         with:
           context: .
           file: "docker/Dockerfile"
@@ -182,7 +182,7 @@ jobs:
             EXTENSION_JAR_FILE=elastic-otel-agentextension.jar
 
       - name: generate build provenance (containers)
-        uses: actions/attest-build-provenance@210c1913531870065f03ce1f9440dd87bc0938cd  # v1.4.0
+        uses: actions/attest-build-provenance@310b0a4a3b0b78ef57ecda988ee04b132db73ef8  # v1.4.1
         with:
           subject-name: "${{ env.DOCKER_IMAGE_NAME }}"
           subject-digest: ${{ steps.push.outputs.digest }}
