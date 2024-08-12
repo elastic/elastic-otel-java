@@ -1,6 +1,6 @@
 [versions]
 shadow = "8.1.1"
-jib = "3.4.3"
+jib = "3.4.2"
 spotless = "6.25.0"
 junit = "5.10.3"
 autoservice = "1.1.1"
@@ -78,7 +78,6 @@ semconv = ["opentelemetrySemconv", "opentelemetrySemconvIncubating"]
 [plugins]
 
 jib = { id = "com.google.cloud.tools.jib", version.ref = "jib" }
-spotless = { id = "com.diffplug.spotless:spotless", version.ref = "spotless" }
 taskinfo = { id = "org.barfuin.gradle.taskinfo", version = '2.2.0' }
 jmh = {id = "me.champeau.jmh", version = "0.7.2"}
 nexusPublish = { id = "io.github.gradle-nexus.publish-plugin", version = '2.0.0' }
