@@ -5,7 +5,7 @@ Provide a complete reference of all available configuration options and where/ho
 
 # Configure the Elastic distribution
 
-Configure the Elastic Distribution for OpenTelemetry Java (EDOT Java) to send data to Elastic.
+Configure the Elastic Distribution of OpenTelemetry Java (EDOT Java) to send data to Elastic.
 
 <!-- ✅ How users set configuration options -->
 ## Configuration methods
