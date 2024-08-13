@@ -56,7 +56,7 @@ junitBom = { group = "org.junit", name = "junit-bom", version.ref = "junit" }
 okhttp = "com.squareup.okhttp3:okhttp:4.12.0"
 
 hdrhistogram = "org.hdrhistogram:HdrHistogram:2.2.2"
-lmax-disruptor = "com.lmax:disruptor:3.4.4"
+lmax-disruptor = "com.lmax:disruptor:4.0.0"
 jctools = "org.jctools:jctools-core:4.0.5"
 github-api = "org.kohsuke:github-api:1.323"
 apachecommons-compress = "org.apache.commons:commons-compress:1.27.0"
