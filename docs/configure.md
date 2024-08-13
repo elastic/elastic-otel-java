@@ -10,7 +10,7 @@ Configure the Elastic Distribution for OpenTelemetry Java (EDOT Java) to send da
 <!-- ✅ How users set configuration options -->
 ## Configuration methods
 
-OpenTelemetry configuration options should be set using one of the mechanisms listed in the
+Set OpenTelemetry configuration options using one of the mechanisms listed in the
 [OpenTelemetry documentation](https://opentelemetry.io/docs/zero-code/java/agent/configuration/),
 including:
 
@@ -29,7 +29,7 @@ EDOT Java can be configured using environment variables.
 This is a cross-platform way to configure EDOT Java and is especially useful in containerized environments.
 
 <!-- ✅ How -->
-Define environment variables before the start of the JVM:
+Define environment variables before starting the JVM:
 
 ```sh
 export OTEL_SERVICE_NAME=my-service
@@ -55,7 +55,7 @@ java -Dotel.service.name=my-service ...
 EDOT Java can be configured using a configuration file.
 
 <!-- ✅ How -->
-Create and populate the configuration file before the JVM is started, and specify where properties are defined at the JVM start:
+Before starting the JVM, create and populate the configuration file and specify where to find it:
 
 ```sh
 echo otel.service.name=my-service > my.properties
@@ -100,8 +100,8 @@ Both EDOT Java and APM Server must be configured with the same secret token for 
 ### Use an APM agent key (API key)
 
 <!-- ✅ What and why -->
-It is also possible to authenticate to an Elastic Observability endpoint using
-an {observability-guide}/apm-api-key.html[APM agent key].
+[APM agent keys](https://www.elastic.co/guide/en/observability/current/apm-api-key.html) are
+used to authorize requests to an Elastic Observability endpoint.
 APM agent keys are revocable, you can have more than one of them, and
 you can add or remove them without restarting APM Server.
 
