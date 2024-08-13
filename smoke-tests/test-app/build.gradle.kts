@@ -1,5 +1,6 @@
 plugins {
   id("com.github.johnrengelman.shadow")
+  id("elastic-otel.java-conventions")
   alias(catalog.plugins.jib)
   alias(catalog.plugins.taskinfo)
 }

@@ -54,7 +54,7 @@ tasks.test {
   inputs.files(layout.files(agentShadowTask))
 
   // depends on the packaged test app war file
-  dependsOn(project(":smoke-tests:test-app-war").tasks.assemble)
+  dependsOn(":smoke-tests:test-app-war:assemble")
   def warFile = project.configurations.warOnly.files.stream().findFirst().get()
   inputs.files(layout.files(warFile))
 

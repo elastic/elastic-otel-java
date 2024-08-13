@@ -1,5 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.github.jengelman.gradle.plugins.shadow.transformers.TransformerContext
+import gradle.kotlin.dsl.accessors._97d9f620dd36daf175b1011457ba4820.java
 import org.apache.tools.zip.ZipEntry
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
@@ -7,7 +8,7 @@ import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
 
 plugins {
-  id("java")
+  id("elastic-otel.java-conventions")
   id("com.github.johnrengelman.shadow")
 }
 
