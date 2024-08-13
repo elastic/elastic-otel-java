@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-  compileOnly("jakarta.servlet:jakarta.servlet-api:5.0.0")
+  compileOnly("jakarta.servlet:jakarta.servlet-api:6.1.0")
 }
 
 val packagingAttribute = Attribute.of("elastic.packaging", String::class.java)
