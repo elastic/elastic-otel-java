@@ -35,8 +35,8 @@ java -javaagent:/path/to/agent.jar \
 ## Read the docs
 
 * [Get started](./docs/get-started.md)
-* [Configuration](./docs/configure.md)
-* [Migrate to the Elastic Distribution of OpenTelemetry Java from the Elastic APM Java agent](./docs/migrate.md)
+* [Configure the Elastic Distribution of OpenTelemetry Java](./docs/configure.md)
+* [Migrate to the Elastic Distribution of OpenTelemetry Java](./docs/migrate.md) from the Elastic APM Java agent
 
 ## Build and Test
 
