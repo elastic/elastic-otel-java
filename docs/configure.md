@@ -3,7 +3,9 @@ Goal of this doc:
 Provide a complete reference of all available configuration options and where/how they can be set. (Any Elastic-specific configuration options are listed directly. General OpenTelemetry configuration options are linked.)
 -->
 
-# Configure
+# Configure the Elastic distribution
+
+Configure the Elastic Distribution for OpenTelemetry Java (EDOT Java) to send data to Elastic.
 
 <!-- ✅ How users set configuration options -->
 ## Configuration methods
@@ -23,8 +25,8 @@ system properties take precedence over configuration options set using file prop
 ### Environment variables
 
 <!-- ✅ What and why -->
-The distro can be configured using environment variables.
-This is a cross-platform way to configure the distro and is especially useful in containerized environments.
+EDOT Java can be configured using environment variables.
+This is a cross-platform way to configure EDOT Java and is especially useful in containerized environments.
 
 <!-- ✅ How -->
 Define environment variables before the start of the JVM:
@@ -37,7 +39,7 @@ java ...
 ### System properties
 
 <!-- ✅ What and why -->
-The distro can be configured using system properties.
+EDOT Java can be configured using system properties.
 These configuration options can be seen by anything that can see the executed command-line.
 
 <!-- ✅ How -->
@@ -50,7 +52,7 @@ java -Dotel.service.name=my-service ...
 ### Configuration file
 
 <!-- ✅ What and why -->
-The distro can be configured using a configuration file.
+EDOT Java can be configured using a configuration file.
 
 <!-- ✅ How -->
 Create and populate the configuration file before the JVM is started, and specify where properties are defined at the JVM start:
@@ -62,14 +64,14 @@ java -Dotel.javaagent.configuration-file=my.properties ...
 
 ## Configuration options
 
-Because the Elastic Distribution for OpenTelemetry Java ("the distro") is an extension of the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation), it supports both:
+Because the Elastic Distribution of OpenTelemetry Java is an extension of the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation), it supports both:
 
 * General OpenTelemetry SDK configuration options
-* Elastic-specific configuration options that are only available when using the distro
+* Elastic-specific configuration options that are only available when using EDOT Java
 
 ### OpenTelemetry SDK configuration options
 
-The distro supports all configuration options listed in the [OpenTelemetry General SDK Configuration documentation](https://opentelemetry.io/docs/languages/sdk-configuration/general/).
+EDOT Java supports all configuration options listed in the [OpenTelemetry General SDK Configuration documentation](https://opentelemetry.io/docs/languages/sdk-configuration/general/).
 
 <!--
 TO DO:
@@ -78,22 +80,22 @@ Does this approach and language make sense?
 ### Elastic distro configuration options
 
 In addition to general OpenTelemetry SDK configuration options, there are two kinds
-of configuration options that are only available in the Elastic Distribution for OpenTelemetry Java:
+of configuration options that are only available in EDOT Java:
 
 * Additional `OTEL_` options that Elastic plans to contribute upstream to the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation), but are not yet available in the OpenTelemetry Java agent.
-* `ELASTIC_OTEL_` options that are specific to Elastic and will always live in the Elastic Distribution for OpenTelemetry Java (in other words, it will _not_ be added upstream).
+* `ELASTIC_OTEL_` options that are specific to Elastic and will always live in EDOT Java (in other words, it will _not_ be added upstream).
 
 <!--
 TO DO:
 List config options instead of linking to the README
 -->
-Find a list of configuration options that are only available in the Elastic distro in [README](https://github.com/elastic/elastic-otel-java?tab=readme-ov-file#features).
+Find a list of configuration options that are only available in EDOT Java in [README](https://github.com/elastic/elastic-otel-java?tab=readme-ov-file#features).
 
 <!-- ✅ List auth methods -->
 ## Authentication methods
 
 When sending data to Elastic, there are two ways you can authenticate: using an APM agent key or using a secret token.
-Both the distro and APM Server must be configured with the same secret token for the request to be accepted.
+Both EDOT Java and APM Server must be configured with the same secret token for the request to be accepted.
 
 ### Use an APM agent key (API key)
 

@@ -1,21 +1,21 @@
-# Elastic Distribution for OpenTelemetry Java
+# Elastic Distribution of OpenTelemetry Java
 
 [![Snapshot status](https://badge.buildkite.com/e527255a5d6e7f5a940bc71911d8bc2be25d16702d7642c0d6.svg)](https://buildkite.com/elastic/elastic-otel-java-snapshot)
 [![Release status](https://badge.buildkite.com/8bac74f475ea0d5d17ea3ea2ecf2c27a319414b97ce03dbd21.svg)](https://buildkite.com/elastic/elastic-otel-java-release)
 
 > [!WARNING]
-> The Elastic Distribution for OpenTelemetry Java is not yet recommended for production use. Functionality may be changed or removed in future releases. Alpha releases are not subject to the support SLA of official GA features.
+> The Elastic Distribution of OpenTelemetry Java is not yet recommended for production use. Functionality may be changed or removed in future releases. Alpha releases are not subject to the support SLA of official GA features.
 >
 > We welcome your feedback! You can reach us by [opening a GitHub issue](https://github.com/elastic/elastic-otel-java/issues) or starting a discussion thread on the [Elastic Discuss forum](https://discuss.elastic.co/tags/c/observability/apm/58/java).
 
-The Elastic Distribution for OpenTelemetry Java (the distro) is an extension of the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation). Use the distro to start the OpenTelemetry SDK with your Java application, and automatically capture tracing data, performance metrics, and logs. Traces, metrics, and logs can be sent to any OpenTelemetry Protocol (OTLP) collector you choose.
+The Elastic Distribution of OpenTelemetry Java (EDOT Java) is a customized version of the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation). Use EDOT Java to start the OpenTelemetry SDK with your Java application, and automatically capture tracing data, performance metrics, and logs. Traces, metrics, and logs can be sent to any OpenTelemetry Protocol (OTLP) collector you choose.
 
-With the Elastic distro you have access to all the features of the OpenTelemetry Java agent plus:
+With EDOT Java you have access to all the features of the OpenTelemetry Java agent plus:
 
 * Access to SDK improvements and bug fixes contributed by the Elastic team _before_ the changes are available upstream in OpenTelemetry repositories.
 * Access to optional features that can enhance OpenTelemetry data that is being sent to Elastic (for example, [inferred spans](#inferred-spans) and [span stacktrace](#span-stacktrace)).
 
-**Ready to try out the distro?** Follow the step-by-step instructions in [Get started](./docs/get-started.md).
+**Ready to try out EDOT Java?** Follow the step-by-step instructions in [Get started](./docs/get-started.md).
 
 ## Download
 
@@ -36,7 +36,7 @@ java -javaagent:/path/to/agent.jar \
 
 * [Get started](./docs/get-started.md)
 * [Configuration](./docs/configure.md)
-* [Migrate to the distro from the Elastic APM Java agent](./docs/migrate.md)
+* [Migrate to the Elastic Distribution of OpenTelemetry Java from the Elastic APM Java agent](./docs/migrate.md)
 
 ## Build and Test
 
@@ -128,5 +128,5 @@ if(ctx.numeric_labels != null && ctx.numeric_labels.elastic_span_self_time != nu
 
 # License
 
-The Elastic Distribution for OpenTelemetry Java is licensed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.html).
+The Elastic Distribution of OpenTelemetry Java is licensed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.html).
 

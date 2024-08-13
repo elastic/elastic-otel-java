@@ -1,9 +1,9 @@
 <#-- @ftlvariable name="config" type="java.util.Map<java.lang.String,java.util.List<co.elastic.otel.config.ConfigurationOption>>" -->
 <#-- @ftlvariable name="keys" type="java.util.Collection<java.lang.String>" -->
 
-This documentation describes how applications using the [Elastic APM Java agent](https://www.elastic.co/guide/en/apm/agent/java/current/index.html) can be updated to use the Elastic Distribution for OpenTelemetry Java ("the distro").
+This documentation describes how applications using the [Elastic APM Java agent](https://www.elastic.co/guide/en/apm/agent/java/current/index.html) can be updated to use the Elastic Distribution of OpenTelemetry Java (EDOT Java).
 
-Start by installing the distro following the steps outlined in [Get started](./get-started.md). Then update existing APM Java agent configuration options in your application with the equivalent [OpenTelemetry SDK configuration variables](https://opentelemetry.io/docs/languages/sdk-configuration/general/) (listed below).
+Start by installing EDOT Java following the steps outlined in [Get started](./get-started.md). Then update existing APM Java agent configuration options in your application with the equivalent [OpenTelemetry SDK configuration variables](https://opentelemetry.io/docs/languages/sdk-configuration/general/) (listed below).
 
 ## Option reference
 

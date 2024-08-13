@@ -88,7 +88,7 @@ public class ConfigurationExporterTest {
     StringWriter tempRenderedFile = new StringWriter();
     tempRenderedFile.write(
         "[[migrate]]\n"
-            + "== Migrate to the Elastic distro\n\n"
+            + "== Migrate to the Elastic distribution\n\n"
             + "////\n"
             + "This file is auto generated. Please only make changes in `migrate.md.ftl`\n"
             + "////\n");

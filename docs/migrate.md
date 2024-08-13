@@ -1,12 +1,12 @@
-# Migrate to the Elastic distro
+# Migrate to the Elastic distribution
 
 <!--
 This file is auto generated. Please only make changes in `migrate.md.ftl`
 -->
 
-This documentation describes how applications using the [Elastic APM Java agent](https://www.elastic.co/guide/en/apm/agent/java/current/index.html) can be updated to use the Elastic Distribution for OpenTelemetry Java ("the distro").
+This documentation describes how applications using the [Elastic APM Java agent](https://www.elastic.co/guide/en/apm/agent/java/current/index.html) can be updated to use the Elastic Distribution of OpenTelemetry Java (EDOT Java).
 
-Start by installing the distro following the steps outlined in [Get started](./get-started.md). Then update existing APM Java agent configuration options in your application with the equivalent [OpenTelemetry SDK configuration variables](https://opentelemetry.io/docs/languages/sdk-configuration/general/) (listed below).
+Start by installing EDOT Java following the steps outlined in [Get started](./get-started.md). Then update existing APM Java agent configuration options in your application with the equivalent [OpenTelemetry SDK configuration variables](https://opentelemetry.io/docs/languages/sdk-configuration/general/) (listed below).
 
 ## Option reference
 
