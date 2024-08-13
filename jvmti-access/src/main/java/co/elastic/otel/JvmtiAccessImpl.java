@@ -22,13 +22,17 @@ import java.nio.ByteBuffer;
 
 public class JvmtiAccessImpl {
 
-  static native int destroy0();
+  public static native int init0();
+
+  public static native int destroy0();
 
   /**
    * @param threadBuffer the buffer whose address will get stored in the native thread-local-storage
    *     for APM <-> profiling correlation
    */
   static native void setThreadProfilingCorrelationBuffer0(ByteBuffer threadBuffer);
+
+  static native int setProfilingCorrelationVirtualThreadSupportEnabled0(boolean enable);
 
   /**
    * @param byteBuffer the buffer whose address will get stored in the native global variable for

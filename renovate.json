@@ -1,0 +1,22 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "local>elastic/renovate-config"
+  ],
+  "packageRules": [
+    {
+      "description": "Upstream agent dependencies are kept in sync via the gradle/update-upstream.sh script",
+      "matchPackageNames": [
+        "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha",
+        "io.opentelemetry.semconv:**",
+        "io.opentelemetry.contrib:**"
+      ],
+      "enabled": false
+    }
+  ],
+  "ignorePaths": [
+    ".github/**",
+    ".buildkite/**",
+    "jvmti-access/jni-build/*.Dockerfile"
+  ]
+}

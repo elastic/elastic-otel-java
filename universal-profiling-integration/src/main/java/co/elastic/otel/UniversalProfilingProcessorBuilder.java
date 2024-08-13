@@ -29,10 +29,9 @@ public class UniversalProfilingProcessorBuilder {
   private boolean delayActivationAfterProfilerRegistration = true;
 
   private LongSupplier nanoClock = System::nanoTime;
-
   private int bufferSize = 8096;
-
   private String socketDir = System.getProperty("java.io.tmpdir");
+  private boolean virtualThreadSupportEnabled = true;
 
   UniversalProfilingProcessorBuilder(SpanProcessor next, Resource resource) {
     this.resource = resource;
@@ -45,6 +44,7 @@ public class UniversalProfilingProcessorBuilder {
         resource,
         bufferSize,
         delayActivationAfterProfilerRegistration,
+        virtualThreadSupportEnabled,
         socketDir,
         nanoClock);
   }
@@ -91,6 +91,17 @@ public class UniversalProfilingProcessorBuilder {
    */
   public UniversalProfilingProcessorBuilder socketDir(String path) {
     this.socketDir = path;
+    return this;
+  }
+
+  /**
+   * Virtual threads need some extra work for correlation: On mount/unmount the span/trace context
+   * of the platform thread needs to be kept in sync. This is done by hooking on to JVMTI-events.
+   * This option allows to disable support for virtual threads in case this mechanism causes any
+   * problems.
+   */
+  public UniversalProfilingProcessorBuilder virtualThreadSupportEnabled(boolean enable) {
+    this.virtualThreadSupportEnabled = enable;
     return this;
   }
 }

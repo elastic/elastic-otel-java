@@ -101,7 +101,7 @@ jobs:
         run: tar xvf ${{ env.TARBALL_FILE }}
 
       - name: generate build provenance
-        uses: actions/attest-build-provenance@bdd51370e0416ac948727f861e03c2f05d32d78e  # v1.3.2
+        uses: actions/attest-build-provenance@310b0a4a3b0b78ef57ecda988ee04b132db73ef8  # v1.4.1
         with:
           subject-path: "${{ github.workspace }}/**/*.jar"
 
@@ -144,10 +144,10 @@ jobs:
         run: echo "LATEST_TAG=$(git tag --list --sort=version:refname "v*" | grep -v RC | sed s/^v// | tail -n 1)" >> "${GITHUB_ENV}"
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
+        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # v3.6.1
 
       - name: Log in to the Elastic Container registry
-        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
           registry: ${{ secrets.ELASTIC_DOCKER_REGISTRY }}
           username: ${{ secrets.ELASTIC_DOCKER_USERNAME }}
@@ -169,7 +169,7 @@ jobs:
 
       - name: Build and push image
         id: push
-        uses: docker/build-push-action@1a162644f9a7e87d8f4b053101d1d9a712edc18c  # v6.3.0
+        uses: docker/build-push-action@16ebe778df0e7752d2cfcbd924afdbbd89c1a755  # v6.6.1
         with:
           context: .
           file: "docker/Dockerfile"
@@ -182,7 +182,7 @@ jobs:
             EXTENSION_JAR_FILE=elastic-otel-agentextension.jar
 
       - name: generate build provenance (containers)
-        uses: actions/attest-build-provenance@bdd51370e0416ac948727f861e03c2f05d32d78e  # v1.3.2
+        uses: actions/attest-build-provenance@310b0a4a3b0b78ef57ecda988ee04b132db73ef8  # v1.4.1
         with:
           subject-name: "${{ env.DOCKER_IMAGE_NAME }}"
           subject-digest: ${{ steps.push.outputs.digest }}

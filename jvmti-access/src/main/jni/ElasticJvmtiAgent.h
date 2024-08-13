@@ -10,15 +10,18 @@ namespace elastic {
         enum class ReturnCode {
             SUCCESS = 0,
             ERROR = -1,
+            ERROR_NOT_INITIALIZED = -2,
         };
 
         constexpr jint toJint(ReturnCode rc) noexcept {
             return static_cast<jint>(rc);
         }
 
-        void destroy();
+        ReturnCode init(JNIEnv* jniEnv);
+        ReturnCode destroy(JNIEnv* jniEnv);
 
-        void setThreadProfilingCorrelationBuffer(JNIEnv* jniEnv, jobject bytebuffer);
+        ReturnCode setVirtualThreadProfilingCorrelationEnabled(JNIEnv* jniEnv, jboolean enable);
+        ReturnCode setThreadProfilingCorrelationBuffer(JNIEnv* jniEnv, jobject bytebuffer);
         void setProcessProfilingCorrelationBuffer(JNIEnv* jniEnv, jobject bytebuffer);
 
         jobject createThreadProfilingCorrelationBufferAlias(JNIEnv* jniEnv, jlong capacity);
@@ -31,6 +34,9 @@ namespace elastic {
         jint readProfilerSocketMessage(JNIEnv* jniEnv, jobject outputBuffer);
         ReturnCode writeProfilerSocketMessage(JNIEnv* jniEnv, jbyteArray message);
 
+        void onVirtualThreadMount(JNIEnv* jni, jthread currentThread);
+        void onVirtualThreadUnmount(JNIEnv* jni, jthread currentThread);
+        
 
         template <typename T>
         typename std::enable_if<

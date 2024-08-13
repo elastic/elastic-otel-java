@@ -40,6 +40,8 @@ public class UniversalProfilingProcessorAutoConfig
   static final String BUFFER_SIZE_OPTION =
       "elastic.otel.universal.profiling.integration.buffer.size";
   static final String SOCKET_DIR_OPTION = "elastic.otel.universal.profiling.integration.socket.dir";
+  static final String VIRTUAL_THREAD_SUPPORT_OPTION =
+      "elastic.otel.universal.profiling.integration.virtual.threads.enabled";
 
   private enum EnabledOptions {
     TRUE,
@@ -85,6 +87,7 @@ public class UniversalProfilingProcessorAutoConfig
             builder.delayActivationAfterProfilerRegistration(enabled == EnabledOptions.AUTO);
             props.applyInt(BUFFER_SIZE_OPTION, builder::bufferSize);
             props.applyString(SOCKET_DIR_OPTION, builder::socketDir);
+            props.applyBool(VIRTUAL_THREAD_SUPPORT_OPTION, builder::virtualThreadSupportEnabled);
             return builder.build();
           } catch (Exception e) {
             logger.log(

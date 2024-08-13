@@ -48,8 +48,7 @@ public class ElasticAutoConfigurationCustomizerProvider
         .addSpanExporterCustomizer(
             (spanExporter, configProperties) ->
                 // wrap the original span exporter
-                ElasticExtension.INSTANCE.wrapSpanExporter(spanExporter))
-        .addMetricExporterCustomizer((exporter, config) -> new ElasticMetricExporter(exporter));
+                ElasticExtension.INSTANCE.wrapSpanExporter(spanExporter));
   }
 
   static Map<String, String> propertiesCustomizer(ConfigProperties configProperties) {

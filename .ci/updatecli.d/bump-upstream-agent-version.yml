@@ -1,0 +1,68 @@
+name: Upgrade the upstream agent version and related transitive dependencies
+# This task
+# - checks if the current otel-agent version referenced by the distro is the latest release
+# - if not, it will update the agent version AND the semconv and contrib versions to match the upstream
+
+scms:
+  githubConfig:
+    kind: github
+    spec:
+      user: '{{ requiredEnv "GITHUB_ACTOR" }}'
+      owner: elastic
+      repository: elastic-otel-java
+      token: '{{ requiredEnv "GITHUB_TOKEN" }}'
+      username: '{{ requiredEnv "GITHUB_ACTOR" }}'
+      branch: main
+      commitusingapi: true
+
+sources:
+
+  upstream-agent-version:
+    kind: githubrelease
+    spec:
+      owner: open-telemetry
+      repository: opentelemetry-java-instrumentation
+      token: '{{ requiredEnv "GITHUB_TOKEN" }}'
+      typefilter:
+        latest: true
+    transformers:
+      - trimprefix: "v"
+
+  distro-otel-agent-version:
+    kind: toml
+    scmid: githubConfig
+    spec:
+      file: gradle/libs.versions.toml
+      key: versions.opentelemetryJavaagentAlpha
+
+conditions:
+  update-required:
+    disablesourceinput: true
+    kind: shell
+    spec:
+      command: test "{{ source "upstream-agent-version" }}-alpha" != "{{ source "distro-otel-agent-version" }}"
+
+targets:
+
+  update-agent-version:
+    name: "Update upstream OpenTelemetry agent version and related dependencies"
+    disablesourceinput: true
+    # There is an updatecli toml target kind, however that one currently hast the limitation of erasing comments,
+    # which we don't want
+    kind: shell
+    scmid: githubConfig
+    spec:
+      # We do the echo add the end to let updatecli know that there have been changes
+      command: gradle/update-upstream.sh v{{ source "upstream-agent-version" }} && echo "Update successful"
+
+actions:
+  open-pr:
+    kind: github/pullrequest
+    scmid: githubConfig
+    title: 'Update upstream OpenTelemetry agent dependencies to {{ source "upstream-agent-version" }}'
+    spec:
+      automerge: false
+      labels:
+        - dependencies
+      description: |
+        @elastic/apm-agent-java, can you please check and merge this PR?
