@@ -37,7 +37,7 @@ public class SpanStackTraceProcessorAutoConfig implements ChainingSpanProcessorA
       ConfigProperties properties, ChainingSpanProcessorRegisterer registerer) {
 
     Duration minDuration = properties.getDuration(MIN_DURATION_CONFIG_OPTION, Duration.ofMillis(5));
-    if (minDuration.isNegative()) {
+    if (minDuration.isZero() || minDuration.isNegative()) {
       return;
     }
     registerer.register(
