@@ -87,11 +87,10 @@ public class ConfigurationExporterTest {
     Template temp = cfg.getTemplate("migrate.md.ftl");
     StringWriter tempRenderedFile = new StringWriter();
     tempRenderedFile.write(
-        "[[migrate]]\n"
-            + "== Migrate to the Elastic distribution\n\n"
-            + "////\n"
+        "# Migrate to the Elastic distribution\n\n"
+            + "<!--\n"
             + "This file is auto generated. Please only make changes in `migrate.md.ftl`\n"
-            + "////\n");
+            + "-->\n");
     final Map<String, List<ConfigurationOption>> optionsByCategory = new HashMap<>();
     optionsByCategory.put("Elastic to OpenTelemetry mapping", configurationRegistry);
     Map<String, Object> map = new HashMap<>();
