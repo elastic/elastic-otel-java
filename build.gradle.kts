@@ -43,12 +43,3 @@ tasks {
     }
   }
 }
-
-
-
-//Copy githooks automatically when gradle configures the project
-Files.copy(
-  Paths.get(layout.projectDirectory.file(".githooks/pre-commit").toString()),
-  Paths.get(layout.projectDirectory.file(".git/hooks/pre-commit").toString()),
-  StandardCopyOption.REPLACE_EXISTING
-)
