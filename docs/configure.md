@@ -11,7 +11,8 @@ Configure the Elastic Distribution of OpenTelemetry Java (EDOT Java) to send dat
 ## Configuration methods
 
 Set OpenTelemetry configuration options using one of the mechanisms listed in the
-[OpenTelemetry documentation](https://opentelemetry.io/docs/zero-code/java/agent/configuration/),
+[OpenTelemetry agent documentation](https://opentelemetry.io/docs/zero-code/java/agent/configuration/) 
+and [OpenTelemetry SDK documentation](https://opentelemetry.io/docs/languages/java/configuration/),
 including:
 
 * [Environment variables](#environment-variables)
@@ -67,23 +68,22 @@ java -Dotel.javaagent.configuration-file=my.properties ...
 Because the Elastic Distribution of OpenTelemetry Java is an extension of the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation), it supports both:
 
 * General OpenTelemetry SDK configuration options
+* General OpenTelemetry Java agent configuration options
 * Elastic-specific configuration options that are only available when using EDOT Java
 
-### OpenTelemetry SDK configuration options
+### OpenTelemetry configuration options
 
-EDOT Java supports all configuration options listed in the [OpenTelemetry General SDK Configuration documentation](https://opentelemetry.io/docs/languages/sdk-configuration/general/).
+EDOT Java supports all configuration options listed in the [OpenTelemetry General SDK Configuration documentation](https://opentelemetry.io/docs/languages/sdk-configuration/general/) and [OpenTelemetry Java agent documentation](https://opentelemetry.io/docs/zero-code/java/agent/configuration/) .
 
-<!--
-TO DO:
-Does this approach and language make sense?
--->
 ### Elastic distro configuration options
 
-In addition to general OpenTelemetry SDK configuration options, there are two kinds
+In addition to general OpenTelemetry configuration options, there are two kinds
 of configuration options that are only available in EDOT Java:
 
-* Additional `OTEL_` options that Elastic plans to contribute upstream to the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation), but are not yet available in the OpenTelemetry Java agent.
-* `ELASTIC_OTEL_` options that are specific to Elastic and will always live in EDOT Java (in other words, it will _not_ be added upstream).
+* Additional `OTEL_` options that Elastic plans to contribute upstream to the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation), or have been contributed to the
+[Java agent contrib repo](https://github.com/open-telemetry/opentelemetry-java-contrib/) and are included
+in the EDOT but are not yet available in the OpenTelemetry Java agent.
+* `ELASTIC_OTEL_` options that are specific to Elastic and will always live in EDOT Java (in other words, they will _not_ be added upstream).
 
 <!--
 TO DO:
