@@ -55,7 +55,10 @@ The agent captures the stacktraces of spans to help identify code paths that tri
 
 The stacktrace is stored in the [`code.stacktrace`](https://opentelemetry.io/docs/specs/semconv/attributes-registry/code/) attribute.
 
-The minimum span duration can be configured with `elastic.otel.span.stack.trace.min.duration` (in milliseconds, defaults to 5ms).
+The minimum span duration can be configured with `otel.span.stacktrace.min.duration` (in nanoseconds, defaults to 5ms).
+
+Implementation has been contributed upstream in the [opentelemetry-java-contrib](https://github.com/open-telemetry/opentelemetry-java-contrib) repository,
+in the [`span-stacktrace`](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/span-stacktrace) folder.
 
 ### Runtime metrics
 
