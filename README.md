@@ -28,10 +28,8 @@ Latest snapshot: [![Sonatype Nexus](https://img.shields.io/nexus/s/co.elastic.ot
 Use the `-javaagent:` JVM argument with the path to agent jar.
 
 ```bash
-Latest release: [![Maven Central](https://img.shields.io/maven-central/v/co.elastic.otel/elastic-otel-javaagent?label=elastic-otel-javaagent)](https://mvnrepository.com/artifact/co.elastic.otel/elastic-otel-javaagent/latest)
-
-Latest snapshot: [![Sonatype Nexus](https://img.shields.io/nexus/s/co.elastic.otel/elastic-otel-javaagent?server=https%3A%2F%2Foss.sonatype.org&label=elastic-otel-javaagent)](https://oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=co.elastic.otel&a=elastic-otel-javaagent&v=LATEST)
-
+java -javaagent:/path/to/agent.jar \
+-jar myapp.jar
 ```
 
 ## Read the docs
