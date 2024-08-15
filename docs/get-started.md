@@ -55,7 +55,7 @@ authorization data to set the appropriate `OTLP_*` environment variables:
 
 * `OTEL_EXPORTER_OTLP_ENDPOINT`: The full URL of the endpoint where data will be sent.
 * `OTEL_EXPORTER_OTLP_HEADERS`: A comma-separated list of `key=value` pairs that will
-be added to the headers of every request. This is typically this is used for authentication information.
+be added to the headers of every request. This is typically used for authentication information.
 
 You can find the values of these variables in Kibana's APM tutorial.
 In Kibana:

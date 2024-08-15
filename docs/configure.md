@@ -3,7 +3,7 @@ Goal of this doc:
 Provide a complete reference of all available configuration options and where/how they can be set. (Any Elastic-specific configuration options are listed directly. General OpenTelemetry configuration options are linked.)
 -->
 
-# Configure the Elastic distribution
+# Configure the Elastic Distribution
 
 Configure the Elastic Distribution of OpenTelemetry Java (EDOT Java) to send data to Elastic.
 
@@ -44,7 +44,7 @@ EDOT Java can be configured using system properties.
 These configuration options can be seen by anything that can see the executed command-line.
 
 <!-- ✅ How -->
-Define system properties need at the JVM start, usually on the command-line:
+Define system properties at the JVM start, usually on the command-line:
 
 ```sh
 java -Dotel.service.name=my-service ...
