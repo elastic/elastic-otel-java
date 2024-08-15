@@ -7,7 +7,7 @@ import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
 
 plugins {
-  id("java")
+  id("elastic-otel.java-conventions")
   id("com.github.johnrengelman.shadow")
 }
 
