@@ -23,6 +23,15 @@ dependencies {
 
   implementation(platform(catalog.findLibrary("opentelemetryInstrumentationAlphaBom").get()))
 
+  annotationProcessor(catalog.findLibrary("autoservice.processor").get())
+  compileOnly(catalog.findLibrary("autoservice.annotations").get())
+  compileOnly(catalog.findLibrary("findbugs.jsr305").get())
+
+  testAnnotationProcessor(catalog.findLibrary("autoservice.processor").get())
+  testCompileOnly(catalog.findLibrary("autoservice.annotations").get())
+  testCompileOnly(catalog.findLibrary("findbugs.jsr305").get())
+  testImplementation(catalog.findLibrary("assertj.core").get())
+  testImplementation(catalog.findLibrary("awaitility").get())
   testImplementation(catalog.findLibrary("mockito").get())
   testImplementation(enforcedPlatform(catalog.findLibrary("junitBom").get()))
   testImplementation("org.junit.jupiter:junit-jupiter")
