@@ -3,6 +3,9 @@ import java.nio.file.Paths
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
+plugins {
+  alias(catalog.plugins.nexusPublish)
+}
 
 val versionProperties = java.util.Properties()
 versionProperties.load(FileInputStream(file("version.properties")))
@@ -16,6 +19,12 @@ defaultTasks("agent:assemble")
 subprojects {
   group = rootProject.group
   version = rootProject.version
+}
+
+nexusPublishing {
+  repositories {
+    sonatype()
+  }
 }
 
 tasks {
