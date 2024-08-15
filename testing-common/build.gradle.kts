@@ -1,4 +1,5 @@
 plugins {
+  id("elastic-otel.java-conventions")
   id("java-library")
 }
 

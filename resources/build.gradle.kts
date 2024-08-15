@@ -1,5 +1,5 @@
 plugins {
-  java
+  id("elastic-otel.java-conventions")
   alias(catalog.plugins.taskinfo)
 }
 
