@@ -8,13 +8,11 @@ description = "Elastic Inferred Spans extension for OpenTelemetry Java"
 dependencies {
   annotationProcessor(libs.autoservice.processor)
   compileOnly(libs.autoservice.annotations)
+  // TODO: remove explicit version of dependency and have it managed by the BOM
+  // once contrib 1.37 is used by the upstream agent
+  implementation("io.opentelemetry.contrib:opentelemetry-inferred-spans:1.37.0-alpha")
   compileOnly("io.opentelemetry:opentelemetry-sdk")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
-  compileOnly(libs.findbugs.jsr305)
-  implementation(libs.lmax.disruptor)
-  implementation(libs.jctools)
-  implementation(libs.asyncprofiler)
-  implementation(libs.bundles.semconv)
   implementation(project(":common"))
 
   testAnnotationProcessor(libs.autoservice.processor)
@@ -24,8 +22,6 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation(libs.awaitility)
-  testImplementation(libs.github.api)
-  testImplementation(libs.apachecommons.compress)
   testImplementation(libs.bundles.semconv)
 }
 

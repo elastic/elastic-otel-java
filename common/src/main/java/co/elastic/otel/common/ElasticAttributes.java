@@ -30,11 +30,11 @@ public interface ElasticAttributes {
   AttributeKey<String> SPAN_TYPE = AttributeKey.stringKey("elastic.span.type");
   AttributeKey<String> SPAN_SUBTYPE = AttributeKey.stringKey("elastic.span.subtype");
 
-  /** Marker attribute for inferred spans. */
-  AttributeKey<Boolean> IS_INFERRED = AttributeKey.booleanKey("elastic.is_inferred");
-
-  /** Used as marker on span-links to override the parent-child relationship for inferred spans. */
-  AttributeKey<Boolean> IS_CHILD = AttributeKey.booleanKey("elastic.is_child");
+  /**
+   * Marker attribute for inferred spans. Does not have the elastic-prefix anymore because it has
+   * been contributed upstream
+   */
+  AttributeKey<Boolean> IS_INFERRED = AttributeKey.booleanKey("is_inferred");
 
   AttributeKey<List<String>> PROFILER_STACK_TRACE_IDS =
       AttributeKey.stringArrayKey("elastic.profiler_stack_trace_ids");
