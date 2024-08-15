@@ -12,7 +12,7 @@ versionProperties.load(FileInputStream(file("version.properties")))
 
 group = "co.elastic.otel"
 version = versionProperties.get("version").toString()
-description = "Elastic Distribution for OpenTelemetry Java"
+description = "Elastic Distribution of OpenTelemetry Java"
 
 defaultTasks("agent:assemble")
 
