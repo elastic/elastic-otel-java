@@ -65,10 +65,11 @@ java -Dotel.javaagent.configuration-file=my.properties ...
 
 ## Configuration options
 
-Because the Elastic Distribution of OpenTelemetry Java is an extension of the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation), it supports both:
+Because the Elastic Distribution of OpenTelemetry Java is an extension of the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation), it supports:
 
 * General OpenTelemetry SDK configuration options
 * General OpenTelemetry Java agent configuration options
+* OpenTelemetry extensions from the OpenTelemetry Java contrib repo that are included with EDOT Java
 * Elastic-specific configuration options that are only available when using EDOT Java
 
 ### OpenTelemetry configuration options
@@ -85,11 +86,15 @@ of configuration options that are only available in EDOT Java:
 in the EDOT but are not yet available in the OpenTelemetry Java agent.
 * `ELASTIC_OTEL_` options that are specific to Elastic and will always live in EDOT Java (in other words, they will _not_ be added upstream).
 
-<!--
-TO DO:
-List config options instead of linking to the README
--->
-Find a list of configuration options that are only available in EDOT Java in [README](https://github.com/elastic/elastic-otel-java?tab=readme-ov-file#features).
+### EDOT specific configuration options and settings
+
+* OTEL_RESOURCE_PROVIDERS_AWS_ENABLED - enabled by default in EDOT ([disabled by default](https://opentelemetry.io/docs/zero-code/java/agent/configuration/#enable-resource-providers-that-are-disabled-by-default) in the OpenTelemetry Java agent)
+* OTEL_RESOURCE_PROVIDERS_GCP_ENABLED - enabled by default in EDOT ([disabled by default](https://opentelemetry.io/docs/zero-code/java/agent/configuration/#enable-resource-providers-that-are-disabled-by-default) in the OpenTelemetry Java agent)
+* SERVICE_NAME - can be set a usual, but if not set this will be inferred when the EDOT Java agent is running in various application servers
+* OTEL_INFERRED_SPANS_* options (see the [extension documentation](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/inferred-spans) for full details)
+* OTEL_SPAN_STACK_TRACE_MIN_DURATION - in milliseconds, defaults to 5ms (see the [extension documentation](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/span-stacktrace) for full details)
+* OTEL_INSTRUMENTATION_RUNTIME-TELEMETRY_EMIT-EXPERIMENTAL-TELEMETRY - Experimental runtime metrics are enabled by default. Set otel.instrumentation.runtime-telemetry.emit-experimental-telemetry to false to disable them.
+* ELASTIC_OTEL_UNIVERSAL_PROFILING_INTEGRATION_* OPTIONS (see the [extension documentation](https://github.com/elastic/elastic-otel-java/tree/main/universal-profiling-integration) for full details)
 
 <!-- ✅ List auth methods -->
 ## Authentication methods
