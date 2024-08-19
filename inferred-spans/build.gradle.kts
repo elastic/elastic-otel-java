@@ -8,8 +8,7 @@ description = "Elastic Inferred Spans extension for OpenTelemetry Java"
 dependencies {
   compileOnly("io.opentelemetry:opentelemetry-sdk")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
-  implementation("io.opentelemetry.contrib:opentelemetry-inferred-spans")
-  implementation(project(":common"))
+  implementation(libs.contribInferredSpans)
 
   testImplementation(project(":testing-common"))
   testImplementation("io.opentelemetry:opentelemetry-sdk")
