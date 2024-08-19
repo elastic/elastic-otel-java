@@ -15,18 +15,3 @@ updates:
       github-actions:
         patterns:
           - "*"
-
-  # Gradle
-  - package-ecosystem: "gradle"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-    ignore:
-      # upstream dependencies that need to be updated in sync and with manual control
-      - dependency-name: "io.opentelemetry.javaagent:*"
-      - dependency-name: "io.opentelemetry.instrumentation:*"
-      - dependency-name: "io.opentelemetry.contrib:*"
-      - dependency-name: "io.opentelemetry:*"
-      # Newer Mockito versions don't support java 8 anymore
-      - dependency-name: "org.mockito:mockito-core"

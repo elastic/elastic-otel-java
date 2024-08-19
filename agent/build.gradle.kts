@@ -11,7 +11,7 @@ plugins {
   alias(catalog.plugins.licenseReport)
 }
 
-description = "Elastic Distribution for OpenTelemetry Java Agent"
+description = "Elastic Distribution of OpenTelemetry Java Agent"
 
 base.archivesName.set("elastic-otel-javaagent")
 
@@ -92,7 +92,7 @@ tasks {
       var year = Calendar.getInstance().get(Calendar.YEAR)
       var lines = ArrayList<String>(
         listOf(
-          "Elastic Distribution for OpenTelemetry Java",
+          "Elastic Distribution of OpenTelemetry Java",
           "Copyright 2023-${year} Elasticsearch B.V.",
           "",
           "This project is licensed under the Apache License, Version 2.0 - https://www.apache.org/licenses/LICENSE-2.0",

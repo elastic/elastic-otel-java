@@ -1,5 +1,6 @@
 plugins {
   id("com.github.johnrengelman.shadow")
+  id("elastic-otel.java-conventions")
   alias(catalog.plugins.jib)
   alias(catalog.plugins.taskinfo)
 }
@@ -11,7 +12,7 @@ dependencies {
   // - http endpoint, which is easy to call remotely
   // - implement a server, which is not a single invocation only like a CLI app
   // - multiple endpoints are possible, which allows multiple test scenarios
-  val springBootVersion = "2.7.15";
+  val springBootVersion = "2.7.18";
   testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
   implementation("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
 

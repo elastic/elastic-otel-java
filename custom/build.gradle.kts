@@ -19,9 +19,6 @@ dependencies {
   }
   testImplementation(libs.contribSpanStacktrace)
 
-  annotationProcessor(libs.autoservice.processor)
-  compileOnly(libs.autoservice.annotations)
-
   // needs to be added in order to allow access to AgentListener interface
   // this is currently required because autoconfigure is currently not exposed to the extension API.
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
@@ -36,12 +33,8 @@ dependencies {
   }
   testImplementation(libs.bundles.semconv)
 
-  testAnnotationProcessor(libs.autoservice.processor)
-  testCompileOnly(libs.autoservice.annotations)
-
   testImplementation("io.opentelemetry.javaagent:opentelemetry-testing-common")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-  testImplementation(libs.assertj.core)
   testImplementation(libs.freemarker)
 }
 tasks.withType<Test> {
