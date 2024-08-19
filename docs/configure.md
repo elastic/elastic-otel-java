@@ -94,7 +94,7 @@ in the EDOT but are not yet available in the OpenTelemetry Java agent.
 * OTEL_INFERRED_SPANS_* options (see the [extension documentation](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/inferred-spans) for full details)
 * OTEL_SPAN_STACK_TRACE_MIN_DURATION - in milliseconds, defaults to 5ms (see the [extension documentation](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/span-stacktrace) for full details)
 * OTEL_INSTRUMENTATION_RUNTIME-TELEMETRY_EMIT-EXPERIMENTAL-TELEMETRY - Experimental runtime metrics are enabled by default. Set otel.instrumentation.runtime-telemetry.emit-experimental-telemetry to false to disable them.
-* ELASTIC_OTEL_UNIVERSAL_PROFILING_INTEGRATION_* OPTIONS (see the [extension documentation](https://github.com/elastic/elastic-otel-java/tree/main/universal-profiling-integration) for full details)
+* ELASTIC_OTEL_UNIVERSAL_PROFILING_INTEGRATION_* options (see the [extension documentation](https://github.com/elastic/elastic-otel-java/tree/main/universal-profiling-integration) for full details)
 
 <!-- ✅ List auth methods -->
 ## Authentication methods
