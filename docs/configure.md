@@ -90,7 +90,7 @@ in the EDOT but are not yet available in the OpenTelemetry Java agent.
 
 * OTEL_RESOURCE_PROVIDERS_AWS_ENABLED - enabled by default in EDOT ([disabled by default](https://opentelemetry.io/docs/zero-code/java/agent/configuration/#enable-resource-providers-that-are-disabled-by-default) in the OpenTelemetry Java agent)
 * OTEL_RESOURCE_PROVIDERS_GCP_ENABLED - enabled by default in EDOT ([disabled by default](https://opentelemetry.io/docs/zero-code/java/agent/configuration/#enable-resource-providers-that-are-disabled-by-default) in the OpenTelemetry Java agent)
-* OTEL_SERVICE_NAME - can be set as usual, but if not set this will be inferred when the EDOT Java agent is running in various application servers
+* OTEL_SERVICE_NAME - can be set as usual, but if not set this will be inferred when the EDOT Java agent is running in [various application servers](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/resource-providers)
 * OTEL_INFERRED_SPANS_* options (see the [extension documentation](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/inferred-spans) for full details)
 * OTEL_SPAN_STACK_TRACE_MIN_DURATION - in milliseconds, defaults to 5ms (see the [extension documentation](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/span-stacktrace) for full details)
 * OTEL_INSTRUMENTATION_RUNTIME-TELEMETRY_EMIT-EXPERIMENTAL-TELEMETRY - Experimental runtime metrics are enabled by default. Set otel.instrumentation.runtime-telemetry.emit-experimental-telemetry to false to disable them.
