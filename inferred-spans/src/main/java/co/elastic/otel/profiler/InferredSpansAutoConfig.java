@@ -22,6 +22,9 @@ import co.elastic.otel.common.config.PropertiesApplier;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @AutoService(AutoConfigurationCustomizerProvider.class)
@@ -29,22 +32,56 @@ public class InferredSpansAutoConfig implements AutoConfigurationCustomizerProvi
 
   private static final Logger log = Logger.getLogger(InferredSpansAutoConfig.class.getName());
 
-  static final String ENABLED_OPTION = "elastic.otel.inferred.spans.enabled";
-  static final String LOGGING_OPTION = "elastic.otel.inferred.spans.logging.enabled";
-  static final String DIAGNOSTIC_FILES_OPTION =
-      "elastic.otel.inferred.spans.backup.diagnostic.files";
-  static final String SAFEMODE_OPTION = "elastic.otel.inferred.spans.safe.mode";
-  static final String POSTPROCESSING_OPTION = "elastic.otel.inferred.spans.post.processing.enabled";
-  static final String SAMPLING_INTERVAL_OPTION = "elastic.otel.inferred.spans.sampling.interval";
-  static final String MIN_DURATION_OPTION = "elastic.otel.inferred.spans.min.duration";
-  static final String INCLUDED_CLASSES_OPTION = "elastic.otel.inferred.spans.included.classes";
-  static final String EXCLUDED_CLASSES_OPTION = "elastic.otel.inferred.spans.excluded.classes";
-  static final String INTERVAL_OPTION = "elastic.otel.inferred.spans.interval";
-  static final String DURATION_OPTION = "elastic.otel.inferred.spans.duration";
-  static final String LIB_DIRECTORY_OPTION = "elastic.otel.inferred.spans.lib.directory";
+  static final String ENABLED_OPTION = "otel.inferred.spans.enabled";
+  static final String LOGGING_OPTION = "otel.inferred.spans.logging.enabled";
+  static final String DIAGNOSTIC_FILES_OPTION = "otel.inferred.spans.backup.diagnostic.files";
+  static final String SAFEMODE_OPTION = "otel.inferred.spans.safe.mode";
+  static final String POSTPROCESSING_OPTION = "otel.inferred.spans.post.processing.enabled";
+  static final String SAMPLING_INTERVAL_OPTION = "otel.inferred.spans.sampling.interval";
+  static final String MIN_DURATION_OPTION = "otel.inferred.spans.min.duration";
+  static final String INCLUDED_CLASSES_OPTION = "otel.inferred.spans.included.classes";
+  static final String EXCLUDED_CLASSES_OPTION = "otel.inferred.spans.excluded.classes";
+  static final String INTERVAL_OPTION = "otel.inferred.spans.interval";
+  static final String DURATION_OPTION = "otel.inferred.spans.duration";
+  static final String LIB_DIRECTORY_OPTION = "otel.inferred.spans.lib.directory";
+
+  private static final Map<String, String> LEGACY_OPTIONS_MAP = new HashMap<>();
+
+  static {
+    LEGACY_OPTIONS_MAP.put("elastic." + ENABLED_OPTION, ENABLED_OPTION);
+    LEGACY_OPTIONS_MAP.put("elastic." + LOGGING_OPTION, LOGGING_OPTION);
+    LEGACY_OPTIONS_MAP.put("elastic." + DIAGNOSTIC_FILES_OPTION, DIAGNOSTIC_FILES_OPTION);
+    LEGACY_OPTIONS_MAP.put("elastic." + SAFEMODE_OPTION, SAFEMODE_OPTION);
+    LEGACY_OPTIONS_MAP.put("elastic." + POSTPROCESSING_OPTION, POSTPROCESSING_OPTION);
+    LEGACY_OPTIONS_MAP.put("elastic." + SAMPLING_INTERVAL_OPTION, SAMPLING_INTERVAL_OPTION);
+    LEGACY_OPTIONS_MAP.put("elastic." + MIN_DURATION_OPTION, MIN_DURATION_OPTION);
+    LEGACY_OPTIONS_MAP.put("elastic." + INCLUDED_CLASSES_OPTION, INCLUDED_CLASSES_OPTION);
+    LEGACY_OPTIONS_MAP.put("elastic." + EXCLUDED_CLASSES_OPTION, EXCLUDED_CLASSES_OPTION);
+    LEGACY_OPTIONS_MAP.put("elastic." + INTERVAL_OPTION, INTERVAL_OPTION);
+    LEGACY_OPTIONS_MAP.put("elastic." + DURATION_OPTION, DURATION_OPTION);
+    LEGACY_OPTIONS_MAP.put("elastic." + LIB_DIRECTORY_OPTION, LIB_DIRECTORY_OPTION);
+  }
 
   @Override
   public void customize(AutoConfigurationCustomizer config) {
+    config.addPropertiesCustomizer(
+        props -> {
+          Map<String, String> overrides = new HashMap<>();
+          for (String oldKey : LEGACY_OPTIONS_MAP.keySet()) {
+            String value = props.getString(oldKey);
+            if (value != null) {
+              String newKey = LEGACY_OPTIONS_MAP.get(oldKey);
+              if (props.getString(newKey) == null) { // new value has not been configured
+                log.log(
+                    Level.WARNING,
+                    "The configuration property {0} is deprecated, use {1} instead",
+                    new Object[] {oldKey, newKey});
+                overrides.put(newKey, value);
+              }
+            }
+          }
+          return overrides;
+        });
     config.addTracerProviderCustomizer(
         (providerBuilder, properties) -> {
           if (properties.getBoolean(ENABLED_OPTION, false)) {
