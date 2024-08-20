@@ -43,6 +43,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class InferredSpansAutoConfigTest {
 
@@ -53,24 +55,29 @@ public class InferredSpansAutoConfigTest {
     OtelReflectionUtils.shutdownAndResetGlobalOtel();
   }
 
-  @Test
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
   @DisabledOnOpenJ9
-  public void checkAllOptions(@TempDir Path tmpDir) {
+  public void checkAllOptions(boolean legacyOptions, @TempDir Path tmpDir) {
     String libDir = tmpDir.resolve("foo").resolve("bar").toString();
+    String prefix = "";
+    if (legacyOptions) {
+      prefix = "elastic.";
+    }
     try (AutoConfigTestProperties props =
         new AutoConfigTestProperties()
-            .put(InferredSpansAutoConfig.ENABLED_OPTION, "true")
-            .put(InferredSpansAutoConfig.LOGGING_OPTION, "false")
-            .put(InferredSpansAutoConfig.DIAGNOSTIC_FILES_OPTION, "true")
-            .put(InferredSpansAutoConfig.SAFEMODE_OPTION, "16")
-            .put(InferredSpansAutoConfig.POSTPROCESSING_OPTION, "false")
-            .put(InferredSpansAutoConfig.SAMPLING_INTERVAL_OPTION, "7ms")
-            .put(InferredSpansAutoConfig.MIN_DURATION_OPTION, "2ms")
-            .put(InferredSpansAutoConfig.INCLUDED_CLASSES_OPTION, "foo*23,bar.baz")
-            .put(InferredSpansAutoConfig.EXCLUDED_CLASSES_OPTION, "blub,test*.test2")
-            .put(InferredSpansAutoConfig.INTERVAL_OPTION, "2s")
-            .put(InferredSpansAutoConfig.DURATION_OPTION, "3s")
-            .put(InferredSpansAutoConfig.LIB_DIRECTORY_OPTION, libDir)) {
+            .put(prefix + InferredSpansAutoConfig.ENABLED_OPTION, "true")
+            .put(prefix + InferredSpansAutoConfig.LOGGING_OPTION, "false")
+            .put(prefix + InferredSpansAutoConfig.DIAGNOSTIC_FILES_OPTION, "true")
+            .put(prefix + InferredSpansAutoConfig.SAFEMODE_OPTION, "16")
+            .put(prefix + InferredSpansAutoConfig.POSTPROCESSING_OPTION, "false")
+            .put(prefix + InferredSpansAutoConfig.SAMPLING_INTERVAL_OPTION, "7ms")
+            .put(prefix + InferredSpansAutoConfig.MIN_DURATION_OPTION, "2ms")
+            .put(prefix + InferredSpansAutoConfig.INCLUDED_CLASSES_OPTION, "foo*23,bar.baz")
+            .put(prefix + InferredSpansAutoConfig.EXCLUDED_CLASSES_OPTION, "blub,test*.test2")
+            .put(prefix + InferredSpansAutoConfig.INTERVAL_OPTION, "2s")
+            .put(prefix + InferredSpansAutoConfig.DURATION_OPTION, "3s")
+            .put(prefix + InferredSpansAutoConfig.LIB_DIRECTORY_OPTION, libDir)) {
 
       OpenTelemetry otel = GlobalOpenTelemetry.get();
       List<SpanProcessor> processors = OtelReflectionUtils.getSpanProcessors(otel);
