@@ -18,5 +18,9 @@
     ".github/**",
     ".buildkite/**",
     "jvmti-access/jni-build/*.Dockerfile"
-  ]
+  ],
+  "postUpgradeTasks": {
+    "commands": ["./gradlew updateLicensesAndNotice"],
+    "fileFilters": ["licences/**/*"]
+  }
 }
