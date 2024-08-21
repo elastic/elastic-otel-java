@@ -76,10 +76,10 @@ tasks {
       )
     )
     projects = arrayOf(
-      rootProject, rootProject.project("agent"), rootProject.project("bootstrap"),
+      rootProject.project("agent"), rootProject.project("bootstrap"),
       rootProject.project("common"), rootProject.project("custom"),
       rootProject.project("inferred-spans"), rootProject.project("instrumentation"),
-      rootProject.project("resources"), project
+      rootProject.project("resources")
     )
 
     configurations = arrayOf("runtimeClasspath", "compileClasspath")
