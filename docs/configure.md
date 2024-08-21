@@ -79,9 +79,9 @@ EDOT Java uses different defaults than the OpenTelemetry Java agent for the foll
 
 | Option | EDOT Java default | OpenTelemetry Java agent default |
 |---|---|---|
-| `OTEL_RESOURCE_PROVIDERS_AWS_ENABLED` |  enabled | disabled ([docs](https://opentelemetry.io/docs/zero-code/java/agent/configuration/#enable-resource-providers-that-are-disabled-by-default)) |
-| `OTEL_RESOURCE_PROVIDERS_GCP_ENABLED` | enabled | disabled ([docs](https://opentelemetry.io/docs/zero-code/java/agent/configuration/#enable-resource-providers-that-are-disabled-by-default)) |
-| `OTEL_INSTRUMENTATION_RUNTIME-TELEMETRY_EMIT-EXPERIMENTAL-TELEMETRY` | enabled | disabled ([docs](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/ec0223de59a6c7c09b0dcf72ba89addc0975a40d/instrumentation/runtime-telemetry/README.md)) |
+| `OTEL_RESOURCE_PROVIDERS_AWS_ENABLED` |  true (enabled) | false (disabled) ([docs](https://opentelemetry.io/docs/zero-code/java/agent/configuration/#enable-resource-providers-that-are-disabled-by-default)) |
+| `OTEL_RESOURCE_PROVIDERS_GCP_ENABLED` | true (enabled) | false (disabled) ([docs](https://opentelemetry.io/docs/zero-code/java/agent/configuration/#enable-resource-providers-that-are-disabled-by-default)) |
+| `OTEL_INSTRUMENTATION_RUNTIME-TELEMETRY_EMIT-EXPERIMENTAL-TELEMETRY` | true (enabled) | false (disabled) ([docs](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/ec0223de59a6c7c09b0dcf72ba89addc0975a40d/instrumentation/runtime-telemetry/README.md)) |
 
 ### Configuration options from OpenTelemetry extensions
 
@@ -90,8 +90,8 @@ EDOT Java includes several OpenTelemetry extensions from the [OpenTelemetry Java
 | Option(s) | Extension |  Description |
 |---|---|---|
 | `OTEL_SERVICE_NAME` | [Resource providers](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/resource-providers) | This can be [set as usual](https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_service_name), but if not set the value will be inferred when the EDOT Java agent is running in various application servers. |
-| `OTEL_INFERRED_SPANS_*` | [Inferred Spans](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/inferred-spans) | Generates spans using profiling instead of instrumentation. |
-| `OTEL_SPAN_STACK_TRACE_MIN_DURATION` | [Span stacktrace capture](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/span-stacktrace) | Define the minimum duration (in milliseconds) for stack traces. Defaults to 5ms. |
+| `OTEL_INFERRED_SPANS_*` | [Inferred Spans](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/inferred-spans) | Generates additional spans using profiling instead of instrumentation. |
+| `OTEL_SPAN_STACK_TRACE_MIN_DURATION` | [Span stacktrace capture](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/span-stacktrace) | Define the minimum duration (in milliseconds) for attaching stack traces to spans. Defaults to 5ms. |
 
 ### Configuration options that are _only_ available in EDOT Java
 
