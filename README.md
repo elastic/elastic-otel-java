@@ -79,53 +79,6 @@ The minimum span duration can be configured with `elastic.otel.span.stack.trace.
 Experimental runtime metrics are enabled by default.
 Set `otel.instrumentation.runtime-telemetry.emit-experimental-telemetry` to `false` to disable them.
 
-### Breakdown metrics
-
-Breakdown metrics currently require a custom Elasticsearch ingest pipeline.
-
-```
-PUT _ingest/pipeline/metrics-apm.app@custom
-{
-  "processors": [
-    {
-      "script": {
-        "lang": "painless",
-        "source": """
-
-if(ctx.span == null){
-  ctx.span = [:];
-}
-if(ctx.transaction == null){
-  ctx.transaction = [:];
-}
-if(ctx.labels != null){
-  if(ctx.labels.elastic_span_type != null){
-    ctx.span.type = ctx.labels.elastic_span_type;
-  }
-  if(ctx.labels.elastic_span_subtype != null){
-    ctx.span.subtype = ctx.labels.elastic_span_subtype;
-  }
-  if(ctx.labels.elastic_local_root_type != null){
-    ctx.transaction.type = ctx.labels.elastic_local_root_type;
-  }
-  if(ctx.labels.elastic_local_root_name != null){
-    ctx.transaction.name = ctx.labels.elastic_local_root_name;
-  }
-}
-
-if(ctx.numeric_labels != null && ctx.numeric_labels.elastic_span_self_time != null){
-  def value = ctx.numeric_labels.elastic_span_self_time/1000;
-  def sum = [ 'us': value];
-  ctx.span.self_time =  [ 'count': 0, 'sum': sum];
-}
-
-        """
-      }
-    }
-  ]
-}
-```
-
 # License
 
 The Elastic Distribution of OpenTelemetry Java is licensed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.html).

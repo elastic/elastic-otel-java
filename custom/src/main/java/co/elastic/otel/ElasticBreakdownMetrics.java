@@ -83,7 +83,7 @@ public class ElasticBreakdownMetrics {
   }
 
   public ElasticBreakdownMetrics() {
-    elasticSpanData = new ConcurrentHashMap<>();
+    this.elasticSpanData = (ConcurrentHashMap<SpanContext, BreakdownData>) new ConcurrentHashMap();
   }
 
   public void registerOpenTelemetry(OpenTelemetry openTelemetry) {
@@ -182,11 +182,14 @@ public class ElasticBreakdownMetrics {
           buildCounterAttributes(spanData.getAttributes())
               .put(ElasticAttributes.LOCAL_ROOT_TYPE, spanContextData.getLocalRootSpanType())
               .put(ElasticAttributes.LOCAL_ROOT_NAME, spanContextData.getLocalRootSpanName())
-              // put measured metric as span attribute to allow using an ingest pipeline to alter
-              // storage
-              // ingest pipelines do not have access to _source and thus can't read the metric
-              // as-is.
-              .put(ElasticAttributes.SELF_TIME, selfTime);
+          // put measured metric as span attribute to allow using an ingest pipeline to alter
+          // storage ingest pipelines do not have access to _source and thus can't read the
+          // metric as-is.
+          //
+          // (ab)using metric attributes for this breaks due to high cardinality
+          // see https://github.com/elastic/elastic-otel-java/issues/383 for details
+          // .put(ElasticAttributes.SELF_TIME, selfTime)
+          ;
 
       // unfortunately here we get a read-only span that has already been ended, thus even a cast to
       // ReadWriteSpan

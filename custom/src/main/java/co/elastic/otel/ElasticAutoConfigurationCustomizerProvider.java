@@ -37,18 +37,8 @@ public class ElasticAutoConfigurationCustomizerProvider
 
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
-
-    autoConfiguration
-        .addTracerProviderCustomizer(
-            (sdkTracerProviderBuilder, configProperties) ->
-                // span processor registration
-                sdkTracerProviderBuilder.addSpanProcessor(
-                    ElasticExtension.INSTANCE.getSpanProcessor()))
-        .addPropertiesCustomizer(ElasticAutoConfigurationCustomizerProvider::propertiesCustomizer)
-        .addSpanExporterCustomizer(
-            (spanExporter, configProperties) ->
-                // wrap the original span exporter
-                ElasticExtension.INSTANCE.wrapSpanExporter(spanExporter));
+    autoConfiguration.addPropertiesCustomizer(
+        ElasticAutoConfigurationCustomizerProvider::propertiesCustomizer);
   }
 
   static Map<String, String> propertiesCustomizer(ConfigProperties configProperties) {
