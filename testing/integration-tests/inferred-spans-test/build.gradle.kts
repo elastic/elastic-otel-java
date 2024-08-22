@@ -16,9 +16,9 @@ tasks.withType<Test>() {
   jvmArgs(
     //"-Dotel.javaagent.debug=true",
     "-Dotel.service.name=testing",
-    "-Delastic.otel.inferred.spans.enabled=true",
-    "-Delastic.otel.inferred.spans.duration=2000ms",
-    "-Delastic.otel.inferred.spans.interval=2000ms",
-    "-Delastic.otel.inferred.spans.sampling.interval=5ms"
+    "-Dotel.inferred.spans.enabled=true",
+    "-Dotel.inferred.spans.duration=2000ms",
+    "-Dotel.inferred.spans.interval=2000ms",
+    "-Dotel.inferred.spans.sampling.interval=5ms"
   )
 }

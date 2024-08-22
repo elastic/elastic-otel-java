@@ -13,12 +13,6 @@ plugins {
   alias(catalog.plugins.dockerJavaApplication)
 }
 
-dependencies {
-  testImplementation(libs.assertj.core)
-  testImplementation(libs.awaitility)
-  compileOnly(libs.findbugs.jsr305)
-}
-
 description = "Library for exposing JVMTI and JNI functionality to Java"
 
 

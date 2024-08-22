@@ -19,6 +19,8 @@ tasks.withType<Test>() {
     .toAbsolutePath().toString()
 
   jvmArgs(
+    // TODO work-around: exporter is required to make chaining batch processor work
+    "-Dotel.traces.exporter=logging",
     //"-Dotel.javaagent.debug=true",
     "-Dotel.service.name=testing",
     "-Delastic.otel.universal.profiling.integration.socket.dir=${tmpDir}"

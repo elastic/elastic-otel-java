@@ -1,5 +1,5 @@
 plugins {
-  id("java")
+  id("elastic-otel.java-conventions")
   id("elastic-otel.sign-and-publish-conventions")
   id("com.github.johnrengelman.shadow")
 }

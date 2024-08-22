@@ -1,5 +1,5 @@
 plugins {
-  java
+  id("elastic-otel.java-conventions")
 }
 
 dependencies {

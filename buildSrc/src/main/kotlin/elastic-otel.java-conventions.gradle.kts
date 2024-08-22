@@ -1,12 +1,59 @@
 plugins {
-  id("java")
+  java
+  id("elastic-otel.spotless-conventions")
 }
+
+java {
+  withJavadocJar()
+  withSourcesJar()
+}
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+  maven {
+    name = "mavenCentralSnapshots"
+    url = uri("https://oss.sonatype.org/content/repositories/snapshots")
+  }
+}
+
+//https://github.com/gradle/gradle/issues/15383
+val catalog = extensions.getByType<VersionCatalogsExtension>().named("catalog")
+dependencies {
+
+  implementation(platform(catalog.findLibrary("opentelemetryInstrumentationAlphaBom").get()))
+
+  annotationProcessor(catalog.findLibrary("autoservice.processor").get())
+  compileOnly(catalog.findLibrary("autoservice.annotations").get())
+  compileOnly(catalog.findLibrary("findbugs.jsr305").get())
+
+  testAnnotationProcessor(catalog.findLibrary("autoservice.processor").get())
+  testCompileOnly(catalog.findLibrary("autoservice.annotations").get())
+  testCompileOnly(catalog.findLibrary("findbugs.jsr305").get())
+  testImplementation(catalog.findLibrary("assertj.core").get())
+  testImplementation(catalog.findLibrary("awaitility").get())
+  testImplementation(catalog.findLibrary("mockito").get())
+  testImplementation(enforcedPlatform(catalog.findLibrary("junitBom").get()))
+  testImplementation("org.junit.jupiter:junit-jupiter")
+}
+
+tasks {
+  test {
+    useJUnitPlatform()
+  }
+
+  compileJava {
+    options.release.set(8)
+  }
+  compileTestJava {
+    options.release.set(8)
+  }
+}
+
 
 interface JavaVersionTestingExtension {
   /**
-   * By default the convention will publish the artifacts and pom as libraries.
-   * To override the behaviour provide the tasks producing the artifacts as this property.
-   * This should only be required when publishing fat-jars with custom packaging.
+   * This option can be set to false to disable testing with openj9 on this project
    */
   val enableTestsOnOpenJ9: Property<Boolean>
 }

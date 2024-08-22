@@ -10,11 +10,11 @@ opentelemetryProto = "1.3.2-alpha"
 
 # otel agent, we rely on the '*-alpha' and get the non-alpha dependencies transitively
 # updated from upstream agent with .ci/update-upstream.sh
-opentelemetryJavaagentAlpha = "2.6.0-alpha"
+opentelemetryJavaagentAlpha = "2.7.0-alpha"
 
 # otel contrib
 # updated from upstream agent with .ci/update-upstream.sh
-opentelemetryContribAlpha = "1.36.0-alpha"
+opentelemetryContribAlpha = "1.37.0-alpha"
 
 # otel semconv
 # updated from upstream agent with .ci/update-upstream.sh
@@ -44,7 +44,7 @@ assertj-core = "org.assertj:assertj-core:3.26.3"
 awaitility = "org.awaitility:awaitility:4.2.2"
 findbugs-jsr305 = "com.google.code.findbugs:jsr305:3.0.2"
 testcontainers = "org.testcontainers:testcontainers:1.20.1"
-logback = "ch.qos.logback:logback-classic:1.5.6"
+logback = "ch.qos.logback:logback-classic:1.5.7"
 jackson = "com.fasterxml.jackson.core:jackson-databind:2.17.2"
 protobuf-util = "com.google.protobuf:protobuf-java-util:3.25.4"
 # last version supporting Java 8
@@ -58,8 +58,8 @@ okhttp = "com.squareup.okhttp3:okhttp:4.12.0"
 hdrhistogram = "org.hdrhistogram:HdrHistogram:2.2.2"
 lmax-disruptor = "com.lmax:disruptor:3.4.4"
 jctools = "org.jctools:jctools-core:4.0.5"
-github-api = "org.kohsuke:github-api:1.323"
-apachecommons-compress = "org.apache.commons:commons-compress:1.27.0"
+github-api = "org.kohsuke:github-api:1.324"
+apachecommons-compress = "org.apache.commons:commons-compress:1.27.1"
 asyncprofiler = "tools.profiler:async-profiler:3.0"
 
 freemarker = "org.freemarker:freemarker:2.3.33"
@@ -81,6 +81,6 @@ jib = { id = "com.google.cloud.tools.jib", version.ref = "jib" }
 taskinfo = { id = "org.barfuin.gradle.taskinfo", version = '2.2.0' }
 jmh = {id = "me.champeau.jmh", version = "0.7.2"}
 nexusPublish = { id = "io.github.gradle-nexus.publish-plugin", version = '2.0.0' }
-licenseReport = { id = "com.github.jk1.dependency-license-report", version = "2.7" }
+licenseReport = { id = "com.github.jk1.dependency-license-report", version = "2.9" }
 dockerJavaApplication = { id = "com.bmuschko.docker-java-application", version = "9.4.0" }
 shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }

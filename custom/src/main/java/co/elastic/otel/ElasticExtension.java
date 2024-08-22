@@ -18,27 +18,25 @@
  */
 package co.elastic.otel;
 
-import co.elastic.otel.common.util.ExecutorUtils;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
+/**
+ * Deprecated as breakdown metrics is experimental and has <a
+ * href="https://github.com/elastic/elastic-otel-java/issues/383">at least one issue</a>
+ */
+@Deprecated
 public class ElasticExtension {
 
   public static final ElasticExtension INSTANCE = new ElasticExtension();
   private final ElasticBreakdownMetrics breakdownMetrics;
   private final ElasticSpanProcessor spanProcessor;
-  private final ExecutorService asyncInitExecutor;
   private ElasticSpanExporter spanExporter;
 
   private ElasticExtension() {
     this.breakdownMetrics = new ElasticBreakdownMetrics();
     this.spanProcessor = new ElasticSpanProcessor(breakdownMetrics);
-
-    this.asyncInitExecutor =
-        Executors.newSingleThreadExecutor(ExecutorUtils.threadFactory("resource-init", true));
   }
 
   public void registerOpenTelemetry(OpenTelemetry openTelemetry) {
@@ -54,9 +52,5 @@ public class ElasticExtension {
     breakdownMetrics.registerSpanExporter(spanExporter);
     spanProcessor.registerSpanExporter(spanExporter);
     return spanExporter;
-  }
-
-  public void shutdown() {
-    ExecutorUtils.shutdownAndWaitTermination(asyncInitExecutor);
   }
 }
