@@ -30,7 +30,8 @@ import java.time.Duration;
 public class SpanStackTraceProcessorAutoConfig implements ChainingSpanProcessorAutoConfiguration {
 
   // TODO replace this with upstream once it's available
-  static final String MIN_DURATION_CONFIG_OPTION = "otel.span.stacktrace.min.duration";
+  static final String MIN_DURATION_CONFIG_OPTION =
+      "otel.java.experimental.span-stacktrace.min.duration";
 
   @Override
   public void registerSpanProcessors(
