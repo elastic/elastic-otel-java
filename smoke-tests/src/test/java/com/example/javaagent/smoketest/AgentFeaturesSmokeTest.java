@@ -33,7 +33,8 @@ class AgentFeaturesSmokeTest extends TestAppSmokeTest {
   @BeforeAll
   public static void start() {
     startTestApp(
-        (container) -> container.addEnv("ELASTIC_OTEL_SPAN_STACK_TRACE_MIN_DURATION", "0ms"));
+        (container) ->
+            container.addEnv("OTEL_JAVA_EXPERIMENTAL_SPAN_STACKTRACE_MIN_DURATION", "0ms"));
   }
 
   @AfterAll
