@@ -1,0 +1,48 @@
+---
+# Renovate Pull Requests are not updating the license files in the licenses folder.
+# This workflow will checkout the renovate PR, update the license files, and push the changes back to the PR.
+name: update-renovate-pr
+
+on:
+  push:
+    branches:
+      - renovate/**
+    paths-ignore:
+      - licenses/**
+
+permissions:
+  contents: read
+
+jobs:
+  update-renovate-pr:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/workflows/gradle-goal
+        with:
+          command: "./gradlew updateLicensesAndNotice"
+
+      - name: Debug diff
+        run: git status --porcelain
+
+      - name: Check if NOTICE.txt has changed
+        id: check-notice-diff
+        run: |
+          changed=false
+          if git status --porcelain | grep -q 'NOTICE.txt'; then
+            changed=true
+          fi
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+
+      - name: Debug output
+        run: |-
+          echo 'changed: ${{ steps.check-notice-diff.outputs.changed }}'
+
+      - name: Commit changes (TBD)
+        if: ${{ steps.check-notice-diff.outputs.changed == 'true' }}
+        run: |
+           git status
+           git --no-pager diff
