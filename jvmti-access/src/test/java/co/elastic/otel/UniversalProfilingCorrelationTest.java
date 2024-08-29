@@ -185,6 +185,7 @@ public class UniversalProfilingCorrelationTest {
     @Test
     @EnabledForJreRange(min = JRE.JAVA_21)
     public void testVirtualThreadsExcludedByDefault() throws Exception {
+      System.out.println(System.getProperty("java.vm.version"));
 
       if (System.getProperty("java.vm.name").toUpperCase().contains("J9")) {
         // We exclude this test on OpenJ9, because it is flaky there
