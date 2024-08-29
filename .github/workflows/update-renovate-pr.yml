@@ -28,11 +28,11 @@ jobs:
       - name: Debug diff
         run: git status --porcelain
 
-      - name: Check if NOTICE.txt has changed
+      - name: Check if licenses folder has changed
         id: check-notice-diff
         run: |
           changed=false
-          if git status --porcelain | grep -q 'NOTICE.txt'; then
+          if git status --porcelain | grep -q 'licenses/'; then
             changed=true
           fi
           echo "changed=$changed" >> "$GITHUB_OUTPUT"
