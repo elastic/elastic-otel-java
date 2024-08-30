@@ -32,7 +32,7 @@ jobs:
         id: check-notice-diff
         run: |
           changed=false
-          if git status --porcelain | grep -q 'licenses/'; then
+          if git status --porcelain | grep -q '^licenses/'; then
             changed=true
           fi
           echo "changed=$changed" >> "$GITHUB_OUTPUT"
@@ -41,8 +41,21 @@ jobs:
         run: |-
           echo 'changed: ${{ steps.check-notice-diff.outputs.changed }}'
 
-      - name: Commit changes (TBD)
+      - name: Commit changes
         if: ${{ steps.check-notice-diff.outputs.changed == 'true' }}
         run: |
-           git status
-           git --no-pager diff
+          git status
+          git --no-pager diff
+          changed_files=$(git status --porcelain | grep -E '^(M|\?\?)' | awk '{print $2}' | grep '^licenses/')
+          for file in $changed_files; do
+            export BRANCH=${GITHUB_REF#refs/heads/}
+            export SHA=$(git rev-parse "$BRANCH:$file")
+            gh api --method PUT "/repos/${REPO}/contents/$file" \
+              --field message="Update $file" \
+              --field content=@<(base64 -i $file) \
+              --field sha="${SHA}" \
+              --field branch="${BRANCH}"
+          done
+        env:
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
