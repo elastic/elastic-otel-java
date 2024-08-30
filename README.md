@@ -62,7 +62,7 @@ The attributes for cloud providers are captured asynchronously to prevent applic
 
 ### Inferred spans
 
-Set `ELASTIC_OTEL_INFERRED_SPANS_ENABLED=true` to enable.
+Set `OTEL_INFERRED_SPANS_ENABLED=true` to enable.
 
 See [inferred spans](./inferred-spans/README.md) for more details
 
