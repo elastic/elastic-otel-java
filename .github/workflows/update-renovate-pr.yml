@@ -32,7 +32,7 @@ jobs:
         id: check-notice-diff
         run: |
           changed=false
-          if git status --porcelain | grep -q '^licenses/'; then
+          if git status --porcelain | grep -q 'licenses/'; then
             changed=true
           fi
           echo "changed=$changed" >> "$GITHUB_OUTPUT"
@@ -41,13 +41,20 @@ jobs:
         run: |-
           echo 'changed: ${{ steps.check-notice-diff.outputs.changed }}'
 
-      - name: Commit changes
+      ## this should help with of multiple files in a new folder.
+      - name: Add changes
+        if: ${{ steps.check-notice-diff.outputs.changed == 'true' }}
+        run: git add licenses
+
+      - name: Push changes
         if: ${{ steps.check-notice-diff.outputs.changed == 'true' }}
         run: |
-          git status
-          git --no-pager diff
-          changed_files=$(git status --porcelain | grep -E '^(M|\?\?)' | awk '{print $2}' | grep '^licenses/')
+          changed_files=$(git status --porcelain | grep -E '^(M|A)' | awk '{print $2}' | grep -E '^licenses/')
+          echo "::notice::changed files: $(echo $changed_files | tr '\n' '')"
           for file in $changed_files; do
+            if [ -d "$file" ]; then
+              continue
+            fi
             export BRANCH=${GITHUB_REF#refs/heads/}
             export SHA=$(git rev-parse "$BRANCH:$file")
             gh api --method PUT "/repos/${REPO}/contents/$file" \
