@@ -67,7 +67,7 @@ freemarker = "org.freemarker:freemarker:2.3.33"
 spotlessPlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
 shadowPlugin = { group = "com.github.johnrengelman", name = "shadow", version.ref = "shadow" }
 # Ant should be kept in sync with the version used in the shadow plugin
-ant = "org.apache.ant:ant:1.10.14"
+ant = "org.apache.ant:ant:1.10.15"
 # ASM is currently only used during compile-time, so it is okay to diverge from the version used in ByteBuddy
 asm = "org.ow2.asm:asm:9.7"
 
