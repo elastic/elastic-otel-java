@@ -56,8 +56,7 @@ SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
   .addSpanProcessor(BatchSpanProcessor.builder(OtlpGrpcSpanExporter.builder()
     .setEndpoint("https://<clusterid>.apm.europe-west3.gcp.cloud.es.io:443")
     .addHeader("Authorization", "Bearer <secrettoken>>")
-    .build()))
-  .build();
+    .build())).build();
 inferredSpans.setTracerProvider(tracerProvider);
 ```
 
