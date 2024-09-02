@@ -55,11 +55,12 @@ class AgentFeaturesSmokeTest extends TestAppSmokeTest {
     spans.forEach(
         span -> {
           assertThat(getAttributes(span.getAttributesList()))
-              .containsKeys(
-                  "elastic.span.is_local_root",
-                  "elastic.span.local_root.id",
+              // span breakdown feature disabled
+              .doesNotContainKeys(
                   "elastic.span.self_time",
-                  "code.stacktrace");
+                  "elastic.span.is_local_root",
+                  "elastic.span.local_root.id")
+              .containsKeys("code.stacktrace");
         });
   }
 }

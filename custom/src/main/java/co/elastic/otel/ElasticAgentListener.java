@@ -18,13 +18,13 @@
  */
 package co.elastic.otel;
 
-import com.google.auto.service.AutoService;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.javaagent.extension.AgentListener;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 
-@AutoService(AgentListener.class)
+// @AutoService(AgentListener.class)
+@Deprecated
 public class ElasticAgentListener implements AgentListener {
   @Override
   public void afterAgent(AutoConfiguredOpenTelemetrySdk autoConfiguredOpenTelemetrySdk) {
@@ -37,14 +37,5 @@ public class ElasticAgentListener implements AgentListener {
     OpenTelemetry openTelemetry = GlobalOpenTelemetry.get();
 
     ElasticExtension.INSTANCE.registerOpenTelemetry(openTelemetry);
-
-    Runtime.getRuntime()
-        .addShutdownHook(
-            new Thread() {
-              @Override
-              public void run() {
-                ElasticExtension.INSTANCE.shutdown();
-              }
-            });
   }
 }

@@ -11,7 +11,7 @@ Configure the Elastic Distribution of OpenTelemetry Java (EDOT Java) to send dat
 ## Configuration methods
 
 Set OpenTelemetry configuration options using one of the mechanisms listed in the
-[OpenTelemetry agent documentation](https://opentelemetry.io/docs/zero-code/java/agent/configuration/) 
+[OpenTelemetry agent documentation](https://opentelemetry.io/docs/zero-code/java/agent/configuration/)
 and [OpenTelemetry SDK documentation](https://opentelemetry.io/docs/languages/java/configuration/),
 including:
 
@@ -65,31 +65,51 @@ java -Dotel.javaagent.configuration-file=my.properties ...
 
 ## Configuration options
 
-Because the Elastic Distribution of OpenTelemetry Java is an extension of the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation), it supports both:
+Because the Elastic Distribution of OpenTelemetry Java is an extension of the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation), it supports:
 
-* General OpenTelemetry SDK configuration options
-* General OpenTelemetry Java agent configuration options
-* Elastic-specific configuration options that are only available when using EDOT Java
+* OpenTelemetry configuration options
+* Configuration options from OpenTelemetry extensions that are included with EDOT Java
+* Configuration options that are _only_ available in EDOT Java
 
 ### OpenTelemetry configuration options
 
-EDOT Java supports all configuration options listed in the [OpenTelemetry General SDK Configuration documentation](https://opentelemetry.io/docs/languages/sdk-configuration/general/) and [OpenTelemetry Java agent documentation](https://opentelemetry.io/docs/zero-code/java/agent/configuration/) .
+EDOT Java supports all configuration options listed in the [OpenTelemetry General SDK Configuration documentation](https://opentelemetry.io/docs/languages/sdk-configuration/general/) and [OpenTelemetry Java agent documentation](https://opentelemetry.io/docs/zero-code/java/agent/configuration/).
 
-### Elastic distro configuration options
+EDOT Java uses different defaults than the OpenTelemetry Java agent for the following configuration options:
 
-In addition to general OpenTelemetry configuration options, there are two kinds
-of configuration options that are only available in EDOT Java:
+| Option | EDOT Java default | OpenTelemetry Java agent default |
+|---|---|---|
+| `OTEL_RESOURCE_PROVIDERS_AWS_ENABLED` |  true (enabled) | false (disabled) ([docs](https://opentelemetry.io/docs/zero-code/java/agent/configuration/#enable-resource-providers-that-are-disabled-by-default)) |
+| `OTEL_RESOURCE_PROVIDERS_GCP_ENABLED` | true (enabled) | false (disabled) ([docs](https://opentelemetry.io/docs/zero-code/java/agent/configuration/#enable-resource-providers-that-are-disabled-by-default)) |
+| `OTEL_INSTRUMENTATION_RUNTIME-TELEMETRY_EMIT-EXPERIMENTAL-TELEMETRY` | true (enabled) | false (disabled) ([docs](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/ec0223de59a6c7c09b0dcf72ba89addc0975a40d/instrumentation/runtime-telemetry/README.md)) |
 
-* Additional `OTEL_` options that Elastic plans to contribute upstream to the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation), or have been contributed to the
-[Java agent contrib repo](https://github.com/open-telemetry/opentelemetry-java-contrib/) and are included
-in the EDOT but are not yet available in the OpenTelemetry Java agent.
-* `ELASTIC_OTEL_` options that are specific to Elastic and will always live in EDOT Java (in other words, they will _not_ be added upstream).
+### Configuration options from OpenTelemetry extensions
 
-<!--
-TO DO:
-List config options instead of linking to the README
--->
-Find a list of configuration options that are only available in EDOT Java in [README](https://github.com/elastic/elastic-otel-java?tab=readme-ov-file#features).
+EDOT Java includes several OpenTelemetry extensions from the [OpenTelemetry Java agent contrib repo](https://github.com/open-telemetry/opentelemetry-java-contrib/). These extensions offer the following additional `OTEL_` options:
+
+| Option(s) | Extension |  Description |
+|---|---|---|
+| `OTEL_SERVICE_NAME` | [Resource providers](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/resource-providers) | This can be [set as usual](https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_service_name), but if not set the value will be inferred when the EDOT Java agent is running in various application servers. |
+| `OTEL_INFERRED_SPANS_*` | [Inferred Spans](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/inferred-spans) | Generates additional spans using profiling instead of instrumentation. |
+| `OTEL_SPAN_STACK_TRACE_MIN_DURATION` | [Span stacktrace capture](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/span-stacktrace) | Define the minimum duration (in milliseconds) for attaching stack traces to spans. Defaults to 5ms. |
+
+### Configuration options that are _only_ available in EDOT Java
+
+In addition to general OpenTelemetry configuration options, there are two kinds of configuration options that are _only_ available in EDOT Java.
+
+**Elastic-authored options that are not yet available upstream**
+
+Additional `OTEL_` options that Elastic plans to contribute upstream to the [OpenTelemetry Java agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation) but are not yet available in the OpenTelemetry Java agent.
+
+_Currently there are no additional `OTEL_` options waiting to be contributed upstream._
+
+**Elastic-specific options**
+
+`ELASTIC_OTEL_` options that are specific to Elastic and will always live in EDOT Java (in other words, they will _not_ be added upstream):
+
+| Option(s) | Extension | Description |
+|---|---|---|
+| `ELASTIC_OTEL_UNIVERSAL_PROFILING_INTEGRATION_*` | [Universal profiling integration](https://github.com/elastic/elastic-otel-java/tree/main/universal-profiling-integration) | Correlates traces with profiling data from the Elastic universal profiler. |
 
 <!-- ✅ List auth methods -->
 ## Authentication methods
