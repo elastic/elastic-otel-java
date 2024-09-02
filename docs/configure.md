@@ -91,7 +91,6 @@ EDOT Java includes several OpenTelemetry extensions from the [OpenTelemetry Java
 |---|---|---|
 | `OTEL_SERVICE_NAME` | [Resource providers](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/resource-providers) | This can be [set as usual](https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_service_name), but if not set the value will be inferred when the EDOT Java agent is running in various application servers. |
 | `OTEL_INFERRED_SPANS_*` | [Inferred Spans](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/inferred-spans) | Generates additional spans using profiling instead of instrumentation. |
-| `OTEL_SPAN_STACK_TRACE_MIN_DURATION` | [Span stacktrace capture](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/span-stacktrace) | Define the minimum duration (in milliseconds) for attaching stack traces to spans. Defaults to 5ms. |
 
 ### Configuration options that are _only_ available in EDOT Java
 
@@ -110,6 +109,7 @@ _Currently there are no additional `OTEL_` options waiting to be contributed ups
 | Option(s) | Extension | Description |
 |---|---|---|
 | `ELASTIC_OTEL_UNIVERSAL_PROFILING_INTEGRATION_*` | [Universal profiling integration](https://github.com/elastic/elastic-otel-java/tree/main/universal-profiling-integration) | Correlates traces with profiling data from the Elastic universal profiler. |
+| `ELASTIC_OTEL_JAVA_SPAN_STACKTRACE_MIN_DURATION` | [Span stacktrace capture](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/span-stacktrace) | Define the minimum duration for attaching stack traces to spans. Defaults to 5ms. |
 
 <!-- ✅ List auth methods -->
 ## Authentication methods
