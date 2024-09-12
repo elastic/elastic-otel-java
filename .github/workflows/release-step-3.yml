@@ -195,10 +195,10 @@ jobs:
     needs:
       - validate-tag
     steps:
-      - uses: elastic/apm-pipeline-library/.github/actions/await-maven-artifact@current
+      - uses: elastic/oblt-actions/maven/await-artifact@v1
         with:
-          groupid: 'co.elastic.otel'
-          artifactid: 'elastic-otel-javaagent'
+          group-id: 'co.elastic.otel'
+          artifact-id: 'elastic-otel-javaagent'
           version: ${{ inputs.version }}
 
   post-release:
