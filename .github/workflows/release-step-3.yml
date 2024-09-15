@@ -101,7 +101,7 @@ jobs:
         run: tar xvf ${{ env.TARBALL_FILE }}
 
       - name: generate build provenance
-        uses: actions/attest-build-provenance@6149ea5740be74af77f260b9db67e633f6b0a9a1  # v1.4.2
+        uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c  # v1.4.3
         with:
           subject-path: "${{ github.workspace }}/**/*.jar"
 
@@ -182,7 +182,7 @@ jobs:
             EXTENSION_JAR_FILE=elastic-otel-agentextension.jar
 
       - name: generate build provenance (containers)
-        uses: actions/attest-build-provenance@6149ea5740be74af77f260b9db67e633f6b0a9a1  # v1.4.2
+        uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c  # v1.4.3
         with:
           subject-name: "${{ env.DOCKER_IMAGE_NAME }}"
           subject-digest: ${{ steps.push.outputs.digest }}
