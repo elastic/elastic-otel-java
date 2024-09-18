@@ -1,6 +1,7 @@
 plugins {
   id("elastic-otel.java-conventions")
   id("elastic-otel.sign-and-publish-conventions")
+  id("elastic-otel.license-report-conventions")
   id("com.github.johnrengelman.shadow")
 }
 
@@ -20,6 +21,10 @@ publishingConventions {
   artifactTasks.add(tasks.sourcesJar)
 }
 
+licenseReport {
+  configurations = arrayOf(shadowDependencies.name)
+}
+
 tasks {
 
   jar {
@@ -33,13 +38,9 @@ tasks {
     archiveClassifier.set("")
 
     // include licenses and notices in jar
-    dependsOn(project(":agent").tasks.named("updateLicensesAndNotice"))
-    from(rootDir) {
+    dependsOn(fullLicenseReport)
+    from(fullLicenseReport.get().outputs.files.singleFile) {
       into("META-INF")
-
-      include("LICENSE")
-      include("NOTICE")
-      include("licenses/**")
     }
   }
 }
