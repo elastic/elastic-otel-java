@@ -38,8 +38,7 @@ tasks {
     archiveClassifier.set("")
 
     // include licenses and notices in jar
-    dependsOn(fullLicenseReport)
-    from(fullLicenseReport.get().outputs.files.singleFile) {
+    from(fullLicenseReport) {
       into("META-INF")
     }
   }

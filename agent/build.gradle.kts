@@ -37,15 +37,12 @@ licenseReport {
 
 tasks {
 
-
   // We override the agent entrypoints defined in elastic-otel.agent-packaging-convention
   shadowJar {
     // include licenses and notices in jar
-    dependsOn(fullLicenseReport)
-    from(fullLicenseReport.get().outputs.files.singleFile) {
+    from(fullLicenseReport) {
       into("META-INF")
     }
-
   }
 
   assemble {
