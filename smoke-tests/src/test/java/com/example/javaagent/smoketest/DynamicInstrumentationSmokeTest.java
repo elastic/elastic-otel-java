@@ -18,16 +18,15 @@
  */
 package com.example.javaagent.smoketest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.google.protobuf.ByteString;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.trace.v1.Span;
+import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 class DynamicInstrumentationSmokeTest extends TestAppSmokeTest {
 
@@ -35,7 +34,9 @@ class DynamicInstrumentationSmokeTest extends TestAppSmokeTest {
   public static void start() {
     startTestApp(
         (container) -> {
-          container.addEnv("OTEL_INSTRUMENTATION_METHODS_INCLUDE", "co.elastic.otel.test.DynamicInstrumentationController[flipMethods]");
+          container.addEnv(
+              "OTEL_INSTRUMENTATION_METHODS_INCLUDE",
+              "co.elastic.otel.test.DynamicInstrumentationController[flipMethods]");
           container.addEnv("ELASTIC_OTEL_JAVA_DISABLE_INSTRUMENTATIONS_CHECKER", "true");
           container.addEnv("OTEL_JAVAAGENT_DEBUG", "true");
         });
@@ -57,26 +58,28 @@ class DynamicInstrumentationSmokeTest extends TestAppSmokeTest {
         .containsOnly("GET /dynamic", "DynamicInstrumentationController.flipMethods");
     ByteString firstTraceID = spans.get(0).getTraceId();
 
-    Thread.sleep(2000L); //give the flip time to be applied
+    Thread.sleep(2000L); // give the flip time to be applied
 
     doRequest(getUrl("/dynamic"), okResponseBody("disabled"));
     traces = waitForTraces();
     spans = getSpans(traces).dropWhile(span -> span.getTraceId().equals(firstTraceID)).toList();
-    assertThat(spans)
-        .hasSize(1)
-        .extracting("name")
-        .containsOnly("GET /dynamic");
+    assertThat(spans).hasSize(1).extracting("name").containsOnly("GET /dynamic");
     ByteString secondTraceID = spans.get(0).getTraceId();
 
-    Thread.sleep(2000L); //give the flip time to be applied
+    Thread.sleep(2000L); // give the flip time to be applied
 
     doRequest(getUrl("/dynamic"), okResponseBody("enabled"));
     traces = waitForTraces();
-    spans = getSpans(traces).dropWhile(span -> span.getTraceId().equals(firstTraceID) || span.getTraceId().equals(secondTraceID)).toList();
+    spans =
+        getSpans(traces)
+            .dropWhile(
+                span ->
+                    span.getTraceId().equals(firstTraceID)
+                        || span.getTraceId().equals(secondTraceID))
+            .toList();
     assertThat(spans)
         .hasSize(2)
         .extracting("name")
         .containsOnly("GET /dynamic", "DynamicInstrumentationController.flipMethods");
-
   }
 }
