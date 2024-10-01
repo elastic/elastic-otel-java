@@ -31,8 +31,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -207,7 +209,7 @@ public class DynamicInstrumentation {
   }
 
   static class OptionChecker implements Runnable {
-    ConcurrentMap<String, Boolean> alreadyDisabled = new ConcurrentHashMap<>();
+    private Map<String, Boolean> alreadyDisabled = new HashMap<>();
 
     @Override
     public void run() {
