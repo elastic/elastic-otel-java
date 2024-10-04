@@ -1,0 +1,13 @@
+{
+  "allowedLicenses": [
+    {
+      "moduleLicense": "Apache License, Version 2.0",
+      "moduleName": ".*"
+    },
+    {
+      "moduleLicense": "The 2-Clause BSD License",
+      "moduleVersion": ".*",
+      "moduleName": "org.hdrhistogram:HdrHistogram"
+    }
+  ]
+}
