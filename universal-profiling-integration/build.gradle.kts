@@ -15,7 +15,7 @@ description = "OpenTelemetry SDK extension to enable correlation of traces with 
 
 dependencies {
   implementation(project(":jvmti-access"))
-  implementation(project(":common"))
+  api(project(":common"))
   implementation("io.opentelemetry.semconv:opentelemetry-semconv")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
