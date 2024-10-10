@@ -43,6 +43,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -200,9 +201,6 @@ public class UniversalProfilingCorrelationTest {
               })
           .get();
 
-      // We need to properly wait for all virtual threads to be actually ended and unmounted
-      // otherwise we might not correctly remove the virtual-thread TLS attached to the carrier
-      // thread and leak it to other tests
       exec.shutdown();
       exec.awaitTermination(10, TimeUnit.SECONDS);
     }
@@ -265,8 +263,26 @@ public class UniversalProfilingCorrelationTest {
       for (Future<?> future : threadResults) {
         future.get(); // this will throw an ExecutionException if any assertions failed
       }
+
+      // We need to properly wait for all virtual threads to be actually ended and unmounted
+      // otherwise we might not correctly remove the virtual-thread TLS attached to the carrier
+      // thread and leak it to other tests
       exec.shutdown();
       exec.awaitTermination(10, TimeUnit.SECONDS);
+
+      // Wait until all virtual threads are GCed, just to be sure
+      List<WeakReference<Thread>> threadsWeak =
+          virtualThreads.stream().map(WeakReference::new).collect(Collectors.toList());
+      virtualThreads.clear();
+      threadLatches.clear();
+      threadResults.clear();
+      await()
+          .atMost(Duration.ofSeconds(10))
+          .until(
+              () -> {
+                System.gc();
+                return threadsWeak.stream().allMatch(weakRef -> weakRef.get() == null);
+              });
     }
   }
 
