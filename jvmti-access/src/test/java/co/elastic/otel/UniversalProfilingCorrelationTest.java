@@ -201,8 +201,8 @@ public class UniversalProfilingCorrelationTest {
           .get();
 
       // We need to properly wait for all virtual threads to be actually ended and unmounted
-      // otherwise we might not correctly remove the virtual-thread TLS attached to the carrier thread
-      // and leak it to other tests
+      // otherwise we might not correctly remove the virtual-thread TLS attached to the carrier
+      // thread and leak it to other tests
       exec.shutdown();
       exec.awaitTermination(10, TimeUnit.SECONDS);
     }
@@ -256,7 +256,7 @@ public class UniversalProfilingCorrelationTest {
               () ->
                   virtualThreads.size() == threadLatches.size()
                       && virtualThreads.stream()
-                      .allMatch(t -> t.getState() == Thread.State.WAITING));
+                          .allMatch(t -> t.getState() == Thread.State.WAITING));
 
       // resume all threads
       for (CountDownLatch latch : threadLatches) {
@@ -287,7 +287,7 @@ public class UniversalProfilingCorrelationTest {
         name.append("abc");
       }
       assertThatThrownBy(
-          () -> UniversalProfilingCorrelation.startProfilerReturnChannel(name.toString()))
+              () -> UniversalProfilingCorrelation.startProfilerReturnChannel(name.toString()))
           .isInstanceOf(RuntimeException.class)
           .hasMessageContaining("filepath");
     }
