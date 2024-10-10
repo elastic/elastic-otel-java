@@ -261,7 +261,7 @@ public class UniversalProfilingCorrelationTest {
               () ->
                   virtualThreads.size() == threadLatches.size()
                       && virtualThreads.stream()
-                      .allMatch(t -> t.getState() == Thread.State.WAITING));
+                          .allMatch(t -> t.getState() == Thread.State.WAITING));
 
       // resume all threads
       for (CountDownLatch latch : threadLatches) {
@@ -292,7 +292,7 @@ public class UniversalProfilingCorrelationTest {
         name.append("abc");
       }
       assertThatThrownBy(
-          () -> UniversalProfilingCorrelation.startProfilerReturnChannel(name.toString()))
+              () -> UniversalProfilingCorrelation.startProfilerReturnChannel(name.toString()))
           .isInstanceOf(RuntimeException.class)
           .hasMessageContaining("filepath");
     }
