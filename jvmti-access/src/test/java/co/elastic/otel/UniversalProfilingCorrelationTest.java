@@ -42,6 +42,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -207,6 +208,8 @@ public class UniversalProfilingCorrelationTest {
                     .isNull();
               })
           .get();
+      exec.shutdown();
+      exec.awaitTermination(10, TimeUnit.SECONDS);
     }
 
     @Test
@@ -258,7 +261,7 @@ public class UniversalProfilingCorrelationTest {
               () ->
                   virtualThreads.size() == threadLatches.size()
                       && virtualThreads.stream()
-                          .allMatch(t -> t.getState() == Thread.State.WAITING));
+                      .allMatch(t -> t.getState() == Thread.State.WAITING));
 
       // resume all threads
       for (CountDownLatch latch : threadLatches) {
@@ -267,6 +270,8 @@ public class UniversalProfilingCorrelationTest {
       for (Future<?> future : threadResults) {
         future.get(); // this will throw an ExecutionException if any assertions failed
       }
+      exec.shutdown();
+      exec.awaitTermination(10, TimeUnit.SECONDS);
     }
   }
 
@@ -287,7 +292,7 @@ public class UniversalProfilingCorrelationTest {
         name.append("abc");
       }
       assertThatThrownBy(
-              () -> UniversalProfilingCorrelation.startProfilerReturnChannel(name.toString()))
+          () -> UniversalProfilingCorrelation.startProfilerReturnChannel(name.toString()))
           .isInstanceOf(RuntimeException.class)
           .hasMessageContaining("filepath");
     }
