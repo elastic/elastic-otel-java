@@ -29,6 +29,7 @@ import java.time.Duration;
 @AutoService(ChainingSpanProcessorAutoConfiguration.class)
 public class SpanStackTraceProcessorAutoConfig implements ChainingSpanProcessorAutoConfiguration {
 
+  static final String LEGACY_DURATION_CONFIG_OPTION = "elastic.otel.java.span-stacktrace.min.duration";
   // TODO replace this with upstream config once it's stable
   static final String MIN_DURATION_CONFIG_OPTION = "elastic.otel.java.span.stacktrace.min.duration";
 
@@ -36,7 +37,9 @@ public class SpanStackTraceProcessorAutoConfig implements ChainingSpanProcessorA
   public void registerSpanProcessors(
       ConfigProperties properties, ChainingSpanProcessorRegisterer registerer) {
 
-    Duration minDuration = properties.getDuration(MIN_DURATION_CONFIG_OPTION, Duration.ofMillis(5));
+    Duration legacyMinDuration = properties.getDuration(LEGACY_DURATION_CONFIG_OPTION,
+        Duration.ofMillis(5));
+    Duration minDuration = properties.getDuration(MIN_DURATION_CONFIG_OPTION, legacyMinDuration);
     if (minDuration.isNegative()) {
       return;
     }
