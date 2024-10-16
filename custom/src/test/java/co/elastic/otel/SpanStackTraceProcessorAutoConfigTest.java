@@ -79,6 +79,30 @@ public class SpanStackTraceProcessorAutoConfigTest {
   }
 
   @Test
+  void legacyConfigOptionSupported() {
+    try (AutoConfigTestProperties testProps =
+        new AutoConfigTestProperties()
+            .put(SpanStackTraceProcessorAutoConfig.LEGACY_DURATION_CONFIG_OPTION, "0ms")) {
+      OpenTelemetry otel = GlobalOpenTelemetry.get();
+
+      // TODO: cleanup other extensions (Breakdown) so that this is not required:
+      ElasticExtension.INSTANCE.registerOpenTelemetry(otel);
+
+      Tracer tracer = otel.getTracer("test-tracer");
+
+      tracer.spanBuilder("my-span").startSpan().end();
+
+      List<SpanData> spans = AutoConfiguredDataCapture.getSpans();
+
+      assertThat(spans).hasSize(1);
+      assertThat(spans.get(0))
+          .hasName("my-span")
+          .hasAttribute(
+              satisfies(CodeIncubatingAttributes.CODE_STACKTRACE, att -> att.isNotBlank()));
+    }
+  }
+
+  @Test
   void checkMinDurationRespected() {
     try (AutoConfigTestProperties testProps =
         new AutoConfigTestProperties()
