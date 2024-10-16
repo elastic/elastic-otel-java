@@ -102,7 +102,6 @@ public class SpanStackTraceProcessorAutoConfigTest {
     }
   }
 
-
   @Test
   void checkMinDurationRespected() {
     try (AutoConfigTestProperties testProps =
