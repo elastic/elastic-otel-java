@@ -18,6 +18,7 @@
  */
 package co.elastic.otel;
 
+import co.elastic.otel.config.DynamicInstrumentation;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
@@ -39,6 +40,12 @@ public class ElasticAutoConfigurationCustomizerProvider
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
     autoConfiguration.addPropertiesCustomizer(
         ElasticAutoConfigurationCustomizerProvider::propertiesCustomizer);
+    autoConfiguration.addTracerProviderCustomizer(
+        (providerBuilder, properties) -> {
+          DynamicInstrumentation.setTracerConfigurator(
+              providerBuilder, DynamicInstrumentation.UpdatableConfigurator.INSTANCE);
+          return providerBuilder;
+        });
   }
 
   static Map<String, String> propertiesCustomizer(ConfigProperties configProperties) {
