@@ -79,7 +79,8 @@ public class DynamicInstrumentation {
     }
   }
 
-  private static <T> Object call(String methodname, Object target, T arg1, Class<? super T> arg1Class) {
+  private static <T> Object call(
+      String methodname, Object target, T arg1, Class<? super T> arg1Class) {
     try {
       Method method = target.getClass().getDeclaredMethod(methodname, arg1Class);
       method.setAccessible(true);
