@@ -204,13 +204,20 @@ public class DynamicInstrumentation {
   static {
     if ("true".equals(System.getProperty(INSTRUMENTATION_DISABLE_OPTION + ".checker"))
         || "true".equals(System.getenv("ELASTIC_OTEL_JAVA_DISABLE_INSTRUMENTATIONS_CHECKER"))) {
-      new Thread(new OptionChecker(), "Elastic dynamic_instrumentation checker").start();
+      Thread checker = new Thread(new OptionChecker(), "Elastic dynamic_instrumentation checker");
+      checker.setDaemon(true);
+      checker.start();
     }
   }
 
   static class OptionChecker implements Runnable {
     private Map<String, Boolean> alreadyDisabled = new HashMap<>();
 
+    // Note that if the property and the API are both used to specify enablement
+    // for a particular instrument, and this thread is executing, the property
+    // will take priority if the instrument is in the property - by virtue of running
+    // more frequently; but won't if the instrument is removed from the property!
+    // TODO define priority of enablement by source of disabler
     @Override
     public void run() {
       while (true) {
