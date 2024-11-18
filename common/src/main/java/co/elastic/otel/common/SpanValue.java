@@ -74,7 +74,6 @@ public class SpanValue<V> {
    */
 
   private static final Class<?> SDK_SPAN_CLASS = getSdkSpanClass();
-  private static final Class<?> CONTRIB_MUTABLE_SPAN_CLASS = getContribMutableSpanClass();
 
   private static final SpanValueStorageProvider storageProvider = SpanValueStorageProvider.get();
 
@@ -261,7 +260,7 @@ public class SpanValue<V> {
     return storageProvider.get(unwrapped, initialize);
   }
 
-  /** Provides the underlying {@link SdkSpan} instance in case the given span is wrapped. */
+  /** Provides the underlying {@code SdkSpan} instance in case the given span is wrapped. */
   private static Span unwrap(Object span) {
     if (span.getClass() == SDK_SPAN_CLASS) {
       if (!((Span) span).getSpanContext().isValid()) {
@@ -271,9 +270,6 @@ public class SpanValue<V> {
     }
     if (span instanceof MutableSpan) {
       return unwrap(((MutableSpan) span).getOriginalSpan());
-    }
-    if (CONTRIB_MUTABLE_SPAN_CLASS != null && CONTRIB_MUTABLE_SPAN_CLASS.isInstance(span)) {
-      return unwrap(ContribMutableSpanAccessor.getOriginalSpan(span));
     }
     if (span instanceof Span && !((Span) span).getSpanContext().isValid()) {
       throw new IllegalArgumentException("SpanValues don't work with invalid spans!");
@@ -296,12 +292,6 @@ public class SpanValue<V> {
       return Class.forName("io.opentelemetry.contrib.stacktrace.internal.MutableSpan");
     } catch (ClassNotFoundException e) {
       return null;
-    }
-  }
-
-  private static class ContribMutableSpanAccessor {
-    public static ReadableSpan getOriginalSpan(Object span) {
-      return ((io.opentelemetry.contrib.stacktrace.internal.MutableSpan) span).getOriginalSpan();
     }
   }
 }
