@@ -1,7 +1,4 @@
 import java.io.FileInputStream
-import java.nio.file.Paths
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
 
 plugins {
   alias(catalog.plugins.nexusPublish)
@@ -27,7 +24,37 @@ nexusPublishing {
   }
 }
 
+repositories {
+  mavenCentral()
+}
+
+val printDependencyVersions: Configuration by configurations.creating
+dependencies {
+  printDependencyVersions(platform(libs.opentelemetryInstrumentationAlphaBom))
+  printDependencyVersions("io.opentelemetry.javaagent:opentelemetry-javaagent")
+  printDependencyVersions("io.opentelemetry:opentelemetry-sdk")
+}
+
 tasks {
+
+  fun getResolvedDependency(identifier: String): ModuleComponentIdentifier? {
+    return printDependencyVersions.incoming.resolutionResult.allComponents.mapNotNull {
+      val id = it.id
+      return@mapNotNull if (id is ModuleComponentIdentifier) id else null;
+    }.find {
+      it.moduleIdentifier.toString() == identifier
+    }
+  }
+
+  register("printUpstreamDependenciesMarkdown") {
+    dependsOn(printDependencyVersions)
+    doLast {
+      println("* opentelemetry-javaagent: `" + getResolvedDependency("io.opentelemetry.javaagent:opentelemetry-javaagent")!!.version + "`")
+      println("* opentelemetry-sdk: `" + getResolvedDependency("io.opentelemetry:opentelemetry-sdk")!!.version + "`")
+      println("* opentelemetry-semconv: `" + libs.versions.opentelemetrySemconvAlpha.get() + "`")
+      println("* opentelemetry-java-contrib: `" + libs.versions.opentelemetryContribAlpha.get() + "`")
+    }
+  }
 
   register("currentVersion") {
     doLast {
