@@ -32,7 +32,6 @@ import io.opentelemetry.api.incubator.events.GlobalEventLoggerProvider;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.contrib.stacktrace.StackTraceSpanProcessor;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
@@ -107,11 +106,10 @@ public class ChainingSpanProcessorAutoConfigurationTest {
 
       List<SpanProcessor> spanProcessors = OtelReflectionUtils.getSpanProcessors(otel);
       assertThat(spanProcessors)
-          .hasSize(3)
+          .hasSize(2)
           .anySatisfy(proc -> assertThat(proc).isEqualTo(chainingProcessor.get()))
           // NOOP-processor
-          .anySatisfy(proc -> assertThat(proc).isEqualTo(SpanProcessor.composite()))
-          .anySatisfy(proc -> assertThat(proc).isInstanceOf(StackTraceSpanProcessor.class));
+          .anySatisfy(proc -> assertThat(proc).isEqualTo(SpanProcessor.composite()));
 
       SpanProcessor terminal = chainingProcessor.get().next;
       assertThat(terminal).isInstanceOf(MutableCompositeSpanProcessor.class);
