@@ -29,4 +29,4 @@ jobs:
         run: |
           gh release create v1.23 \
             --title="Dummy Release" \
-            --notes="${{steps.generate_release_notes.release_notes}}"
+            --notes="${{steps.generate_release_notes.outputs.release_notes}}"
