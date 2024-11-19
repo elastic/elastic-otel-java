@@ -23,10 +23,12 @@ jobs:
             ./gradlew -q printUpstreamDependenciesMarkdown >> $GITHUB_OUTPUT
             echo 'RELNOTESEOF' >> $GITHUB_OUTPUT
 
-      - name: Create GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create v1.23 \
-            --title="Dummy Release" \
-            --notes="${{steps.generate_release_notes.outputs.release_notes}}"
+      - name: Echo release notes
+        run: echo '${{ steps.generate_release_notes.outputs.release_notes }}'
+#      - name: Create GitHub Release
+#        env:
+#          GH_TOKEN: ${{ github.token }}
+#        run: |
+#          gh release create v1.23 \
+#            --title="Dummy Release" \
+#            --notes="${{ steps.generate_release_notes.outputs.release_notes }}"
