@@ -17,21 +17,18 @@ jobs:
         with:
           command: ""
       - name: Generate Release Notes
-        id: vars
+        id: generate_release_notes
         run: |
-            echo 'foo=bar' >> $GITHUB_OUTPUT
             echo 'notes<<RELNOTESEOF' >> $GITHUB_OUTPUT
             cat CHANGELOG.md >> $GITHUB_OUTPUT
             printf '\nThis release is based on the following upstream versions:\n\n' >> $GITHUB_OUTPUT
             ./gradlew -q printUpstreamDependenciesMarkdown >> $GITHUB_OUTPUT
             echo 'RELNOTESEOF' >> $GITHUB_OUTPUT
 
-      - name: Echo release notes
-        run: echo '${{ steps.vars.outputs.foo }}' && echo '${{ steps.vars.outputs.notes }}'
-#      - name: Create GitHub Release
-#        env:
-#          GH_TOKEN: ${{ github.token }}
-#        run: |
-#          gh release create v1.23 \
-#            --title="Dummy Release" \
-#            --notes="${{ steps.generate_release_notes.outputs.release_notes }}"
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create v1.23 \
+            --title="Dummy Release" \
+            --notes='${{ steps.generate_release_notes.outputs.notes }}'
