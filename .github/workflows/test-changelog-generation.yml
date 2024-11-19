@@ -13,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Generate Release Notes
-        id: generate_release_notes
+        id: vars
         uses: ./.github/workflows/gradle-goal
         with:
           command: |
@@ -25,7 +25,7 @@ jobs:
 #            echo 'RELNOTESEOF' >> $GITHUB_OUTPUT
 
       - name: Echo release notes
-        run: echo '${{ steps.generate_release_notes.outputs.foo }}' && echo '${{ steps.generate_release_notes.outputs.notes }}'
+        run: echo '${{ steps.vars.outputs.foo }}' && echo '${{ steps.vars.outputs.notes }}'
 #      - name: Create GitHub Release
 #        env:
 #          GH_TOKEN: ${{ github.token }}
