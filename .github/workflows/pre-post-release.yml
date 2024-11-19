@@ -97,6 +97,11 @@ jobs:
         uses: ./.github/workflows/gradle-goal
         with:
           command: ./gradlew -q setNextVersion
+
+      - name: Clear changelog (post release)
+        if: inputs.phase == 'post'
+        run: |
+          echo '<!--- Add all user relevant changes here as a list with a suffix referring to the PR: " * My change description - #123" -->' > CHANGELOG.md
   
       - name: Push the ${{ inputs.phase }} release branch
         run: |
