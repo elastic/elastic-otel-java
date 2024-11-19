@@ -46,6 +46,9 @@ tasks {
     }
   }
 
+  /**
+   * Used from within our release automation as part of the release note generation.
+   */
   register("printUpstreamDependenciesMarkdown") {
     dependsOn(printDependencyVersions)
     doLast {
