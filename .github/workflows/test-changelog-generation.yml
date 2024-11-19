@@ -24,6 +24,8 @@ jobs:
             echo 'RELNOTESEOF' >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh release create v1.23 \
             --title="Dummy Release" \
