@@ -13,7 +13,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Gradle
-        id: vars
         uses: ./.github/workflows/gradle-goal
         with:
           command: ""
