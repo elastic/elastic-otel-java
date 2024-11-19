@@ -12,17 +12,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Generate Release Notes
+      - name: Setup Gradle
         id: vars
         uses: ./.github/workflows/gradle-goal
         with:
-          command: |
+          command: ""
+      - name: Generate Release Notes
+        id: vars
+        run: |
             echo 'foo=bar' >> $GITHUB_OUTPUT
-#            echo 'notes<<RELNOTESEOF' >> $GITHUB_OUTPUT
-#            cat CHANGELOG.md >> $GITHUB_OUTPUT
-#            printf '\nThis release is based on the following upstream versions:\n\n' >> $GITHUB_OUTPUT
-#            ./gradlew -q printUpstreamDependenciesMarkdown >> $GITHUB_OUTPUT
-#            echo 'RELNOTESEOF' >> $GITHUB_OUTPUT
+            echo 'notes<<RELNOTESEOF' >> $GITHUB_OUTPUT
+            cat CHANGELOG.md >> $GITHUB_OUTPUT
+            printf '\nThis release is based on the following upstream versions:\n\n' >> $GITHUB_OUTPUT
+            ./gradlew -q printUpstreamDependenciesMarkdown >> $GITHUB_OUTPUT
+            echo 'RELNOTESEOF' >> $GITHUB_OUTPUT
 
       - name: Echo release notes
         run: echo '${{ steps.vars.outputs.foo }}' && echo '${{ steps.vars.outputs.notes }}'
