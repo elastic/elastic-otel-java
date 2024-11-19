@@ -18,11 +18,11 @@ jobs:
         with:
           command: |
             echo 'foo=bar' >> $GITHUB_OUTPUT
-            echo 'notes<<RELNOTESEOF' >> $GITHUB_OUTPUT
-            cat CHANGELOG.md >> $GITHUB_OUTPUT
-            printf '\nThis release is based on the following upstream versions:\n\n' >> $GITHUB_OUTPUT
-            ./gradlew -q printUpstreamDependenciesMarkdown >> $GITHUB_OUTPUT
-            echo 'RELNOTESEOF' >> $GITHUB_OUTPUT
+#            echo 'notes<<RELNOTESEOF' >> $GITHUB_OUTPUT
+#            cat CHANGELOG.md >> $GITHUB_OUTPUT
+#            printf '\nThis release is based on the following upstream versions:\n\n' >> $GITHUB_OUTPUT
+#            ./gradlew -q printUpstreamDependenciesMarkdown >> $GITHUB_OUTPUT
+#            echo 'RELNOTESEOF' >> $GITHUB_OUTPUT
 
       - name: Echo release notes
         run: echo '${{ steps.generate_release_notes.outputs.foo }}' && echo '${{ steps.generate_release_notes.outputs.notes }}'
