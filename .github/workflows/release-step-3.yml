@@ -200,11 +200,32 @@ jobs:
           group-id: 'co.elastic.otel'
           artifact-id: 'elastic-otel-javaagent'
           version: ${{ inputs.version }}
+  
+  generate-release-notes:
+    runs-on: ubuntu-latest
+    name: Generate the changelog for this release
+    outputs:
+      notes: ${{ steps.print_release_notes.outputs.notes }}
+    steps:
+      - name: Setup Gradle
+        uses: ./.github/workflows/gradle-goal
+        with:
+          command: ""
+      - name: Print Release Notes
+        id: print_release_notes
+        run: |
+          echo 'notes<<RELNOTESEOF' >> $GITHUB_OUTPUT
+          cat CHANGELOG.next-release.md >> $GITHUB_OUTPUT
+          printf '\nThis release is based on the following upstream versions:\n\n' >> $GITHUB_OUTPUT
+          ./gradlew -q printUpstreamDependenciesMarkdown >> $GITHUB_OUTPUT
+          echo 'RELNOTESEOF' >> $GITHUB_OUTPUT  
+    
 
   post-release:
     name: "Bump versions and create PR"
     needs:
       - await-maven-central-artifact
+      - generate-release-notes
     uses: ./.github/workflows/pre-post-release.yml
     permissions:
       contents: write
@@ -215,12 +236,14 @@ jobs:
       phase: 'post'
       pr_title: "[release] release-step-4 ${{ inputs.version }}"
       pr_body: "Step 4 of the release process for version ${{ inputs.version }}: review & merge"
+      changelog: ${{needs.generate-release-notes.outputs.notes}}
     secrets: inherit
 
   create-github-release:
     name: "Create GitHub Release"
     needs:
       - post-release
+      - generate-release-notes
     runs-on: ubuntu-latest
     if: ${{ ! inputs.dry_run }}
     permissions:
@@ -229,18 +252,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref }}
-      - name: Setup Gradle
-        uses: ./.github/workflows/gradle-goal
-        with:
-          command: ""
-      - name: Generate Release Notes
-        id: generate_release_notes
-        run: |
-          echo 'notes<<RELNOTESEOF' >> $GITHUB_OUTPUT
-          cat CHANGELOG.md >> $GITHUB_OUTPUT
-          printf '\nThis release is based on the following upstream versions:\n\n' >> $GITHUB_OUTPUT
-          ./gradlew -q printUpstreamDependenciesMarkdown >> $GITHUB_OUTPUT
-          echo 'RELNOTESEOF' >> $GITHUB_OUTPUT
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -248,4 +259,4 @@ jobs:
           gh release create ${{ env.RELEASE_VERSION_TAG }} \
             --verify-tag \
             --title="Release ${{ env.RELEASE_VERSION }}" \
-            --notes='${{ steps.generate_release_notes.outputs.notes }}'
+            --notes='${{needs.generate-release-notes.outputs.notes}}'

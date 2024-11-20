@@ -26,6 +26,11 @@ on:
         description: 'pull-request body'
         type: string
         required: true
+      changelog:
+        description: 'The changelog to prepend to CHANGELOG.md without heading'
+        type: string
+        required: false
+        default: ''
 
 env:
   RELEASE_VERSION: ${{ inputs.version }}
@@ -98,10 +103,18 @@ jobs:
         with:
           command: ./gradlew -q setNextVersion
 
-      - name: Clear changelog (post release)
+      - name: Insert notes into cumulative changelog (post release)
         if: inputs.phase == 'post'
         run: |
-          echo '<!--- Add all user relevant changes here as a list with a suffix referring to the PR: " * My change description - #123" -->' > CHANGELOG.md
+          echo "# ${{ inputs.version }} - $(date +'%d/%m/%Y')" > tmpchangelog
+          echo '${{ inputs.changelog }}' >> tmpchangelog
+          cat CHANGELOG.md >> tmpchangelog
+          mv tmpchangelog CHANGELOG.md
+
+      - name: Clear next release changelog (post release)
+        if: inputs.phase == 'post'
+        run: |
+          echo '' > CHANGELOG.next-release.md
   
       - name: Push the ${{ inputs.phase }} release branch
         run: |
