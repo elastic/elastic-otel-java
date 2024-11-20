@@ -207,6 +207,9 @@ jobs:
     outputs:
       notes: ${{ steps.print_release_notes.outputs.notes }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
       - name: Setup Gradle
         uses: ./.github/workflows/gradle-goal
         with:
