@@ -52,10 +52,14 @@ tasks {
   register("printUpstreamDependenciesMarkdown") {
     dependsOn(printDependencyVersions)
     doLast {
-      println("* opentelemetry-javaagent: `" + getResolvedDependency("io.opentelemetry.javaagent:opentelemetry-javaagent")!!.version + "`")
-      println("* opentelemetry-sdk: `" + getResolvedDependency("io.opentelemetry:opentelemetry-sdk")!!.version + "`")
-      println("* opentelemetry-semconv: `" + libs.versions.opentelemetrySemconvAlpha.get() + "`")
-      println("* opentelemetry-java-contrib: `" + libs.versions.opentelemetryContribAlpha.get() + "`")
+      val agentVer = getResolvedDependency("io.opentelemetry.javaagent:opentelemetry-javaagent")!!.version
+      val sdkVer = getResolvedDependency("io.opentelemetry:opentelemetry-sdk")!!.version
+      val semconvVer = libs.versions.opentelemetrySemconvAlpha.get().replace("-alpha", "")
+      val contribVer = libs.versions.opentelemetryContribAlpha.get().replace("-alpha", "")
+      println("* opentelemetry-javaagent: [$agentVer](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v$agentVer)")
+      println("* opentelemetry-sdk: [$sdkVer](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v$sdkVer)")
+      println("* opentelemetry-semconv: [$semconvVer](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v$semconvVer)")
+      println("* opentelemetry-java-contrib: [$contribVer](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v$contribVer)")
     }
   }
 
