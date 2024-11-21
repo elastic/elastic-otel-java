@@ -1,7 +1,4 @@
 import java.io.FileInputStream
-import java.nio.file.Paths
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
 
 plugins {
   alias(catalog.plugins.nexusPublish)
@@ -27,7 +24,44 @@ nexusPublishing {
   }
 }
 
+repositories {
+  mavenCentral()
+}
+
+val printDependencyVersions: Configuration by configurations.creating
+dependencies {
+  printDependencyVersions(platform(libs.opentelemetryInstrumentationAlphaBom))
+  printDependencyVersions("io.opentelemetry.javaagent:opentelemetry-javaagent")
+  printDependencyVersions("io.opentelemetry:opentelemetry-sdk")
+}
+
 tasks {
+
+  fun getResolvedDependency(identifier: String): ModuleComponentIdentifier? {
+    return printDependencyVersions.incoming.resolutionResult.allComponents.mapNotNull {
+      val id = it.id
+      return@mapNotNull if (id is ModuleComponentIdentifier) id else null;
+    }.find {
+      it.moduleIdentifier.toString() == identifier
+    }
+  }
+
+  /**
+   * Used from within our release automation as part of the release note generation.
+   */
+  register("printUpstreamDependenciesMarkdown") {
+    dependsOn(printDependencyVersions)
+    doLast {
+      val agentVer = getResolvedDependency("io.opentelemetry.javaagent:opentelemetry-javaagent")!!.version
+      val sdkVer = getResolvedDependency("io.opentelemetry:opentelemetry-sdk")!!.version
+      val semconvVer = libs.versions.opentelemetrySemconvAlpha.get().replace("-alpha", "")
+      val contribVer = libs.versions.opentelemetryContribAlpha.get().replace("-alpha", "")
+      println("* opentelemetry-javaagent: [$agentVer](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v$agentVer)")
+      println("* opentelemetry-sdk: [$sdkVer](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v$sdkVer)")
+      println("* opentelemetry-semconv: [$semconvVer](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v$semconvVer)")
+      println("* opentelemetry-java-contrib: [$contribVer](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v$contribVer)")
+    }
+  }
 
   register("currentVersion") {
     doLast {
