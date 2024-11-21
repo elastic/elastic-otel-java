@@ -21,6 +21,7 @@ package co.elastic.otel;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.satisfies;
 
+import co.elastic.otel.common.ElasticAttributes;
 import co.elastic.otel.testing.AutoConfigTestProperties;
 import co.elastic.otel.testing.AutoConfiguredDataCapture;
 import co.elastic.otel.testing.OtelReflectionUtils;
@@ -31,11 +32,22 @@ import io.opentelemetry.contrib.stacktrace.StackTraceSpanProcessor;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.semconv.incubating.CodeIncubatingAttributes;
 import java.util.List;
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-public class SpanStackTraceProcessorAutoConfigTest {
+/**
+ * Tests Span stack trace capture feature is properly behaving, which is mostly ensuring that the
+ * contrib implementation is properly configured for usage in this distribution.
+ */
+public class SpanStackTraceTest {
+
+  private static final String OTEL_MIN_DURATION =
+      "otel.java.experimental.span-stacktrace.min.duration";
+
   @BeforeEach
   @AfterEach
   void resetGlobalOtel() {
@@ -45,32 +57,27 @@ public class SpanStackTraceProcessorAutoConfigTest {
   @Test
   void checkStackTracePresent() {
     try (AutoConfigTestProperties testProps =
-        new AutoConfigTestProperties()
-            .put(SpanStackTraceProcessorAutoConfig.MIN_DURATION_CONFIG_OPTION, "0ms")) {
+        new AutoConfigTestProperties().put(OTEL_MIN_DURATION, "0ms")) {
       OpenTelemetry otel = GlobalOpenTelemetry.get();
-
-      // TODO: cleanup other extensions (Breakdown) so that this is not required:
-      ElasticExtension.INSTANCE.registerOpenTelemetry(otel);
 
       Tracer tracer = otel.getTracer("test-tracer");
 
       tracer.spanBuilder("my-span").startSpan().end();
 
-      List<SpanData> spans = AutoConfiguredDataCapture.getSpans();
-
-      assertThat(spans).hasSize(1);
-      assertThat(spans.get(0))
-          .hasName("my-span")
-          .hasAttribute(
-              satisfies(CodeIncubatingAttributes.CODE_STACKTRACE, att -> att.isNotBlank()));
+      checkSpanStackTrace(true);
     }
   }
 
-  @Test
-  void featureCanBeDisabled() {
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        ElasticAutoConfigurationCustomizerProvider.STACKTRACE_OTEL_DURATION,
+        ElasticAutoConfigurationCustomizerProvider.STACKTRACE_LEGACY1_DURATION,
+        ElasticAutoConfigurationCustomizerProvider.STACKTRACE_LEGACY2_DURATION
+      })
+  void featureCanBeDisabled(String configName) {
     try (AutoConfigTestProperties testProps =
-        new AutoConfigTestProperties()
-            .put(SpanStackTraceProcessorAutoConfig.MIN_DURATION_CONFIG_OPTION, "-1")) {
+        new AutoConfigTestProperties().put(configName, "-1")) {
       OpenTelemetry otel = GlobalOpenTelemetry.get();
 
       assertThat(OtelReflectionUtils.getSpanProcessors(otel))
@@ -78,48 +85,70 @@ public class SpanStackTraceProcessorAutoConfigTest {
     }
   }
 
-  @Test
-  void legacyConfigOptionSupported() {
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        ElasticAutoConfigurationCustomizerProvider.STACKTRACE_OTEL_DURATION,
+        ElasticAutoConfigurationCustomizerProvider.STACKTRACE_LEGACY1_DURATION,
+        ElasticAutoConfigurationCustomizerProvider.STACKTRACE_LEGACY2_DURATION
+      })
+  void legacyConfigOptionsSupported(String configName) {
     try (AutoConfigTestProperties testProps =
-        new AutoConfigTestProperties()
-            .put(SpanStackTraceProcessorAutoConfig.LEGACY_DURATION_CONFIG_OPTION, "0ms")) {
+        new AutoConfigTestProperties().put(configName, "0ms")) {
       OpenTelemetry otel = GlobalOpenTelemetry.get();
-
-      // TODO: cleanup other extensions (Breakdown) so that this is not required:
-      ElasticExtension.INSTANCE.registerOpenTelemetry(otel);
 
       Tracer tracer = otel.getTracer("test-tracer");
 
       tracer.spanBuilder("my-span").startSpan().end();
 
-      List<SpanData> spans = AutoConfiguredDataCapture.getSpans();
-
-      assertThat(spans).hasSize(1);
-      assertThat(spans.get(0))
-          .hasName("my-span")
-          .hasAttribute(
-              satisfies(CodeIncubatingAttributes.CODE_STACKTRACE, att -> att.isNotBlank()));
+      checkSpanStackTrace(true);
     }
   }
 
   @Test
   void checkMinDurationRespected() {
     try (AutoConfigTestProperties testProps =
-        new AutoConfigTestProperties()
-            .put(SpanStackTraceProcessorAutoConfig.MIN_DURATION_CONFIG_OPTION, "100s")) {
+        new AutoConfigTestProperties().put(OTEL_MIN_DURATION, "100s")) {
       OpenTelemetry otel = GlobalOpenTelemetry.get();
-
-      // TODO: cleanup other extensions (Breakdown) so that this is not required:
-      ElasticExtension.INSTANCE.registerOpenTelemetry(otel);
 
       Tracer tracer = otel.getTracer("test-tracer");
 
       tracer.spanBuilder("my-span").startSpan().end();
 
-      List<SpanData> spans = AutoConfiguredDataCapture.getSpans();
-      assertThat(spans).hasSize(1);
-      assertThat(spans.get(0).getAttributes().get(CodeIncubatingAttributes.CODE_STACKTRACE))
-          .isNull();
+      checkSpanStackTrace(false);
+    }
+  }
+
+  private void checkSpanStackTrace(boolean stackTraceExpected) {
+    List<SpanData> spans = AutoConfiguredDataCapture.getSpans();
+    assertThat(spans).hasSize(1);
+    SpanData span = spans.get(0);
+    if (stackTraceExpected) {
+      assertThat(span)
+          .hasAttribute(
+              satisfies(
+                  CodeIncubatingAttributes.CODE_STACKTRACE,
+                  AbstractCharSequenceAssert::isNotBlank));
+    } else {
+      assertThat(span.getAttributes().get(CodeIncubatingAttributes.CODE_STACKTRACE)).isNull();
+    }
+  }
+
+  @Test
+  void checkInferredSpansIgnored() {
+    try (AutoConfigTestProperties testProps =
+        new AutoConfigTestProperties().put(OTEL_MIN_DURATION, "0")) {
+      OpenTelemetry otel = GlobalOpenTelemetry.get();
+
+      Tracer tracer = otel.getTracer("test-tracer");
+
+      tracer
+          .spanBuilder("my-span")
+          .setAttribute(ElasticAttributes.IS_INFERRED, true)
+          .startSpan()
+          .end();
+
+      checkSpanStackTrace(false);
     }
   }
 }

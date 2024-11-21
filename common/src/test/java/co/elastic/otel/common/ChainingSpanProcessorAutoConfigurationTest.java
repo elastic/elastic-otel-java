@@ -106,9 +106,10 @@ public class ChainingSpanProcessorAutoConfigurationTest {
 
       List<SpanProcessor> spanProcessors = OtelReflectionUtils.getSpanProcessors(otel);
       assertThat(spanProcessors)
-          .containsExactlyInAnyOrder(
-              chainingProcessor.get(), SpanProcessor.composite() // NOOP-processor
-              );
+          .hasSize(2)
+          .anySatisfy(proc -> assertThat(proc).isEqualTo(chainingProcessor.get()))
+          // NOOP-processor
+          .anySatisfy(proc -> assertThat(proc).isEqualTo(SpanProcessor.composite()));
 
       SpanProcessor terminal = chainingProcessor.get().next;
       assertThat(terminal).isInstanceOf(MutableCompositeSpanProcessor.class);
