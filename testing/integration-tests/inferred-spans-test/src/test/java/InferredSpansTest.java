@@ -83,17 +83,21 @@ public class InferredSpansTest {
                                           .hasName("InferredSpansTest#rootSpan")
                                           .hasParent(parent)
                                           .hasAttribute(ElasticAttributes.IS_INFERRED, true)
-                                          .hasLinksSatisfying(links ->
-                                              assertThat(links)
-                                                  .hasSize(1)
-                                                  .anySatisfy(link -> {
-                                                    assertThat(link.getSpanContext()
-                                                        .getSpanId()).isEqualTo(child.getSpanId());
-                                                    assertThat(link.getAttributes())
-                                                        .containsEntry("is_child", true)
-                                                        .containsEntry("elastic.is_child", true);
-                                                  })
-                                          ));
+                                          .hasLinksSatisfying(
+                                              links ->
+                                                  assertThat(links)
+                                                      .hasSize(1)
+                                                      .anySatisfy(
+                                                          link -> {
+                                                            assertThat(
+                                                                    link.getSpanContext()
+                                                                        .getSpanId())
+                                                                .isEqualTo(child.getSpanId());
+                                                            assertThat(link.getAttributes())
+                                                                .containsEntry("is_child", true)
+                                                                .containsEntry(
+                                                                    "elastic.is_child", true);
+                                                          })));
                         });
                 return true;
               } finally {
@@ -114,7 +118,5 @@ public class InferredSpansTest {
   }
 
   @WithSpan
-  public void childSpan() {
-  }
-
+  public void childSpan() {}
 }
