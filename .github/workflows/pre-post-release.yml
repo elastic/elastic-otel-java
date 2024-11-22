@@ -26,6 +26,11 @@ on:
         description: 'pull-request body'
         type: string
         required: true
+      changelog:
+        description: 'The changelog to prepend to CHANGELOG.md without heading'
+        type: string
+        required: false
+        default: ''
 
 env:
   RELEASE_VERSION: ${{ inputs.version }}
@@ -52,19 +57,30 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - validate-tag
-    permissions:
-      contents: write
-    env:
-      GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
     steps:
+
+      - name: Get token
+        id: get_token
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
+        with:
+          app_id: ${{ secrets.OBS_AUTOMATION_APP_ID }}
+          private_key: ${{ secrets.OBS_AUTOMATION_APP_PEM }}
+          permissions: >-
+            {
+              "contents": "write",
+              "pull_requests": "write"
+            }
+          repositories: >-
+            ["elastic-otel-java"]
+
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref }}
-          token: ${{ env.GITHUB_TOKEN }}
+          token: ${{ steps.get_token.outputs.token }}
 
       - uses: elastic/oblt-actions/git/setup@v1
         with:
-          github-token: ${{ env.GITHUB_TOKEN }}
+          github-token: ${{ steps.get_token.outputs.token }}
 
       - name: Create the release tag (post phase)
         if: inputs.phase == 'post'
@@ -86,6 +102,19 @@ jobs:
         uses: ./.github/workflows/gradle-goal
         with:
           command: ./gradlew -q setNextVersion
+
+      - name: Insert notes into cumulative changelog (post release)
+        if: inputs.phase == 'post'
+        run: |
+          echo "# ${{ inputs.version }} - $(date +'%d/%m/%Y')" > tmpchangelog
+          echo '${{ inputs.changelog }}' >> tmpchangelog
+          cat CHANGELOG.md >> tmpchangelog
+          mv tmpchangelog CHANGELOG.md
+
+      - name: Clear next release changelog (post release)
+        if: inputs.phase == 'post'
+        run: |
+          echo '' > CHANGELOG.next-release.md
   
       - name: Push the ${{ inputs.phase }} release branch
         run: |
@@ -96,4 +125,4 @@ jobs:
       - name: Create the ${{ inputs.phase }} release PR
         run: gh pr create --title="${{ inputs.pr_title }}" --base main --head ${{ env.BRANCH_NAME }} -b "${{ inputs.pr_body }}"
         env:
-          GH_TOKEN: ${{ env.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.get_token.outputs.token }}

@@ -101,7 +101,7 @@ jobs:
         run: tar xvf ${{ env.TARBALL_FILE }}
 
       - name: generate build provenance
-        uses: actions/attest-build-provenance@6149ea5740be74af77f260b9db67e633f6b0a9a1  # v1.4.2
+        uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c  # v1.4.3
         with:
           subject-path: "${{ github.workspace }}/**/*.jar"
 
@@ -144,7 +144,7 @@ jobs:
         run: echo "LATEST_TAG=$(git tag --list --sort=version:refname "v*" | grep -v RC | sed s/^v// | tail -n 1)" >> "${GITHUB_ENV}"
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # v3.6.1
+        uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349 # v3.7.1
 
       - name: Log in to the Elastic Container registry
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
@@ -169,7 +169,7 @@ jobs:
 
       - name: Build and push image
         id: push
-        uses: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85  # v6.7.0
+        uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75  # v6.9.0
         with:
           context: .
           file: "docker/Dockerfile"
@@ -182,7 +182,7 @@ jobs:
             EXTENSION_JAR_FILE=elastic-otel-agentextension.jar
 
       - name: generate build provenance (containers)
-        uses: actions/attest-build-provenance@6149ea5740be74af77f260b9db67e633f6b0a9a1  # v1.4.2
+        uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c  # v1.4.3
         with:
           subject-name: "${{ env.DOCKER_IMAGE_NAME }}"
           subject-digest: ${{ steps.push.outputs.digest }}
@@ -195,16 +195,40 @@ jobs:
     needs:
       - validate-tag
     steps:
-      - uses: elastic/apm-pipeline-library/.github/actions/await-maven-artifact@current
+      - uses: elastic/oblt-actions/maven/await-artifact@v1
         with:
-          groupid: 'co.elastic.otel'
-          artifactid: 'elastic-otel-javaagent'
+          group-id: 'co.elastic.otel'
+          artifact-id: 'elastic-otel-javaagent'
           version: ${{ inputs.version }}
+  
+  generate-release-notes:
+    runs-on: ubuntu-latest
+    name: Generate the changelog for this release
+    outputs:
+      notes: ${{ steps.print_release_notes.outputs.notes }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - name: Setup Gradle
+        uses: ./.github/workflows/gradle-goal
+        with:
+          command: ""
+      - name: Print Release Notes
+        id: print_release_notes
+        run: |
+          echo 'notes<<RELNOTESEOF' >> $GITHUB_OUTPUT
+          cat CHANGELOG.next-release.md >> $GITHUB_OUTPUT
+          printf '\nThis release is based on the following upstream versions:\n\n' >> $GITHUB_OUTPUT
+          ./gradlew -q printUpstreamDependenciesMarkdown >> $GITHUB_OUTPUT
+          echo 'RELNOTESEOF' >> $GITHUB_OUTPUT  
+    
 
   post-release:
     name: "Bump versions and create PR"
     needs:
       - await-maven-central-artifact
+      - generate-release-notes
     uses: ./.github/workflows/pre-post-release.yml
     permissions:
       contents: write
@@ -215,12 +239,14 @@ jobs:
       phase: 'post'
       pr_title: "[release] release-step-4 ${{ inputs.version }}"
       pr_body: "Step 4 of the release process for version ${{ inputs.version }}: review & merge"
+      changelog: ${{needs.generate-release-notes.outputs.notes}}
     secrets: inherit
 
   create-github-release:
     name: "Create GitHub Release"
     needs:
       - post-release
+      - generate-release-notes
     runs-on: ubuntu-latest
     if: ${{ ! inputs.dry_run }}
     permissions:
@@ -236,4 +262,4 @@ jobs:
           gh release create ${{ env.RELEASE_VERSION_TAG }} \
             --verify-tag \
             --title="Release ${{ env.RELEASE_VERSION }}" \
-            --notes=""
+            --notes='${{needs.generate-release-notes.outputs.notes}}'

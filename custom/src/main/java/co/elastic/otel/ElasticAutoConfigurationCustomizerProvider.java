@@ -18,6 +18,7 @@
  */
 package co.elastic.otel;
 
+import co.elastic.otel.config.DynamicInstrumentation;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
@@ -35,29 +36,69 @@ public class ElasticAutoConfigurationCustomizerProvider
   private static final String RUNTIME_EXPERIMENTAL_TELEMETRY =
       "otel.instrumentation.runtime-telemetry.emit-experimental-telemetry";
 
+  // must match value in io.opentelemetry.contrib.stacktrace.StackTraceAutoConfig
+  private static final String STACKTRACE_OTEL_FILTER =
+      "otel.java.experimental.span-stacktrace.filter";
+  static final String STACKTRACE_OTEL_DURATION =
+      "otel.java.experimental.span-stacktrace.min.duration";
+  static final String STACKTRACE_LEGACY1_DURATION =
+      "elastic.otel.java.span-stacktrace.min.duration";
+  static final String STACKTRACE_LEGACY2_DURATION =
+      "elastic.otel.java.span.stacktrace.min.duration";
+
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
     autoConfiguration.addPropertiesCustomizer(
         ElasticAutoConfigurationCustomizerProvider::propertiesCustomizer);
+    autoConfiguration.addTracerProviderCustomizer(
+        (providerBuilder, properties) -> {
+          DynamicInstrumentation.setTracerConfigurator(
+              providerBuilder, DynamicInstrumentation.UpdatableConfigurator.INSTANCE);
+          return providerBuilder;
+        });
   }
 
   static Map<String, String> propertiesCustomizer(ConfigProperties configProperties) {
+    Map<String, String> config = new HashMap<>();
+
+    experimentalTelemetry(config, configProperties);
+    resourceProviders(config, configProperties);
+    spanStackTrace(config, configProperties);
+
+    return config;
+  }
+
+  private static void experimentalTelemetry(
+      Map<String, String> config, ConfigProperties configProperties) {
+    // enable experimental telemetry metrics by default if not explicitly disabled
+    boolean experimentalTelemetry =
+        configProperties.getBoolean(RUNTIME_EXPERIMENTAL_TELEMETRY, true);
+    config.put(RUNTIME_EXPERIMENTAL_TELEMETRY, Boolean.toString(experimentalTelemetry));
+  }
+
+  private static void resourceProviders(
+      Map<String, String> config, ConfigProperties configProperties) {
     Set<String> disabledResourceProviders =
         new HashSet<>(configProperties.getList(DISABLED_RESOURCE_PROVIDERS));
 
     // disable upstream distro name & version provider
     disabledResourceProviders.add(
         "io.opentelemetry.javaagent.tooling.DistroVersionResourceProvider");
-
-    Map<String, String> config = new HashMap<>();
-
-    // enable experimental telemetry metrics by default if not explicitly disabled
-    boolean experimentalTelemetry =
-        configProperties.getBoolean(RUNTIME_EXPERIMENTAL_TELEMETRY, true);
-    config.put(RUNTIME_EXPERIMENTAL_TELEMETRY, Boolean.toString(experimentalTelemetry));
-
     config.put(DISABLED_RESOURCE_PROVIDERS, String.join(",", disabledResourceProviders));
+  }
 
-    return config;
+  private static void spanStackTrace(
+      Map<String, String> config, ConfigProperties configProperties) {
+
+    String value = configProperties.getString(STACKTRACE_OTEL_DURATION);
+    if (value == null) {
+      value = configProperties.getString(STACKTRACE_LEGACY1_DURATION);
+      if (value == null) {
+        value = configProperties.getString(STACKTRACE_LEGACY2_DURATION);
+      }
+      config.put(STACKTRACE_OTEL_DURATION, value);
+    }
+
+    config.put(STACKTRACE_OTEL_FILTER, SpanStackTraceFilter.class.getName());
   }
 }
