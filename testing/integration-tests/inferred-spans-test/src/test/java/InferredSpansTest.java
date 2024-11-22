@@ -53,16 +53,26 @@ public class InferredSpansTest {
                     .untilAsserted(
                         () -> {
                           List<SpanData> spans = testing.spans();
-                          assertThat(spans).hasSize(2);
+                          assertThat(spans).hasSizeGreaterThanOrEqualTo(3);
 
                           assertThat(spans)
                               .anySatisfy(
-                                  span -> assertThat(span).hasName("InferredSpansTest.rootSpan"));
+                                  span -> assertThat(span).hasName("InferredSpansTest.rootSpan"))
+                              .anySatisfy(
+                                  span -> assertThat(span).hasName("InferredSpansTest.childSpan"));
 
+                          System.out.println("checking inferred span");
                           SpanData parent =
                               spans.stream()
                                   .filter(
                                       span -> span.getName().equals("InferredSpansTest.rootSpan"))
+                                  .findFirst()
+                                  .get();
+
+                          SpanData child =
+                              spans.stream()
+                                  .filter(
+                                      span -> span.getName().equals("InferredSpansTest.childSpan"))
                                   .findFirst()
                                   .get();
 
@@ -72,7 +82,18 @@ public class InferredSpansTest {
                                       assertThat(span)
                                           .hasName("InferredSpansTest#rootSpan")
                                           .hasParent(parent)
-                                          .hasAttribute(ElasticAttributes.IS_INFERRED, true));
+                                          .hasAttribute(ElasticAttributes.IS_INFERRED, true)
+                                          .hasLinksSatisfying(links ->
+                                              assertThat(links)
+                                                  .hasSize(1)
+                                                  .anySatisfy(link -> {
+                                                    assertThat(link.getSpanContext()
+                                                        .getSpanId()).isEqualTo(child.getSpanId());
+                                                    assertThat(link.getAttributes())
+                                                        .containsEntry("is_child", true)
+                                                        .containsEntry("elastic.is_child", true);
+                                                  })
+                                          ));
                         });
                 return true;
               } finally {
@@ -85,8 +106,15 @@ public class InferredSpansTest {
   public void rootSpan() {
     try {
       Thread.sleep(100);
+      childSpan();
+      Thread.sleep(100);
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
   }
+
+  @WithSpan
+  public void childSpan() {
+  }
+
 }

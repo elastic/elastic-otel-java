@@ -19,17 +19,24 @@
 package co.elastic.otel;
 
 import com.google.auto.service.AutoService;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.SpanBuilder;
+import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @AutoService(AutoConfigurationCustomizerProvider.class)
-public class InferredSpansConfigMigration implements AutoConfigurationCustomizerProvider {
+public class InferredSpansBackwardsCompatibilityConfig
+    implements AutoConfigurationCustomizerProvider {
 
-  private static final Logger log = Logger.getLogger(InferredSpansConfigMigration.class.getName());
+  private static final Logger log =
+      Logger.getLogger(InferredSpansBackwardsCompatibilityConfig.class.getName());
 
   private static final Map<String, String> CONFIG_MAPPING = new HashMap<>();
 
@@ -76,7 +83,30 @@ public class InferredSpansConfigMigration implements AutoConfigurationCustomizer
               }
             }
           }
+
+          String userDefinedHandler =
+              props.getString("otel.inferred.spans.parent.override.handler");
+          if (userDefinedHandler == null || userDefinedHandler.isEmpty()) {
+            overrides.put(
+                "otel.inferred.spans.parent.override.handler",
+                BackwardsCompatibilitySpanLinkHandler.class.getName());
+          }
+
           return overrides;
         });
+  }
+
+  public static class BackwardsCompatibilitySpanLinkHandler
+      implements BiConsumer<SpanBuilder, SpanContext> {
+
+    private static final Attributes LINK_ATTRIBUTES =
+        Attributes.of(
+            AttributeKey.booleanKey("is_child"), true,
+            AttributeKey.booleanKey("elastic.is_child"), true);
+
+    @Override
+    public void accept(SpanBuilder spanBuilder, SpanContext spanContext) {
+      spanBuilder.addLink(spanContext, LINK_ATTRIBUTES);
+    }
   }
 }
