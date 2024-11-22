@@ -61,7 +61,6 @@ public class InferredSpansTest {
                               .anySatisfy(
                                   span -> assertThat(span).hasName("InferredSpansTest.childSpan"));
 
-                          System.out.println("checking inferred span");
                           SpanData parent =
                               spans.stream()
                                   .filter(
@@ -90,8 +89,8 @@ public class InferredSpansTest {
                                                       .anySatisfy(
                                                           link -> {
                                                             assertThat(
-                                                                    link.getSpanContext()
-                                                                        .getSpanId())
+                                                                link.getSpanContext()
+                                                                    .getSpanId())
                                                                 .isEqualTo(child.getSpanId());
                                                             assertThat(link.getAttributes())
                                                                 .containsEntry("is_child", true)
