@@ -43,7 +43,7 @@ autoservice-annotations = { group = "com.google.auto.service", name = "auto-serv
 assertj-core = "org.assertj:assertj-core:3.26.3"
 awaitility = "org.awaitility:awaitility:4.2.2"
 findbugs-jsr305 = "com.google.code.findbugs:jsr305:3.0.2"
-testcontainers = "org.testcontainers:testcontainers:1.20.3"
+testcontainers = "org.testcontainers:testcontainers:1.20.4"
 logback = "ch.qos.logback:logback-classic:1.5.12"
 jackson = "com.fasterxml.jackson.core:jackson-databind:2.18.1"
 protobuf-util = "com.google.protobuf:protobuf-java-util:3.25.5"
