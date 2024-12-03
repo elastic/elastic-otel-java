@@ -51,11 +51,15 @@ import java.util.logging.Logger;
  */
 public class DynamicInstrumentation {
 
-  private static final Logger logger = Logger.getLogger(DynamicInstrumentation.class.getName());
   public static final String INSTRUMENTATION_NAME_PREPEND = "io.opentelemetry.";
-  // note the option can't be an env because no OSes support changing envs while the program runs
+  public static final String ALL_INSTRUMENTATION = "_ALL_";
   public static final String INSTRUMENTATION_DISABLE_OPTION =
       "elastic.otel.java.disable_instrumentations";
+  private static final String ALL_INSTRUMENTATION_FULL_NAME =
+      INSTRUMENTATION_NAME_PREPEND + ALL_INSTRUMENTATION;
+  private static final Logger logger = Logger.getLogger(DynamicInstrumentation.class.getName());
+
+  // note the option can't be an env because no OSes support changing envs while the program runs
 
   private static Object getField(String fieldname, Object target) {
     try {
@@ -186,6 +190,14 @@ public class DynamicInstrumentation {
     updateTracerConfigurations(GlobalOpenTelemetry.getTracerProvider());
   }
 
+  public static void disableAllTraces() {
+    disableTracesFor(ALL_INSTRUMENTATION);
+  }
+
+  public static void stopDisablingAllTraces() {
+    reenableTracesFor(ALL_INSTRUMENTATION);
+  }
+
   public static class UpdatableConfigurator implements ScopeConfigurator<TracerConfig> {
     public static final UpdatableConfigurator INSTANCE = new UpdatableConfigurator();
     private final ConcurrentMap<String, TracerConfig> map = new ConcurrentHashMap<>();
@@ -194,6 +206,11 @@ public class DynamicInstrumentation {
 
     @Override
     public TracerConfig apply(InstrumentationScopeInfo scopeInfo) {
+      // If key "_ALL_" is set to disabled, then always return disabled
+      // otherwise fallback to the individual instrumentation
+      if (!map.getOrDefault(ALL_INSTRUMENTATION_FULL_NAME, TracerConfig.enabled()).isEnabled()) {
+        return TracerConfig.disabled();
+      }
       return map.getOrDefault(scopeInfo.getName(), TracerConfig.defaultConfig());
     }
 

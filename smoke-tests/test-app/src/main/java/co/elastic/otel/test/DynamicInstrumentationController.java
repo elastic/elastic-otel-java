@@ -29,14 +29,33 @@ public class DynamicInstrumentationController {
       "elastic.otel.java.disable_instrumentations";
 
   // note synchronized to make enable/disable faster with DynamicInstrumentation
-  @GetMapping
+  @GetMapping("/flipMethods")
   public synchronized String flipMethods() {
     String old = System.getProperty(INSTRUMENTATION_DISABLE_OPTION, "");
     if (old.isEmpty()) {
       System.setProperty(INSTRUMENTATION_DISABLE_OPTION, "methods");
+      return "enabled";
     } else {
       System.setProperty(INSTRUMENTATION_DISABLE_OPTION, "");
+      return "disabled";
     }
-    return old.isEmpty() ? "enabled" : "disabled";
+  }
+
+  @RequestMapping("/flipAll")
+  public synchronized String flipAll() {
+    String old = System.getProperty(INSTRUMENTATION_DISABLE_OPTION, "");
+    if (old.isEmpty()) {
+      System.setProperty(INSTRUMENTATION_DISABLE_OPTION, "_ALL_");
+      return "enabled";
+    } else {
+      System.setProperty(INSTRUMENTATION_DISABLE_OPTION, "");
+      return "disabled";
+    }
+  }
+
+  @RequestMapping("/reset")
+  public synchronized String reset() {
+    System.setProperty(INSTRUMENTATION_DISABLE_OPTION, "");
+    return "reset";
   }
 }
