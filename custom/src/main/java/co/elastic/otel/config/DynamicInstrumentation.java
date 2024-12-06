@@ -238,6 +238,19 @@ public class DynamicInstrumentation {
     @Override
     public void run() {
       while (true) {
+        // Handle DynamicConfiguration.DISABLE_SEND_OPTION
+        boolean stopSending;
+        synchronized (this) {
+          stopSending =
+              Boolean.parseBoolean(System.getProperty(DynamicConfiguration.DISABLE_SEND_OPTION));
+        }
+        if (stopSending) {
+          DynamicConfiguration.getInstance().stopAllSending();
+        } else {
+          DynamicConfiguration.getInstance().restartAllSending();
+        }
+
+        // Handle INSTRUMENTATION_DISABLE_OPTION
         String disableList;
         synchronized (this) {
           disableList = System.getProperty(INSTRUMENTATION_DISABLE_OPTION);

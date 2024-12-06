@@ -48,6 +48,15 @@ public class ElasticAutoConfigurationCustomizerProvider
 
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
+    autoConfiguration.addMetricExporterCustomizer(
+        (metricexporter, configProperties) ->
+            ElasticMetricExporter.createCustomInstance(metricexporter));
+    autoConfiguration.addSpanExporterCustomizer(
+        (spanExporter, configProperties) -> ElasticSpanExporter.createCustomInstance(spanExporter));
+    autoConfiguration.addLogRecordExporterCustomizer(
+        (logExporter, configProperties) ->
+            ElasticLogRecordExporter.createCustomInstance(logExporter));
+
     autoConfiguration.addPropertiesCustomizer(
         ElasticAutoConfigurationCustomizerProvider::propertiesCustomizer);
     autoConfiguration.addTracerProviderCustomizer(
