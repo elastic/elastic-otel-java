@@ -53,13 +53,12 @@ public class DynamicInstrumentation {
 
   public static final String INSTRUMENTATION_NAME_PREPEND = "io.opentelemetry.";
   public static final String ALL_INSTRUMENTATION = "_ALL_";
+  // note the option can't be an env because no OSes support changing envs while the program runs
   public static final String INSTRUMENTATION_DISABLE_OPTION =
       "elastic.otel.java.disable_instrumentations";
   private static final String ALL_INSTRUMENTATION_FULL_NAME =
       INSTRUMENTATION_NAME_PREPEND + ALL_INSTRUMENTATION;
   private static final Logger logger = Logger.getLogger(DynamicInstrumentation.class.getName());
-
-  // note the option can't be an env because no OSes support changing envs while the program runs
 
   private static Object getField(String fieldname, Object target) {
     try {
