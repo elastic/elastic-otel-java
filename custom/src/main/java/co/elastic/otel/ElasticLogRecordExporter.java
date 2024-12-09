@@ -19,42 +19,42 @@
 package co.elastic.otel;
 
 import io.opentelemetry.sdk.common.CompletableResultCode;
-import io.opentelemetry.sdk.trace.data.SpanData;
-import io.opentelemetry.sdk.trace.export.SpanExporter;
+import io.opentelemetry.sdk.logs.data.LogRecordData;
+import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ElasticSpanExporter implements SpanExporter {
-  private static final AtomicReference<ElasticSpanExporter> INSTANCE = new AtomicReference<>();
+public class ElasticLogRecordExporter implements LogRecordExporter {
+  private static final AtomicReference<ElasticLogRecordExporter> INSTANCE = new AtomicReference<>();
 
-  private volatile boolean sendingSpans = true;
-  private final SpanExporter delegate;
+  private volatile boolean sendingLogs = true;
+  private final LogRecordExporter delegate;
 
-  public static ElasticSpanExporter getInstance() {
+  public static ElasticLogRecordExporter getInstance() {
     return INSTANCE.get();
   }
 
-  static ElasticSpanExporter createCustomInstance(SpanExporter exporter) {
-    INSTANCE.set(new ElasticSpanExporter(exporter));
+  static ElasticLogRecordExporter createCustomInstance(LogRecordExporter exporter) {
+    INSTANCE.set(new ElasticLogRecordExporter(exporter));
     return INSTANCE.get();
   }
 
-  private ElasticSpanExporter(SpanExporter delegate) {
+  private ElasticLogRecordExporter(LogRecordExporter delegate) {
     this.delegate = delegate;
   }
 
-  public void setSendingSpans(boolean send) {
-    sendingSpans = send;
+  public void setSendingLogs(boolean send) {
+    sendingLogs = send;
   }
 
-  public boolean sendingSpans() {
-    return sendingSpans;
+  public boolean sendingLogs() {
+    return sendingLogs;
   }
 
   @Override
-  public CompletableResultCode export(Collection<SpanData> spans) {
-    if (sendingSpans) {
-      return delegate.export(spans);
+  public CompletableResultCode export(Collection<LogRecordData> collection) {
+    if (sendingLogs) {
+      return delegate.export(collection);
     } else {
       return CompletableResultCode.ofFailure();
     }
@@ -68,5 +68,10 @@ public class ElasticSpanExporter implements SpanExporter {
   @Override
   public CompletableResultCode shutdown() {
     return delegate.shutdown();
+  }
+
+  @Override
+  public void close() {
+    delegate.close();
   }
 }
