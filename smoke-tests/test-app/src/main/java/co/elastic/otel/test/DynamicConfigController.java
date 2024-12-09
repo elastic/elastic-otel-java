@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/dynamicconfig")
 public class DynamicConfigController {
-  public static final String DISABLE_SEND_OPTION = "elastic.otel.java.disable_send";
+  public static final String DISABLE_SEND_OPTION = "elastic.otel.java.experimental.disable_send";
 
   // note synchronized to make enable/disable faster with DynamicInstrumentation
   @GetMapping("/flipSending")

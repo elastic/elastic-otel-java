@@ -18,18 +18,32 @@
  */
 package co.elastic.otel.config;
 
+import static co.elastic.otel.config.DynamicInstrumentation.updateTracerConfigurations;
+
 import co.elastic.otel.ElasticLogRecordExporter;
 import co.elastic.otel.ElasticMetricExporter;
 import co.elastic.otel.ElasticSpanExporter;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
+import io.opentelemetry.sdk.internal.ScopeConfigurator;
+import io.opentelemetry.sdk.trace.internal.TracerConfig;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class DynamicConfiguration {
+  static final String INSTRUMENTATION_NAME_PREPEND = "io.opentelemetry.";
+  private static final String ALL_INSTRUMENTATION = "_ALL_";
+  private static final String ALL_INSTRUMENTATION_FULL_NAME =
+      INSTRUMENTATION_NAME_PREPEND + ALL_INSTRUMENTATION;
   private static DynamicConfiguration INSTANCE = new DynamicConfiguration();
 
   public static DynamicConfiguration getInstance() {
     return INSTANCE;
   }
 
-  public static final String DISABLE_SEND_OPTION = "elastic.otel.java.disable_send";
+  public static final String DISABLE_SEND_OPTION = "elastic.otel.java.experimental.disable_send";
+  public static final String INSTRUMENTATION_DISABLE_OPTION =
+      "elastic.otel.java.experimental.disable_instrumentations";
 
   private Boolean recoverySendSpansState;
   private Boolean recoverySendLogsState;
@@ -69,20 +83,46 @@ public class DynamicConfiguration {
     }
   }
 
-  public void stopInstrumentation(String instrumentationName) {
-    DynamicInstrumentation.disableTracesFor(instrumentationName);
+  public void reenableTracesFor(String instrumentationName) {
+    UpdatableConfigurator.INSTANCE.put(
+        InstrumentationScopeInfo.create(INSTRUMENTATION_NAME_PREPEND + instrumentationName),
+        TracerConfig.enabled());
+    updateTracerConfigurations(GlobalOpenTelemetry.getTracerProvider());
   }
 
-  public void restartInstrumentation(String instrumentationName) {
-    DynamicInstrumentation.reenableTracesFor(instrumentationName);
+  public void disableTracesFor(String instrumentationName) {
+    UpdatableConfigurator.INSTANCE.put(
+        InstrumentationScopeInfo.create(INSTRUMENTATION_NAME_PREPEND + instrumentationName),
+        TracerConfig.disabled());
+    updateTracerConfigurations(GlobalOpenTelemetry.getTracerProvider());
   }
 
-  // TODO these are in a separate PR, so add after that is merged
-  //  public void stopAllInstrumentation() {
-  //    DynamicInstrumentation.disableAllTraces();
-  //  }
-  //
-  //  public void restartAllInstrumentation() {
-  //    DynamicInstrumentation.stopDisablingAllTraces();
-  //  }
+  public void disableAllTraces() {
+    disableTracesFor(ALL_INSTRUMENTATION);
+  }
+
+  public void stopDisablingAllTraces() {
+    reenableTracesFor(ALL_INSTRUMENTATION);
+  }
+
+  public static class UpdatableConfigurator implements ScopeConfigurator<TracerConfig> {
+    public static final UpdatableConfigurator INSTANCE = new UpdatableConfigurator();
+    private final ConcurrentMap<String, TracerConfig> map = new ConcurrentHashMap<>();
+
+    private UpdatableConfigurator() {}
+
+    @Override
+    public TracerConfig apply(InstrumentationScopeInfo scopeInfo) {
+      // If key "_ALL_" is set to disabled, then always return disabled
+      // otherwise fallback to the individual instrumentation
+      if (!map.getOrDefault(ALL_INSTRUMENTATION_FULL_NAME, TracerConfig.enabled()).isEnabled()) {
+        return TracerConfig.disabled();
+      }
+      return map.getOrDefault(scopeInfo.getName(), TracerConfig.defaultConfig());
+    }
+
+    public void put(InstrumentationScopeInfo scope, TracerConfig tracerConfig) {
+      map.put(scope.getName(), tracerConfig);
+    }
+  }
 }

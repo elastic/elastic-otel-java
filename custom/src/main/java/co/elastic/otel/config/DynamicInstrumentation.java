@@ -18,7 +18,8 @@
  */
 package co.elastic.otel.config;
 
-import io.opentelemetry.api.GlobalOpenTelemetry;
+import static co.elastic.otel.config.DynamicConfiguration.INSTRUMENTATION_NAME_PREPEND;
+
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.api.trace.TracerProvider;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
@@ -31,13 +32,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,13 +46,6 @@ import java.util.logging.Logger;
  */
 public class DynamicInstrumentation {
 
-  public static final String INSTRUMENTATION_NAME_PREPEND = "io.opentelemetry.";
-  public static final String ALL_INSTRUMENTATION = "_ALL_";
-  // note the option can't be an env because no OSes support changing envs while the program runs
-  public static final String INSTRUMENTATION_DISABLE_OPTION =
-      "elastic.otel.java.disable_instrumentations";
-  private static final String ALL_INSTRUMENTATION_FULL_NAME =
-      INSTRUMENTATION_NAME_PREPEND + ALL_INSTRUMENTATION;
   private static final Logger logger = Logger.getLogger(DynamicInstrumentation.class.getName());
 
   private static Object getField(String fieldname, Object target) {
@@ -130,7 +118,7 @@ public class DynamicInstrumentation {
   //                    getTracerConfig(sdkTracer.getInstrumentationScopeInfo())));
   // where SdkTracer.updateTracerConfig(TracerConfig tracerConfig) is equivalent to
   //  this.tracerEnabled = tracerConfig.isEnabled();
-  private static void updateTracerConfigurations(TracerProvider provider) {
+  static void updateTracerConfigurations(TracerProvider provider) {
     if (!(provider instanceof SdkTracerProvider)) {
       provider = (TracerProvider) getField("delegate", provider);
     }
@@ -175,124 +163,8 @@ public class DynamicInstrumentation {
     }
   }
 
-  public static void reenableTracesFor(String instrumentationName) {
-    UpdatableConfigurator.INSTANCE.put(
-        InstrumentationScopeInfo.create(INSTRUMENTATION_NAME_PREPEND + instrumentationName),
-        TracerConfig.enabled());
-    updateTracerConfigurations(GlobalOpenTelemetry.getTracerProvider());
-  }
-
-  public static void disableTracesFor(String instrumentationName) {
-    UpdatableConfigurator.INSTANCE.put(
-        InstrumentationScopeInfo.create(INSTRUMENTATION_NAME_PREPEND + instrumentationName),
-        TracerConfig.disabled());
-    updateTracerConfigurations(GlobalOpenTelemetry.getTracerProvider());
-  }
-
-  public static void disableAllTraces() {
-    disableTracesFor(ALL_INSTRUMENTATION);
-  }
-
-  public static void stopDisablingAllTraces() {
-    reenableTracesFor(ALL_INSTRUMENTATION);
-  }
-
-  public static class UpdatableConfigurator implements ScopeConfigurator<TracerConfig> {
-    public static final UpdatableConfigurator INSTANCE = new UpdatableConfigurator();
-    private final ConcurrentMap<String, TracerConfig> map = new ConcurrentHashMap<>();
-
-    private UpdatableConfigurator() {}
-
-    @Override
-    public TracerConfig apply(InstrumentationScopeInfo scopeInfo) {
-      // If key "_ALL_" is set to disabled, then always return disabled
-      // otherwise fallback to the individual instrumentation
-      if (!map.getOrDefault(ALL_INSTRUMENTATION_FULL_NAME, TracerConfig.enabled()).isEnabled()) {
-        return TracerConfig.disabled();
-      }
-      return map.getOrDefault(scopeInfo.getName(), TracerConfig.defaultConfig());
-    }
-
-    public void put(InstrumentationScopeInfo scope, TracerConfig tracerConfig) {
-      map.put(scope.getName(), tracerConfig);
-    }
-  }
-
   static {
-    if ("true".equals(System.getProperty(INSTRUMENTATION_DISABLE_OPTION + ".checker"))
-        || "true".equals(System.getenv("ELASTIC_OTEL_JAVA_DISABLE_INSTRUMENTATIONS_CHECKER"))) {
-      Thread checker = new Thread(new OptionChecker(), "Elastic dynamic_instrumentation checker");
-      checker.setDaemon(true);
-      checker.start();
-    }
-  }
-
-  static class OptionChecker implements Runnable {
-    private Map<String, Boolean> alreadyDisabled = new HashMap<>();
-
-    // Note that if the property and the API are both used to specify enablement
-    // for a particular instrument, and this thread is executing, the property
-    // will take priority if the instrument is in the property - by virtue of running
-    // more frequently; but won't if the instrument is removed from the property!
-    // TODO define priority of enablement by source of disabler
-    @Override
-    public void run() {
-      while (true) {
-        // Handle DynamicConfiguration.DISABLE_SEND_OPTION
-        boolean stopSending;
-        synchronized (this) {
-          stopSending =
-              Boolean.parseBoolean(System.getProperty(DynamicConfiguration.DISABLE_SEND_OPTION));
-        }
-        if (stopSending) {
-          DynamicConfiguration.getInstance().stopAllSending();
-        } else {
-          DynamicConfiguration.getInstance().restartAllSending();
-        }
-
-        // Handle INSTRUMENTATION_DISABLE_OPTION
-        String disableList;
-        synchronized (this) {
-          disableList = System.getProperty(INSTRUMENTATION_DISABLE_OPTION);
-        }
-        if (disableList != null && !disableList.trim().isEmpty()) {
-          // some values in the disable_instrumentations list
-          Set<String> toBeEnabled = null;
-          if (!alreadyDisabled.isEmpty()) {
-            toBeEnabled = new HashSet<>(alreadyDisabled.keySet());
-          }
-          for (String toBeDisabled : disableList.split(",")) {
-            toBeDisabled = toBeDisabled.trim();
-            if (alreadyDisabled.containsKey(toBeDisabled)) {
-              // already disabled and keep it that way
-              if (toBeEnabled != null) {
-                toBeEnabled.remove(toBeDisabled);
-              }
-            } else {
-              DynamicInstrumentation.disableTracesFor(toBeDisabled);
-              alreadyDisabled.put(toBeDisabled, Boolean.TRUE);
-            }
-          }
-          if (toBeEnabled != null) {
-            for (String instrumentation : toBeEnabled) {
-              DynamicInstrumentation.reenableTracesFor(instrumentation);
-              alreadyDisabled.remove(instrumentation);
-            }
-          }
-        } else {
-          // empty list so anything currently disabled should be re-enabled
-          if (!alreadyDisabled.isEmpty()) {
-            for (String instrumentation : new HashSet<>(alreadyDisabled.keySet())) {
-              DynamicInstrumentation.reenableTracesFor(instrumentation);
-              alreadyDisabled.remove(instrumentation);
-            }
-          }
-        }
-        try {
-          Thread.sleep(1000L);
-        } catch (InterruptedException ignored) {
-        }
-      }
-    }
+    // will refactor this when DynamicInstrumentation class becomes mostly empty
+    DynamicConfigurationPropertyChecker.startCheckerThread();
   }
 }

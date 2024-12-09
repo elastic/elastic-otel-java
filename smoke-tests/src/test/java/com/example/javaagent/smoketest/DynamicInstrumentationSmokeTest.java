@@ -38,7 +38,10 @@ class DynamicInstrumentationSmokeTest extends TestAppSmokeTest {
           container.addEnv(
               "OTEL_INSTRUMENTATION_METHODS_INCLUDE",
               "co.elastic.otel.test.DynamicInstrumentationController[flipMethods,flipAll]");
-          container.addEnv("ELASTIC_OTEL_JAVA_DISABLE_INSTRUMENTATIONS_CHECKER", "true");
+          container.addEnv(
+              "ELASTIC_OTEL_JAVA_EXPERIMENTAL_DISABLE_INSTRUMENTATIONS_CHECKER", "true");
+          container.addEnv(
+              "ELASTIC_OTEL_JAVA_EXPERIMENTAL_DISABLE_INSTRUMENTATIONS_CHECKER_INTERVAL_MS", "100");
           container.addEnv("OTEL_JAVAAGENT_DEBUG", "true");
         });
   }
@@ -51,7 +54,7 @@ class DynamicInstrumentationSmokeTest extends TestAppSmokeTest {
   @AfterEach
   public void endTest() throws InterruptedException {
     doRequest(getUrl("/dynamic/reset"), okResponseBody("reset"));
-    Thread.sleep(2000L); // give the reset time to be applied
+    Thread.sleep(500L); // give the reset time to be applied
   }
 
   @Test
@@ -77,7 +80,7 @@ class DynamicInstrumentationSmokeTest extends TestAppSmokeTest {
             "DynamicInstrumentationController.flip" + extensionName);
     ByteString firstTraceID = spans.get(0).getTraceId();
 
-    Thread.sleep(2000L); // give the flip time to be applied
+    Thread.sleep(500L); // give the flip time to be applied
 
     doRequest(getUrl("/dynamic/flip" + extensionName), okResponseBody("disabled"));
     traces = waitForTraces();
@@ -92,7 +95,7 @@ class DynamicInstrumentationSmokeTest extends TestAppSmokeTest {
     }
     ByteString secondTraceID = SpanCountWhenDisabled > 0 ? spans.get(0).getTraceId() : firstTraceID;
 
-    Thread.sleep(2000L); // give the flip time to be applied
+    Thread.sleep(500L); // give the flip time to be applied
 
     doRequest(getUrl("/dynamic/flip" + extensionName), okResponseBody("enabled"));
     traces = waitForTraces();

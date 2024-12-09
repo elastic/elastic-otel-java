@@ -56,7 +56,7 @@ public class ElasticMetricExporter implements MetricExporter {
 
   @Override
   public AggregationTemporality getAggregationTemporality(InstrumentType instrumentType) {
-    return AggregationTemporality.DELTA;
+    return delegate.getAggregationTemporality(instrumentType);
   }
 
   @Override

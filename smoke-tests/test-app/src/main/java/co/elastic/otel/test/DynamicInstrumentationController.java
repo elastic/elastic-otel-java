@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/dynamic")
 public class DynamicInstrumentationController {
   public static final String INSTRUMENTATION_DISABLE_OPTION =
-      "elastic.otel.java.disable_instrumentations";
+      "elastic.otel.java.experimental.disable_instrumentations";
 
   // note synchronized to make enable/disable faster with DynamicInstrumentation
   @GetMapping("/flipMethods")

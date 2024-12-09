@@ -38,7 +38,10 @@ class DynamicConfigSmokeTest extends TestAppSmokeTest {
           container.addEnv(
               "OTEL_INSTRUMENTATION_METHODS_INCLUDE",
               "co.elastic.otel.test.DynamicConfigController[flipSending]");
-          container.addEnv("ELASTIC_OTEL_JAVA_DISABLE_INSTRUMENTATIONS_CHECKER", "true");
+          container.addEnv(
+              "ELASTIC_OTEL_JAVA_EXPERIMENTAL_DISABLE_INSTRUMENTATIONS_CHECKER", "true");
+          container.addEnv(
+              "ELASTIC_OTEL_JAVA_EXPERIMENTAL_DISABLE_INSTRUMENTATIONS_CHECKER_INTERVAL_MS", "100");
           container.addEnv("OTEL_JAVAAGENT_DEBUG", "true");
         });
   }
@@ -51,7 +54,7 @@ class DynamicConfigSmokeTest extends TestAppSmokeTest {
   @AfterEach
   public void endTest() throws InterruptedException {
     doRequest(getUrl("/dynamicconfig/reset"), okResponseBody("reset"));
-    Thread.sleep(2000L); // give the reset time to be applied
+    Thread.sleep(500L); // give the reset time to be applied
   }
 
   @Test
@@ -65,14 +68,14 @@ class DynamicConfigSmokeTest extends TestAppSmokeTest {
         .containsOnly("GET /dynamicconfig/flipSending", "DynamicConfigController.flipSending");
     ByteString firstTraceID = spans.get(0).getTraceId();
 
-    Thread.sleep(2000L); // give the flip time to be applied
+    Thread.sleep(500L); // give the flip time to be applied
 
     doRequest(getUrl("/dynamicconfig/flipSending"), okResponseBody("restarted"));
     traces = waitForTraces();
     spans = getSpans(traces).dropWhile(span -> span.getTraceId().equals(firstTraceID)).toList();
     assertThat(spans).hasSize(0);
 
-    Thread.sleep(2000L); // give the flip time to be applied
+    Thread.sleep(500L); // give the flip time to be applied
 
     doRequest(getUrl("/dynamicconfig/flipSending"), okResponseBody("stopped"));
     traces = waitForTraces();
