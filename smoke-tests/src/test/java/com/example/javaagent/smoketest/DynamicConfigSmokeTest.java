@@ -41,7 +41,7 @@ class DynamicConfigSmokeTest extends TestAppSmokeTest {
           container.addEnv(
               "ELASTIC_OTEL_JAVA_EXPERIMENTAL_DISABLE_INSTRUMENTATIONS_CHECKER", "true");
           container.addEnv(
-              "ELASTIC_OTEL_JAVA_EXPERIMENTAL_DISABLE_INSTRUMENTATIONS_CHECKER_INTERVAL_MS", "100");
+              "ELASTIC_OTEL_JAVA_EXPERIMENTAL_DISABLE_INSTRUMENTATIONS_CHECKER_INTERVAL_MS", "300");
           container.addEnv("OTEL_JAVAAGENT_DEBUG", "true");
         });
   }
