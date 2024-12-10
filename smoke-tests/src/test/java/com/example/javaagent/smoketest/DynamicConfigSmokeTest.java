@@ -29,7 +29,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-class DynamicInstrumentationSmokeTest extends TestAppSmokeTest {
+class DynamicConfigSmokeTest extends TestAppSmokeTest {
 
   @BeforeAll
   public static void start() {
@@ -37,7 +37,7 @@ class DynamicInstrumentationSmokeTest extends TestAppSmokeTest {
         (container) -> {
           container.addEnv(
               "OTEL_INSTRUMENTATION_METHODS_INCLUDE",
-              "co.elastic.otel.test.DynamicInstrumentationController[flipMethods,flipAll]");
+              "co.elastic.otel.test.DynamicConfigController[flipSending]");
           container.addEnv(
               "ELASTIC_OTEL_JAVA_EXPERIMENTAL_DISABLE_INSTRUMENTATIONS_CHECKER", "true");
           container.addEnv(
@@ -53,64 +53,36 @@ class DynamicInstrumentationSmokeTest extends TestAppSmokeTest {
 
   @AfterEach
   public void endTest() throws InterruptedException {
-    doRequest(getUrl("/dynamic/reset"), okResponseBody("reset"));
+    doRequest(getUrl("/dynamicconfig/reset"), okResponseBody("reset"));
     Thread.sleep(500L); // give the reset time to be applied
   }
 
   @Test
-  public void flipMethodInstrumentation() throws InterruptedException {
-    dynamicFlipInstrumentation("Methods", 1);
-  }
-
-  @Test
-  public void flipAllInstrumentation() throws InterruptedException {
-    dynamicFlipInstrumentation("All", 0);
-  }
-
-  private void dynamicFlipInstrumentation(String extensionName, int SpanCountWhenDisabled)
-      throws InterruptedException {
-    doRequest(getUrl("/dynamic/flip" + extensionName), okResponseBody("enabled"));
+  public void flipSending() throws InterruptedException {
+    doRequest(getUrl("/dynamicconfig/flipSending"), okResponseBody("stopped"));
     List<ExportTraceServiceRequest> traces = waitForTraces();
     List<Span> spans = getSpans(traces).toList();
     assertThat(spans)
         .hasSize(2)
         .extracting("name")
-        .containsOnly(
-            "GET /dynamic/flip" + extensionName,
-            "DynamicInstrumentationController.flip" + extensionName);
+        .containsOnly("GET /dynamicconfig/flipSending", "DynamicConfigController.flipSending");
     ByteString firstTraceID = spans.get(0).getTraceId();
 
-    Thread.sleep(500L); // give the flip time to be applied
+    Thread.sleep(1000L); // give the flip time to be applied
 
-    doRequest(getUrl("/dynamic/flip" + extensionName), okResponseBody("disabled"));
+    doRequest(getUrl("/dynamicconfig/flipSending"), okResponseBody("restarted"));
     traces = waitForTraces();
     spans = getSpans(traces).dropWhile(span -> span.getTraceId().equals(firstTraceID)).toList();
-    if (SpanCountWhenDisabled > 0) {
-      assertThat(spans)
-          .hasSize(SpanCountWhenDisabled)
-          .extracting("name")
-          .containsOnly("GET /dynamic/flip" + extensionName);
-    } else {
-      assertThat(spans).hasSize(0);
-    }
-    ByteString secondTraceID = SpanCountWhenDisabled > 0 ? spans.get(0).getTraceId() : firstTraceID;
+    assertThat(spans).hasSize(0);
 
-    Thread.sleep(500L); // give the flip time to be applied
+    Thread.sleep(1000L); // give the flip time to be applied
 
-    doRequest(getUrl("/dynamic/flip" + extensionName), okResponseBody("enabled"));
+    doRequest(getUrl("/dynamicconfig/flipSending"), okResponseBody("stopped"));
     traces = waitForTraces();
-    spans =
-        getSpans(traces)
-            .dropWhile(
-                span ->
-                    span.getTraceId().equals(firstTraceID)
-                        || span.getTraceId().equals(secondTraceID))
-            .toList();
+    spans = getSpans(traces).dropWhile(span -> span.getTraceId().equals(firstTraceID)).toList();
     assertThat(spans)
         .hasSize(2)
         .extracting("name")
-        .containsOnly(
-            "GET /dynamic/flip" + extensionName,
-            "DynamicInstrumentationController.flip" + extensionName);
+        .containsOnly("GET /dynamicconfig/flipSending", "DynamicConfigController.flipSending");
   }
 }
