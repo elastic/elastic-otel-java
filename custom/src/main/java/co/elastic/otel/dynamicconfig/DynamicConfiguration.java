@@ -16,26 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.config;
+package co.elastic.otel.dynamicconfig;
 
-import static co.elastic.otel.config.DynamicInstrumentation.updateTracerConfigurations;
+import static co.elastic.otel.dynamicconfig.DynamicInstrumentation.updateTracerConfigurations;
 
-import co.elastic.otel.ElasticLogRecordExporter;
-import co.elastic.otel.ElasticMetricExporter;
-import co.elastic.otel.ElasticSpanExporter;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.internal.ScopeConfigurator;
 import io.opentelemetry.sdk.trace.internal.TracerConfig;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DynamicConfiguration {
   static final String INSTRUMENTATION_NAME_PREPEND = "io.opentelemetry.";
   private static final String ALL_INSTRUMENTATION = "_ALL_";
   private static final String ALL_INSTRUMENTATION_FULL_NAME =
       INSTRUMENTATION_NAME_PREPEND + ALL_INSTRUMENTATION;
-  private static DynamicConfiguration INSTANCE = new DynamicConfiguration();
+  private static final DynamicConfiguration INSTANCE = new DynamicConfiguration();
+  private static final Logger logger = Logger.getLogger(DynamicConfiguration.class.getName());
 
   public static DynamicConfiguration getInstance() {
     return INSTANCE;
@@ -49,37 +49,61 @@ public class DynamicConfiguration {
   private Boolean recoverySendLogsState;
   private Boolean recoverySendMetricsState;
 
-  private boolean initSendingStates() {
-    if (recoverySendSpansState == null && ElasticSpanExporter.getInstance() != null) {
-      recoverySendSpansState = ElasticSpanExporter.getInstance().sendingSpans();
+  private void initSendingStates() {
+    if (recoverySendSpansState == null) {
+      if (BlockableSpanExporter.getInstance() == null) {
+        logger.log(
+            Level.WARNING,
+            "BlockableSpanExporter.getInstance() == null which is unexpected unless this is a test");
+      } else {
+        recoverySendSpansState = BlockableSpanExporter.getInstance().sendingSpans();
+      }
     }
-    if (recoverySendMetricsState == null && ElasticMetricExporter.getInstance() != null) {
-      recoverySendMetricsState = ElasticMetricExporter.getInstance().sendingMetrics();
+    if (recoverySendMetricsState == null) {
+      if (BlockableMetricExporter.getInstance() == null) {
+        logger.log(
+            Level.WARNING,
+            "BlockableMetricExporter.getInstance() == null which is unexpected unless this is a test");
+      } else {
+        recoverySendMetricsState = BlockableMetricExporter.getInstance().sendingMetrics();
+      }
     }
-    if (recoverySendLogsState == null && ElasticLogRecordExporter.getInstance() != null) {
-      recoverySendLogsState = ElasticLogRecordExporter.getInstance().sendingLogs();
+    if (recoverySendLogsState == null) {
+      if (BlockableLogRecordExporter.getInstance() == null) {
+        logger.log(
+            Level.WARNING,
+            "BlockableLogRecordExporter.getInstance() == null which is unexpected unless this is a test");
+      } else {
+        recoverySendLogsState = BlockableLogRecordExporter.getInstance().sendingLogs();
+      }
     }
-    return recoverySendLogsState != null
-        && recoverySendMetricsState != null
-        && recoverySendSpansState != null
-        && recoverySendMetricsState;
   }
 
   /** Can be executed repeatedly even if sending is currently stopped */
   public void stopAllSending() {
-    if (initSendingStates()) {
-      ElasticSpanExporter.getInstance().setSendingSpans(false);
-      ElasticMetricExporter.getInstance().setSendingMetrics(false);
-      ElasticLogRecordExporter.getInstance().setSendingLogs(false);
+    initSendingStates();
+    if (recoverySendSpansState != null) {
+      BlockableSpanExporter.getInstance().setSendingSpans(false);
+    }
+    if (recoverySendMetricsState != null) {
+      BlockableMetricExporter.getInstance().setSendingMetrics(false);
+    }
+    if (recoverySendLogsState != null) {
+      BlockableLogRecordExporter.getInstance().setSendingLogs(false);
     }
   }
 
   /** Can be executed repeatedly even if sending is currently proceeding */
   public void restartAllSending() {
-    if (initSendingStates()) {
-      ElasticSpanExporter.getInstance().setSendingSpans(recoverySendSpansState);
-      ElasticMetricExporter.getInstance().setSendingMetrics(recoverySendMetricsState);
-      ElasticLogRecordExporter.getInstance().setSendingLogs(recoverySendLogsState);
+    initSendingStates();
+    if (recoverySendSpansState != null) {
+      BlockableSpanExporter.getInstance().setSendingSpans(recoverySendSpansState);
+    }
+    if (recoverySendMetricsState != null) {
+      BlockableMetricExporter.getInstance().setSendingMetrics(recoverySendMetricsState);
+    }
+    if (recoverySendLogsState != null) {
+      BlockableLogRecordExporter.getInstance().setSendingLogs(recoverySendLogsState);
     }
   }
 

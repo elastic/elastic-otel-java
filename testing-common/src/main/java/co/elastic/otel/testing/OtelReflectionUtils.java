@@ -54,11 +54,8 @@ public class OtelReflectionUtils {
         (OpenTelemetry) readField(GlobalOpenTelemetry.class, null, "globalOpenTelemetry");
     if (otel != null) {
       // unwrap from obfuscated opentelemetry
-      Object sdkObject = readField(otel, "delegate");
-      if (sdkObject instanceof OpenTelemetrySdk) {
-        OpenTelemetrySdk sdk = (OpenTelemetrySdk) sdkObject;
-        sdk.close();
-      }
+      OpenTelemetrySdk sdk = (OpenTelemetrySdk) readField(otel, "delegate");
+      sdk.close();
       GlobalOpenTelemetry.resetForTest();
       GlobalEventLoggerProvider.resetForTest();
     }

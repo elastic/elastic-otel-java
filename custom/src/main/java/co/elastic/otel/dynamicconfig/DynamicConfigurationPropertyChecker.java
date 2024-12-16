@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.config;
+package co.elastic.otel.dynamicconfig;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,13 +26,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DynamicConfigurationPropertyChecker implements Runnable {
-  private static Thread CheckerThread;
-  private static long Interval = 1000;
-  private static Logger logger =
+  private static Thread checkerThread;
+  private static long interval = 1000;
+  private static final Logger logger =
       Logger.getLogger(DynamicConfigurationPropertyChecker.class.getName());
 
   public static synchronized void startCheckerThread() {
-    if (CheckerThread != null) {
+    if (checkerThread != null) {
       return;
     }
     if ("true"
@@ -43,22 +43,22 @@ public class DynamicConfigurationPropertyChecker implements Runnable {
             .equals(
                 System.getenv("ELASTIC_OTEL_JAVA_EXPERIMENTAL_DISABLE_INSTRUMENTATIONS_CHECKER"))) {
       try {
-        Interval =
+        interval =
             Long.parseLong(
                 System.getenv(
                     "ELASTIC_OTEL_JAVA_EXPERIMENTAL_DISABLE_INSTRUMENTATIONS_CHECKER_INTERVAL_MS"));
       } catch (NumberFormatException e) {
         // do nothing leave the default
       }
-      CheckerThread =
+      checkerThread =
           new Thread(
               new DynamicConfigurationPropertyChecker(), "Elastic dynamic_instrumentation checker");
-      CheckerThread.setDaemon(true);
-      CheckerThread.start();
+      checkerThread.setDaemon(true);
+      checkerThread.start();
     }
   }
 
-  private Map<String, Boolean> alreadyDisabled = new HashMap<>();
+  private final Map<String, Boolean> alreadyDisabled = new HashMap<>();
 
   private void checkSending() {
     boolean stopSending;
@@ -124,9 +124,9 @@ public class DynamicConfigurationPropertyChecker implements Runnable {
       try {
         checkSending();
         checkDisablingInstrumentations();
-        Thread.sleep(Interval);
-      } catch (Exception ignored) {
-        logger.log(Level.SEVERE, "Checker thread hit an exception: ", ignored);
+        Thread.sleep(interval);
+      } catch (Exception logged) {
+        logger.log(Level.SEVERE, "Checker thread hit an exception: ", logged);
       }
     }
   }

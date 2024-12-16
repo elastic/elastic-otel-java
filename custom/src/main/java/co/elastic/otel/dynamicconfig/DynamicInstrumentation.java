@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.config;
+package co.elastic.otel.dynamicconfig;
 
-import static co.elastic.otel.config.DynamicConfiguration.INSTRUMENTATION_NAME_PREPEND;
+import static co.elastic.otel.dynamicconfig.DynamicConfiguration.INSTRUMENTATION_NAME_PREPEND;
 
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.api.trace.TracerProvider;

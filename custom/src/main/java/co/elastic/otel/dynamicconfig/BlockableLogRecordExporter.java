@@ -16,47 +16,47 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel;
+package co.elastic.otel.dynamicconfig;
 
 import io.opentelemetry.sdk.common.CompletableResultCode;
-import io.opentelemetry.sdk.trace.data.SpanData;
-import io.opentelemetry.sdk.trace.export.SpanExporter;
+import io.opentelemetry.sdk.logs.data.LogRecordData;
+import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.Nonnull;
 
-public class ElasticSpanExporter implements SpanExporter {
-  private static final AtomicReference<ElasticSpanExporter> INSTANCE = new AtomicReference<>();
+public class BlockableLogRecordExporter implements LogRecordExporter {
+  private static volatile BlockableLogRecordExporter INSTANCE;
 
-  private volatile boolean sendingSpans = true;
-  private final SpanExporter delegate;
+  private volatile boolean sendingLogs = true;
+  private final LogRecordExporter delegate;
 
-  public static ElasticSpanExporter getInstance() {
-    return INSTANCE.get();
+  public static BlockableLogRecordExporter getInstance() {
+    return INSTANCE;
   }
 
-  static ElasticSpanExporter createCustomInstance(SpanExporter exporter) {
-    INSTANCE.set(new ElasticSpanExporter(exporter));
-    return INSTANCE.get();
+  public static BlockableLogRecordExporter createCustomInstance(LogRecordExporter exporter) {
+    INSTANCE = new BlockableLogRecordExporter(exporter);
+    return INSTANCE;
   }
 
-  private ElasticSpanExporter(SpanExporter delegate) {
+  private BlockableLogRecordExporter(LogRecordExporter delegate) {
     this.delegate = delegate;
   }
 
-  public void setSendingSpans(boolean send) {
-    sendingSpans = send;
+  public void setSendingLogs(boolean send) {
+    sendingLogs = send;
   }
 
-  public boolean sendingSpans() {
-    return sendingSpans;
+  public boolean sendingLogs() {
+    return sendingLogs;
   }
 
   @Override
-  public CompletableResultCode export(Collection<SpanData> spans) {
-    if (sendingSpans) {
-      return delegate.export(spans);
+  public CompletableResultCode export(@Nonnull Collection<LogRecordData> collection) {
+    if (sendingLogs) {
+      return delegate.export(collection);
     } else {
-      return CompletableResultCode.ofFailure();
+      return CompletableResultCode.ofSuccess();
     }
   }
 
@@ -68,5 +68,10 @@ public class ElasticSpanExporter implements SpanExporter {
   @Override
   public CompletableResultCode shutdown() {
     return delegate.shutdown();
+  }
+
+  @Override
+  public void close() {
+    delegate.close();
   }
 }

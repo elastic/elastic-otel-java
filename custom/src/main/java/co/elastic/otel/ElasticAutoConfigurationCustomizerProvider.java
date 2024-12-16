@@ -18,8 +18,11 @@
  */
 package co.elastic.otel;
 
-import co.elastic.otel.config.DynamicConfiguration;
-import co.elastic.otel.config.DynamicInstrumentation;
+import co.elastic.otel.dynamicconfig.BlockableLogRecordExporter;
+import co.elastic.otel.dynamicconfig.BlockableMetricExporter;
+import co.elastic.otel.dynamicconfig.BlockableSpanExporter;
+import co.elastic.otel.dynamicconfig.DynamicConfiguration;
+import co.elastic.otel.dynamicconfig.DynamicInstrumentation;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
@@ -51,12 +54,13 @@ public class ElasticAutoConfigurationCustomizerProvider
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
     autoConfiguration.addMetricExporterCustomizer(
         (metricexporter, configProperties) ->
-            ElasticMetricExporter.createCustomInstance(metricexporter));
+            BlockableMetricExporter.createCustomInstance(metricexporter));
     autoConfiguration.addSpanExporterCustomizer(
-        (spanExporter, configProperties) -> ElasticSpanExporter.createCustomInstance(spanExporter));
+        (spanExporter, configProperties) ->
+            BlockableSpanExporter.createCustomInstance(spanExporter));
     autoConfiguration.addLogRecordExporterCustomizer(
         (logExporter, configProperties) ->
-            ElasticLogRecordExporter.createCustomInstance(logExporter));
+            BlockableLogRecordExporter.createCustomInstance(logExporter));
 
     autoConfiguration.addPropertiesCustomizer(
         ElasticAutoConfigurationCustomizerProvider::propertiesCustomizer);

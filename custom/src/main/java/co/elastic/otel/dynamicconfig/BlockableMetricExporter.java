@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel;
+package co.elastic.otel.dynamicconfig;
 
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.metrics.Aggregation;
@@ -25,24 +25,24 @@ import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.Nonnull;
 
-public class ElasticMetricExporter implements MetricExporter {
-  private static final AtomicReference<ElasticMetricExporter> INSTANCE = new AtomicReference<>();
+public class BlockableMetricExporter implements MetricExporter {
+  private static volatile BlockableMetricExporter INSTANCE;
 
   private volatile boolean sendingMetrics = true;
   private final MetricExporter delegate;
 
-  public static ElasticMetricExporter getInstance() {
-    return INSTANCE.get();
+  public static BlockableMetricExporter getInstance() {
+    return INSTANCE;
   }
 
-  static ElasticMetricExporter createCustomInstance(MetricExporter exporter) {
-    INSTANCE.set(new ElasticMetricExporter(exporter));
-    return INSTANCE.get();
+  public static BlockableMetricExporter createCustomInstance(MetricExporter exporter) {
+    INSTANCE = new BlockableMetricExporter(exporter);
+    return INSTANCE;
   }
 
-  private ElasticMetricExporter(MetricExporter delegate) {
+  private BlockableMetricExporter(MetricExporter delegate) {
     this.delegate = delegate;
   }
 
@@ -55,21 +55,21 @@ public class ElasticMetricExporter implements MetricExporter {
   }
 
   @Override
-  public AggregationTemporality getAggregationTemporality(InstrumentType instrumentType) {
+  public AggregationTemporality getAggregationTemporality(@Nonnull InstrumentType instrumentType) {
     return delegate.getAggregationTemporality(instrumentType);
   }
 
   @Override
-  public Aggregation getDefaultAggregation(InstrumentType instrumentType) {
+  public Aggregation getDefaultAggregation(@Nonnull InstrumentType instrumentType) {
     return delegate.getDefaultAggregation(instrumentType);
   }
 
   @Override
-  public CompletableResultCode export(Collection<MetricData> metrics) {
+  public CompletableResultCode export(@Nonnull Collection<MetricData> metrics) {
     if (sendingMetrics) {
       return delegate.export(metrics);
     } else {
-      return CompletableResultCode.ofFailure();
+      return CompletableResultCode.ofSuccess();
     }
   }
 
