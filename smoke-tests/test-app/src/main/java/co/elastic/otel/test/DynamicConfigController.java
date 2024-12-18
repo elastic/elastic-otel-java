@@ -23,39 +23,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/dynamic")
-public class DynamicInstrumentationController {
-  public static final String INSTRUMENTATION_DISABLE_OPTION =
-      "elastic.otel.java.experimental.disable_instrumentations";
+@RequestMapping("/dynamicconfig")
+public class DynamicConfigController {
+  public static final String DISABLE_SEND_OPTION = "elastic.otel.java.experimental.disable_send";
 
   // note synchronized to make enable/disable faster with DynamicInstrumentation
-  @GetMapping("/flipMethods")
-  public synchronized String flipMethods() {
-    String old = System.getProperty(INSTRUMENTATION_DISABLE_OPTION, "");
+  @GetMapping("/flipSending")
+  public synchronized String flipSending() {
+    String old = System.getProperty(DISABLE_SEND_OPTION, "");
     if (old.isEmpty()) {
-      System.setProperty(INSTRUMENTATION_DISABLE_OPTION, "methods");
-      return "enabled";
+      System.setProperty(DISABLE_SEND_OPTION, "true");
+      return "stopped";
     } else {
-      System.setProperty(INSTRUMENTATION_DISABLE_OPTION, "");
-      return "disabled";
-    }
-  }
-
-  @RequestMapping("/flipAll")
-  public synchronized String flipAll() {
-    String old = System.getProperty(INSTRUMENTATION_DISABLE_OPTION, "");
-    if (old.isEmpty()) {
-      System.setProperty(INSTRUMENTATION_DISABLE_OPTION, "_ALL_");
-      return "enabled";
-    } else {
-      System.setProperty(INSTRUMENTATION_DISABLE_OPTION, "");
-      return "disabled";
+      System.setProperty(DISABLE_SEND_OPTION, "");
+      return "restarted";
     }
   }
 
   @RequestMapping("/reset")
   public synchronized String reset() {
-    System.setProperty(INSTRUMENTATION_DISABLE_OPTION, "");
+    System.setProperty(DISABLE_SEND_OPTION, "");
     return "reset";
   }
 }
