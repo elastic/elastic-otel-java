@@ -62,7 +62,7 @@ github-api = "org.kohsuke:github-api:1.326"
 apachecommons-compress = "org.apache.commons:commons-compress:1.27.1"
 asyncprofiler = "tools.profiler:async-profiler:3.0"
 
-freemarker = "org.freemarker:freemarker:2.3.33"
+freemarker = "org.freemarker:freemarker:2.3.34"
 
 spotlessPlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
 shadowPlugin = { group = "com.github.johnrengelman", name = "shadow", version.ref = "shadow" }
