@@ -2,7 +2,7 @@
 shadow = "8.1.1"
 jib = "3.4.4"
 spotless = "6.25.0"
-junit = "5.11.3"
+junit = "5.11.4"
 autoservice = "1.1.1"
 
 # otel protocol (OTLP)
@@ -10,17 +10,17 @@ opentelemetryProto = "1.3.2-alpha"
 
 # otel agent, we rely on the '*-alpha' and get the non-alpha dependencies transitively
 # updated from upstream agent with .ci/update-upstream.sh
-opentelemetryJavaagentAlpha = "2.10.0-alpha"
+opentelemetryJavaagentAlpha = "2.11.0-alpha"
 
 # otel contrib
 # updated from upstream agent with .ci/update-upstream.sh
-opentelemetryContribAlpha = "1.41.0-alpha"
+opentelemetryContribAlpha = "1.42.0-alpha"
 
 # otel semconv
 # updated from upstream agent with .ci/update-upstream.sh
 # While the semconv stable artifact is provided transitively by the agent, we still have to explicitly
 # reference the "incubating" version explicitly
-opentelemetrySemconvAlpha = "1.28.0-alpha"
+opentelemetrySemconvAlpha = "1.29.0-alpha"
 
 [libraries]
 
@@ -41,12 +41,12 @@ opentelemetrySemconvIncubating = { group = "io.opentelemetry.semconv", name = "o
 autoservice-processor = { group = "com.google.auto.service", name = "auto-service", version.ref = "autoservice" }
 autoservice-annotations = { group = "com.google.auto.service", name = "auto-service-annotations", version.ref = "autoservice" }
 
-assertj-core = "org.assertj:assertj-core:3.26.3"
+assertj-core = "org.assertj:assertj-core:3.27.1"
 awaitility = "org.awaitility:awaitility:4.2.2"
 findbugs-jsr305 = "com.google.code.findbugs:jsr305:3.0.2"
-testcontainers = "org.testcontainers:testcontainers:1.20.3"
-logback = "ch.qos.logback:logback-classic:1.5.12"
-jackson = "com.fasterxml.jackson.core:jackson-databind:2.18.1"
+testcontainers = "org.testcontainers:testcontainers:1.20.4"
+logback = "ch.qos.logback:logback-classic:1.5.15"
+jackson = "com.fasterxml.jackson.core:jackson-databind:2.18.2"
 protobuf-util = "com.google.protobuf:protobuf-java-util:3.25.5"
 # last version supporting Java 8
 mockito = "org.mockito:mockito-core:4.11.0"
@@ -63,7 +63,7 @@ github-api = "org.kohsuke:github-api:1.326"
 apachecommons-compress = "org.apache.commons:commons-compress:1.27.1"
 asyncprofiler = "tools.profiler:async-profiler:3.0"
 
-freemarker = "org.freemarker:freemarker:2.3.33"
+freemarker = "org.freemarker:freemarker:2.3.34"
 
 spotlessPlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
 shadowPlugin = { group = "com.github.johnrengelman", name = "shadow", version.ref = "shadow" }
