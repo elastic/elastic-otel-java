@@ -25,13 +25,12 @@ import co.elastic.otel.testing.DisabledOnOpenJ9;
 import co.elastic.otel.testing.OtelReflectionUtils;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.contrib.inferredspans.FieldAccessors;
 import io.opentelemetry.contrib.inferredspans.InferredSpansProcessor;
 import io.opentelemetry.contrib.inferredspans.WildcardMatcher;
 import io.opentelemetry.contrib.inferredspans.internal.InferredSpansConfiguration;
 import io.opentelemetry.contrib.inferredspans.internal.ProfilingActivationListener;
-import io.opentelemetry.contrib.inferredspans.internal.SamplingProfiler;
 import io.opentelemetry.sdk.trace.SpanProcessor;
-import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
@@ -79,7 +78,7 @@ public class InferredSpansBackwardsCompatibilityConfigTest {
                   .findFirst()
                   .get();
 
-      InferredSpansConfiguration config = extractProfiler(processor).getConfig();
+      InferredSpansConfiguration config = FieldAccessors.getProfiler(processor).getConfig();
       assertThat(config.isProfilingLoggingEnabled()).isFalse();
       assertThat(config.isBackupDiagnosticFiles()).isTrue();
       assertThat(config.getAsyncProfilerSafeMode()).isEqualTo(16);
@@ -91,16 +90,6 @@ public class InferredSpansBackwardsCompatibilityConfigTest {
       assertThat(config.getProfilingInterval()).isEqualTo(Duration.ofSeconds(2));
       assertThat(config.getProfilingDuration()).isEqualTo(Duration.ofSeconds(3));
       assertThat(config.getProfilerLibDirectory()).isEqualTo(libDir);
-    }
-  }
-
-  private SamplingProfiler extractProfiler(InferredSpansProcessor processor) {
-    try {
-      Field profilerField = processor.getClass().getDeclaredField("profiler");
-      profilerField.setAccessible(true);
-      return (SamplingProfiler) profilerField.get(processor);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
     }
   }
 
