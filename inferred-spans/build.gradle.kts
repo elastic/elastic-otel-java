@@ -1,6 +1,5 @@
 plugins {
   id("elastic-otel.library-packaging-conventions")
-  id("elastic-otel.sign-and-publish-conventions")
 }
 
 description = "Elastic Inferred Spans extension for OpenTelemetry Java"
