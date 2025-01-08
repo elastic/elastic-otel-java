@@ -93,6 +93,34 @@ public class InferredSpansBackwardsCompatibilityConfigTest {
     }
   }
 
+
+  @Test
+  @DisabledOnOpenJ9
+  public void ensureOptionsTakePrecedenceOverLegacyOptions() {
+    try (AutoConfigTestProperties props =
+        new AutoConfigTestProperties()
+            .put("elastic.otel.inferred.spans.enabled", "false")
+            .put("otel.inferred.spans.enabled", "true")
+            .put("elastic.otel.inferred.spans.interval", "2s")
+            .put("otel.inferred.spans.interval", "3s")
+    ) {
+
+      OpenTelemetry otel = GlobalOpenTelemetry.get();
+      List<SpanProcessor> processors = OtelReflectionUtils.getSpanProcessors(otel);
+      assertThat(processors).filteredOn(proc -> proc instanceof InferredSpansProcessor).hasSize(1);
+      InferredSpansProcessor processor =
+          (InferredSpansProcessor)
+              processors.stream()
+                  .filter(proc -> proc instanceof InferredSpansProcessor)
+                  .findFirst()
+                  .get();
+
+      InferredSpansConfiguration config = FieldAccessors.getProfiler(processor).getConfig();
+      assertThat(config.getProfilingInterval()).isEqualTo(Duration.ofSeconds(3));
+    }
+  }
+
+
   @Test
   public void checkDisabledbyDefault() {
     try (AutoConfigTestProperties props = new AutoConfigTestProperties()) {
