@@ -16,37 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.profiler;
+package co.elastic.otel;
 
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
-import co.elastic.otel.common.config.WildcardMatcher;
 import co.elastic.otel.testing.AutoConfigTestProperties;
-import co.elastic.otel.testing.AutoConfiguredDataCapture;
 import co.elastic.otel.testing.DisabledOnOpenJ9;
 import co.elastic.otel.testing.OtelReflectionUtils;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.context.Scope;
+import io.opentelemetry.contrib.inferredspans.FieldAccessors;
+import io.opentelemetry.contrib.inferredspans.InferredSpansProcessor;
+import io.opentelemetry.contrib.inferredspans.WildcardMatcher;
+import io.opentelemetry.contrib.inferredspans.internal.InferredSpansConfiguration;
+import io.opentelemetry.contrib.inferredspans.internal.ProfilingActivationListener;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
-public class InferredSpansAutoConfigTest {
+public class InferredSpansBackwardsCompatibilityConfigTest {
 
   @BeforeEach
   @AfterEach
@@ -55,29 +49,24 @@ public class InferredSpansAutoConfigTest {
     OtelReflectionUtils.shutdownAndResetGlobalOtel();
   }
 
-  @ParameterizedTest
-  @ValueSource(booleans = {true, false})
+  @Test
   @DisabledOnOpenJ9
-  public void checkAllOptions(boolean legacyOptions, @TempDir Path tmpDir) {
+  public void checkAllLegacyOptions(@TempDir Path tmpDir) {
     String libDir = tmpDir.resolve("foo").resolve("bar").toString();
-    String prefix = "";
-    if (legacyOptions) {
-      prefix = "elastic.";
-    }
     try (AutoConfigTestProperties props =
         new AutoConfigTestProperties()
-            .put(prefix + InferredSpansAutoConfig.ENABLED_OPTION, "true")
-            .put(prefix + InferredSpansAutoConfig.LOGGING_OPTION, "false")
-            .put(prefix + InferredSpansAutoConfig.DIAGNOSTIC_FILES_OPTION, "true")
-            .put(prefix + InferredSpansAutoConfig.SAFEMODE_OPTION, "16")
-            .put(prefix + InferredSpansAutoConfig.POSTPROCESSING_OPTION, "false")
-            .put(prefix + InferredSpansAutoConfig.SAMPLING_INTERVAL_OPTION, "7ms")
-            .put(prefix + InferredSpansAutoConfig.MIN_DURATION_OPTION, "2ms")
-            .put(prefix + InferredSpansAutoConfig.INCLUDED_CLASSES_OPTION, "foo*23,bar.baz")
-            .put(prefix + InferredSpansAutoConfig.EXCLUDED_CLASSES_OPTION, "blub,test*.test2")
-            .put(prefix + InferredSpansAutoConfig.INTERVAL_OPTION, "2s")
-            .put(prefix + InferredSpansAutoConfig.DURATION_OPTION, "3s")
-            .put(prefix + InferredSpansAutoConfig.LIB_DIRECTORY_OPTION, libDir)) {
+            .put("elastic.otel.inferred.spans.enabled", "true")
+            .put("elastic.otel.inferred.spans.logging.enabled", "false")
+            .put("elastic.otel.inferred.spans.backup.diagnostic.files", "true")
+            .put("elastic.otel.inferred.spans.safe.mode", "16")
+            .put("elastic.otel.inferred.spans.post.processing.enabled", "false")
+            .put("elastic.otel.inferred.spans.sampling.interval", "7ms")
+            .put("elastic.otel.inferred.spans.min.duration", "2ms")
+            .put("elastic.otel.inferred.spans.included.classes", "foo*23,bar.baz")
+            .put("elastic.otel.inferred.spans.excluded.classes", "blub,test*.test2")
+            .put("elastic.otel.inferred.spans.interval", "2s")
+            .put("elastic.otel.inferred.spans.duration", "3s")
+            .put("elastic.otel.inferred.spans.lib.directory", libDir)) {
 
       OpenTelemetry otel = GlobalOpenTelemetry.get();
       List<SpanProcessor> processors = OtelReflectionUtils.getSpanProcessors(otel);
@@ -89,7 +78,7 @@ public class InferredSpansAutoConfigTest {
                   .findFirst()
                   .get();
 
-      InferredSpansConfiguration config = processor.profiler.config;
+      InferredSpansConfiguration config = FieldAccessors.getProfiler(processor).getConfig();
       assertThat(config.isProfilingLoggingEnabled()).isFalse();
       assertThat(config.isBackupDiagnosticFiles()).isTrue();
       assertThat(config.getAsyncProfilerSafeMode()).isEqualTo(16);
@@ -105,24 +94,15 @@ public class InferredSpansAutoConfigTest {
   }
 
   @Test
-  public void checkDisabledbyDefault() {
-    try (AutoConfigTestProperties props = new AutoConfigTestProperties()) {
-      OpenTelemetry otel = GlobalOpenTelemetry.get();
-      List<SpanProcessor> processors = OtelReflectionUtils.getSpanProcessors(otel);
-      assertThat(processors).noneMatch(proc -> proc instanceof InferredSpansProcessor);
-    }
-  }
-
   @DisabledOnOpenJ9
-  @DisabledOnOs(OS.WINDOWS)
-  @Test
-  public void checkProfilerWorking() {
+  public void ensureOptionsTakePrecedenceOverLegacyOptions() {
     try (AutoConfigTestProperties props =
         new AutoConfigTestProperties()
-            .put(InferredSpansAutoConfig.ENABLED_OPTION, "true")
-            .put(InferredSpansAutoConfig.DURATION_OPTION, "500ms")
-            .put(InferredSpansAutoConfig.INTERVAL_OPTION, "500ms")
-            .put(InferredSpansAutoConfig.SAMPLING_INTERVAL_OPTION, "5ms")) {
+            .put("elastic.otel.inferred.spans.enabled", "false")
+            .put("otel.inferred.spans.enabled", "true")
+            .put("elastic.otel.inferred.spans.interval", "2s")
+            .put("otel.inferred.spans.interval", "3s")) {
+
       OpenTelemetry otel = GlobalOpenTelemetry.get();
       List<SpanProcessor> processors = OtelReflectionUtils.getSpanProcessors(otel);
       assertThat(processors).filteredOn(proc -> proc instanceof InferredSpansProcessor).hasSize(1);
@@ -133,42 +113,17 @@ public class InferredSpansAutoConfigTest {
                   .findFirst()
                   .get();
 
-      // Wait until profiler is started
-      await()
-          .pollDelay(10, TimeUnit.MILLISECONDS)
-          .timeout(6000, TimeUnit.MILLISECONDS)
-          .until(() -> processor.profiler.getProfilingSessions() > 1);
-
-      Tracer tracer = otel.getTracer("manual-spans");
-
-      Span tx = tracer.spanBuilder("my-root").startSpan();
-      try (Scope scope = tx.makeCurrent()) {
-        doSleep();
-      } finally {
-        tx.end();
-      }
-
-      await()
-          .untilAsserted(
-              () ->
-                  assertThat(AutoConfiguredDataCapture.getSpans())
-                      .hasSizeGreaterThanOrEqualTo(2)
-                      .anySatisfy(
-                          span -> {
-                            assertThat(span.getName()).startsWith("InferredSpansAutoConfigTest#");
-                            assertThat(span.getInstrumentationScopeInfo().getName())
-                                .isEqualTo(InferredSpansProcessor.TRACER_NAME);
-                            assertThat(span.getInstrumentationScopeInfo().getVersion())
-                                .isNotBlank();
-                          }));
+      InferredSpansConfiguration config = FieldAccessors.getProfiler(processor).getConfig();
+      assertThat(config.getProfilingInterval()).isEqualTo(Duration.ofSeconds(3));
     }
   }
 
-  private void doSleep() {
-    try {
-      Thread.sleep(100);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
+  @Test
+  public void checkDisabledbyDefault() {
+    try (AutoConfigTestProperties props = new AutoConfigTestProperties()) {
+      OpenTelemetry otel = GlobalOpenTelemetry.get();
+      List<SpanProcessor> processors = OtelReflectionUtils.getSpanProcessors(otel);
+      assertThat(processors).noneMatch(proc -> proc instanceof InferredSpansProcessor);
     }
   }
 

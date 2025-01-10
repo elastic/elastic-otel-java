@@ -33,6 +33,7 @@ awsContribResources = { group = "io.opentelemetry.contrib", name = "opentelemetr
 gcpContribResources = { group = "io.opentelemetry.contrib", name = "opentelemetry-gcp-resources", version.ref = "opentelemetryContribAlpha" }
 contribResources = { group = "io.opentelemetry.contrib", name = "opentelemetry-resource-providers", version.ref = "opentelemetryContribAlpha" }
 contribSpanStacktrace = { group = "io.opentelemetry.contrib", name = "opentelemetry-span-stacktrace", version.ref = "opentelemetryContribAlpha" }
+contribInferredSpans = { group = "io.opentelemetry.contrib", name = "opentelemetry-inferred-spans", version.ref = "opentelemetryContribAlpha" }
 
 opentelemetrySemconv = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv", version.ref = "opentelemetrySemconvAlpha"}
 opentelemetrySemconvIncubating = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv-incubating", version.ref = "opentelemetrySemconvAlpha"}
