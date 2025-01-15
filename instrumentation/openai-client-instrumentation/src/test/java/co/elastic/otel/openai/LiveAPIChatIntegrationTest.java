@@ -1,3 +1,21 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.otel.openai;
 
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
@@ -51,14 +69,15 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
- * This test runs against the real OpenAI-API. It therefore requires an API-key to be setup.
- * This test is currently not executed on CI.
+ * This test runs against the real OpenAI-API. It therefore requires an API-key to be setup. This
+ * test is currently not executed on CI.
  */
 @EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".+")
 class LiveAPIChatIntegrationTest {
-  private static final String TEST_CHAT_MODEL = System.getenv()
-      .getOrDefault("TEST_CHAT_MODEL", "gpt-4o-mini");
-  private static final String TEST_CHAT_INPUT = "Answer in up to 3 words: Which ocean contains Bouvet Island?";
+  private static final String TEST_CHAT_MODEL =
+      System.getenv().getOrDefault("TEST_CHAT_MODEL", "gpt-4o-mini");
+  private static final String TEST_CHAT_INPUT =
+      "Answer in up to 3 words: Which ocean contains Bouvet Island?";
 
   @RegisterExtension
   static final AgentInstrumentationExtension testing = AgentInstrumentationExtension.create();
@@ -70,8 +89,8 @@ class LiveAPIChatIntegrationTest {
   @BeforeEach
   void setup() throws Exception {
 
-    OpenAIOkHttpClient.Builder builder = OpenAIOkHttpClient.builder()
-        .apiKey(System.getenv().get("OPENAI_API_KEY"));
+    OpenAIOkHttpClient.Builder builder =
+        OpenAIOkHttpClient.builder().apiKey(System.getenv().get("OPENAI_API_KEY"));
     String baseUrl = System.getenv().get("OPENAI_BASE_URL");
     if (baseUrl != null) {
       URL url = new URL(baseUrl);
@@ -94,177 +113,193 @@ class LiveAPIChatIntegrationTest {
   @Test
   void toolCallsWithCaptureMessageContent() {
 
-    ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
-        .messages(Arrays.asList(
-            createSystemMessage(
-                "You are a helpful customer support assistant. Use the supplied tools to assist the user."),
-            createUserMessage("Hi, can you tell me the delivery date for my order?"),
-            createAssistantMessage(
-                "Hi there! I can help with that. Can you please provide your order ID?"),
-            createUserMessage("i think it is order_12345")
-        ))
-        .model(TEST_CHAT_MODEL)
-        .addTool(ChatTest.buildGetDeliveryDateToolDefinition())
-        .build();
+    ChatCompletionCreateParams params =
+        ChatCompletionCreateParams.builder()
+            .messages(
+                Arrays.asList(
+                    createSystemMessage(
+                        "You are a helpful customer support assistant. Use the supplied tools to assist the user."),
+                    createUserMessage("Hi, can you tell me the delivery date for my order?"),
+                    createAssistantMessage(
+                        "Hi there! I can help with that. Can you please provide your order ID?"),
+                    createUserMessage("i think it is order_12345")))
+            .model(TEST_CHAT_MODEL)
+            .addTool(ChatTest.buildGetDeliveryDateToolDefinition())
+            .build();
 
     long startTimeNanos = System.nanoTime();
     ChatCompletion response = client.chat().completions().create(params);
     long durationNanos = System.nanoTime() - startTimeNanos;
 
-    List<ChatCompletionMessageToolCall> toolCalls = response.choices().get(0).message().toolCalls()
-        .get();
+    List<ChatCompletionMessageToolCall> toolCalls =
+        response.choices().get(0).message().toolCalls().get();
 
     assertThat(toolCalls).hasSize(1);
     assertThat(toolCalls.get(0))
-        .satisfies(call -> {
-          assertThat(call.function().name()).isEqualTo("get_delivery_date");
-          assertThat(call.function().arguments()).isEqualTo("{\"order_id\":\"order_12345\"}");
-        });
+        .satisfies(
+            call -> {
+              assertThat(call.function().name()).isEqualTo("get_delivery_date");
+              assertThat(call.function().arguments()).isEqualTo("{\"order_id\":\"order_12345\"}");
+            });
 
     assertThat(testing.spans())
         .hasSize(1)
         .first()
-        .satisfies(span -> {
-          assertThat(span)
-              .hasAttribute(GEN_AI_SYSTEM, "openai")
-              .hasAttribute(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL)
-              .hasAttribute(GEN_AI_RESPONSE_MODEL, response.model())
-              .hasAttribute(GEN_AI_RESPONSE_ID, response.id())
-              .hasAttribute(GEN_AI_RESPONSE_FINISH_REASONS, Collections.singletonList("tool_calls"))
-              .hasAttribute(GEN_AI_USAGE_INPUT_TOKENS, response.usage().get().promptTokens())
-              .hasAttribute(GEN_AI_USAGE_OUTPUT_TOKENS, response.usage().get().completionTokens())
-              .hasAttribute(SERVER_ADDRESS, clientHost)
-              .hasAttribute(SERVER_PORT, clientPort);
-        });
+        .satisfies(
+            span -> {
+              assertThat(span)
+                  .hasAttribute(GEN_AI_SYSTEM, "openai")
+                  .hasAttribute(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL)
+                  .hasAttribute(GEN_AI_RESPONSE_MODEL, response.model())
+                  .hasAttribute(GEN_AI_RESPONSE_ID, response.id())
+                  .hasAttribute(
+                      GEN_AI_RESPONSE_FINISH_REASONS, Collections.singletonList("tool_calls"))
+                  .hasAttribute(GEN_AI_USAGE_INPUT_TOKENS, response.usage().get().promptTokens())
+                  .hasAttribute(
+                      GEN_AI_USAGE_OUTPUT_TOKENS, response.usage().get().completionTokens())
+                  .hasAttribute(SERVER_ADDRESS, clientHost)
+                  .hasAttribute(SERVER_PORT, clientPort);
+            });
 
     assertThat(testing.logRecords())
         .hasSize(5)
-        .anySatisfy(log -> {
-          assertThat(log)
-              .hasAttributesSatisfying(attr -> assertThat(attr)
-                  .containsEntry("event.name", "gen_ai.system.message")
-                  .containsEntry(GEN_AI_SYSTEM, "openai")
-              );
-          assertThat(log.getBodyValue())
-              .satisfies(ValAssert.map()
-                  .entry("content",
-                      "You are a helpful customer support assistant. Use the supplied tools to assist the user.")
-              );
-        })
-        .anySatisfy(log -> {
-          assertThat(log)
-              .hasAttributesSatisfying(attr -> assertThat(attr)
-                  .containsEntry("event.name", "gen_ai.user.message")
-                  .containsEntry(GEN_AI_SYSTEM, "openai")
-              );
-          assertThat(log.getBodyValue())
-              .satisfies(ValAssert.map()
-                  .entry("content",
-                      "Hi, can you tell me the delivery date for my order?")
-              );
-        })
-        .anySatisfy(log -> {
-          assertThat(log)
-              .hasAttributesSatisfying(attr -> assertThat(attr)
-                  .containsEntry("event.name", "gen_ai.assistant.message")
-                  .containsEntry(GEN_AI_SYSTEM, "openai")
-              );
-          assertThat(log.getBodyValue())
-              .satisfies(ValAssert.map()
-                  .entry("content",
-                      "Hi there! I can help with that. Can you please provide your order ID?")
-              );
-        })
-        .anySatisfy(log -> {
-          assertThat(log)
-              .hasAttributesSatisfying(attr -> assertThat(attr)
-                  .containsEntry("event.name", "gen_ai.user.message")
-                  .containsEntry(GEN_AI_SYSTEM, "openai")
-              );
-          assertThat(log.getBodyValue())
-              .satisfies(ValAssert.map()
-                  .entry("content", "i think it is order_12345")
-              );
-        })
-        .anySatisfy(log -> {
-          assertThat(log)
-              .hasAttributesSatisfying(attr -> assertThat(attr)
-                  .containsEntry("event.name", "gen_ai.choice")
-                  .containsEntry(GEN_AI_SYSTEM, "openai")
-              );
-          assertThat(log.getBodyValue())
-              .satisfies(ValAssert.map()
-                  .entry("finish_reason", "tool_calls")
-                  .entry("index", 0)
-                  .entry("message", ValAssert.map()
-                      .entry("tool_calls",
-                          ValAssert.array()
-                              .ignoreOrder()
-                              .entry(ValAssert.map()
-                                  .entry("id",
-                                      toolCalls.get(0).id())
-                                  .entry("type",
-                                      "function")
-                                  .entry("function",
-                                      ValAssert.map()
-                                          .entry("name",
-                                              "get_delivery_date")
-                                          .entry("arguments",
-                                              "{\"order_id\":\"order_12345\"}")
-                                  ))
-                      )
-                  )
-              );
-        });
+        .anySatisfy(
+            log -> {
+              assertThat(log)
+                  .hasAttributesSatisfying(
+                      attr ->
+                          assertThat(attr)
+                              .containsEntry("event.name", "gen_ai.system.message")
+                              .containsEntry(GEN_AI_SYSTEM, "openai"));
+              assertThat(log.getBodyValue())
+                  .satisfies(
+                      ValAssert.map()
+                          .entry(
+                              "content",
+                              "You are a helpful customer support assistant. Use the supplied tools to assist the user."));
+            })
+        .anySatisfy(
+            log -> {
+              assertThat(log)
+                  .hasAttributesSatisfying(
+                      attr ->
+                          assertThat(attr)
+                              .containsEntry("event.name", "gen_ai.user.message")
+                              .containsEntry(GEN_AI_SYSTEM, "openai"));
+              assertThat(log.getBodyValue())
+                  .satisfies(
+                      ValAssert.map()
+                          .entry("content", "Hi, can you tell me the delivery date for my order?"));
+            })
+        .anySatisfy(
+            log -> {
+              assertThat(log)
+                  .hasAttributesSatisfying(
+                      attr ->
+                          assertThat(attr)
+                              .containsEntry("event.name", "gen_ai.assistant.message")
+                              .containsEntry(GEN_AI_SYSTEM, "openai"));
+              assertThat(log.getBodyValue())
+                  .satisfies(
+                      ValAssert.map()
+                          .entry(
+                              "content",
+                              "Hi there! I can help with that. Can you please provide your order ID?"));
+            })
+        .anySatisfy(
+            log -> {
+              assertThat(log)
+                  .hasAttributesSatisfying(
+                      attr ->
+                          assertThat(attr)
+                              .containsEntry("event.name", "gen_ai.user.message")
+                              .containsEntry(GEN_AI_SYSTEM, "openai"));
+              assertThat(log.getBodyValue())
+                  .satisfies(ValAssert.map().entry("content", "i think it is order_12345"));
+            })
+        .anySatisfy(
+            log -> {
+              assertThat(log)
+                  .hasAttributesSatisfying(
+                      attr ->
+                          assertThat(attr)
+                              .containsEntry("event.name", "gen_ai.choice")
+                              .containsEntry(GEN_AI_SYSTEM, "openai"));
+              assertThat(log.getBodyValue())
+                  .satisfies(
+                      ValAssert.map()
+                          .entry("finish_reason", "tool_calls")
+                          .entry("index", 0)
+                          .entry(
+                              "message",
+                              ValAssert.map()
+                                  .entry(
+                                      "tool_calls",
+                                      ValAssert.array()
+                                          .ignoreOrder()
+                                          .entry(
+                                              ValAssert.map()
+                                                  .entry("id", toolCalls.get(0).id())
+                                                  .entry("type", "function")
+                                                  .entry(
+                                                      "function",
+                                                      ValAssert.map()
+                                                          .entry("name", "get_delivery_date")
+                                                          .entry(
+                                                              "arguments",
+                                                              "{\"order_id\":\"order_12345\"}"))))));
+            });
 
     testing.waitAndAssertMetrics(
         "openai-client",
-        metric -> metric.hasName("gen_ai.client.operation.duration")
-            .hasHistogramSatisfying(
-                histogram -> histogram.hasPointsSatisfying(
-                    point -> point
-                        .satisfies(assertThatDurationIsLessThan(durationNanos))
-                        .hasAttributesSatisfyingExactly(
-                            equalTo(GEN_AI_SYSTEM, "openai"),
-                            equalTo(GEN_AI_OPERATION_NAME, "chat"),
-                            equalTo(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL),
-                            equalTo(GEN_AI_RESPONSE_MODEL,
-                                response.model()),
-                            equalTo(SERVER_ADDRESS, clientHost),
-                            equalTo(SERVER_PORT, clientPort)
-                        )
-                )
-            ),
-        metric -> metric.hasName("gen_ai.client.token.usage")
-            .hasHistogramSatisfying(
-                histogram -> histogram.hasPointsSatisfying(
-                    point -> point
-                        .hasSum(response.usage().get().promptTokens())
-                        .hasAttributesSatisfyingExactly(
-                            equalTo(GEN_AI_SYSTEM, "openai"),
-                            equalTo(GEN_AI_OPERATION_NAME, "chat"),
-                            equalTo(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL),
-                            equalTo(GEN_AI_RESPONSE_MODEL,
-                                response.model()),
-                            equalTo(GEN_AI_TOKEN_TYPE,
-                                GenAiTokenTypeIncubatingValues.INPUT),
-                            equalTo(SERVER_ADDRESS, clientHost),
-                            equalTo(SERVER_PORT, clientPort)
-                        ),
-                    point -> point
-                        .hasSum(response.usage().get().completionTokens())
-                        .hasAttributesSatisfyingExactly(
-                            equalTo(GEN_AI_SYSTEM, "openai"),
-                            equalTo(GEN_AI_OPERATION_NAME, "chat"),
-                            equalTo(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL),
-                            equalTo(GEN_AI_RESPONSE_MODEL,
-                                response.model()),
-                            equalTo(GEN_AI_TOKEN_TYPE,
-                                GenAiTokenTypeIncubatingValues.COMPLETION),
-                            equalTo(SERVER_ADDRESS, clientHost),
-                            equalTo(SERVER_PORT, clientPort)
-                        )
-                )));
+        metric ->
+            metric
+                .hasName("gen_ai.client.operation.duration")
+                .hasHistogramSatisfying(
+                    histogram ->
+                        histogram.hasPointsSatisfying(
+                            point ->
+                                point
+                                    .satisfies(assertThatDurationIsLessThan(durationNanos))
+                                    .hasAttributesSatisfyingExactly(
+                                        equalTo(GEN_AI_SYSTEM, "openai"),
+                                        equalTo(GEN_AI_OPERATION_NAME, "chat"),
+                                        equalTo(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL),
+                                        equalTo(GEN_AI_RESPONSE_MODEL, response.model()),
+                                        equalTo(SERVER_ADDRESS, clientHost),
+                                        equalTo(SERVER_PORT, clientPort)))),
+        metric ->
+            metric
+                .hasName("gen_ai.client.token.usage")
+                .hasHistogramSatisfying(
+                    histogram ->
+                        histogram.hasPointsSatisfying(
+                            point ->
+                                point
+                                    .hasSum(response.usage().get().promptTokens())
+                                    .hasAttributesSatisfyingExactly(
+                                        equalTo(GEN_AI_SYSTEM, "openai"),
+                                        equalTo(GEN_AI_OPERATION_NAME, "chat"),
+                                        equalTo(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL),
+                                        equalTo(GEN_AI_RESPONSE_MODEL, response.model()),
+                                        equalTo(
+                                            GEN_AI_TOKEN_TYPE,
+                                            GenAiTokenTypeIncubatingValues.INPUT),
+                                        equalTo(SERVER_ADDRESS, clientHost),
+                                        equalTo(SERVER_PORT, clientPort)),
+                            point ->
+                                point
+                                    .hasSum(response.usage().get().completionTokens())
+                                    .hasAttributesSatisfyingExactly(
+                                        equalTo(GEN_AI_SYSTEM, "openai"),
+                                        equalTo(GEN_AI_OPERATION_NAME, "chat"),
+                                        equalTo(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL),
+                                        equalTo(GEN_AI_RESPONSE_MODEL, response.model()),
+                                        equalTo(
+                                            GEN_AI_TOKEN_TYPE,
+                                            GenAiTokenTypeIncubatingValues.COMPLETION),
+                                        equalTo(SERVER_ADDRESS, clientHost),
+                                        equalTo(SERVER_PORT, clientPort)))));
   }
 
   @Test
@@ -272,10 +307,8 @@ class LiveAPIChatIntegrationTest {
     List<ChatCompletionMessageParam> chatMessages = new ArrayList<>();
     chatMessages.add(createUserMessage(TEST_CHAT_INPUT));
 
-    ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
-        .messages(chatMessages)
-        .model(TEST_CHAT_MODEL)
-        .build();
+    ChatCompletionCreateParams params =
+        ChatCompletionCreateParams.builder().messages(chatMessages).model(TEST_CHAT_MODEL).build();
 
     long startTimeNanos = System.nanoTime();
     ChatCompletion response = client.chat().completions().create(params);
@@ -288,144 +321,153 @@ class LiveAPIChatIntegrationTest {
     assertThat(spans)
         .hasSize(1)
         .first()
-        .satisfies(span -> {
-          assertThat(span)
-              .hasAttribute(GEN_AI_OPERATION_NAME, "chat")
-              .hasAttribute(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL)
-              .hasAttribute(GEN_AI_SYSTEM, "openai")
-              .hasAttribute(GEN_AI_RESPONSE_ID, response.id())
-              .hasAttribute(GEN_AI_RESPONSE_MODEL, response.model())
-              .hasAttributesSatisfying(attribs -> {
-                assertThat(attribs.get(GEN_AI_RESPONSE_FINISH_REASONS))
-                    .containsExactly("stop");
-              })
-              .hasAttribute(GEN_AI_USAGE_INPUT_TOKENS, (long) response.usage().get().promptTokens())
-              .hasAttribute(GEN_AI_USAGE_OUTPUT_TOKENS,
-                  (long) response.usage().get().completionTokens())
-              .hasAttribute(SERVER_ADDRESS, clientHost)
-              .hasAttribute(SERVER_PORT, clientPort);
-        });
+        .satisfies(
+            span -> {
+              assertThat(span)
+                  .hasAttribute(GEN_AI_OPERATION_NAME, "chat")
+                  .hasAttribute(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL)
+                  .hasAttribute(GEN_AI_SYSTEM, "openai")
+                  .hasAttribute(GEN_AI_RESPONSE_ID, response.id())
+                  .hasAttribute(GEN_AI_RESPONSE_MODEL, response.model())
+                  .hasAttributesSatisfying(
+                      attribs -> {
+                        assertThat(attribs.get(GEN_AI_RESPONSE_FINISH_REASONS))
+                            .containsExactly("stop");
+                      })
+                  .hasAttribute(
+                      GEN_AI_USAGE_INPUT_TOKENS, (long) response.usage().get().promptTokens())
+                  .hasAttribute(
+                      GEN_AI_USAGE_OUTPUT_TOKENS, (long) response.usage().get().completionTokens())
+                  .hasAttribute(SERVER_ADDRESS, clientHost)
+                  .hasAttribute(SERVER_PORT, clientPort);
+            });
 
     SpanContext spanCtx = spans.get(0).getSpanContext();
     assertThat(testing.logRecords())
         .hasSize(2)
-        .anySatisfy(log -> {
-          assertThat(log)
-              .hasAttributesSatisfying(attr -> assertThat(attr)
-                  .containsEntry(GEN_AI_SYSTEM, "openai")
-                  .containsEntry("event.name", "gen_ai.user.message")
-              )
-              .hasSpanContext(spanCtx);
-          assertThat(log.getBodyValue())
-              .satisfies(ValAssert.map()
-                  .entry("content", TEST_CHAT_INPUT)
-              );
-        })
-        .anySatisfy(log -> {
-          assertThat(log)
-              .hasAttributesSatisfying(attr -> assertThat(attr)
-                  .containsEntry(GEN_AI_SYSTEM, "openai")
-                  .containsEntry("event.name", "gen_ai.choice")
-              )
-              .hasSpanContext(spanCtx);
-          assertThat(log.getBodyValue())
-              .satisfies(ValAssert.map()
-                  .entry("index", 0)
-                  .entry("finish_reason", "stop")
-                  .entry("message", ValAssert.map()
-                      .entry("content", content))
-              );
-        });
+        .anySatisfy(
+            log -> {
+              assertThat(log)
+                  .hasAttributesSatisfying(
+                      attr ->
+                          assertThat(attr)
+                              .containsEntry(GEN_AI_SYSTEM, "openai")
+                              .containsEntry("event.name", "gen_ai.user.message"))
+                  .hasSpanContext(spanCtx);
+              assertThat(log.getBodyValue())
+                  .satisfies(ValAssert.map().entry("content", TEST_CHAT_INPUT));
+            })
+        .anySatisfy(
+            log -> {
+              assertThat(log)
+                  .hasAttributesSatisfying(
+                      attr ->
+                          assertThat(attr)
+                              .containsEntry(GEN_AI_SYSTEM, "openai")
+                              .containsEntry("event.name", "gen_ai.choice"))
+                  .hasSpanContext(spanCtx);
+              assertThat(log.getBodyValue())
+                  .satisfies(
+                      ValAssert.map()
+                          .entry("index", 0)
+                          .entry("finish_reason", "stop")
+                          .entry("message", ValAssert.map().entry("content", content)));
+            });
 
     testing.waitAndAssertMetrics(
         "openai-client",
-        metric -> metric.hasName("gen_ai.client.operation.duration")
-            .hasHistogramSatisfying(
-                histogram -> histogram.hasPointsSatisfying(
-                    point -> point
-                        .satisfies(assertThatDurationIsLessThan(durationNanos))
-                        .hasAttributesSatisfyingExactly(
-                            equalTo(GEN_AI_SYSTEM, "openai"),
-                            equalTo(GEN_AI_OPERATION_NAME, "chat"),
-                            equalTo(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL),
-                            equalTo(GEN_AI_RESPONSE_MODEL, response.model()),
-                            equalTo(SERVER_ADDRESS, clientHost),
-                            equalTo(SERVER_PORT, clientPort)
-                        )
-                )
-            ),
-        metric -> metric.hasName("gen_ai.client.token.usage")
-            .hasHistogramSatisfying(
-                histogram -> histogram.hasPointsSatisfying(
-                    point -> point
-                        .hasSum(response.usage().get().promptTokens())
-                        .hasAttributesSatisfyingExactly(
-                            equalTo(GEN_AI_SYSTEM, "openai"),
-                            equalTo(GEN_AI_OPERATION_NAME, "chat"),
-                            equalTo(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL),
-                            equalTo(GEN_AI_RESPONSE_MODEL, response.model()),
-                            equalTo(GEN_AI_TOKEN_TYPE, GenAiTokenTypeIncubatingValues.INPUT),
-                            equalTo(SERVER_ADDRESS, clientHost),
-                            equalTo(SERVER_PORT, clientPort)
-                        ),
-                    point -> point
-                        .hasSum(response.usage().get().completionTokens())
-                        .hasAttributesSatisfyingExactly(
-                            equalTo(GEN_AI_SYSTEM, "openai"),
-                            equalTo(GEN_AI_OPERATION_NAME, "chat"),
-                            equalTo(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL),
-                            equalTo(GEN_AI_RESPONSE_MODEL, response.model()),
-                            equalTo(GEN_AI_TOKEN_TYPE, GenAiTokenTypeIncubatingValues.COMPLETION),
-                            equalTo(SERVER_ADDRESS, clientHost),
-                            equalTo(SERVER_PORT, clientPort)
-                        )
-                )));
+        metric ->
+            metric
+                .hasName("gen_ai.client.operation.duration")
+                .hasHistogramSatisfying(
+                    histogram ->
+                        histogram.hasPointsSatisfying(
+                            point ->
+                                point
+                                    .satisfies(assertThatDurationIsLessThan(durationNanos))
+                                    .hasAttributesSatisfyingExactly(
+                                        equalTo(GEN_AI_SYSTEM, "openai"),
+                                        equalTo(GEN_AI_OPERATION_NAME, "chat"),
+                                        equalTo(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL),
+                                        equalTo(GEN_AI_RESPONSE_MODEL, response.model()),
+                                        equalTo(SERVER_ADDRESS, clientHost),
+                                        equalTo(SERVER_PORT, clientPort)))),
+        metric ->
+            metric
+                .hasName("gen_ai.client.token.usage")
+                .hasHistogramSatisfying(
+                    histogram ->
+                        histogram.hasPointsSatisfying(
+                            point ->
+                                point
+                                    .hasSum(response.usage().get().promptTokens())
+                                    .hasAttributesSatisfyingExactly(
+                                        equalTo(GEN_AI_SYSTEM, "openai"),
+                                        equalTo(GEN_AI_OPERATION_NAME, "chat"),
+                                        equalTo(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL),
+                                        equalTo(GEN_AI_RESPONSE_MODEL, response.model()),
+                                        equalTo(
+                                            GEN_AI_TOKEN_TYPE,
+                                            GenAiTokenTypeIncubatingValues.INPUT),
+                                        equalTo(SERVER_ADDRESS, clientHost),
+                                        equalTo(SERVER_PORT, clientPort)),
+                            point ->
+                                point
+                                    .hasSum(response.usage().get().completionTokens())
+                                    .hasAttributesSatisfyingExactly(
+                                        equalTo(GEN_AI_SYSTEM, "openai"),
+                                        equalTo(GEN_AI_OPERATION_NAME, "chat"),
+                                        equalTo(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL),
+                                        equalTo(GEN_AI_RESPONSE_MODEL, response.model()),
+                                        equalTo(
+                                            GEN_AI_TOKEN_TYPE,
+                                            GenAiTokenTypeIncubatingValues.COMPLETION),
+                                        equalTo(SERVER_ADDRESS, clientHost),
+                                        equalTo(SERVER_PORT, clientPort)))));
   }
-
 
   @Test
   void streamWithCaptureMessageContent() throws Exception {
     List<ChatCompletionMessageParam> chatMessages = new ArrayList<>();
     chatMessages.add(createUserMessage(TEST_CHAT_INPUT));
 
-    ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
-        .messages(chatMessages)
-        .model(TEST_CHAT_MODEL)
-        .streamOptions(ChatCompletionStreamOptions.builder()
-            .includeUsage(true)
-            .build())
-        .build();
+    ChatCompletionCreateParams params =
+        ChatCompletionCreateParams.builder()
+            .messages(chatMessages)
+            .model(TEST_CHAT_MODEL)
+            .streamOptions(ChatCompletionStreamOptions.builder().includeUsage(true).build())
+            .build();
 
     List<ChatCompletionChunk> completions;
     long startTimeNanos = System.nanoTime();
-    try (StreamResponse<ChatCompletionChunk> response = client.chat().completions()
-        .createStreaming(params)) {
+    try (StreamResponse<ChatCompletionChunk> response =
+        client.chat().completions().createStreaming(params)) {
       completions = response.stream().collect(Collectors.toList());
     }
     long durationNanos = System.nanoTime() - startTimeNanos;
 
-    String content = completions.stream()
-        .map(cc -> cc.choices().stream().findFirst().map(ChatCompletionChunk.Choice::delta)
-            .orElse(null))
-        .filter(Objects::nonNull)
-        .map(ChatCompletionChunk.Choice.Delta::content)
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .collect(Collectors.joining());
-    String responseModel = completions.stream()
-        .map(ChatCompletionChunk::model)
-        .findFirst()
-        .get();
-    String responseId = completions.stream()
-        .map(ChatCompletionChunk::id)
-        .findFirst()
-        .get();
-    CompletionUsage usage = completions.stream()
-        .map(ChatCompletionChunk::usage)
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .findFirst()
-        .get();
+    String content =
+        completions.stream()
+            .map(
+                cc ->
+                    cc.choices().stream()
+                        .findFirst()
+                        .map(ChatCompletionChunk.Choice::delta)
+                        .orElse(null))
+            .filter(Objects::nonNull)
+            .map(ChatCompletionChunk.Choice.Delta::content)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(Collectors.joining());
+    String responseModel = completions.stream().map(ChatCompletionChunk::model).findFirst().get();
+    String responseId = completions.stream().map(ChatCompletionChunk::id).findFirst().get();
+    CompletionUsage usage =
+        completions.stream()
+            .map(ChatCompletionChunk::usage)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .findFirst()
+            .get();
 
     assertThat(content).isNotEmpty();
 
@@ -433,97 +475,106 @@ class LiveAPIChatIntegrationTest {
     assertThat(spans)
         .hasSize(1)
         .first()
-        .satisfies(span -> {
-          assertThat(span)
-              .hasAttribute(GEN_AI_SYSTEM, "openai")
-              .hasAttribute(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL)
-              .hasAttribute(GEN_AI_RESPONSE_MODEL, responseModel)
-              .hasAttribute(GEN_AI_RESPONSE_ID, responseId)
-              .hasAttribute(SERVER_ADDRESS, clientHost)
-              .hasAttribute(SERVER_PORT, clientPort)
-              .hasAttribute(GEN_AI_USAGE_INPUT_TOKENS, usage.promptTokens())
-              .hasAttribute(GEN_AI_USAGE_OUTPUT_TOKENS, usage.completionTokens())
-              .hasAttributesSatisfying(attribs -> {
-                assertThat(attribs.get(GEN_AI_RESPONSE_FINISH_REASONS))
-                    .containsAnyOf("stop");
-              });
-        });
+        .satisfies(
+            span -> {
+              assertThat(span)
+                  .hasAttribute(GEN_AI_SYSTEM, "openai")
+                  .hasAttribute(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL)
+                  .hasAttribute(GEN_AI_RESPONSE_MODEL, responseModel)
+                  .hasAttribute(GEN_AI_RESPONSE_ID, responseId)
+                  .hasAttribute(SERVER_ADDRESS, clientHost)
+                  .hasAttribute(SERVER_PORT, clientPort)
+                  .hasAttribute(GEN_AI_USAGE_INPUT_TOKENS, usage.promptTokens())
+                  .hasAttribute(GEN_AI_USAGE_OUTPUT_TOKENS, usage.completionTokens())
+                  .hasAttributesSatisfying(
+                      attribs -> {
+                        assertThat(attribs.get(GEN_AI_RESPONSE_FINISH_REASONS))
+                            .containsAnyOf("stop");
+                      });
+            });
     SpanContext spanCtx = spans.get(0).getSpanContext();
     assertThat(testing.logRecords())
         .hasSize(2)
-        .anySatisfy(log -> {
-          assertThat(log)
-              .hasAttributesSatisfying(attr -> assertThat(attr)
-                  .containsEntry("event.name", "gen_ai.user.message")
-                  .containsEntry(GEN_AI_SYSTEM, "openai")
-              )
-              .hasSpanContext(spanCtx);
-          assertThat(log.getBodyValue())
-              .satisfies(ValAssert.map()
-                  .entry("content", TEST_CHAT_INPUT)
-              );
-        })
-        .anySatisfy(log -> {
-          assertThat(log)
-              .hasAttributesSatisfying(attr -> assertThat(attr)
-                  .containsEntry("event.name", "gen_ai.choice")
-                  .containsEntry(GEN_AI_SYSTEM, "openai")
-              )
-              .hasSpanContext(spanCtx);
-          assertThat(log.getBodyValue())
-              .satisfies(ValAssert.map()
-                  .entry("finish_reason", "stop")
-                  .entry("index", 0)
-                  .entry("message", ValAssert.map()
-                      .entry("content", content))
-              );
-        });
+        .anySatisfy(
+            log -> {
+              assertThat(log)
+                  .hasAttributesSatisfying(
+                      attr ->
+                          assertThat(attr)
+                              .containsEntry("event.name", "gen_ai.user.message")
+                              .containsEntry(GEN_AI_SYSTEM, "openai"))
+                  .hasSpanContext(spanCtx);
+              assertThat(log.getBodyValue())
+                  .satisfies(ValAssert.map().entry("content", TEST_CHAT_INPUT));
+            })
+        .anySatisfy(
+            log -> {
+              assertThat(log)
+                  .hasAttributesSatisfying(
+                      attr ->
+                          assertThat(attr)
+                              .containsEntry("event.name", "gen_ai.choice")
+                              .containsEntry(GEN_AI_SYSTEM, "openai"))
+                  .hasSpanContext(spanCtx);
+              assertThat(log.getBodyValue())
+                  .satisfies(
+                      ValAssert.map()
+                          .entry("finish_reason", "stop")
+                          .entry("index", 0)
+                          .entry("message", ValAssert.map().entry("content", content)));
+            });
 
     testing.waitAndAssertMetrics(
         "openai-client",
-        metric -> metric.hasName("gen_ai.client.operation.duration")
-            .hasHistogramSatisfying(
-                histogram -> histogram.hasPointsSatisfying(
-                    point -> point
-                        .satisfies(assertThatDurationIsLessThan(durationNanos))
-                        .hasAttributesSatisfyingExactly(
-                            equalTo(GEN_AI_SYSTEM, "openai"),
-                            equalTo(GEN_AI_OPERATION_NAME, "chat"),
-                            equalTo(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL),
-                            equalTo(GEN_AI_RESPONSE_MODEL, responseModel),
-                            equalTo(SERVER_ADDRESS, clientHost),
-                            equalTo(SERVER_PORT, clientPort)
-                        )
-                )
-            ),
-        metric -> metric.hasName("gen_ai.client.token.usage")
-            .hasHistogramSatisfying(
-                histogram -> histogram.hasPointsSatisfying(
-                    point -> point
-                        .hasSum(usage.promptTokens())
-                        .hasAttributesSatisfyingExactly(
-                            equalTo(GEN_AI_SYSTEM, "openai"),
-                            equalTo(GEN_AI_OPERATION_NAME, "chat"),
-                            equalTo(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL),
-                            equalTo(GEN_AI_RESPONSE_MODEL, responseModel),
-                            equalTo(GEN_AI_TOKEN_TYPE, GenAiTokenTypeIncubatingValues.INPUT),
-                            equalTo(SERVER_ADDRESS, clientHost),
-                            equalTo(SERVER_PORT, clientPort)
-                        ),
-                    point -> point
-                        .hasSum(usage.completionTokens())
-                        .hasAttributesSatisfyingExactly(
-                            equalTo(GEN_AI_SYSTEM, "openai"),
-                            equalTo(GEN_AI_OPERATION_NAME, "chat"),
-                            equalTo(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL),
-                            equalTo(GEN_AI_RESPONSE_MODEL, responseModel),
-                            equalTo(GEN_AI_TOKEN_TYPE, GenAiTokenTypeIncubatingValues.COMPLETION),
-                            equalTo(SERVER_ADDRESS, clientHost),
-                            equalTo(SERVER_PORT, clientPort)
-                        )
-                )));
+        metric ->
+            metric
+                .hasName("gen_ai.client.operation.duration")
+                .hasHistogramSatisfying(
+                    histogram ->
+                        histogram.hasPointsSatisfying(
+                            point ->
+                                point
+                                    .satisfies(assertThatDurationIsLessThan(durationNanos))
+                                    .hasAttributesSatisfyingExactly(
+                                        equalTo(GEN_AI_SYSTEM, "openai"),
+                                        equalTo(GEN_AI_OPERATION_NAME, "chat"),
+                                        equalTo(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL),
+                                        equalTo(GEN_AI_RESPONSE_MODEL, responseModel),
+                                        equalTo(SERVER_ADDRESS, clientHost),
+                                        equalTo(SERVER_PORT, clientPort)))),
+        metric ->
+            metric
+                .hasName("gen_ai.client.token.usage")
+                .hasHistogramSatisfying(
+                    histogram ->
+                        histogram.hasPointsSatisfying(
+                            point ->
+                                point
+                                    .hasSum(usage.promptTokens())
+                                    .hasAttributesSatisfyingExactly(
+                                        equalTo(GEN_AI_SYSTEM, "openai"),
+                                        equalTo(GEN_AI_OPERATION_NAME, "chat"),
+                                        equalTo(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL),
+                                        equalTo(GEN_AI_RESPONSE_MODEL, responseModel),
+                                        equalTo(
+                                            GEN_AI_TOKEN_TYPE,
+                                            GenAiTokenTypeIncubatingValues.INPUT),
+                                        equalTo(SERVER_ADDRESS, clientHost),
+                                        equalTo(SERVER_PORT, clientPort)),
+                            point ->
+                                point
+                                    .hasSum(usage.completionTokens())
+                                    .hasAttributesSatisfyingExactly(
+                                        equalTo(GEN_AI_SYSTEM, "openai"),
+                                        equalTo(GEN_AI_OPERATION_NAME, "chat"),
+                                        equalTo(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL),
+                                        equalTo(GEN_AI_RESPONSE_MODEL, responseModel),
+                                        equalTo(
+                                            GEN_AI_TOKEN_TYPE,
+                                            GenAiTokenTypeIncubatingValues.COMPLETION),
+                                        equalTo(SERVER_ADDRESS, clientHost),
+                                        equalTo(SERVER_PORT, clientPort)))));
   }
-
 
   @NotNull
   private static ChatCompletionMessageParam createAssistantMessage(String content) {

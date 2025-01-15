@@ -1,3 +1,21 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.otel.openai.wrappers;
 
 import static co.elastic.otel.openai.wrappers.GenAiAttributes.GEN_AI_OPERATION_NAME;
@@ -44,28 +62,38 @@ public class InstrumentedEmbeddingsService implements EmbeddingService {
   public static final Instrumenter<RequestHolder, CreateEmbeddingResponse> INSTRUMENTER =
       Instrumenter.<RequestHolder, CreateEmbeddingResponse>builder(
               GlobalOpenTelemetry.get(),
-              Constants.INSTRUMENTATION_NAME, req -> "embeddings " + req.request.model()
-          )
+              Constants.INSTRUMENTATION_NAME,
+              req -> "embeddings " + req.request.model())
           .addAttributesExtractor(
               new AttributesExtractor<RequestHolder, CreateEmbeddingResponse>() {
 
                 @Override
-                public void onStart(AttributesBuilder attributes, Context parentContext,
+                public void onStart(
+                    AttributesBuilder attributes,
+                    Context parentContext,
                     RequestHolder requestHolder) {
                   EmbeddingCreateParams request = requestHolder.request;
                   requestHolder.settings.putServerInfoIntoAttributes(attributes);
-                  attributes.put(GEN_AI_SYSTEM, "openai")
+                  attributes
+                      .put(GEN_AI_SYSTEM, "openai")
                       .put(GEN_AI_OPERATION_NAME, "embeddings")
                       .put(GEN_AI_REQUEST_MODEL, request.model().toString());
-                  request.encodingFormat().ifPresent(
-                      format -> attributes.put(GEN_AI_REQUEST_ENCODING_FORMATS,
-                          Collections.singletonList(format.toString())));
+                  request
+                      .encodingFormat()
+                      .ifPresent(
+                          format ->
+                              attributes.put(
+                                  GEN_AI_REQUEST_ENCODING_FORMATS,
+                                  Collections.singletonList(format.toString())));
                 }
 
                 @Override
-                public void onEnd(AttributesBuilder attributes, Context context,
+                public void onEnd(
+                    AttributesBuilder attributes,
+                    Context context,
                     RequestHolder requestHolder,
-                    CreateEmbeddingResponse embeddings, Throwable error) {
+                    CreateEmbeddingResponse embeddings,
+                    Throwable error) {
                   if (embeddings != null) {
                     attributes.put(GEN_AI_USAGE_INPUT_TOKENS, embeddings.usage().promptTokens());
                     attributes.put(GEN_AI_RESPONSE_MODEL, embeddings.model());
@@ -76,7 +104,8 @@ public class InstrumentedEmbeddingsService implements EmbeddingService {
 
   @NotNull
   @Override
-  public CreateEmbeddingResponse create(@NotNull EmbeddingCreateParams embeddingCreateParams,
+  public CreateEmbeddingResponse create(
+      @NotNull EmbeddingCreateParams embeddingCreateParams,
       @NotNull RequestOptions requestOptions) {
     RequestHolder requestHolder = new RequestHolder(embeddingCreateParams, settings);
 

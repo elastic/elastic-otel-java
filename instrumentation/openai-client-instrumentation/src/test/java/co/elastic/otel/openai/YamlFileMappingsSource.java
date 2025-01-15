@@ -1,3 +1,21 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.otel.openai;
 
 import static com.github.tomakehurst.wiremock.common.AbstractFileSource.byFileExtension;
@@ -35,24 +53,27 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-// Mostly the same as https://github.com/wiremock/wiremock/blob/master/src/main/java/com/github/tomakehurst/wiremock/standalone/JsonFileMappingsSource.java
+// Mostly the same as
+// https://github.com/wiremock/wiremock/blob/master/src/main/java/com/github/tomakehurst/wiremock/standalone/JsonFileMappingsSource.java
 // replacing Json with Yaml.
 class YamlFileMappingsSource implements MappingsSource {
 
-  private static final ObjectMapper yamlMapper = new YAMLMapper()
-      .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
-      .enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS)
-      // For non-YAML, follow https://github.com/wiremock/wiremock/blob/master/src/main/java/com/github/tomakehurst/wiremock/common/Json.java#L41
-      .setSerializationInclusion(Include.NON_NULL)
-      .configure(JsonNodeFeature.STRIP_TRAILING_BIGDECIMAL_ZEROES, false)
-      .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
-      .configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
-      .configure(JsonParser.Feature.IGNORE_UNDEFINED, true)
-      .configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true)
-      .configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true)
-      .registerModule(new JavaTimeModule())
-      .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-      .enable(JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION);
+  private static final ObjectMapper yamlMapper =
+      new YAMLMapper()
+          .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+          .enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS)
+          // For non-YAML, follow
+          // https://github.com/wiremock/wiremock/blob/master/src/main/java/com/github/tomakehurst/wiremock/common/Json.java#L41
+          .setSerializationInclusion(Include.NON_NULL)
+          .configure(JsonNodeFeature.STRIP_TRAILING_BIGDECIMAL_ZEROES, false)
+          .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
+          .configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
+          .configure(JsonParser.Feature.IGNORE_UNDEFINED, true)
+          .configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true)
+          .configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true)
+          .registerModule(new JavaTimeModule())
+          .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+          .enable(JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION);
 
   private static final ThreadLocal<String> currentTest = new ThreadLocal<>();
 
@@ -94,8 +115,8 @@ class YamlFileMappingsSource implements MappingsSource {
 
     String yaml = "";
     try {
-      ObjectWriter objectWriter = yamlMapper.writerWithDefaultPrettyPrinter()
-          .withView(Json.PrivateView.class);
+      ObjectWriter objectWriter =
+          yamlMapper.writerWithDefaultPrettyPrinter().withView(Json.PrivateView.class);
       yaml = objectWriter.writeValueAsString(stubMapping);
     } catch (IOException ioe) {
       throwUnchecked(ioe, String.class);
@@ -154,8 +175,9 @@ class YamlFileMappingsSource implements MappingsSource {
     for (TextFile mappingFile : mappingFiles) {
       try {
         List<StubMapping> mappings =
-            yamlMapper.readValues(yamlMapper.createParser(mappingFile.readContentsAsString()),
-                    StubMapping.class)
+            yamlMapper
+                .readValues(
+                    yamlMapper.createParser(mappingFile.readContentsAsString()), StubMapping.class)
                 .readAll();
         for (StubMapping mapping : mappings) {
           mapping.setDirty(false);
@@ -165,8 +187,8 @@ class YamlFileMappingsSource implements MappingsSource {
           fileNameMap.put(mapping.getId(), fileMetadata);
         }
       } catch (JsonProcessingException e) {
-        throw new MappingFileException(mappingFile.getPath(),
-            JsonException.fromJackson(e).getErrors().first().getDetail());
+        throw new MappingFileException(
+            mappingFile.getPath(), JsonException.fromJackson(e).getErrors().first().getDetail());
       } catch (IOException e) {
         throwUnchecked(e);
       }

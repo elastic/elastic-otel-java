@@ -1,3 +1,21 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.otel.openai.wrappers;
 
 import com.openai.models.ChatCompletionChunk;
@@ -13,16 +31,16 @@ class StreamedMessageBuffer {
 
   private final Map<Long, ToolCallBuffer> toolCalls = new HashMap<>();
 
-
   public Value<?> toEventMessageObject(InstrumentationSettings settings) {
     MapValueBuilder attributes = new MapValueBuilder();
     if (settings.captureMessageContent && message.length() > 0) {
       attributes.put("content", Value.of(message.toString()));
     }
     if (!toolCalls.isEmpty()) {
-      List<Value<?>> toolCallsJson = toolCalls.values().stream()
-          .map(StreamedMessageBuffer::buildToolCallEventObject)
-          .collect(Collectors.toList());
+      List<Value<?>> toolCallsJson =
+          toolCalls.values().stream()
+              .map(StreamedMessageBuffer::buildToolCallEventObject)
+              .collect(Collectors.toList());
       attributes.put("tool_calls", Value.of(toolCallsJson));
     }
     return attributes.build();
@@ -33,15 +51,18 @@ class StreamedMessageBuffer {
 
     if (delta.toolCalls().isPresent()) {
       for (ChatCompletionChunk.Choice.Delta.ToolCall toolCall : delta.toolCalls().get()) {
-        ToolCallBuffer buffer = toolCalls.computeIfAbsent(toolCall.index(),
-            unused -> new ToolCallBuffer(toolCall.id().get()));
+        ToolCallBuffer buffer =
+            toolCalls.computeIfAbsent(
+                toolCall.index(), unused -> new ToolCallBuffer(toolCall.id().get()));
         toolCall.type().ifPresent(type -> buffer.type = type.toString());
-        toolCall.function().ifPresent(function -> {
-          function.name().ifPresent(name -> buffer.function.name = name);
-          function.arguments().ifPresent(args -> buffer.function.arguments.append(args));
-        });
+        toolCall
+            .function()
+            .ifPresent(
+                function -> {
+                  function.name().ifPresent(name -> buffer.function.name = name);
+                  function.arguments().ifPresent(args -> buffer.function.arguments.append(args));
+                });
       }
-
     }
   }
 

@@ -1,5 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.otel.openai.wrappers;
-
 
 import static co.elastic.otel.openai.wrappers.GenAiAttributes.ERROR_TYPE;
 import static co.elastic.otel.openai.wrappers.GenAiAttributes.GEN_AI_OPENAI_REQUEST_RESPONSE_FORMAT;
@@ -59,8 +76,12 @@ public class InstrumentedChatCompletionService implements CompletionService {
     private final Long inputTokens;
     private final Long completionTokens;
 
-    public ChatCompletionResult(String responseModel, String responseId, List<String> finishReasons,
-        Long inputTokens, Long completionTokens) {
+    public ChatCompletionResult(
+        String responseModel,
+        String responseId,
+        List<String> finishReasons,
+        Long inputTokens,
+        Long completionTokens) {
       this.responseModel = responseModel;
       this.responseId = responseId;
       this.finishReasons = finishReasons;
@@ -73,66 +94,85 @@ public class InstrumentedChatCompletionService implements CompletionService {
       Instrumenter.<RequestHolder, ChatCompletionResult>builder(
               GlobalOpenTelemetry.get(),
               Constants.INSTRUMENTATION_NAME,
-              holder -> "chat " + holder.request.model()
-          )
-          .addAttributesExtractor(new AttributesExtractor<RequestHolder, ChatCompletionResult>() {
-            @Override
-            public void onStart(AttributesBuilder attributes, Context parentContext,
-                RequestHolder requestHolder) {
-              ChatCompletionCreateParams request = requestHolder.request;
+              holder -> "chat " + holder.request.model())
+          .addAttributesExtractor(
+              new AttributesExtractor<RequestHolder, ChatCompletionResult>() {
+                @Override
+                public void onStart(
+                    AttributesBuilder attributes,
+                    Context parentContext,
+                    RequestHolder requestHolder) {
+                  ChatCompletionCreateParams request = requestHolder.request;
 
-              requestHolder.settings.putServerInfoIntoAttributes(attributes);
-              attributes.put(GEN_AI_SYSTEM, "openai");
-              attributes.put(GEN_AI_OPERATION_NAME, "chat");
-              attributes.put(GEN_AI_REQUEST_MODEL, request.model().toString());
-              request.frequencyPenalty()
-                  .ifPresent(val -> attributes.put(GEN_AI_REQUEST_FREQUENCY_PENALTY, val));
-              request.maxTokens().ifPresent(val -> attributes.put(GEN_AI_REQUEST_MAX_TOKENS, val));
-              request.presencePenalty()
-                  .ifPresent(val -> attributes.put(GEN_AI_REQUEST_PRESENCE_PENALTY, val));
-              request.temperature()
-                  .ifPresent(val -> attributes.put(GEN_AI_REQUEST_TEMPERATURE, val));
-              request.topP().ifPresent(val -> attributes.put(GEN_AI_REQUEST_TOP_P, val));
-              request.seed().ifPresent(val -> attributes.put(GEN_AI_OPENAI_REQUEST_SEED, val));
-              request.stop().ifPresent(stop -> {
-                if (stop.isString()) {
-                  attributes.put(GEN_AI_REQUEST_STOP_SEQUENCES,
-                      Collections.singletonList(stop.asString()));
-                } else if (stop.isStrings()) {
-                  attributes.put(GEN_AI_REQUEST_STOP_SEQUENCES, stop.asStrings());
+                  requestHolder.settings.putServerInfoIntoAttributes(attributes);
+                  attributes.put(GEN_AI_SYSTEM, "openai");
+                  attributes.put(GEN_AI_OPERATION_NAME, "chat");
+                  attributes.put(GEN_AI_REQUEST_MODEL, request.model().toString());
+                  request
+                      .frequencyPenalty()
+                      .ifPresent(val -> attributes.put(GEN_AI_REQUEST_FREQUENCY_PENALTY, val));
+                  request
+                      .maxTokens()
+                      .ifPresent(val -> attributes.put(GEN_AI_REQUEST_MAX_TOKENS, val));
+                  request
+                      .presencePenalty()
+                      .ifPresent(val -> attributes.put(GEN_AI_REQUEST_PRESENCE_PENALTY, val));
+                  request
+                      .temperature()
+                      .ifPresent(val -> attributes.put(GEN_AI_REQUEST_TEMPERATURE, val));
+                  request.topP().ifPresent(val -> attributes.put(GEN_AI_REQUEST_TOP_P, val));
+                  request.seed().ifPresent(val -> attributes.put(GEN_AI_OPENAI_REQUEST_SEED, val));
+                  request
+                      .stop()
+                      .ifPresent(
+                          stop -> {
+                            if (stop.isString()) {
+                              attributes.put(
+                                  GEN_AI_REQUEST_STOP_SEQUENCES,
+                                  Collections.singletonList(stop.asString()));
+                            } else if (stop.isStrings()) {
+                              attributes.put(GEN_AI_REQUEST_STOP_SEQUENCES, stop.asStrings());
+                            }
+                          });
+                  request
+                      .responseFormat()
+                      .ifPresent(
+                          val -> {
+                            if (val.isResponseFormatText()) {
+                              attributes.put(
+                                  GEN_AI_OPENAI_REQUEST_RESPONSE_FORMAT,
+                                  val.asResponseFormatText().type().toString());
+                            }
+                          });
                 }
-              });
-              request.responseFormat().ifPresent(val -> {
-                if (val.isResponseFormatText()) {
-                  attributes.put(GEN_AI_OPENAI_REQUEST_RESPONSE_FORMAT,
-                      val.asResponseFormatText().type().toString());
-                }
-              });
-            }
 
-            @Override
-            public void onEnd(AttributesBuilder attributes, Context context, RequestHolder request,
-                ChatCompletionResult result, Throwable error) {
-              if (error != null) {
-                attributes.put(ERROR_TYPE, error.getClass().getCanonicalName());
-              } else {
-                attributes.put(GEN_AI_RESPONSE_MODEL, result.responseModel);
-                attributes.put(GEN_AI_RESPONSE_ID, result.responseId);
+                @Override
+                public void onEnd(
+                    AttributesBuilder attributes,
+                    Context context,
+                    RequestHolder request,
+                    ChatCompletionResult result,
+                    Throwable error) {
+                  if (error != null) {
+                    attributes.put(ERROR_TYPE, error.getClass().getCanonicalName());
+                  } else {
+                    attributes.put(GEN_AI_RESPONSE_MODEL, result.responseModel);
+                    attributes.put(GEN_AI_RESPONSE_ID, result.responseId);
 
-                List<String> finishReasons = result.finishReasons;
-                if (finishReasons != null && !finishReasons.isEmpty()) {
-                  attributes.put(GEN_AI_RESPONSE_FINISH_REASONS, finishReasons);
-                }
+                    List<String> finishReasons = result.finishReasons;
+                    if (finishReasons != null && !finishReasons.isEmpty()) {
+                      attributes.put(GEN_AI_RESPONSE_FINISH_REASONS, finishReasons);
+                    }
 
-                if (result.inputTokens != null) {
-                  attributes.put(GEN_AI_USAGE_INPUT_TOKENS, result.inputTokens);
+                    if (result.inputTokens != null) {
+                      attributes.put(GEN_AI_USAGE_INPUT_TOKENS, result.inputTokens);
+                    }
+                    if (result.completionTokens != null) {
+                      attributes.put(GEN_AI_USAGE_OUTPUT_TOKENS, result.completionTokens);
+                    }
+                  }
                 }
-                if (result.completionTokens != null) {
-                  attributes.put(GEN_AI_USAGE_OUTPUT_TOKENS, result.completionTokens);
-                }
-              }
-            }
-          })
+              })
           .addOperationMetrics(GenAiClientMetrics::new)
           .buildInstrumenter();
 
@@ -145,8 +185,8 @@ public class InstrumentedChatCompletionService implements CompletionService {
   }
 
   @Override
-  public ChatCompletion create(ChatCompletionCreateParams chatCompletionCreateParams,
-      RequestOptions requestOptions) {
+  public ChatCompletion create(
+      ChatCompletionCreateParams chatCompletionCreateParams, RequestOptions requestOptions) {
 
     RequestHolder requestHolder = new RequestHolder(chatCompletionCreateParams, settings);
 
@@ -164,10 +204,11 @@ public class InstrumentedChatCompletionService implements CompletionService {
       throw t;
     }
 
-    List<String> finishReasons = completion.choices().stream()
-        .map(ChatCompletion.Choice::finishReason)
-        .map(ChatCompletion.Choice.FinishReason::toString)
-        .collect(Collectors.toList());
+    List<String> finishReasons =
+        completion.choices().stream()
+            .map(ChatCompletion.Choice::finishReason)
+            .map(ChatCompletion.Choice.FinishReason::toString)
+            .collect(Collectors.toList());
     Long inputTokens = null;
     Long completionTokens = null;
     Optional<CompletionUsage> usage = completion.usage();
@@ -175,15 +216,16 @@ public class InstrumentedChatCompletionService implements CompletionService {
       inputTokens = usage.get().promptTokens();
       completionTokens = usage.get().completionTokens();
     }
-    ChatCompletionResult result = new ChatCompletionResult(completion.model(), completion.id(),
-        finishReasons, inputTokens, completionTokens);
+    ChatCompletionResult result =
+        new ChatCompletionResult(
+            completion.model(), completion.id(), finishReasons, inputTokens, completionTokens);
     INSTRUMENTER.end(ctx, requestHolder, result, null);
     return completion;
   }
 
   @NotNull
-  private ChatCompletion createWithLogs(ChatCompletionCreateParams chatCompletionCreateParams,
-      RequestOptions requestOptions) {
+  private ChatCompletion createWithLogs(
+      ChatCompletionCreateParams chatCompletionCreateParams, RequestOptions requestOptions) {
     ChatCompletionEventsHelper.emitPromptLogEvents(chatCompletionCreateParams, settings);
     ChatCompletion result = delegate.create(chatCompletionCreateParams, requestOptions);
     ChatCompletionEventsHelper.emitCompletionLogEvents(result, settings);
@@ -210,8 +252,8 @@ public class InstrumentedChatCompletionService implements CompletionService {
       throw t;
     }
 
-    TracingStreamedResponse wrappedResponse = new TracingStreamedResponse(response, ctx,
-        requestHolder);
+    TracingStreamedResponse wrappedResponse =
+        new TracingStreamedResponse(response, ctx, requestHolder);
     return wrappedResponse;
   }
 
@@ -219,12 +261,11 @@ public class InstrumentedChatCompletionService implements CompletionService {
   private StreamResponse<ChatCompletionChunk> createStreamingWithLogs(
       ChatCompletionCreateParams chatCompletionCreateParams, RequestOptions requestOptions) {
     ChatCompletionEventsHelper.emitPromptLogEvents(chatCompletionCreateParams, settings);
-    StreamResponse<ChatCompletionChunk> result = delegate.createStreaming(
-        chatCompletionCreateParams, requestOptions);
+    StreamResponse<ChatCompletionChunk> result =
+        delegate.createStreaming(chatCompletionCreateParams, requestOptions);
     if (settings.emitEvents) {
       result = new EventLoggingStreamedResponse(result, settings);
     }
     return result;
   }
-
 }
