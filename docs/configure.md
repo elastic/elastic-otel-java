@@ -111,6 +111,26 @@ _Currently there are no additional `OTEL_` options waiting to be contributed ups
 | `ELASTIC_OTEL_UNIVERSAL_PROFILING_INTEGRATION_*` | [Universal profiling integration](https://github.com/elastic/elastic-otel-java/tree/main/universal-profiling-integration) | Correlates traces with profiling data from the Elastic universal profiler. |
 | `ELASTIC_OTEL_JAVA_SPAN_STACKTRACE_MIN_DURATION` | [Span stacktrace capture](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/span-stacktrace) | Define the minimum duration for attaching stack traces to spans. Defaults to 5ms. |
 
+### Instrumentations that are _only_ available in EDOT Java
+
+Some instrumentation are only available in EDOT Java and might or might not be added upstream in future versions.
+
+#### OpenAI Java Client
+
+Instrumentation for the [official OpenAI Java Client](https://github.com/openai/openai-java).
+It supports:
+ * Tracing for requests, including GenAI-specific attributes such as token usage
+ * Opt-In logging of OpenAI request and response content payloads
+
+This instrumentation is currently **experimental**. It needs to be explicitly enabled by setting either the `OTEL_INSTRUMENTATION_OPENAI_CLIENT_ENABLED` environment variable or the `otel.instrumentation.openai-client.enabled` JVM property to `true`.
+
+In addition, this instrumentation provides the following configuration options:
+
+| Option(s)                                             | Description                                                                                                                                                                                                                                                                                                                                                                                                   |
+|-------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT`  | If set to `true`, enables the capturing of OpenAI request and response content in the log events outputted by the agent. Defaults to `false`                                                                                                                                                                                                                                                                  |
+| `ELASTIC_OTEL_JAVA_INSTRUMENTATION_GENAI_EMIT_EVENTS` | If set to `true`, the agent will generate log events for OpenAI requests and responses. Potentially sensitive content will only be included if `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` is true. Defaults to the value of `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT`, so that just enabling `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` ensures that log events are generated. |
+
 <!-- ✅ List auth methods -->
 ## Authentication methods
 
