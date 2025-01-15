@@ -22,6 +22,9 @@ opentelemetryContribAlpha = "1.42.0-alpha"
 # reference the "incubating" version explicitly
 opentelemetrySemconvAlpha = "1.29.0-alpha"
 
+# instrumented libraries
+openaiClient = "0.11.0"
+
 [libraries]
 
 # transitively provides 'opentelemetry-instrumentation-bom' (non-alpha)
@@ -75,6 +78,9 @@ muzzleGenerationPlugin = { group = "io.opentelemetry.instrumentation.muzzle-gene
 ant = "org.apache.ant:ant:1.10.15"
 # ASM is currently only used during compile-time, so it is okay to diverge from the version used in ByteBuddy
 asm = "org.ow2.asm:asm:9.7"
+
+# Instrumented libraries
+openaiClient = {group = "com.openai", name = "openai-java", version.ref ="openaiClient"}
 
 [bundles]
 
