@@ -1,0 +1,78 @@
+---
+id: 670a09a4-82e4-4f3e-9182-43f7957b4305
+name: v1_chat_completions
+request:
+  url: /chat/completions
+  method: POST
+  bodyPatterns:
+  - equalToJson: |-
+      {
+        "messages" : [ {
+          "content" : "Answer in up to 3 words: Which ocean contains Bouvet Island?",
+          "role" : "user"
+        } ],
+        "model" : "gpt-4o-mini"
+      }
+    ignoreArrayOrder: false
+    ignoreExtraElements: false
+response:
+  status: 200
+  body: |
+    {
+      "id": "chatcmpl-Ag5GVftDjiTplSfufsh83EuqfVaah",
+      "object": "chat.completion",
+      "created": 1734593379,
+      "model": "gpt-4o-mini-2024-07-18",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Atlantic Ocean.",
+            "refusal": null
+          },
+          "logprobs": null,
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 22,
+        "completion_tokens": 3,
+        "total_tokens": 25,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "system_fingerprint": "fp_0aa8d3e20b"
+    }
+  headers:
+    x-request-id: req_bb4bea6349a75237e3ca84e723f703df
+    x-ratelimit-limit-tokens: "200000"
+    openai-organization: test_openai_org_id
+    CF-RAY: 8f45aec7afa7d53f-NRT
+    Server: cloudflare
+    X-Content-Type-Options: nosniff
+    x-ratelimit-reset-requests: 8.64s
+    x-ratelimit-remaining-tokens: "199967"
+    x-ratelimit-remaining-requests: "9999"
+    strict-transport-security: max-age=31536000; includeSubDomains; preload
+    Date: "Thu, 19 Dec 2024 07:29:39 GMT"
+    x-ratelimit-reset-tokens: 9ms
+    access-control-expose-headers: X-Request-ID
+    CF-Cache-Status: DYNAMIC
+    x-ratelimit-limit-requests: "10000"
+    Set-Cookie: test_set_cookie
+    openai-version: 2020-10-01
+    openai-processing-ms: "359"
+    alt-svc: h3=":443"; ma=86400
+    Content-Type: application/json
+uuid: 670a09a4-82e4-4f3e-9182-43f7957b4305
+persistent: true
+insertionIndex: 15

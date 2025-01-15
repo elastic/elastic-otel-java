@@ -7,6 +7,9 @@ pluginManagement {
             url = uri("https://oss.sonatype.org/content/repositories/snapshots")
         }
     }
+  plugins {
+    kotlin("jvm") version "1.9.24"
+  }
 }
 
 rootProject.name = "elastic-otel-java"
@@ -16,7 +19,7 @@ include("agent:entrypoint")
 include("agentextension")
 include("bootstrap")
 include("custom")
-include("instrumentation")
+include("instrumentation:openai-client-instrumentation")
 include("inferred-spans")
 include("resources")
 include("smoke-tests")

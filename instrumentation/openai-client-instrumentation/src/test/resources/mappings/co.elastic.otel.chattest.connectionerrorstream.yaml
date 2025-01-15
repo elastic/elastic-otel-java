@@ -1,0 +1,34 @@
+---
+id: 67beb343-9821-43ec-b053-ab58a84ee73b
+name: bad-url_v1_chat_completions
+request:
+  url: /bad-url/chat/completions
+  method: POST
+  bodyPatterns:
+  - equalToJson: |-
+      {
+        "messages" : [ {
+          "content" : "Answer in up to 3 words: Which ocean contains Bouvet Island?",
+          "role" : "user"
+        } ],
+        "stream" : true,
+        "model" : "gpt-4o-mini"
+      }
+    ignoreArrayOrder: false
+    ignoreExtraElements: false
+response:
+  status: 404
+  base64Body: ewogICJlcnJvciI6IHsKICAgICJ0eXBlIjogImludmFsaWRfcmVxdWVzdF9lcnJvciIsCiAgICAiY29kZSI6ICJ1bmtub3duX3VybCIsCiAgICAibWVzc2FnZSI6ICJVbmtub3duIHJlcXVlc3QgVVJMOiBQT1NUIC9iYWQtdXJsL3YxL2NoYXQvY29tcGxldGlvbnMuIFBsZWFzZSBjaGVjayB0aGUgVVJMIGZvciB0eXBvcywgb3Igc2VlIHRoZSBkb2NzIGF0IGh0dHBzOi8vcGxhdGZvcm0ub3BlbmFpLmNvbS9kb2NzL2FwaS1yZWZlcmVuY2UvLiIsCiAgICAicGFyYW0iOiBudWxsCiAgfQp9
+  headers:
+    CF-Cache-Status: DYNAMIC
+    CF-RAY: 8f4d6571f840d5cb-NRT
+    Server: cloudflare
+    X-Content-Type-Options: nosniff
+    Set-Cookie: test_set_cookie
+    alt-svc: h3=":443"; ma=86400
+    strict-transport-security: max-age=31536000; includeSubDomains; preload
+    Date: "Fri, 20 Dec 2024 05:57:40 GMT"
+    Content-Type: application/octet-stream
+uuid: 67beb343-9821-43ec-b053-ab58a84ee73b
+persistent: true
+insertionIndex: 21

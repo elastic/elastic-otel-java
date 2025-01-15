@@ -1,0 +1,41 @@
+---
+id: 520aa412-26b0-4655-9bd8-b664deab16ef
+name: v1_embeddings
+request:
+  url: /embeddings
+  method: POST
+  bodyPatterns:
+  - equalToJson: |-
+      {
+        "input" : [ "South Atlantic Ocean." ],
+        "encoding_format" : "base64",
+        "model" : "not-a-model"
+      }
+    ignoreArrayOrder: false
+    ignoreExtraElements: false
+response:
+  status: 404
+  body: |
+    {
+        "error": {
+            "message": "The model `not-a-model` does not exist or you do not have access to it.",
+            "type": "invalid_request_error",
+            "param": null,
+            "code": "model_not_found"
+        }
+    }
+  headers:
+    x-request-id: req_5d24f50a1db10693d6a7c5ce047e75bb
+    CF-Cache-Status: DYNAMIC
+    CF-RAY: 8f139f474a352638-NRT
+    Server: cloudflare
+    vary: Origin
+    X-Content-Type-Options: nosniff
+    Set-Cookie: test_set_cookie
+    alt-svc: h3=":443"; ma=86400
+    strict-transport-security: max-age=31536000; includeSubDomains; preload
+    Date: "Fri, 13 Dec 2024 05:40:55 GMT"
+    Content-Type: application/json; charset=utf-8
+uuid: 520aa412-26b0-4655-9bd8-b664deab16ef
+persistent: true
+insertionIndex: 13
