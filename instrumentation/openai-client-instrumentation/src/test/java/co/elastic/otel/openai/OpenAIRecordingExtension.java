@@ -12,6 +12,12 @@ import com.openai.client.okhttp.OpenAIOkHttpClient;
 
 final class OpenAIRecordingExtension extends WireMockExtension {
 
+  /**
+   * Setting this to true will make the tests call the real OpenAI API instead and record the responses.
+   * You'll have to setup the OPENAI_API_KEY variable for this to work.
+   */
+  private static final boolean RECORD_WITH_REAL_API = false;
+
   OpenAIClient client;
 
   private final String testName;
@@ -34,20 +40,24 @@ final class OpenAIRecordingExtension extends WireMockExtension {
         .build();
 
     // Set a low priority so recordings are used when available
-    String baseUrl = System.getenv().getOrDefault("OPENAI_BASE_URL", "https://api.openai.com/v1");
-    stubFor(proxyAllTo(baseUrl)
-        .atPriority(Integer.MAX_VALUE));
-    startRecording(recordSpec().forTarget(baseUrl)
-        .transformers("scrub-response-header", "pretty-print-equal-to-json")
-        // Include all bodies inline.
-        .extractTextBodiesOver(Long.MAX_VALUE)
-        .extractBinaryBodiesOver(Long.MAX_VALUE));
+    if (RECORD_WITH_REAL_API) {
+      String baseUrl = System.getenv().getOrDefault("OPENAI_BASE_URL", "https://api.openai.com/v1");
+      stubFor(proxyAllTo(baseUrl)
+          .atPriority(Integer.MAX_VALUE));
+      startRecording(recordSpec().forTarget(baseUrl)
+          .transformers("scrub-response-header", "pretty-print-equal-to-json")
+          // Include all bodies inline.
+          .extractTextBodiesOver(Long.MAX_VALUE)
+          .extractBinaryBodiesOver(Long.MAX_VALUE));
+    }
   }
 
   @Override
   protected void onAfterEach(WireMockRuntimeInfo wireMockRuntimeInfo) {
-    YamlFileMappingsSource.setCurrentTest(testName);
-    stopRecording();
+    if (RECORD_WITH_REAL_API) {
+      YamlFileMappingsSource.setCurrentTest(testName);
+      stopRecording();
+    }
   }
 
 }

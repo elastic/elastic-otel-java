@@ -133,7 +133,8 @@ class ChatTest {
               .hasAttribute(GEN_AI_OPERATION_NAME, "chat")
               .hasAttribute(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL)
               .hasAttribute(GEN_AI_SYSTEM, "openai")
-              .hasAttribute(GEN_AI_RESPONSE_ID, "chatcmpl-Ag5GVftDjiTplSfufsh83EuqfVaah")
+              .hasAttributesSatisfying(
+                  att -> assertThat(att.get(GEN_AI_RESPONSE_ID)).startsWith("chatcmpl-"))
               .hasAttribute(GEN_AI_RESPONSE_MODEL, TEST_CHAT_RESPONSE_MODEL)
               .hasAttributesSatisfying(attribs -> {
                 assertThat(attribs.get(GEN_AI_RESPONSE_FINISH_REASONS))
@@ -256,7 +257,8 @@ class ChatTest {
               .hasAttribute(GEN_AI_REQUEST_TEMPERATURE, 1.0)
               .hasAttribute(GEN_AI_REQUEST_TOP_P, 1.0)
               .hasAttribute(GEN_AI_SYSTEM, "openai")
-              .hasAttribute(GEN_AI_RESPONSE_ID, "chatcmpl-Apv788w2gWXIXli4Gb17JQQvleqWM")
+              .hasAttributesSatisfying(
+                  att -> assertThat(att.get(GEN_AI_RESPONSE_ID)).startsWith("chatcmpl-"))
               .hasAttribute(GEN_AI_RESPONSE_MODEL, TEST_CHAT_RESPONSE_MODEL)
               .hasAttributesSatisfying(attribs -> {
                 assertThat(attribs.get(GEN_AI_RESPONSE_FINISH_REASONS))
@@ -357,7 +359,7 @@ class ChatTest {
     long durationNanos = System.nanoTime() - startTimeNanos;
     result.validate();
 
-    String content = "South Atlantic Ocean.";
+    String content = "Atlantic Ocean.";
     assertThat(result.choices().get(0).message().content()).hasValue(content);
 
     List<SpanData> spans = testing.spans();
@@ -369,7 +371,8 @@ class ChatTest {
               .hasAttribute(GEN_AI_OPERATION_NAME, "chat")
               .hasAttribute(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL)
               .hasAttribute(GEN_AI_SYSTEM, "openai")
-              .hasAttribute(GEN_AI_RESPONSE_ID, "chatcmpl-AgNe3kBmW5zRDniuYUrJMlYzOfcjq")
+              .hasAttributesSatisfying(
+                  att -> assertThat(att.get(GEN_AI_RESPONSE_ID)).startsWith("chatcmpl-"))
               .hasAttribute(GEN_AI_RESPONSE_MODEL, TEST_CHAT_RESPONSE_MODEL)
               .hasAttributesSatisfying(attribs -> {
                 assertThat(attribs.get(GEN_AI_RESPONSE_FINISH_REASONS))
@@ -423,7 +426,7 @@ class ChatTest {
                   .entry("index", 1)
                   .entry("finish_reason", "stop")
                   .entry("message", ValAssert.map()
-                      .entry("content", "Atlantic Ocean."))
+                      .entry("content", "South Atlantic Ocean."))
               );
         });
 
@@ -514,7 +517,8 @@ class ChatTest {
               .hasAttribute(GEN_AI_SYSTEM, "openai")
               .hasAttribute(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL)
               .hasAttribute(GEN_AI_RESPONSE_MODEL, TEST_CHAT_RESPONSE_MODEL)
-              .hasAttribute(GEN_AI_RESPONSE_ID, "chatcmpl-AgOtmb09xJ9GPKyvsplVDY3ZueQ1B")
+              .hasAttributesSatisfying(
+                  att -> assertThat(att.get(GEN_AI_RESPONSE_ID)).startsWith("chatcmpl-"))
               .hasAttribute(GEN_AI_RESPONSE_FINISH_REASONS, Collections.singletonList("tool_calls"))
               .hasAttribute(GEN_AI_USAGE_INPUT_TOKENS, 140L)
               .hasAttribute(GEN_AI_USAGE_OUTPUT_TOKENS, 20L)
@@ -643,7 +647,10 @@ class ChatTest {
         .satisfies(call -> {
           assertThat(call.function().name()).isEqualTo("get_delivery_date");
           assertThat(call.function().arguments()).isEqualTo("{\"order_id\":\"order_12345\"}");
+          assertThat(call.id()).startsWith("call_");
         });
+
+    String toolCallId = toolCalls.get(0).id();
 
     assertThat(testing.spans())
         .hasSize(1)
@@ -653,7 +660,8 @@ class ChatTest {
               .hasAttribute(GEN_AI_SYSTEM, "openai")
               .hasAttribute(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL)
               .hasAttribute(GEN_AI_RESPONSE_MODEL, TEST_CHAT_RESPONSE_MODEL)
-              .hasAttribute(GEN_AI_RESPONSE_ID, "chatcmpl-AgOtmb09xJ9GPKyvsplVDY3ZueQ1B")
+              .hasAttributesSatisfying(
+                  att -> assertThat(att.get(GEN_AI_RESPONSE_ID)).startsWith("chatcmpl-"))
               .hasAttribute(GEN_AI_RESPONSE_FINISH_REASONS, Collections.singletonList("tool_calls"))
               .hasAttribute(GEN_AI_USAGE_INPUT_TOKENS, 140L)
               .hasAttribute(GEN_AI_USAGE_OUTPUT_TOKENS, 20L)
@@ -722,7 +730,7 @@ class ChatTest {
                   .entry("message", ValAssert.map()
                       .entry("tool_calls", ValAssert.array().ignoreOrder()
                           .entry(ValAssert.map()
-                              .entry("id", "call_JF9HIQTBcr66BmQtQEvLtess")
+                              .entry("id", toolCallId)
                               .entry("type", "function")
                               .entry("function", ValAssert.map()
                                   .entry("name", "get_delivery_date")
@@ -938,7 +946,7 @@ class ChatTest {
     long durationNanos = System.nanoTime() - startTimeNanos;
     result.validate();
 
-    String content = "Atlantic Ocean.";
+    String content = "Southern Ocean";
     assertThat(result.choices().get(0).message().content()).hasValue(content);
 
     List<SpanData> spans = testing.spans();
@@ -950,7 +958,8 @@ class ChatTest {
               .hasAttribute(GEN_AI_OPERATION_NAME, "chat")
               .hasAttribute(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL)
               .hasAttribute(GEN_AI_SYSTEM, "openai")
-              .hasAttribute(GEN_AI_RESPONSE_ID, "chatcmpl-Ag5GVftDjiTplSfufsh83EuqfVaah")
+              .hasAttributesSatisfying(
+                  att -> assertThat(att.get(GEN_AI_RESPONSE_ID)).startsWith("chatcmpl-"))
               .hasAttribute(GEN_AI_RESPONSE_MODEL, TEST_CHAT_RESPONSE_MODEL)
               .hasAttributesSatisfying(attribs -> {
                 assertThat(attribs.get(GEN_AI_RESPONSE_FINISH_REASONS))
@@ -1074,7 +1083,8 @@ class ChatTest {
               .hasAttribute(GEN_AI_SYSTEM, "openai")
               .hasAttribute(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL)
               .hasAttribute(GEN_AI_RESPONSE_MODEL, TEST_CHAT_RESPONSE_MODEL)
-              .hasAttribute(GEN_AI_RESPONSE_ID, "chatcmpl-AgQ2hTMzvoG4ZNt8P3HXR52Ae8C4D")
+              .hasAttributesSatisfying(
+                  att -> assertThat(att.get(GEN_AI_RESPONSE_ID)).startsWith("chatcmpl-"))
               .hasAttribute(SERVER_ADDRESS, "localhost")
               .hasAttribute(SERVER_PORT, (long) openai.getPort())
               .hasAttributesSatisfying(attribs -> {
@@ -1165,7 +1175,8 @@ class ChatTest {
               .hasAttribute(GEN_AI_OPERATION_NAME, "chat")
               .hasAttribute(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL)
               .hasAttribute(GEN_AI_SYSTEM, "openai")
-              .hasAttribute(GEN_AI_RESPONSE_ID, "chatcmpl-AiXkCrHkP1ive3tG8af3OEouSaCpD")
+              .hasAttributesSatisfying(
+                  att -> assertThat(att.get(GEN_AI_RESPONSE_ID)).startsWith("chatcmpl-"))
               .hasAttribute(GEN_AI_RESPONSE_MODEL, TEST_CHAT_RESPONSE_MODEL)
               .hasAttributesSatisfying(attribs -> {
                 assertThat(attribs.get(GEN_AI_RESPONSE_FINISH_REASONS))
@@ -1296,7 +1307,8 @@ class ChatTest {
               .hasAttribute(GEN_AI_REQUEST_TEMPERATURE, 1.0)
               .hasAttribute(GEN_AI_REQUEST_TOP_P, 1.0)
               .hasAttribute(GEN_AI_SYSTEM, "openai")
-              .hasAttribute(GEN_AI_RESPONSE_ID, "chatcmpl-AgR2KlOq1buEDqjXt2C0SEBgovJxS")
+              .hasAttributesSatisfying(
+                  att -> assertThat(att.get(GEN_AI_RESPONSE_ID)).startsWith("chatcmpl-"))
               .hasAttribute(GEN_AI_RESPONSE_MODEL, TEST_CHAT_RESPONSE_MODEL)
               .hasAttributesSatisfying(attribs -> {
                 assertThat(attribs.get(GEN_AI_RESPONSE_FINISH_REASONS))
@@ -1381,7 +1393,8 @@ class ChatTest {
               .hasAttribute(GEN_AI_SYSTEM, "openai")
               .hasAttribute(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL)
               .hasAttribute(GEN_AI_RESPONSE_MODEL, TEST_CHAT_RESPONSE_MODEL)
-              .hasAttribute(GEN_AI_RESPONSE_ID, "chatcmpl-AgQ2hTMzvoG4ZNt8P3HXR52Ae8C4D")
+              .hasAttributesSatisfying(
+                  att -> assertThat(att.get(GEN_AI_RESPONSE_ID)).startsWith("chatcmpl-"))
               .hasAttribute(SERVER_ADDRESS, "localhost")
               .hasAttribute(SERVER_PORT, (long) openai.getPort())
               .hasAttributesSatisfying(attribs -> {
@@ -1469,6 +1482,16 @@ class ChatTest {
         .collect(Collectors.joining());
     assertThat(fullMessage).isEmpty();
 
+    String toolCallId = chunks.stream()
+        .map(chunk -> chunk.choices().get(0).delta().toolCalls())
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .map(tool -> tool.get(0).id())
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .findFirst()
+        .get();
+
     assertThat(testing.spans())
         .hasSize(1)
         .first()
@@ -1477,7 +1500,8 @@ class ChatTest {
               .hasAttribute(GEN_AI_SYSTEM, "openai")
               .hasAttribute(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL)
               .hasAttribute(GEN_AI_RESPONSE_MODEL, TEST_CHAT_RESPONSE_MODEL)
-              .hasAttribute(GEN_AI_RESPONSE_ID, "chatcmpl-AiWah7wgUOGbWW5GTHxr6iBu9xzTn")
+              .hasAttributesSatisfying(
+                  att -> assertThat(att.get(GEN_AI_RESPONSE_ID)).startsWith("chatcmpl-"))
               .hasAttribute(GEN_AI_RESPONSE_FINISH_REASONS, Collections.singletonList("tool_calls"))
               .hasAttribute(SERVER_ADDRESS, "localhost")
               .hasAttribute(SERVER_PORT, (long) openai.getPort());
@@ -1544,7 +1568,7 @@ class ChatTest {
                   .entry("message", ValAssert.map()
                       .entry("tool_calls", ValAssert.array().ignoreOrder()
                           .entry(ValAssert.map()
-                              .entry("id", "call_LqVuXFn6Ncl2PcufDle4Up51")
+                              .entry("id", toolCallId)
                               .entry("type", "function")
                               .entry("function", ValAssert.map()
                                   .entry("name", "get_delivery_date")
@@ -1726,6 +1750,17 @@ class ChatTest {
     List<ChatCompletionMessageToolCall> toolCalls = response.choices().get(0).message().toolCalls()
         .get();
     assertThat(toolCalls).hasSize(2);
+    String newYorkCallId = toolCalls.stream()
+        .filter(call -> call.function().arguments().contains("New York"))
+        .map(ChatCompletionMessageToolCall::id)
+        .findFirst().get();
+    String londonCallId = toolCalls.stream()
+        .filter(call -> call.function().arguments().contains("London"))
+        .map(ChatCompletionMessageToolCall::id)
+        .findFirst().get();
+
+    assertThat(newYorkCallId).startsWith("call_");
+    assertThat(londonCallId).startsWith("call_");
 
     assertThat(testing.spans())
         .hasSize(1)
@@ -1735,7 +1770,8 @@ class ChatTest {
               .hasAttribute(GEN_AI_SYSTEM, "openai")
               .hasAttribute(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL)
               .hasAttribute(GEN_AI_RESPONSE_MODEL, TEST_CHAT_RESPONSE_MODEL)
-              .hasAttribute(GEN_AI_RESPONSE_ID, "chatcmpl-AgPtfXbS6UlilkIOD0PqdxAW3ao7l")
+              .hasAttributesSatisfying(
+                  att -> assertThat(att.get(GEN_AI_RESPONSE_ID)).startsWith("chatcmpl-"))
               .hasAttribute(GEN_AI_RESPONSE_FINISH_REASONS, Collections.singletonList("tool_calls"))
               .hasAttribute(SERVER_ADDRESS, "localhost")
               .hasAttribute(SERVER_PORT, (long) openai.getPort());
@@ -1778,14 +1814,14 @@ class ChatTest {
                   .entry("message", ValAssert.map()
                       .entry("tool_calls", ValAssert.array().ignoreOrder()
                           .entry(ValAssert.map()
-                              .entry("id", "call_HtKN6juSPlIW7Jn6wGu9Fl98")
+                              .entry("id", newYorkCallId)
                               .entry("type", "function")
                               .entry("function", ValAssert.map()
                                   .entry("name", "get_weather")
                                   .entry("arguments", "{\"location\": \"New York City\"}")
                               ))
                           .entry(ValAssert.map()
-                              .entry("id", "call_YJvXI6DrRWpyOXEGQmX8sX30")
+                              .entry("id", londonCallId)
                               .entry("type", "function")
                               .entry("function", ValAssert.map()
                                   .entry("name", "get_weather")
@@ -1849,8 +1885,8 @@ class ChatTest {
             .build());
 
     chatMessages.add(assistantMessage);
-    chatMessages.add(createToolMessage("25 degrees and sunny", toolCalls.get(0).id()));
-    chatMessages.add(createToolMessage("15 degrees and raining", toolCalls.get(1).id()));
+    chatMessages.add(createToolMessage("25 degrees and sunny", newYorkCallId));
+    chatMessages.add(createToolMessage("15 degrees and raining", londonCallId));
 
     long startTimeNanosSecond = System.nanoTime();
     ChatCompletion fullCompletion = openai.client.chat().completions()
@@ -1872,7 +1908,8 @@ class ChatTest {
               .hasAttribute(GEN_AI_SYSTEM, "openai")
               .hasAttribute(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL)
               .hasAttribute(GEN_AI_RESPONSE_MODEL, TEST_CHAT_RESPONSE_MODEL)
-              .hasAttribute(GEN_AI_RESPONSE_ID, "chatcmpl-AgPwgYoNfAp7xKDgCZjBad1QU6Wno")
+              .hasAttributesSatisfying(
+                  att -> assertThat(att.get(GEN_AI_RESPONSE_ID)).startsWith("chatcmpl-"))
               .hasAttribute(GEN_AI_RESPONSE_FINISH_REASONS, Collections.singletonList("stop"))
               .hasAttribute(SERVER_ADDRESS, "localhost")
               .hasAttribute(SERVER_PORT, (long) openai.getPort());
@@ -1912,14 +1949,14 @@ class ChatTest {
               .satisfies(ValAssert.map()
                   .entry("tool_calls", ValAssert.array()
                       .entry(ValAssert.map()
-                          .entry("id", "call_HtKN6juSPlIW7Jn6wGu9Fl98")
+                          .entry("id", newYorkCallId)
                           .entry("type", "function")
                           .entry("function", ValAssert.map()
                               .entry("name", "get_weather")
                               .entry("arguments", "{\"location\": \"New York City\"}")
                           ))
                       .entry(ValAssert.map()
-                          .entry("id", "call_YJvXI6DrRWpyOXEGQmX8sX30")
+                          .entry("id", londonCallId)
                           .entry("type", "function")
                           .entry("function", ValAssert.map()
                               .entry("name", "get_weather")
@@ -1936,7 +1973,7 @@ class ChatTest {
               );
           assertThat(log.getBodyValue())
               .satisfies(ValAssert.map()
-                  .entry("id", "call_HtKN6juSPlIW7Jn6wGu9Fl98")
+                  .entry("id", newYorkCallId)
                   .entry("content", "25 degrees and sunny")
               );
         })
@@ -1948,7 +1985,7 @@ class ChatTest {
               );
           assertThat(log.getBodyValue())
               .satisfies(ValAssert.map()
-                  .entry("id", "call_YJvXI6DrRWpyOXEGQmX8sX30")
+                  .entry("id", londonCallId)
                   .entry("content", "15 degrees and raining")
               );
         })
@@ -2000,7 +2037,7 @@ class ChatTest {
                             equalTo(SERVER_PORT, (long) openai.getPort())
                         ),
                     point -> point
-                        .hasSum(29.0)
+                        .hasSum(27.0)
                         .hasAttributesSatisfyingExactly(
                             equalTo(GEN_AI_SYSTEM, "openai"),
                             equalTo(GEN_AI_OPERATION_NAME, "chat"),
@@ -2027,7 +2064,7 @@ class ChatTest {
     ChatCompletion result = openai.client.chat().completions().create(params);
     result.validate();
 
-    String content = "Atlantic Ocean.";
+    String content = "Southern Ocean";
     assertThat(result.choices().get(0).message().content()).hasValue(content);
 
     List<SpanData> spans = testing.spans();
@@ -2039,7 +2076,8 @@ class ChatTest {
               .hasAttribute(GEN_AI_OPERATION_NAME, "chat")
               .hasAttribute(GEN_AI_REQUEST_MODEL, TEST_CHAT_MODEL)
               .hasAttribute(GEN_AI_SYSTEM, "openai")
-              .hasAttribute(GEN_AI_RESPONSE_ID, "chatcmpl-Ag5GVftDjiTplSfufsh83EuqfVaah")
+              .hasAttributesSatisfying(
+                  att -> assertThat(att.get(GEN_AI_RESPONSE_ID)).startsWith("chatcmpl-"))
               .hasAttribute(GEN_AI_RESPONSE_MODEL, TEST_CHAT_RESPONSE_MODEL)
               .hasAttributesSatisfying(attribs -> {
                 assertThat(attribs.get(GEN_AI_RESPONSE_FINISH_REASONS))
@@ -2079,7 +2117,7 @@ class ChatTest {
   }
 
   @NotNull
-  private static ChatCompletionTool buildGetDeliveryDateToolDefinition() {
+  static ChatCompletionTool buildGetDeliveryDateToolDefinition() {
     Map<String, JsonValue> orderId = new HashMap<>();
     orderId.put("type", JsonValue.from("string"));
     orderId.put("description", JsonValue.from("The customer's order ID."));

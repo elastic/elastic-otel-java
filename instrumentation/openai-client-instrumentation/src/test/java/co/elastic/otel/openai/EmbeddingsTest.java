@@ -30,7 +30,7 @@ class EmbeddingsTest {
   static final AgentInstrumentationExtension testing = AgentInstrumentationExtension.create();
 
   @RegisterExtension
-  static final OpenAIRecordingExtension openai = new OpenAIRecordingExtension("EmbeddingsTest.yml");
+  static final OpenAIRecordingExtension openai = new OpenAIRecordingExtension("EmbeddingsTest");
 
   @Test
   void basic() {
