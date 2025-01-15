@@ -13,19 +13,7 @@ dependencies {
 }
 
 
-tasks {
-
-  /*
-  testing {
-    suites {
-      withType<JvmTestSuite> {
-        dependencies {
-          implementation("com.openai:openai-java:0.8.1")
-          implementation("org.slf4j:slf4j-simple:2.0.16")
-        }
-      }
-
-    }
-  }
-  */
+tasks.withType<Test>().configureEach {
+  // The instrumentation is experimental and therefore disabled by default, it needs to be explicitly enabled
+  jvmArgs("-Dotel.instrumentation.openai-client.enabled=true")
 }
