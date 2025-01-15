@@ -2,11 +2,20 @@ plugins {
   id("elastic-otel.library-packaging-conventions")
 }
 
+val instrumentations = listOf(
+  ":instrumentation:openai-client-instrumentation"
+)
+
 dependencies {
   implementation(project(":common"))
   implementation(project(":inferred-spans"))
   implementation(project(":universal-profiling-integration"))
+  implementation(project(":instrumentation:openai-client-instrumentation"))
   implementation(project(":resources"))
+  instrumentations.forEach {
+    implementation(project(it))
+  }
+
   compileOnly("io.opentelemetry:opentelemetry-sdk")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-extension-api")
@@ -37,6 +46,21 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation(libs.freemarker)
 }
+
+tasks {
+  instrumentations.forEach {
+    // TODO: instrumentation dependencies must be declared here explicitly atm, otherwise gradle complains
+    // about it being missing we need to figure out a way of including it in the "compileJava" task
+    // to not have to do this
+    javadoc {
+      dependsOn("$it:byteBuddyJava")
+    }
+    compileTestJava {
+      dependsOn("$it:byteBuddyJava")
+    }
+  }
+}
+
 tasks.withType<Test> {
   val overrideConfig = project.properties["elastic.otel.overwrite.config.docs"]
   if (overrideConfig != null) {
