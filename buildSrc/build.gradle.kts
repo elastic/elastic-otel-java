@@ -16,8 +16,13 @@ repositories {
 dependencies {
     implementation(catalog.spotlessPlugin)
     implementation(catalog.licenseReportPlugin)
-    implementation(catalog.muzzleGenerationPlugin)
-    implementation(catalog.muzzleCheckPlugin)
+    // muzzle pulls in ancient versions of http components which conflict with other plugins, such as jib
+    implementation(catalog.muzzleGenerationPlugin) {
+      exclude(group = "org.apache.httpcomponents" )
+    }
+    implementation(catalog.muzzleCheckPlugin) {
+      exclude(group = "org.apache.httpcomponents" )
+    }
     implementation(catalog.shadowPlugin)
     // The ant dependency is required to add custom transformers for the shadow plugin
     // but it is unfortunately not exposed as transitive dependency
