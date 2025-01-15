@@ -15,8 +15,10 @@ repositories {
 
 dependencies {
     implementation(catalog.spotlessPlugin)
-    implementation(catalog.shadowPlugin)
     implementation(catalog.licenseReportPlugin)
+    implementation(catalog.muzzleGenerationPlugin)
+    implementation(catalog.muzzleCheckPlugin)
+    implementation(catalog.shadowPlugin)
     // The ant dependency is required to add custom transformers for the shadow plugin
     // but it is unfortunately not exposed as transitive dependency
     implementation(catalog.ant)

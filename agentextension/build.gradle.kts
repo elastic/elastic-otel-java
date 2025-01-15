@@ -2,7 +2,7 @@ plugins {
   id("elastic-otel.java-conventions")
   id("elastic-otel.sign-and-publish-conventions")
   id("elastic-otel.license-report-conventions")
-  id("com.github.johnrengelman.shadow")
+  id("com.gradleup.shadow")
 }
 
 description = "Bundles all elastic extensions in a fat-jar to be used" +

@@ -8,7 +8,7 @@ import org.objectweb.asm.Opcodes
 
 plugins {
   id("elastic-otel.java-conventions")
-  id("com.github.johnrengelman.shadow")
+  id("com.gradleup.shadow")
 }
 
 
