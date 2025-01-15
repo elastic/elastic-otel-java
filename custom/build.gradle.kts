@@ -2,7 +2,7 @@ plugins {
   id("elastic-otel.library-packaging-conventions")
 }
 
-val instrumentations = listOf(
+val instrumentations = listOf<String>(
   ":instrumentation:openai-client-instrumentation"
 )
 
