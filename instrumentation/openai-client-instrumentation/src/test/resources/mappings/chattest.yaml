@@ -1,0 +1,1128 @@
+---
+id: b1fad0cf-f817-4306-94bd-ae69af7ba87f
+name: chat_completions
+request:
+  url: /chat/completions
+  method: POST
+  bodyPatterns:
+  - equalToJson: |-
+      {
+        "messages" : [ {
+          "content" : "Answer in up to 3 words: Which ocean contains Bouvet Island?",
+          "role" : "user"
+        } ],
+        "model" : "gpt-4o-mini",
+        "frequency_penalty" : 0,
+        "max_tokens" : 100,
+        "presence_penalty" : 0,
+        "response_format" : {
+          "type" : "text"
+        },
+        "seed" : 100,
+        "stop" : [ "foo" ],
+        "temperature" : 1,
+        "top_p" : 1
+      }
+    ignoreArrayOrder: false
+    ignoreExtraElements: false
+response:
+  status: 200
+  body: |
+    {
+      "id": "chatcmpl-Apv8J5cWGEFmHVs32wbzakYuMGN1Q",
+      "object": "chat.completion",
+      "created": 1736937711,
+      "model": "gpt-4o-mini-2024-07-18",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Atlantic Ocean.",
+            "refusal": null
+          },
+          "logprobs": null,
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 22,
+        "completion_tokens": 3,
+        "total_tokens": 25,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_72ed7ab54c"
+    }
+  headers:
+    Date: "Wed, 15 Jan 2025 10:41:52 GMT"
+    Content-Type: application/json
+    access-control-expose-headers: X-Request-ID
+    openai-organization: test_openai_org_id
+    openai-processing-ms: "322"
+    openai-version: 2020-10-01
+    x-ratelimit-limit-requests: "10000"
+    x-ratelimit-limit-tokens: "200000"
+    x-ratelimit-remaining-requests: "9994"
+    x-ratelimit-remaining-tokens: "199883"
+    x-ratelimit-reset-requests: 47.818s
+    x-ratelimit-reset-tokens: 34ms
+    x-request-id: req_e368c8d58deb838466c8fa8641780f92
+    strict-transport-security: max-age=31536000; includeSubDomains; preload
+    CF-Cache-Status: DYNAMIC
+    Set-Cookie: test_set_cookie
+    X-Content-Type-Options: nosniff
+    Server: cloudflare
+    CF-RAY: 902541792ff6d2bf-FRA
+uuid: b1fad0cf-f817-4306-94bd-ae69af7ba87f
+persistent: true
+insertionIndex: 2
+---
+id: aa0925f5-8bcd-45a1-987c-e204bfbf6e51
+name: chat_completions
+request:
+  url: /chat/completions
+  method: POST
+  bodyPatterns:
+  - equalToJson: |-
+      {
+        "messages" : [ {
+          "content" : "Answer in up to 3 words: Which ocean contains Bouvet Island?",
+          "role" : "user"
+        } ],
+        "model" : "gpt-4o-mini"
+      }
+    ignoreArrayOrder: false
+    ignoreExtraElements: false
+response:
+  status: 200
+  body: |
+    {
+      "id": "chatcmpl-Apv8KcHAihCLewuBNuKWR4dbvabfP",
+      "object": "chat.completion",
+      "created": 1736937712,
+      "model": "gpt-4o-mini-2024-07-18",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Atlantic Ocean",
+            "refusal": null
+          },
+          "logprobs": null,
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 22,
+        "completion_tokens": 3,
+        "total_tokens": 25,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_72ed7ab54c"
+    }
+  headers:
+    Date: "Wed, 15 Jan 2025 10:41:52 GMT"
+    Content-Type: application/json
+    access-control-expose-headers: X-Request-ID
+    openai-organization: test_openai_org_id
+    openai-processing-ms: "247"
+    openai-version: 2020-10-01
+    x-ratelimit-limit-requests: "10000"
+    x-ratelimit-limit-tokens: "200000"
+    x-ratelimit-remaining-requests: "9993"
+    x-ratelimit-remaining-tokens: "199967"
+    x-ratelimit-reset-requests: 55.54s
+    x-ratelimit-reset-tokens: 9ms
+    x-request-id: req_f8cd608c272f245e86b35b8b4ae083d3
+    strict-transport-security: max-age=31536000; includeSubDomains; preload
+    CF-Cache-Status: DYNAMIC
+    Set-Cookie: test_set_cookie
+    X-Content-Type-Options: nosniff
+    Server: cloudflare
+    CF-RAY: 9025417eef21dc82-FRA
+uuid: aa0925f5-8bcd-45a1-987c-e204bfbf6e51
+persistent: true
+insertionIndex: 6
+---
+id: b785088f-d596-4c88-b4e4-0877c022ae2b
+name: chat_completions
+request:
+  url: /chat/completions
+  method: POST
+  bodyPatterns:
+  - equalToJson: |-
+      {
+        "messages" : [ {
+          "content" : "You are a helpful assistant providing weather updates.",
+          "role" : "system"
+        }, {
+          "content" : "What is the weather in New York City and London?",
+          "role" : "user"
+        } ],
+        "model" : "gpt-4o-mini",
+        "tools" : [ {
+          "type" : "function",
+          "function" : {
+            "name" : "get_weather",
+            "parameters" : {
+              "type" : "object",
+              "required" : [ "location" ],
+              "additionalProperties" : false,
+              "properties" : {
+                "location" : {
+                  "description" : "The location to get the current temperature for",
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        } ]
+      }
+    ignoreArrayOrder: false
+    ignoreExtraElements: false
+response:
+  status: 200
+  body: |
+    {
+      "id": "chatcmpl-Apv8LSMjVDePaACz6DpAqeWbb1tUH",
+      "object": "chat.completion",
+      "created": 1736937713,
+      "model": "gpt-4o-mini-2024-07-18",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "call_fvaQ9u6oPaWqRAymyPKSivuo",
+                "type": "function",
+                "function": {
+                  "name": "get_weather",
+                  "arguments": "{\"location\": \"New York City\"}"
+                }
+              },
+              {
+                "id": "call_32A9GhNwtlJQhYMaGWlD6UWj",
+                "type": "function",
+                "function": {
+                  "name": "get_weather",
+                  "arguments": "{\"location\": \"London\"}"
+                }
+              }
+            ],
+            "refusal": null
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 67,
+        "completion_tokens": 47,
+        "total_tokens": 114,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_72ed7ab54c"
+    }
+  headers:
+    Date: "Wed, 15 Jan 2025 10:41:54 GMT"
+    Content-Type: application/json
+    access-control-expose-headers: X-Request-ID
+    openai-organization: test_openai_org_id
+    openai-processing-ms: "929"
+    openai-version: 2020-10-01
+    x-ratelimit-limit-requests: "10000"
+    x-ratelimit-limit-tokens: "200000"
+    x-ratelimit-remaining-requests: "9992"
+    x-ratelimit-remaining-tokens: "199956"
+    x-ratelimit-reset-requests: 1m3.453s
+    x-ratelimit-reset-tokens: 13ms
+    x-request-id: req_8905dd2adfba78370194ce08f6deb917
+    strict-transport-security: max-age=31536000; includeSubDomains; preload
+    CF-Cache-Status: DYNAMIC
+    Set-Cookie: test_set_cookie
+    X-Content-Type-Options: nosniff
+    Server: cloudflare
+    CF-RAY: 902541836c8ed2be-FRA
+uuid: b785088f-d596-4c88-b4e4-0877c022ae2b
+persistent: true
+insertionIndex: 11
+---
+id: 8b10ee4e-7075-4e45-b7d2-1870fe720a59
+name: chat_completions
+request:
+  url: /chat/completions
+  method: POST
+  bodyPatterns:
+  - equalToJson: |-
+      {
+        "messages" : [ {
+          "content" : "Answer in up to 3 words: Which ocean contains Bouvet Island?",
+          "role" : "user"
+        } ],
+        "model" : "gpt-4o-mini"
+      }
+    ignoreArrayOrder: false
+    ignoreExtraElements: false
+response:
+  status: 200
+  body: |
+    {
+      "id": "chatcmpl-Apv8MGyDJCOs1RV8pj2v8MLj5qoVw",
+      "object": "chat.completion",
+      "created": 1736937714,
+      "model": "gpt-4o-mini-2024-07-18",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Atlantic Ocean.",
+            "refusal": null
+          },
+          "logprobs": null,
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 22,
+        "completion_tokens": 4,
+        "total_tokens": 26,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_bd83329f63"
+    }
+  headers:
+    Date: "Wed, 15 Jan 2025 10:41:54 GMT"
+    Content-Type: application/json
+    access-control-expose-headers: X-Request-ID
+    openai-organization: test_openai_org_id
+    openai-processing-ms: "202"
+    openai-version: 2020-10-01
+    x-ratelimit-limit-requests: "10000"
+    x-ratelimit-limit-tokens: "200000"
+    x-ratelimit-remaining-requests: "9991"
+    x-ratelimit-remaining-tokens: "199967"
+    x-ratelimit-reset-requests: 1m10.792s
+    x-ratelimit-reset-tokens: 9ms
+    x-request-id: req_e20981685196a9ba342bcf8d080cf73d
+    strict-transport-security: max-age=31536000; includeSubDomains; preload
+    CF-Cache-Status: DYNAMIC
+    Set-Cookie: test_set_cookie
+    X-Content-Type-Options: nosniff
+    Server: cloudflare
+    CF-RAY: 9025418b8c5b691f-FRA
+uuid: 8b10ee4e-7075-4e45-b7d2-1870fe720a59
+persistent: true
+insertionIndex: 17
+---
+id: f49c5ac4-bc25-40f2-9e08-e0f3f9c35feb
+name: chat_completions
+request:
+  url: /chat/completions
+  method: POST
+  bodyPatterns:
+  - equalToJson: |-
+      {
+        "messages" : [ {
+          "content" : "Answer in up to 3 words: Which ocean contains Bouvet Island?",
+          "role" : "user"
+        } ],
+        "model" : "gpt-4o-mini",
+        "stream" : true
+      }
+    ignoreArrayOrder: false
+    ignoreExtraElements: false
+response:
+  status: 200
+  body: |+
+    data: {"id":"chatcmpl-Apv8NwiY15F7VJhnqpoMY2TZmNcsQ","object":"chat.completion.chunk","created":1736937715,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"role":"assistant","content":"","refusal":null},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8NwiY15F7VJhnqpoMY2TZmNcsQ","object":"chat.completion.chunk","created":1736937715,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"content":"Southern"},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8NwiY15F7VJhnqpoMY2TZmNcsQ","object":"chat.completion.chunk","created":1736937715,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"content":" Ocean"},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8NwiY15F7VJhnqpoMY2TZmNcsQ","object":"chat.completion.chunk","created":1736937715,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"content":"."},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8NwiY15F7VJhnqpoMY2TZmNcsQ","object":"chat.completion.chunk","created":1736937715,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"stop"}]}
+
+    data: [DONE]
+
+  headers:
+    Date: "Wed, 15 Jan 2025 10:41:55 GMT"
+    Content-Type: text/event-stream; charset=utf-8
+    access-control-expose-headers: X-Request-ID
+    openai-organization: test_openai_org_id
+    openai-processing-ms: "309"
+    openai-version: 2020-10-01
+    x-ratelimit-limit-requests: "10000"
+    x-ratelimit-limit-tokens: "200000"
+    x-ratelimit-remaining-requests: "9990"
+    x-ratelimit-remaining-tokens: "199968"
+    x-ratelimit-reset-requests: 1m18.807s
+    x-ratelimit-reset-tokens: 9ms
+    x-request-id: req_3a632a1cb05d98895ed63c75b93bca8b
+    strict-transport-security: max-age=31536000; includeSubDomains; preload
+    CF-Cache-Status: DYNAMIC
+    Set-Cookie: test_set_cookie
+    X-Content-Type-Options: nosniff
+    Server: cloudflare
+    CF-RAY: 9025418f692d698b-FRA
+uuid: f49c5ac4-bc25-40f2-9e08-e0f3f9c35feb
+persistent: true
+insertionIndex: 24
+---
+id: bf686321-b3f5-476e-ae88-90fd4755b39e
+name: chat_completions
+request:
+  url: /chat/completions
+  method: POST
+  bodyPatterns:
+  - equalToJson: |-
+      {
+        "messages" : [ {
+          "content" : "Answer in up to 3 words: Which ocean contains Bouvet Island?",
+          "role" : "user"
+        } ],
+        "model" : "gpt-4o-mini",
+        "frequency_penalty" : 0,
+        "max_tokens" : 100,
+        "presence_penalty" : 0,
+        "response_format" : {
+          "type" : "text"
+        },
+        "seed" : 100,
+        "stop" : [ "foo" ],
+        "temperature" : 1,
+        "top_p" : 1,
+        "stream" : true
+      }
+    ignoreArrayOrder: false
+    ignoreExtraElements: false
+response:
+  status: 200
+  body: |+
+    data: {"id":"chatcmpl-Apv8Of8QF8kEon4be3OPFtjLQXak7","object":"chat.completion.chunk","created":1736937716,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"role":"assistant","content":"","refusal":null},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8Of8QF8kEon4be3OPFtjLQXak7","object":"chat.completion.chunk","created":1736937716,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"content":"Southern"},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8Of8QF8kEon4be3OPFtjLQXak7","object":"chat.completion.chunk","created":1736937716,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"content":" Ocean"},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8Of8QF8kEon4be3OPFtjLQXak7","object":"chat.completion.chunk","created":1736937716,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"content":"."},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8Of8QF8kEon4be3OPFtjLQXak7","object":"chat.completion.chunk","created":1736937716,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"stop"}]}
+
+    data: [DONE]
+
+  headers:
+    Date: "Wed, 15 Jan 2025 10:41:56 GMT"
+    Content-Type: text/event-stream; charset=utf-8
+    access-control-expose-headers: X-Request-ID
+    openai-organization: test_openai_org_id
+    openai-processing-ms: "341"
+    openai-version: 2020-10-01
+    x-ratelimit-limit-requests: "10000"
+    x-ratelimit-limit-tokens: "200000"
+    x-ratelimit-remaining-requests: "9989"
+    x-ratelimit-remaining-tokens: "199883"
+    x-ratelimit-reset-requests: 1m26.676s
+    x-ratelimit-reset-tokens: 34ms
+    x-request-id: req_b28686701536481cf00fe81fed64ac4d
+    strict-transport-security: max-age=31536000; includeSubDomains; preload
+    CF-Cache-Status: DYNAMIC
+    Set-Cookie: test_set_cookie
+    X-Content-Type-Options: nosniff
+    Server: cloudflare
+    CF-RAY: 902541944a5a92b4-FRA
+uuid: bf686321-b3f5-476e-ae88-90fd4755b39e
+persistent: true
+insertionIndex: 32
+---
+id: a82ea38c-a7e6-4cac-b5f6-f61d1f518725
+name: chat_completions
+request:
+  url: /chat/completions
+  method: POST
+  bodyPatterns:
+  - equalToJson: |-
+      {
+        "messages" : [ {
+          "content" : "You are a helpful customer support assistant. Use the supplied tools to assist the user.",
+          "role" : "system"
+        }, {
+          "content" : "Hi, can you tell me the delivery date for my order?",
+          "role" : "user"
+        }, {
+          "content" : "Hi there! I can help with that. Can you please provide your order ID?",
+          "role" : "assistant"
+        }, {
+          "content" : "i think it is order_12345",
+          "role" : "user"
+        } ],
+        "model" : "gpt-4o-mini",
+        "tools" : [ {
+          "type" : "function",
+          "function" : {
+            "description" : "Get the delivery date for a customer's order. Call this whenever you need to know the delivery date, for example when a customer asks 'Where is my package'",
+            "name" : "get_delivery_date",
+            "parameters" : {
+              "type" : "object",
+              "required" : [ "order_id" ],
+              "additionalProperties" : false,
+              "properties" : {
+                "order_id" : {
+                  "description" : "The customer's order ID.",
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        } ]
+      }
+    ignoreArrayOrder: false
+    ignoreExtraElements: false
+response:
+  status: 200
+  body: |
+    {
+      "id": "chatcmpl-Apv8O3J9ol9fr7rVIiIPgdAji0ghi",
+      "object": "chat.completion",
+      "created": 1736937716,
+      "model": "gpt-4o-mini-2024-07-18",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "call_dkJCuDgzvkNUTpDNLhT0Wb9B",
+                "type": "function",
+                "function": {
+                  "name": "get_delivery_date",
+                  "arguments": "{\"order_id\":\"order_12345\"}"
+                }
+              }
+            ],
+            "refusal": null
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 140,
+        "completion_tokens": 20,
+        "total_tokens": 160,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_72ed7ab54c"
+    }
+  headers:
+    Date: "Wed, 15 Jan 2025 10:41:57 GMT"
+    Content-Type: application/json
+    access-control-expose-headers: X-Request-ID
+    openai-organization: test_openai_org_id
+    openai-processing-ms: "594"
+    openai-version: 2020-10-01
+    x-ratelimit-limit-requests: "10000"
+    x-ratelimit-limit-tokens: "200000"
+    x-ratelimit-remaining-requests: "9989"
+    x-ratelimit-remaining-tokens: "199921"
+    x-ratelimit-reset-requests: 1m34.532s
+    x-ratelimit-reset-tokens: 23ms
+    x-request-id: req_68a964d4d575bc61119158304b96be5c
+    strict-transport-security: max-age=31536000; includeSubDomains; preload
+    CF-Cache-Status: DYNAMIC
+    Set-Cookie: test_set_cookie
+    X-Content-Type-Options: nosniff
+    Server: cloudflare
+    CF-RAY: 902541991f1d5d4c-FRA
+uuid: a82ea38c-a7e6-4cac-b5f6-f61d1f518725
+persistent: true
+insertionIndex: 41
+---
+id: c9cccaeb-f110-478c-8573-37da9705cb68
+name: chat_completions
+request:
+  url: /chat/completions
+  method: POST
+  bodyPatterns:
+  - equalToJson: |-
+      {
+        "messages" : [ {
+          "content" : "Answer in up to 3 words: Which ocean contains Bouvet Island?",
+          "role" : "user"
+        } ],
+        "model" : "gpt-4o-mini"
+      }
+    ignoreArrayOrder: false
+    ignoreExtraElements: false
+response:
+  status: 200
+  body: |
+    {
+      "id": "chatcmpl-Apv8Pv3xBhHTnyjBWjy6bAsG5YqsZ",
+      "object": "chat.completion",
+      "created": 1736937717,
+      "model": "gpt-4o-mini-2024-07-18",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "South Atlantic Ocean.",
+            "refusal": null
+          },
+          "logprobs": null,
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 22,
+        "completion_tokens": 5,
+        "total_tokens": 27,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_72ed7ab54c"
+    }
+  headers:
+    Date: "Wed, 15 Jan 2025 10:41:58 GMT"
+    Content-Type: application/json
+    access-control-expose-headers: X-Request-ID
+    openai-organization: test_openai_org_id
+    openai-processing-ms: "216"
+    openai-version: 2020-10-01
+    x-ratelimit-limit-requests: "10000"
+    x-ratelimit-limit-tokens: "200000"
+    x-ratelimit-remaining-requests: "9988"
+    x-ratelimit-remaining-tokens: "199967"
+    x-ratelimit-reset-requests: 1m42.217s
+    x-ratelimit-reset-tokens: 9ms
+    x-request-id: req_1559290685da32a917929979f86aadc1
+    strict-transport-security: max-age=31536000; includeSubDomains; preload
+    CF-Cache-Status: DYNAMIC
+    Set-Cookie: test_set_cookie
+    X-Content-Type-Options: nosniff
+    Server: cloudflare
+    CF-RAY: 9025419f39ef39ca-FRA
+uuid: c9cccaeb-f110-478c-8573-37da9705cb68
+persistent: true
+insertionIndex: 51
+---
+id: a69956e1-6cec-4206-94b4-9464ff656311
+name: chat_completions
+request:
+  url: /chat/completions
+  method: POST
+  bodyPatterns:
+  - equalToJson: |-
+      {
+        "messages" : [ {
+          "content" : "Answer in up to 3 words: Which ocean contains Bouvet Island?",
+          "role" : "user"
+        } ],
+        "model" : "gpt-4o-mini",
+        "stream_options" : {
+          "include_usage" : true
+        },
+        "stream" : true
+      }
+    ignoreArrayOrder: false
+    ignoreExtraElements: false
+response:
+  status: 200
+  body: |+
+    data: {"id":"chatcmpl-Apv8Qw4x7nCDrxDI7IdEWbQu7ZM8f","object":"chat.completion.chunk","created":1736937718,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"role":"assistant","content":"","refusal":null},"logprobs":null,"finish_reason":null}],"usage":null}
+
+    data: {"id":"chatcmpl-Apv8Qw4x7nCDrxDI7IdEWbQu7ZM8f","object":"chat.completion.chunk","created":1736937718,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"content":"South"},"logprobs":null,"finish_reason":null}],"usage":null}
+
+    data: {"id":"chatcmpl-Apv8Qw4x7nCDrxDI7IdEWbQu7ZM8f","object":"chat.completion.chunk","created":1736937718,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"content":" Atlantic"},"logprobs":null,"finish_reason":null}],"usage":null}
+
+    data: {"id":"chatcmpl-Apv8Qw4x7nCDrxDI7IdEWbQu7ZM8f","object":"chat.completion.chunk","created":1736937718,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"content":" Ocean"},"logprobs":null,"finish_reason":null}],"usage":null}
+
+    data: {"id":"chatcmpl-Apv8Qw4x7nCDrxDI7IdEWbQu7ZM8f","object":"chat.completion.chunk","created":1736937718,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"content":"."},"logprobs":null,"finish_reason":null}],"usage":null}
+
+    data: {"id":"chatcmpl-Apv8Qw4x7nCDrxDI7IdEWbQu7ZM8f","object":"chat.completion.chunk","created":1736937718,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"stop"}],"usage":null}
+
+    data: {"id":"chatcmpl-Apv8Qw4x7nCDrxDI7IdEWbQu7ZM8f","object":"chat.completion.chunk","created":1736937718,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[],"usage":{"prompt_tokens":22,"completion_tokens":4,"total_tokens":26,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0}}}
+
+    data: [DONE]
+
+  headers:
+    Date: "Wed, 15 Jan 2025 10:41:58 GMT"
+    Content-Type: text/event-stream; charset=utf-8
+    access-control-expose-headers: X-Request-ID
+    openai-organization: test_openai_org_id
+    openai-processing-ms: "206"
+    openai-version: 2020-10-01
+    x-ratelimit-limit-requests: "10000"
+    x-ratelimit-limit-tokens: "200000"
+    x-ratelimit-remaining-requests: "9987"
+    x-ratelimit-remaining-tokens: "199967"
+    x-ratelimit-reset-requests: 1m50.294s
+    x-ratelimit-reset-tokens: 9ms
+    x-request-id: req_cc4fdbfbaafd60b7a208b71d7638f5a8
+    strict-transport-security: max-age=31536000; includeSubDomains; preload
+    CF-Cache-Status: DYNAMIC
+    Set-Cookie: test_set_cookie
+    X-Content-Type-Options: nosniff
+    Server: cloudflare
+    CF-RAY: 902541a2a9dfd22e-FRA
+uuid: a69956e1-6cec-4206-94b4-9464ff656311
+persistent: true
+insertionIndex: 62
+---
+id: 74858122-5bd3-4e32-a541-66cff59ee2a5
+name: chat_completions
+request:
+  url: /chat/completions
+  method: POST
+  bodyPatterns:
+  - equalToJson: |-
+      {
+        "messages" : [ {
+          "content" : "You are a helpful customer support assistant. Use the supplied tools to assist the user.",
+          "role" : "system"
+        }, {
+          "content" : "Hi, can you tell me the delivery date for my order?",
+          "role" : "user"
+        }, {
+          "content" : "Hi there! I can help with that. Can you please provide your order ID?",
+          "role" : "assistant"
+        }, {
+          "content" : "i think it is order_12345",
+          "role" : "user"
+        } ],
+        "model" : "gpt-4o-mini",
+        "tools" : [ {
+          "type" : "function",
+          "function" : {
+            "description" : "Get the delivery date for a customer's order. Call this whenever you need to know the delivery date, for example when a customer asks 'Where is my package'",
+            "name" : "get_delivery_date",
+            "parameters" : {
+              "type" : "object",
+              "required" : [ "order_id" ],
+              "additionalProperties" : false,
+              "properties" : {
+                "order_id" : {
+                  "description" : "The customer's order ID.",
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        } ]
+      }
+    ignoreArrayOrder: false
+    ignoreExtraElements: false
+response:
+  status: 200
+  body: |
+    {
+      "id": "chatcmpl-Apv8SYH9eeDLz99F8WwJNy64oKSJV",
+      "object": "chat.completion",
+      "created": 1736937720,
+      "model": "gpt-4o-mini-2024-07-18",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "call_2SgbQgkRYRFQRfHHa6qJrmcD",
+                "type": "function",
+                "function": {
+                  "name": "get_delivery_date",
+                  "arguments": "{\"order_id\":\"order_12345\"}"
+                }
+              }
+            ],
+            "refusal": null
+          },
+          "logprobs": null,
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 140,
+        "completion_tokens": 20,
+        "total_tokens": 160,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_72ed7ab54c"
+    }
+  headers:
+    Date: "Wed, 15 Jan 2025 10:42:01 GMT"
+    Content-Type: application/json
+    access-control-expose-headers: X-Request-ID
+    openai-organization: test_openai_org_id
+    openai-processing-ms: "557"
+    openai-version: 2020-10-01
+    x-ratelimit-limit-requests: "10000"
+    x-ratelimit-limit-tokens: "200000"
+    x-ratelimit-remaining-requests: "9986"
+    x-ratelimit-remaining-tokens: "199921"
+    x-ratelimit-reset-requests: 1m56.737s
+    x-ratelimit-reset-tokens: 23ms
+    x-request-id: req_f26d3b442616aa859740b767adfc089e
+    strict-transport-security: max-age=31536000; includeSubDomains; preload
+    CF-Cache-Status: DYNAMIC
+    Set-Cookie: test_set_cookie
+    X-Content-Type-Options: nosniff
+    Server: cloudflare
+    CF-RAY: 902541b07b2cdba7-FRA
+uuid: 74858122-5bd3-4e32-a541-66cff59ee2a5
+persistent: true
+insertionIndex: 85
+---
+id: 113b843a-84ff-4602-998d-45eff8c47102
+name: chat_completions
+request:
+  url: /chat/completions
+  method: POST
+  bodyPatterns:
+  - equalToJson: |-
+      {
+        "messages" : [ {
+          "content" : "Answer in up to 3 words: Which ocean contains Bouvet Island?",
+          "role" : "user"
+        } ],
+        "model" : "gpt-4o-mini",
+        "stream" : true
+      }
+    ignoreArrayOrder: false
+    ignoreExtraElements: false
+response:
+  status: 200
+  body: |+
+    data: {"id":"chatcmpl-Apv8TMnbMJqqf8iagD3unTyabFIuP","object":"chat.completion.chunk","created":1736937721,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"role":"assistant","content":"","refusal":null},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8TMnbMJqqf8iagD3unTyabFIuP","object":"chat.completion.chunk","created":1736937721,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"content":"Southern"},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8TMnbMJqqf8iagD3unTyabFIuP","object":"chat.completion.chunk","created":1736937721,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"content":" Ocean"},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8TMnbMJqqf8iagD3unTyabFIuP","object":"chat.completion.chunk","created":1736937721,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"content":"."},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8TMnbMJqqf8iagD3unTyabFIuP","object":"chat.completion.chunk","created":1736937721,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"stop"}]}
+
+    data: [DONE]
+
+  headers:
+    Date: "Wed, 15 Jan 2025 10:42:01 GMT"
+    Content-Type: text/event-stream; charset=utf-8
+    access-control-expose-headers: X-Request-ID
+    openai-organization: test_openai_org_id
+    openai-processing-ms: "235"
+    openai-version: 2020-10-01
+    x-ratelimit-limit-requests: "10000"
+    x-ratelimit-limit-tokens: "200000"
+    x-ratelimit-remaining-requests: "9985"
+    x-ratelimit-remaining-tokens: "199967"
+    x-ratelimit-reset-requests: 2m4.405s
+    x-ratelimit-reset-tokens: 9ms
+    x-request-id: req_48431776d0d30df7c47baa9d3eec8435
+    strict-transport-security: max-age=31536000; includeSubDomains; preload
+    CF-Cache-Status: DYNAMIC
+    Set-Cookie: test_set_cookie
+    X-Content-Type-Options: nosniff
+    Server: cloudflare
+    CF-RAY: 902541b68c2cd40e-FRA
+uuid: 113b843a-84ff-4602-998d-45eff8c47102
+persistent: true
+insertionIndex: 98
+---
+id: 80a9375e-0202-42e1-a752-5944d2f57013
+name: chat_completions
+request:
+  url: /chat/completions
+  method: POST
+  bodyPatterns:
+  - equalToJson: |-
+      {
+        "messages" : [ {
+          "content" : "Answer in up to 3 words: Which ocean contains Bouvet Island?",
+          "role" : "user"
+        } ],
+        "model" : "gpt-4o-mini",
+        "n" : 2
+      }
+    ignoreArrayOrder: false
+    ignoreExtraElements: false
+response:
+  status: 200
+  body: |
+    {
+      "id": "chatcmpl-Apv8UsFfVJ9dkymA5vTRjoBZT1ZnY",
+      "object": "chat.completion",
+      "created": 1736937722,
+      "model": "gpt-4o-mini-2024-07-18",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "South Atlantic Ocean.",
+            "refusal": null
+          },
+          "logprobs": null,
+          "finish_reason": "stop"
+        },
+        {
+          "index": 1,
+          "message": {
+            "role": "assistant",
+            "content": "Atlantic Ocean.",
+            "refusal": null
+          },
+          "logprobs": null,
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 22,
+        "completion_tokens": 9,
+        "total_tokens": 31,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_72ed7ab54c"
+    }
+  headers:
+    Date: "Wed, 15 Jan 2025 10:42:02 GMT"
+    Content-Type: application/json
+    access-control-expose-headers: X-Request-ID
+    openai-organization: test_openai_org_id
+    openai-processing-ms: "324"
+    openai-version: 2020-10-01
+    x-ratelimit-limit-requests: "10000"
+    x-ratelimit-limit-tokens: "200000"
+    x-ratelimit-remaining-requests: "9984"
+    x-ratelimit-remaining-tokens: "199952"
+    x-ratelimit-reset-requests: 2m12.397s
+    x-ratelimit-reset-tokens: 14ms
+    x-request-id: req_98f6b1e98a158e8d36bcf80a52c0a3ef
+    strict-transport-security: max-age=31536000; includeSubDomains; preload
+    CF-Cache-Status: DYNAMIC
+    Set-Cookie: test_set_cookie
+    X-Content-Type-Options: nosniff
+    Server: cloudflare
+    CF-RAY: 902541ba7c152bbc-FRA
+uuid: 80a9375e-0202-42e1-a752-5944d2f57013
+persistent: true
+insertionIndex: 112
+---
+id: cb8c9b74-4301-43da-8dae-35edddc2e8da
+name: chat_completions
+request:
+  url: /chat/completions
+  method: POST
+  bodyPatterns:
+  - equalToJson: |-
+      {
+        "messages" : [ {
+          "content" : "You are a helpful customer support assistant. Use the supplied tools to assist the user.",
+          "role" : "system"
+        }, {
+          "content" : "Hi, can you tell me the delivery date for my order?",
+          "role" : "user"
+        }, {
+          "content" : "Hi there! I can help with that. Can you please provide your order ID?",
+          "role" : "assistant"
+        }, {
+          "content" : "i think it is order_12345",
+          "role" : "user"
+        } ],
+        "model" : "gpt-4o-mini",
+        "tools" : [ {
+          "type" : "function",
+          "function" : {
+            "description" : "Get the delivery date for a customer's order. Call this whenever you need to know the delivery date, for example when a customer asks 'Where is my package'",
+            "name" : "get_delivery_date",
+            "parameters" : {
+              "type" : "object",
+              "required" : [ "order_id" ],
+              "additionalProperties" : false,
+              "properties" : {
+                "order_id" : {
+                  "description" : "The customer's order ID.",
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        } ],
+        "stream" : true
+      }
+    ignoreArrayOrder: false
+    ignoreExtraElements: false
+response:
+  status: 200
+  body: |+
+    data: {"id":"chatcmpl-Apv8U9W0k0nwIresPKQD6XCJZ9jM4","object":"chat.completion.chunk","created":1736937722,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"role":"assistant","content":null,"tool_calls":[{"index":0,"id":"call_Px6zH4VwcZr5c0x7Vwl1ETbH","type":"function","function":{"name":"get_delivery_date","arguments":""}}],"refusal":null},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8U9W0k0nwIresPKQD6XCJZ9jM4","object":"chat.completion.chunk","created":1736937722,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\""}}]},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8U9W0k0nwIresPKQD6XCJZ9jM4","object":"chat.completion.chunk","created":1736937722,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"order"}}]},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8U9W0k0nwIresPKQD6XCJZ9jM4","object":"chat.completion.chunk","created":1736937722,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"_id"}}]},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8U9W0k0nwIresPKQD6XCJZ9jM4","object":"chat.completion.chunk","created":1736937722,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\":\""}}]},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8U9W0k0nwIresPKQD6XCJZ9jM4","object":"chat.completion.chunk","created":1736937722,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"order"}}]},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8U9W0k0nwIresPKQD6XCJZ9jM4","object":"chat.completion.chunk","created":1736937722,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"_"}}]},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8U9W0k0nwIresPKQD6XCJZ9jM4","object":"chat.completion.chunk","created":1736937722,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"123"}}]},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8U9W0k0nwIresPKQD6XCJZ9jM4","object":"chat.completion.chunk","created":1736937722,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"45"}}]},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8U9W0k0nwIresPKQD6XCJZ9jM4","object":"chat.completion.chunk","created":1736937722,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\"}"}}]},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-Apv8U9W0k0nwIresPKQD6XCJZ9jM4","object":"chat.completion.chunk","created":1736937722,"model":"gpt-4o-mini-2024-07-18","service_tier":"default","system_fingerprint":"fp_72ed7ab54c","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"tool_calls"}]}
+
+    data: [DONE]
+
+  headers:
+    Date: "Wed, 15 Jan 2025 10:42:03 GMT"
+    Content-Type: text/event-stream; charset=utf-8
+    access-control-expose-headers: X-Request-ID
+    openai-organization: test_openai_org_id
+    openai-processing-ms: "317"
+    openai-version: 2020-10-01
+    x-ratelimit-limit-requests: "10000"
+    x-ratelimit-limit-tokens: "200000"
+    x-ratelimit-remaining-requests: "9983"
+    x-ratelimit-remaining-tokens: "199921"
+    x-ratelimit-reset-requests: 2m20.295s
+    x-ratelimit-reset-tokens: 23ms
+    x-request-id: req_a226c8d9b216eb3470e30d6e2e29f223
+    strict-transport-security: max-age=31536000; includeSubDomains; preload
+    CF-Cache-Status: DYNAMIC
+    Set-Cookie: test_set_cookie
+    X-Content-Type-Options: nosniff
+    Server: cloudflare
+    CF-RAY: 902541bf388ad369-FRA
+uuid: cb8c9b74-4301-43da-8dae-35edddc2e8da
+persistent: true
+insertionIndex: 127
+---
+id: be7cec37-1813-4a2d-8d8e-e84de34996ff
+name: bad-url_chat_completions
+request:
+  url: /bad-url/chat/completions
+  method: POST
+  bodyPatterns:
+  - equalToJson: |-
+      {
+        "messages" : [ {
+          "content" : "Answer in up to 3 words: Which ocean contains Bouvet Island?",
+          "role" : "user"
+        } ],
+        "model" : "gpt-4o-mini",
+        "stream" : true
+      }
+    ignoreArrayOrder: false
+    ignoreExtraElements: false
+response:
+  status: 404
+  body: "<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404\
+    \ Not Found</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\
+    \n"
+  headers:
+    Date: "Wed, 15 Jan 2025 10:42:03 GMT"
+    Content-Type: text/html
+    strict-transport-security: max-age=31536000; includeSubDomains; preload
+    CF-Cache-Status: DYNAMIC
+    Set-Cookie: test_set_cookie
+    X-Content-Type-Options: nosniff
+    Server: cloudflare
+    CF-RAY: 902541c3ebfdd2a5-FRA
+uuid: be7cec37-1813-4a2d-8d8e-e84de34996ff
+persistent: true
+insertionIndex: 143

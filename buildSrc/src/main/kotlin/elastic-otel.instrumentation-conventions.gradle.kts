@@ -29,10 +29,10 @@ dependencies {
   testImplementation("io.opentelemetry.javaagent:opentelemetry-testing-common")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
 
-  add("codegen", "io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
+  add("codegen", "io.opentelemetry.javaagent:opentelemetry-javaagent-tooling:2.11.0-alpha")
   add("muzzleBootstrap", "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations-support")
   add("muzzleTooling", "io.opentelemetry.javaagent:opentelemetry-javaagent-extension-api")
-  add("muzzleTooling", "io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
+  add("muzzleTooling", "io.opentelemetry.javaagent:opentelemetry-javaagent-tooling:2.11.0-alpha")
 }
 
 fun relocatePackages( shadowJar : ShadowJar) {
