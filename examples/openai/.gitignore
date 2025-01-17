@@ -1,0 +1,4 @@
+# Ignore elastic-otel-javaagent JAR files
+elastic-otel-javaagent*.jar
+shdotenv
+.env
