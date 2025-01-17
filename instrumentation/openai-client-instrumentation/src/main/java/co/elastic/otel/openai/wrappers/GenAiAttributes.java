@@ -22,7 +22,7 @@ import io.opentelemetry.api.common.AttributeKey;
 import java.util.List;
 
 public class GenAiAttributes {
-  
+
   public static final AttributeKey<String> GEN_AI_OPERATION_NAME =
       AttributeKey.stringKey("gen_ai.operation.name");
   public static final AttributeKey<Double> GEN_AI_REQUEST_FREQUENCY_PENALTY =
