@@ -30,6 +30,7 @@ public class InstrumentationSettings {
 
   // we do not directly have access to the client baseUrl after construction, therefore we need to
   // remember it
+  // visible for testing
   final String serverAddress;
   final Long serverPort;
 

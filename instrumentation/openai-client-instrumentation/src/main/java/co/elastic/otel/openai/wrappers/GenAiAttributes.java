@@ -22,9 +22,7 @@ import io.opentelemetry.api.common.AttributeKey;
 import java.util.List;
 
 public class GenAiAttributes {
-
-  // TODO: ensure with a test that the attributes don't go out of sync with semconv
-
+  
   public static final AttributeKey<String> GEN_AI_OPERATION_NAME =
       AttributeKey.stringKey("gen_ai.operation.name");
   public static final AttributeKey<Double> GEN_AI_REQUEST_FREQUENCY_PENALTY =

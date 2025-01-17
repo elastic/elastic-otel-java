@@ -32,7 +32,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import org.jetbrains.annotations.NotNull;
 
 public class TracingStreamedResponse implements StreamResponse<ChatCompletionChunk> {
 
@@ -55,7 +54,6 @@ public class TracingStreamedResponse implements StreamResponse<ChatCompletionChu
     this.requestHolder = requestHolder;
   }
 
-  @NotNull
   @Override
   public Stream<ChatCompletionChunk> stream() {
     return StreamSupport.stream(new TracingSpliterator(delegate.stream().spliterator()), false);

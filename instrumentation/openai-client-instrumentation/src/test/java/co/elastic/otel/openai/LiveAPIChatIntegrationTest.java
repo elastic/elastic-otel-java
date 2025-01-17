@@ -62,7 +62,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -576,7 +575,7 @@ class LiveAPIChatIntegrationTest {
                                         equalTo(SERVER_PORT, clientPort)))));
   }
 
-  @NotNull
+  @Nonnull
   private static ChatCompletionMessageParam createAssistantMessage(String content) {
     return ChatCompletionMessageParam.ofChatCompletionAssistantMessageParam(
         ChatCompletionAssistantMessageParam.builder()
@@ -585,7 +584,7 @@ class LiveAPIChatIntegrationTest {
             .build());
   }
 
-  @NotNull
+  @Nonnull
   private static ChatCompletionMessageParam createUserMessage(String content) {
     return ChatCompletionMessageParam.ofChatCompletionUserMessageParam(
         ChatCompletionUserMessageParam.builder()
@@ -594,7 +593,7 @@ class LiveAPIChatIntegrationTest {
             .build());
   }
 
-  @NotNull
+  @Nonnull
   private static ChatCompletionMessageParam createSystemMessage(String content) {
     return ChatCompletionMessageParam.ofChatCompletionSystemMessageParam(
         ChatCompletionSystemMessageParam.builder()

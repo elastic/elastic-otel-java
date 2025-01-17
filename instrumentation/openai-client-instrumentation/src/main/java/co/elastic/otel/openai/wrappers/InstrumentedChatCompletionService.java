@@ -54,7 +54,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
 
 public class InstrumentedChatCompletionService implements CompletionService {
 
@@ -223,7 +222,6 @@ public class InstrumentedChatCompletionService implements CompletionService {
     return completion;
   }
 
-  @NotNull
   private ChatCompletion createWithLogs(
       ChatCompletionCreateParams chatCompletionCreateParams, RequestOptions requestOptions) {
     ChatCompletionEventsHelper.emitPromptLogEvents(chatCompletionCreateParams, settings);
@@ -257,7 +255,6 @@ public class InstrumentedChatCompletionService implements CompletionService {
     return wrappedResponse;
   }
 
-  @NotNull
   private StreamResponse<ChatCompletionChunk> createStreamingWithLogs(
       ChatCompletionCreateParams chatCompletionCreateParams, RequestOptions requestOptions) {
     ChatCompletionEventsHelper.emitPromptLogEvents(chatCompletionCreateParams, settings);

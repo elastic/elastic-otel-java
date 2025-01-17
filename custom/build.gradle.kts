@@ -10,7 +10,6 @@ dependencies {
   implementation(project(":common"))
   implementation(project(":inferred-spans"))
   implementation(project(":universal-profiling-integration"))
-  implementation(project(":instrumentation:openai-client-instrumentation"))
   implementation(project(":resources"))
   instrumentations.forEach {
     implementation(project(it))

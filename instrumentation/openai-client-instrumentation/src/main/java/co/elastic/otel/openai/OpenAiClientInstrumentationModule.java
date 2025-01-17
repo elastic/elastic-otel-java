@@ -18,6 +18,7 @@
  */
 package co.elastic.otel.openai;
 
+import co.elastic.otel.openai.wrappers.Constants;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.javaagent.extension.instrumentation.InstrumentationModule;
 import io.opentelemetry.javaagent.extension.instrumentation.TypeInstrumentation;
@@ -29,7 +30,7 @@ import java.util.List;
 public class OpenAiClientInstrumentationModule extends InstrumentationModule {
 
   public OpenAiClientInstrumentationModule() {
-    super("openai-client");
+    super(Constants.INSTRUMENTATION_NAME);
   }
 
   @Override

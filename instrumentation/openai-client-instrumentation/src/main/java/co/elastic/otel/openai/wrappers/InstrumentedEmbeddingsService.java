@@ -37,7 +37,6 @@ import io.opentelemetry.instrumentation.api.instrumenter.AttributesExtractor;
 import io.opentelemetry.instrumentation.api.instrumenter.Instrumenter;
 import io.opentelemetry.instrumentation.api.instrumenter.SpanKindExtractor;
 import java.util.Collections;
-import org.jetbrains.annotations.NotNull;
 
 public class InstrumentedEmbeddingsService implements EmbeddingService {
 
@@ -102,11 +101,9 @@ public class InstrumentedEmbeddingsService implements EmbeddingService {
               })
           .buildInstrumenter(SpanKindExtractor.alwaysClient());
 
-  @NotNull
   @Override
   public CreateEmbeddingResponse create(
-      @NotNull EmbeddingCreateParams embeddingCreateParams,
-      @NotNull RequestOptions requestOptions) {
+      EmbeddingCreateParams embeddingCreateParams, RequestOptions requestOptions) {
     RequestHolder requestHolder = new RequestHolder(embeddingCreateParams, settings);
 
     Context parentCtx = Context.current();

@@ -82,7 +82,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -2293,7 +2292,7 @@ class ChatTest {
     assertThat(testing.logRecords()).isEmpty();
   }
 
-  @NotNull
+  @Nonnull
   private static ChatCompletionTool buildGetWeatherToolDefinition() {
     Map<String, JsonValue> location = new HashMap<>();
     location.put("type", JsonValue.from("string"));
@@ -2319,7 +2318,7 @@ class ChatTest {
         .build();
   }
 
-  @NotNull
+  @Nonnull
   static ChatCompletionTool buildGetDeliveryDateToolDefinition() {
     Map<String, JsonValue> orderId = new HashMap<>();
     orderId.put("type", JsonValue.from("string"));
@@ -2349,7 +2348,7 @@ class ChatTest {
         .build();
   }
 
-  @NotNull
+  @Nonnull
   private static ChatCompletionMessageParam createAssistantMessage(String content) {
     return ChatCompletionMessageParam.ofChatCompletionAssistantMessageParam(
         ChatCompletionAssistantMessageParam.builder()
@@ -2358,7 +2357,7 @@ class ChatTest {
             .build());
   }
 
-  @NotNull
+  @Nonnull
   private static ChatCompletionMessageParam createUserMessage(String content) {
     return ChatCompletionMessageParam.ofChatCompletionUserMessageParam(
         ChatCompletionUserMessageParam.builder()
@@ -2367,7 +2366,7 @@ class ChatTest {
             .build());
   }
 
-  @NotNull
+  @Nonnull
   private static ChatCompletionMessageParam createSystemMessage(String content) {
     return ChatCompletionMessageParam.ofChatCompletionSystemMessageParam(
         ChatCompletionSystemMessageParam.builder()

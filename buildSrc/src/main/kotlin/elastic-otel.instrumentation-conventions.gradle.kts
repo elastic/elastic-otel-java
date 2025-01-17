@@ -1,5 +1,4 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import gradle.kotlin.dsl.accessors._abb1a50025ac2e3203a09f003b1a6537.implementation
 
 plugins {
   `java-library`
@@ -76,6 +75,9 @@ tasks.withType<Test>().configureEach {
   jvmArgs(
     "-Dotel.javaagent.debug=true",
     "-javaagent:${agentForTesting.files.first().absolutePath}",
+    // loads the given just jar, but in contrast to external extensions doesn't perform runtime shading
+    // instead the instrumentations are expected to be correctly shaded already in the jar
+    // Also the classes end up in the agent classloader instead of the extension loader
     "-Dotel.javaagent.experimental.initializer.jar=${tasks.shadowJar.get().archiveFile.get().asFile.absolutePath}",
     "-Dotel.javaagent.testing.additional-library-ignores.enabled=false",
     "-Dotel.javaagent.testing.fail-on-context-leak=true",

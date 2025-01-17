@@ -24,7 +24,6 @@ import io.opentelemetry.context.Context;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.jetbrains.annotations.NotNull;
 
 public class EventLoggingStreamedResponse implements StreamResponse<ChatCompletionChunk> {
 
@@ -44,7 +43,6 @@ public class EventLoggingStreamedResponse implements StreamResponse<ChatCompleti
   /** Key is the choice index */
   private final Map<Long, StreamedMessageBuffer> choiceBuffers = new HashMap<>();
 
-  @NotNull
   @Override
   public Stream<ChatCompletionChunk> stream() {
     return delegate.stream()

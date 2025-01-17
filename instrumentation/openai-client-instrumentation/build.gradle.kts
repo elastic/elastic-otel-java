@@ -14,6 +14,8 @@ dependencies {
 
 muzzle {
   // TODO: setup muzzle to check older versions of openAI client
+  // See the docs on how to do it:
+  // https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/contributing/muzzle.md
 }
 
 tasks.withType<Test>().configureEach {
