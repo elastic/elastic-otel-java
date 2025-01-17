@@ -575,7 +575,6 @@ class LiveAPIChatIntegrationTest {
                                         equalTo(SERVER_PORT, clientPort)))));
   }
 
-  @Nonnull
   private static ChatCompletionMessageParam createAssistantMessage(String content) {
     return ChatCompletionMessageParam.ofChatCompletionAssistantMessageParam(
         ChatCompletionAssistantMessageParam.builder()
@@ -584,7 +583,6 @@ class LiveAPIChatIntegrationTest {
             .build());
   }
 
-  @Nonnull
   private static ChatCompletionMessageParam createUserMessage(String content) {
     return ChatCompletionMessageParam.ofChatCompletionUserMessageParam(
         ChatCompletionUserMessageParam.builder()
@@ -593,7 +591,6 @@ class LiveAPIChatIntegrationTest {
             .build());
   }
 
-  @Nonnull
   private static ChatCompletionMessageParam createSystemMessage(String content) {
     return ChatCompletionMessageParam.ofChatCompletionSystemMessageParam(
         ChatCompletionSystemMessageParam.builder()

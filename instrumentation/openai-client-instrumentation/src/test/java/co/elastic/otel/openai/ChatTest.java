@@ -2292,7 +2292,6 @@ class ChatTest {
     assertThat(testing.logRecords()).isEmpty();
   }
 
-  @Nonnull
   private static ChatCompletionTool buildGetWeatherToolDefinition() {
     Map<String, JsonValue> location = new HashMap<>();
     location.put("type", JsonValue.from("string"));
@@ -2318,7 +2317,6 @@ class ChatTest {
         .build();
   }
 
-  @Nonnull
   static ChatCompletionTool buildGetDeliveryDateToolDefinition() {
     Map<String, JsonValue> orderId = new HashMap<>();
     orderId.put("type", JsonValue.from("string"));
@@ -2348,7 +2346,6 @@ class ChatTest {
         .build();
   }
 
-  @Nonnull
   private static ChatCompletionMessageParam createAssistantMessage(String content) {
     return ChatCompletionMessageParam.ofChatCompletionAssistantMessageParam(
         ChatCompletionAssistantMessageParam.builder()
@@ -2357,7 +2354,6 @@ class ChatTest {
             .build());
   }
 
-  @Nonnull
   private static ChatCompletionMessageParam createUserMessage(String content) {
     return ChatCompletionMessageParam.ofChatCompletionUserMessageParam(
         ChatCompletionUserMessageParam.builder()
@@ -2366,7 +2362,6 @@ class ChatTest {
             .build());
   }
 
-  @Nonnull
   private static ChatCompletionMessageParam createSystemMessage(String content) {
     return ChatCompletionMessageParam.ofChatCompletionSystemMessageParam(
         ChatCompletionSystemMessageParam.builder()
