@@ -23,7 +23,7 @@ opentelemetryContribAlpha = "1.42.0-alpha"
 opentelemetrySemconvAlpha = "1.29.0-alpha"
 
 # instrumented libraries
-openaiClient = "0.11.0"
+openaiClient = "0.11.8"
 
 [libraries]
 
