@@ -22,7 +22,6 @@ import co.elastic.otel.openai.wrappers.Constants;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.javaagent.extension.instrumentation.InstrumentationModule;
 import io.opentelemetry.javaagent.extension.instrumentation.TypeInstrumentation;
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,11 +30,6 @@ public class OpenAiClientInstrumentationModule extends InstrumentationModule {
 
   public OpenAiClientInstrumentationModule() {
     super(Constants.INSTRUMENTATION_NAME);
-  }
-
-  @Override
-  public boolean defaultEnabled(ConfigProperties config) {
-    return false;
   }
 
   @Override
