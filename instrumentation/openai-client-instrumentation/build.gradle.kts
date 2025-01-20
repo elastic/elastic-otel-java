@@ -17,8 +17,3 @@ muzzle {
   // See the docs on how to do it:
   // https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/contributing/muzzle.md
 }
-
-tasks.withType<Test>().configureEach {
-  // The instrumentation is experimental and therefore disabled by default, it needs to be explicitly enabled
-  jvmArgs("-Dotel.instrumentation.openai-client.enabled=true")
-}
