@@ -1,5 +1,5 @@
 [versions]
-shadow = "8.1.1"
+shadow = "8.3.5"
 jib = "3.4.4"
 spotless = "7.0.1"
 junit = "5.11.4"
@@ -21,6 +21,9 @@ opentelemetryContribAlpha = "1.42.0-alpha"
 # While the semconv stable artifact is provided transitively by the agent, we still have to explicitly
 # reference the "incubating" version explicitly
 opentelemetrySemconvAlpha = "1.29.0-alpha"
+
+# instrumented libraries
+openaiClient = "0.11.0"
 
 [libraries]
 
@@ -44,6 +47,7 @@ autoservice-annotations = { group = "com.google.auto.service", name = "auto-serv
 assertj-core = "org.assertj:assertj-core:3.27.2"
 awaitility = "org.awaitility:awaitility:4.2.2"
 findbugs-jsr305 = "com.google.code.findbugs:jsr305:3.0.2"
+wiremock = "com.github.tomakehurst:wiremock-jre8:2.35.2"
 testcontainers = "org.testcontainers:testcontainers:1.20.4"
 logback = "ch.qos.logback:logback-classic:1.5.16"
 jackson = "com.fasterxml.jackson.core:jackson-databind:2.18.2"
@@ -66,12 +70,17 @@ asyncprofiler = "tools.profiler:async-profiler:3.0"
 freemarker = "org.freemarker:freemarker:2.3.34"
 
 spotlessPlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
-shadowPlugin = { group = "com.github.johnrengelman", name = "shadow", version.ref = "shadow" }
+shadowPlugin = { group = "com.gradleup.shadow", name = "shadow-gradle-plugin", version.ref = "shadow" }
 licenseReportPlugin = "com.github.jk1.dependency-license-report:com.github.jk1.dependency-license-report.gradle.plugin:2.9"
+muzzleCheckPlugin = { group = "io.opentelemetry.instrumentation.muzzle-check", name = "io.opentelemetry.instrumentation.muzzle-check.gradle.plugin", version.ref = "opentelemetryJavaagentAlpha" }
+muzzleGenerationPlugin = { group = "io.opentelemetry.instrumentation.muzzle-generation", name = "io.opentelemetry.instrumentation.muzzle-generation.gradle.plugin", version.ref = "opentelemetryJavaagentAlpha" }
 # Ant should be kept in sync with the version used in the shadow plugin
 ant = "org.apache.ant:ant:1.10.15"
 # ASM is currently only used during compile-time, so it is okay to diverge from the version used in ByteBuddy
 asm = "org.ow2.asm:asm:9.7"
+
+# Instrumented libraries
+openaiClient = {group = "com.openai", name = "openai-java", version.ref ="openaiClient"}
 
 [bundles]
 
@@ -84,4 +93,3 @@ taskinfo = { id = "org.barfuin.gradle.taskinfo", version = '2.2.0' }
 jmh = {id = "me.champeau.jmh", version = "0.7.2"}
 nexusPublish = { id = "io.github.gradle-nexus.publish-plugin", version = '2.0.0' }
 dockerJavaApplication = { id = "com.bmuschko.docker-java-application", version = "9.4.0" }
-shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
