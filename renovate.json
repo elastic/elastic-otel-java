@@ -17,6 +17,7 @@
   "ignorePaths": [
     ".github/**",
     ".buildkite/**",
+    "examples/**",
     "jvmti-access/jni-build/*.Dockerfile"
   ]
 }
