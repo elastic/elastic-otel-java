@@ -84,6 +84,8 @@ jobs:
             vm: 'openj9'
           - version: 23
             vm: 'hotspot'
+          - version: 24-ea
+            vm: 'hotspot'
     steps:
       # We use the cached working directory so that we don't have to recompile everything
       - name: Download cached build working directory
