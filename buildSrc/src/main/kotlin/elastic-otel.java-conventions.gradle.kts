@@ -69,8 +69,13 @@ afterEvaluate {
     if (testJavaVersion != null) {
       javaLauncher.set(
         javaToolchains.launcherFor {
+          if (useJ9) {
+            implementation.set(JvmImplementation.J9)
+          } else {
+            vendor.set(JvmVendorSpec.ADOPTIUM) //Translates to temurin, also supports early-access builds
+            implementation.set(JvmImplementation.VENDOR_SPECIFIC)
+          }
           languageVersion.set(JavaLanguageVersion.of(testJavaVersion.majorVersion))
-          implementation.set(if (useJ9) JvmImplementation.J9 else JvmImplementation.VENDOR_SPECIFIC)
         }
       )
 
