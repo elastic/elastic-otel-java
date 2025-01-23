@@ -14,7 +14,7 @@ repositories {
 
 dependencies {
     implementation(platform("org.slf4j:slf4j-bom:2.0.16"))
-    implementation("com.openai:openai-java:0.11.8")
+    implementation("com.openai:openai-java:0.13.0")
     implementation("org.slf4j:slf4j-simple")
 }
 
