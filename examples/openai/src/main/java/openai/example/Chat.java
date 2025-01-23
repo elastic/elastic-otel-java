@@ -14,10 +14,9 @@ final class Chat {
 
         String message = "Answer in up to 3 words: Which ocean contains Bouvet Island?";
         ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
-                .addMessage(ChatCompletionMessageParam.ofChatCompletionUserMessageParam(ChatCompletionUserMessageParam.builder()
-                        .role(ChatCompletionUserMessageParam.Role.USER)
-                        .content(ChatCompletionUserMessageParam.Content.ofTextContent(message))
-                        .build()))
+                .addMessage(ChatCompletionUserMessageParam.builder()
+                    .content(message)
+                    .build())
                 .model(chatModel)
                 .build();
 

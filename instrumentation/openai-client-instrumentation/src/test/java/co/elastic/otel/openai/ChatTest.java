@@ -255,7 +255,7 @@ class ChatTest {
             .topP(1.0)
             .stopOfStrings(Collections.singletonList("foo"))
             .seed(100L)
-            .responseFormat(ResponseFormatText.builder().type(ResponseFormatText.Type.TEXT).build())
+            .responseFormat(ResponseFormatText.builder().build())
             .build();
 
     long startTimeNanos = System.nanoTime();
@@ -1374,7 +1374,7 @@ class ChatTest {
             .topP(1.0)
             .stopOfStrings(Collections.singletonList("foo"))
             .seed(100L)
-            .responseFormat(ResponseFormatText.builder().type(ResponseFormatText.Type.TEXT).build())
+            .responseFormat(ResponseFormatText.builder().build())
             .build();
 
     long startTimeNanos = System.nanoTime();
@@ -2048,7 +2048,6 @@ class ChatTest {
     ChatCompletionMessageParam assistantMessage =
         ChatCompletionMessageParam.ofChatCompletionAssistantMessageParam(
             ChatCompletionAssistantMessageParam.builder()
-                .role(ChatCompletionAssistantMessageParam.Role.ASSISTANT)
                 .content(ChatCompletionAssistantMessageParam.Content.ofTextContent(""))
                 .toolCalls(toolCalls)
                 .build());
@@ -2301,7 +2300,6 @@ class ChatTest {
     properties.put("location", JsonObject.of(location));
 
     return ChatCompletionTool.builder()
-        .type(ChatCompletionTool.Type.FUNCTION)
         .function(
             FunctionDefinition.builder()
                 .name("get_weather")
@@ -2326,7 +2324,6 @@ class ChatTest {
     properties.put("order_id", JsonObject.of(orderId));
 
     return ChatCompletionTool.builder()
-        .type(ChatCompletionTool.Type.FUNCTION)
         .function(
             FunctionDefinition.builder()
                 .name("get_delivery_date")
@@ -2349,7 +2346,6 @@ class ChatTest {
   private static ChatCompletionMessageParam createAssistantMessage(String content) {
     return ChatCompletionMessageParam.ofChatCompletionAssistantMessageParam(
         ChatCompletionAssistantMessageParam.builder()
-            .role(ChatCompletionAssistantMessageParam.Role.ASSISTANT)
             .content(ChatCompletionAssistantMessageParam.Content.ofTextContent(content))
             .build());
   }
@@ -2357,7 +2353,6 @@ class ChatTest {
   private static ChatCompletionMessageParam createUserMessage(String content) {
     return ChatCompletionMessageParam.ofChatCompletionUserMessageParam(
         ChatCompletionUserMessageParam.builder()
-            .role(ChatCompletionUserMessageParam.Role.USER)
             .content(ChatCompletionUserMessageParam.Content.ofTextContent(content))
             .build());
   }
@@ -2365,7 +2360,6 @@ class ChatTest {
   private static ChatCompletionMessageParam createSystemMessage(String content) {
     return ChatCompletionMessageParam.ofChatCompletionSystemMessageParam(
         ChatCompletionSystemMessageParam.builder()
-            .role(ChatCompletionSystemMessageParam.Role.SYSTEM)
             .content(ChatCompletionSystemMessageParam.Content.ofTextContent(content))
             .build());
   }
@@ -2373,7 +2367,6 @@ class ChatTest {
   private static ChatCompletionMessageParam createToolMessage(String response, String id) {
     return ChatCompletionMessageParam.ofChatCompletionToolMessageParam(
         ChatCompletionToolMessageParam.builder()
-            .role(ChatCompletionToolMessageParam.Role.TOOL)
             .toolCallId(id)
             .content(ChatCompletionToolMessageParam.Content.ofTextContent(response))
             .build());

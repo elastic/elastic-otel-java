@@ -227,7 +227,7 @@ public class ChatCompletionEventsHelper {
   private static Value<?> buildToolCallEventObject(ChatCompletionMessageToolCall call) {
     Map<String, Value<?>> result = new HashMap<>();
     result.put("id", Value.of(call.id()));
-    result.put("type", Value.of(call.type().toString()));
+    result.put("type", Value.of(call._type().toString()));
     result.put("function", buildFunctionEventObject(call.function()));
     return Value.of(result);
   }

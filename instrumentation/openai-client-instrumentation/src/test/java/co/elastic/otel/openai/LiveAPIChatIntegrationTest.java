@@ -578,7 +578,6 @@ class LiveAPIChatIntegrationTest {
   private static ChatCompletionMessageParam createAssistantMessage(String content) {
     return ChatCompletionMessageParam.ofChatCompletionAssistantMessageParam(
         ChatCompletionAssistantMessageParam.builder()
-            .role(ChatCompletionAssistantMessageParam.Role.ASSISTANT)
             .content(ChatCompletionAssistantMessageParam.Content.ofTextContent(content))
             .build());
   }
@@ -586,7 +585,6 @@ class LiveAPIChatIntegrationTest {
   private static ChatCompletionMessageParam createUserMessage(String content) {
     return ChatCompletionMessageParam.ofChatCompletionUserMessageParam(
         ChatCompletionUserMessageParam.builder()
-            .role(ChatCompletionUserMessageParam.Role.USER)
             .content(ChatCompletionUserMessageParam.Content.ofTextContent(content))
             .build());
   }
@@ -594,7 +592,6 @@ class LiveAPIChatIntegrationTest {
   private static ChatCompletionMessageParam createSystemMessage(String content) {
     return ChatCompletionMessageParam.ofChatCompletionSystemMessageParam(
         ChatCompletionSystemMessageParam.builder()
-            .role(ChatCompletionSystemMessageParam.Role.SYSTEM)
             .content(ChatCompletionSystemMessageParam.Content.ofTextContent(content))
             .build());
   }
@@ -602,7 +599,6 @@ class LiveAPIChatIntegrationTest {
   private static ChatCompletionMessageParam createToolMessage(String response, String id) {
     return ChatCompletionMessageParam.ofChatCompletionToolMessageParam(
         ChatCompletionToolMessageParam.builder()
-            .role(ChatCompletionToolMessageParam.Role.TOOL)
             .toolCallId(id)
             .content(ChatCompletionToolMessageParam.Content.ofTextContent(response))
             .build());
