@@ -20,9 +20,9 @@ package com.example.javaagent.smoketest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.protobuf.ByteString;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.trace.v1.Span;
+import java.io.IOException;
 import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -54,32 +54,25 @@ class DynamicConfigSmokeTest extends TestAppSmokeTest {
   @AfterEach
   public void endTest() throws InterruptedException {
     doRequest(getUrl("/dynamicconfig/reset"), okResponseBody("reset"));
-    Thread.sleep(1500L); // give the reset time to be applied
   }
 
   @Test
-  public void flipSending() throws InterruptedException {
+  public void flipSending() throws InterruptedException, IOException {
+    doRequest(getUrl("/health"), okResponseBody("Alive!"));
     doRequest(getUrl("/dynamicconfig/flipSending"), okResponseBody("stopped"));
+
+    // the first flip-sending request should not be part of the exported traces anymore
     List<ExportTraceServiceRequest> traces = waitForTraces();
     List<Span> spans = getSpans(traces).toList();
-    assertThat(spans)
-        .hasSize(2)
-        .extracting("name")
-        .containsOnly("GET /dynamicconfig/flipSending", "DynamicConfigController.flipSending");
-    ByteString firstTraceID = spans.get(0).getTraceId();
+    assertThat(spans).hasSize(1).extracting("name").containsOnly("GET /health");
 
-    Thread.sleep(2000L); // give the flip time to be applied
+    clearBackend();
 
+    doRequest(getUrl("/health"), okResponseBody("Alive!"));
     doRequest(getUrl("/dynamicconfig/flipSending"), okResponseBody("restarted"));
+    // During /health, the sending should still have been disabled, /flipSending should be recorded
     traces = waitForTraces();
-    spans = getSpans(traces).dropWhile(span -> span.getTraceId().equals(firstTraceID)).toList();
-    assertThat(spans).hasSize(0);
-
-    Thread.sleep(2000L); // give the flip time to be applied
-
-    doRequest(getUrl("/dynamicconfig/flipSending"), okResponseBody("stopped"));
-    traces = waitForTraces();
-    spans = getSpans(traces).dropWhile(span -> span.getTraceId().equals(firstTraceID)).toList();
+    spans = getSpans(traces).toList();
     assertThat(spans)
         .hasSize(2)
         .extracting("name")
