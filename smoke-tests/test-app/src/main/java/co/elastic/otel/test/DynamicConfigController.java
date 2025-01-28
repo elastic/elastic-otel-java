@@ -31,18 +31,33 @@ public class DynamicConfigController {
   @GetMapping("/flipSending")
   public synchronized String flipSending() {
     String old = System.getProperty(DISABLE_SEND_OPTION, "");
+    String result;
     if (old.isEmpty()) {
       System.setProperty(DISABLE_SEND_OPTION, "true");
-      return "stopped";
+      result = "stopped";
     } else {
       System.setProperty(DISABLE_SEND_OPTION, "");
-      return "restarted";
+      result = "restarted";
+    }
+    waitForSystemPropertyChangeEffective();
+    return result;
+  }
+
+  private static void waitForSystemPropertyChangeEffective() {
+    try {
+      Thread.sleep(1000L);
+    } catch (InterruptedException e) {
+      throw new IllegalStateException(e);
     }
   }
 
   @RequestMapping("/reset")
   public synchronized String reset() {
-    System.setProperty(DISABLE_SEND_OPTION, "");
+    String old = System.getProperty(DISABLE_SEND_OPTION, "");
+    if (!old.isEmpty()) {
+      System.setProperty(DISABLE_SEND_OPTION, "");
+      waitForSystemPropertyChangeEffective();
+    }
     return "reset";
   }
 }
