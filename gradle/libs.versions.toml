@@ -90,6 +90,6 @@ semconv = ["opentelemetrySemconv", "opentelemetrySemconvIncubating"]
 
 jib = { id = "com.google.cloud.tools.jib", version.ref = "jib" }
 taskinfo = { id = "org.barfuin.gradle.taskinfo", version = '2.2.0' }
-jmh = {id = "me.champeau.jmh", version = "0.7.2"}
+jmh = {id = "me.champeau.jmh", version = "0.7.3"}
 nexusPublish = { id = "io.github.gradle-nexus.publish-plugin", version = '2.0.0' }
 dockerJavaApplication = { id = "com.bmuschko.docker-java-application", version = "9.4.0" }
