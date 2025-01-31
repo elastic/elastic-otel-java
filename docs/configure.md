@@ -122,7 +122,9 @@ It supports:
  * Tracing for requests, including GenAI-specific attributes such as token usage
  * Opt-In logging of OpenAI request and response content payloads
 
-This instrumentation is currently **experimental**. It can by disabled by setting either the `OTEL_INSTRUMENTATION_OPENAI_CLIENT_ENABLED` environment variable or the `otel.instrumentation.openai-client.enabled` JVM property to `false`.
+Note that this instrumentation is currently in **tech preview**, because the OpenAI client itself is still in beta.
+Once the OpenAI client is stable, this instrumentation will be GAed, but we'll likely drop support for beta versions of the client after some time.
+The instrumentation is on by default and can be disabled by setting either the `OTEL_INSTRUMENTATION_OPENAI_CLIENT_ENABLED` environment variable or the `otel.instrumentation.openai-client.enabled` JVM property to `false`.
 
 In addition, this instrumentation provides the following configuration options:
 
