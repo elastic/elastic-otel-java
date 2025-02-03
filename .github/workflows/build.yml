@@ -107,3 +107,14 @@ jobs:
         with:
           name: test-results-${{ matrix.version }}-${{ matrix.vm }}
           path: '**/build/test-results/test/TEST-*.xml'
+
+  muzzle-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run muzzle check
+        uses: ./.github/workflows/gradle-goal
+        with:
+          # We also compile the test-classes, even though we are skipping the tests
+          command: "./gradlew :instrumentation:muzzle"
