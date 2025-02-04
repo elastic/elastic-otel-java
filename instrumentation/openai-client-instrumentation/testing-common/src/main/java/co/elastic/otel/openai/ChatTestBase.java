@@ -86,7 +86,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-class ChatTest {
+class ChatTestBase {
   private static final String TEST_CHAT_MODEL = "gpt-4o-mini";
   private static final String TEST_CHAT_RESPONSE_MODEL = "gpt-4o-mini-2024-07-18";
   private static final String TEST_CHAT_INPUT =
@@ -583,7 +583,7 @@ class ChatTest {
                           assertThat(attr)
                               .containsEntry("event.name", "gen_ai.system.message")
                               .containsEntry(GEN_AI_SYSTEM, "openai"));
-              assertThat(log.getBodyValue()).satisfies(ChatTest::assertThatValueIsEmptyMap);
+              assertThat(log.getBodyValue()).satisfies(ChatTestBase::assertThatValueIsEmptyMap);
             })
         .anySatisfy(
             log -> {
@@ -593,7 +593,7 @@ class ChatTest {
                           assertThat(attr)
                               .containsEntry("event.name", "gen_ai.user.message")
                               .containsEntry(GEN_AI_SYSTEM, "openai"));
-              assertThat(log.getBodyValue()).satisfies(ChatTest::assertThatValueIsEmptyMap);
+              assertThat(log.getBodyValue()).satisfies(ChatTestBase::assertThatValueIsEmptyMap);
             })
         .anySatisfy(
             log -> {
@@ -603,7 +603,7 @@ class ChatTest {
                           assertThat(attr)
                               .containsEntry("event.name", "gen_ai.assistant.message")
                               .containsEntry(GEN_AI_SYSTEM, "openai"));
-              assertThat(log.getBodyValue()).satisfies(ChatTest::assertThatValueIsEmptyMap);
+              assertThat(log.getBodyValue()).satisfies(ChatTestBase::assertThatValueIsEmptyMap);
             })
         .anySatisfy(
             log -> {
@@ -613,7 +613,7 @@ class ChatTest {
                           assertThat(attr)
                               .containsEntry("event.name", "gen_ai.user.message")
                               .containsEntry(GEN_AI_SYSTEM, "openai"));
-              assertThat(log.getBodyValue()).satisfies(ChatTest::assertThatValueIsEmptyMap);
+              assertThat(log.getBodyValue()).satisfies(ChatTestBase::assertThatValueIsEmptyMap);
             })
         .anySatisfy(
             log -> {
@@ -1196,7 +1196,7 @@ class ChatTest {
                               .containsEntry("event.name", "gen_ai.user.message")
                               .containsEntry(GEN_AI_SYSTEM, "openai"))
                   .hasSpanContext(spanCtx);
-              assertThat(log.getBodyValue()).satisfies(ChatTest::assertThatValueIsEmptyMap);
+              assertThat(log.getBodyValue()).satisfies(ChatTestBase::assertThatValueIsEmptyMap);
             })
         .anySatisfy(
             log -> {
@@ -1296,7 +1296,7 @@ class ChatTest {
                               .containsEntry("event.name", "gen_ai.user.message")
                               .containsEntry(GEN_AI_SYSTEM, "openai"))
                   .hasSpanContext(spanCtx);
-              assertThat(log.getBodyValue()).satisfies(ChatTest::assertThatValueIsEmptyMap);
+              assertThat(log.getBodyValue()).satisfies(ChatTestBase::assertThatValueIsEmptyMap);
             })
         .anySatisfy(
             log -> {
@@ -1436,7 +1436,7 @@ class ChatTest {
                               .containsEntry("event.name", "gen_ai.user.message")
                               .containsEntry(GEN_AI_SYSTEM, "openai"))
                   .hasSpanContext(spanCtx);
-              assertThat(log.getBodyValue()).satisfies(ChatTest::assertThatValueIsEmptyMap);
+              assertThat(log.getBodyValue()).satisfies(ChatTestBase::assertThatValueIsEmptyMap);
             })
         .anySatisfy(
             log -> {

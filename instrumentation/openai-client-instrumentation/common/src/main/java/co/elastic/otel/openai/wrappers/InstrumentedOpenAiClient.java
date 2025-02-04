@@ -97,8 +97,8 @@ public class InstrumentedOpenAiClient
         }
       }
       return new InstrumentedOpenAiClient(
-              delegate,
-              new InstrumentationSettings(emitEvents, captureMessageContent, hostname, port))
+          delegate,
+          new InstrumentationSettings(emitEvents, captureMessageContent, hostname, port))
           .createProxy();
     }
   }

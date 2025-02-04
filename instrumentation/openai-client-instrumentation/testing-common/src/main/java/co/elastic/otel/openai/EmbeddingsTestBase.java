@@ -40,7 +40,7 @@ import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-class EmbeddingsTest {
+class EmbeddingsTestBase {
   private static final String MODEL =
       System.getenv().getOrDefault("OPENAI_MODEL", "text-embedding-3-small");
 

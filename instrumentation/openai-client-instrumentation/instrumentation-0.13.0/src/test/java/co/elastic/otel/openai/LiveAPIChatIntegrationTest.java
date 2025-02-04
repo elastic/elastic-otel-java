@@ -123,7 +123,7 @@ class LiveAPIChatIntegrationTest {
                         "Hi there! I can help with that. Can you please provide your order ID?"),
                     createUserMessage("i think it is order_12345")))
             .model(TEST_CHAT_MODEL)
-            .addTool(ChatTest.buildGetDeliveryDateToolDefinition())
+            .addTool(ChatTestBase.buildGetDeliveryDateToolDefinition())
             .build();
 
     long startTimeNanos = System.nanoTime();

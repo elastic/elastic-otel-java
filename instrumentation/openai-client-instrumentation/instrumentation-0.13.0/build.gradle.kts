@@ -5,13 +5,10 @@ plugins {
 }
 
 dependencies {
-  compileOnly(catalog.openaiClient)
-  testImplementation(catalog.openaiClient)
+  implementation(project(":instrumentation:openai-client-instrumentation:common"))
 
-  testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2")
-  testImplementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.18.2")
-  testImplementation("org.slf4j:slf4j-simple:2.0.16")
-  testImplementation(catalog.wiremock)
+  testImplementation(catalog.openaiClient)
+  testImplementation(project(":instrumentation:openai-client-instrumentation:testing-common"))
 }
 
 muzzle {
