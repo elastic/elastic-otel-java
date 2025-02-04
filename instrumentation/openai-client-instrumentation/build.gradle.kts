@@ -1,4 +1,6 @@
 plugins {
+  alias(catalog.plugins.muzzleGeneration)
+  alias(catalog.plugins.muzzleCheck)
   id("elastic-otel.instrumentation-conventions")
 }
 
@@ -13,7 +15,12 @@ dependencies {
 }
 
 muzzle {
-  // TODO: setup muzzle to check older versions of openAI client
-  // See the docs on how to do it:
-  // https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/contributing/muzzle.md
+  pass {
+    val openaiClientLib = catalog.openaiClient.get()
+    group.set(openaiClientLib.group)
+    module.set(openaiClientLib.name)
+    versions.set("(,${openaiClientLib.version}]")
+    // no assertInverse.set(true) here because we don't want muzzle to fail for newer releases on our main branch
+    // instead, renovate will bump the version and failures will be automatically detected on that bump PR
+  }
 }

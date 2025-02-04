@@ -2,9 +2,13 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
   `java-library`
+  id("com.gradleup.shadow")
   id("elastic-otel.java-conventions")
-  id("io.opentelemetry.instrumentation.muzzle-generation")
-  id("io.opentelemetry.instrumentation.muzzle-check")
+  // NOTE: We can't declare a dependency on the muzzle-check and muzzle-generation here
+  // Unfortunately those pull in ancient version of apache-httpclient if used as dependency in buildSrc/build.gradle
+  // That ancient version would then be used in the buildEnvironment of ALL other modules, including the smoke tests
+  // If there is any other plugin using apache httpclient (like jib) it will fail due to the ancient http client version
+  // we workaround this problem by making instrumentation modules pull in the dependency instead of doing it globally here
 }
 
 // Other instrumentations to include for testing

@@ -22,9 +22,6 @@ opentelemetryContribAlpha = "1.42.0-alpha"
 # reference the "incubating" version explicitly
 opentelemetrySemconvAlpha = "1.29.0-alpha"
 
-# instrumented libraries
-openaiClient = "0.13.0"
-
 [libraries]
 
 # transitively provides 'opentelemetry-instrumentation-bom' (non-alpha)
@@ -38,8 +35,8 @@ contribResources = { group = "io.opentelemetry.contrib", name = "opentelemetry-r
 contribSpanStacktrace = { group = "io.opentelemetry.contrib", name = "opentelemetry-span-stacktrace", version.ref = "opentelemetryContribAlpha" }
 contribInferredSpans = { group = "io.opentelemetry.contrib", name = "opentelemetry-inferred-spans", version.ref = "opentelemetryContribAlpha" }
 
-opentelemetrySemconv = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv", version.ref = "opentelemetrySemconvAlpha"}
-opentelemetrySemconvIncubating = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv-incubating", version.ref = "opentelemetrySemconvAlpha"}
+opentelemetrySemconv = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv", version.ref = "opentelemetrySemconvAlpha" }
+opentelemetrySemconvIncubating = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv-incubating", version.ref = "opentelemetrySemconvAlpha" }
 
 autoservice-processor = { group = "com.google.auto.service", name = "auto-service", version.ref = "autoservice" }
 autoservice-annotations = { group = "com.google.auto.service", name = "auto-service-annotations", version.ref = "autoservice" }
@@ -80,7 +77,7 @@ ant = "org.apache.ant:ant:1.10.15"
 asm = "org.ow2.asm:asm:9.7"
 
 # Instrumented libraries
-openaiClient = {group = "com.openai", name = "openai-java", version.ref ="openaiClient"}
+openaiClient = "com.openai:openai-java:0.13.0"
 
 [bundles]
 
@@ -90,6 +87,9 @@ semconv = ["opentelemetrySemconv", "opentelemetrySemconvIncubating"]
 
 jib = { id = "com.google.cloud.tools.jib", version.ref = "jib" }
 taskinfo = { id = "org.barfuin.gradle.taskinfo", version = '2.2.0' }
-jmh = {id = "me.champeau.jmh", version = "0.7.3"}
+jmh = { id = "me.champeau.jmh", version = "0.7.3" }
 nexusPublish = { id = "io.github.gradle-nexus.publish-plugin", version = '2.0.0' }
 dockerJavaApplication = { id = "com.bmuschko.docker-java-application", version = "9.4.0" }
+muzzleCheck = { id = "io.opentelemetry.instrumentation.muzzle-check", version.ref = "opentelemetryJavaagentAlpha" }
+muzzleGeneration = { id = "io.opentelemetry.instrumentation.muzzle-generation", version.ref = "opentelemetryJavaagentAlpha" }
+
