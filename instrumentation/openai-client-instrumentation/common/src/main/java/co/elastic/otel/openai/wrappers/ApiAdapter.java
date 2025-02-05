@@ -1,3 +1,21 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package co.elastic.otel.openai.wrappers;
 
 import com.openai.models.ChatCompletionAssistantMessageParam;
@@ -7,36 +25,35 @@ import com.openai.models.ChatCompletionMessageParam;
 import com.openai.models.ChatCompletionSystemMessageParam;
 import com.openai.models.ChatCompletionToolMessageParam;
 import com.openai.models.ChatCompletionUserMessageParam;
+import java.util.function.Supplier;
 
 /**
- * Api Adapter to encapsulate breaking changes across openai-client versions.
- * If e.g. methods are renamed we add a adapter method here, so that we can provide
- * per-version implementations. These implementations have to be added to instrumentations as helpers,
- * which also ensures muzzle works effectively.
+ * Api Adapter to encapsulate breaking changes across openai-client versions. If e.g. methods are
+ * renamed we add a adapter method here, so that we can provide per-version implementations. These
+ * implementations have to be added to instrumentations as helpers, which also ensures muzzle works
+ * effectively.
  */
 public abstract class ApiAdapter {
 
-  public static final ApiAdapter INSTANCE = lookupAdapter();
+  private static volatile ApiAdapter instance;
 
-  private static ApiAdapter lookupAdapter() {
-    Class<?> implClass = tryLookupClass("co.elastic.otel.openai.v0_13_0.ApiAdapterImpl");
-    if (implClass == null) {
-      implClass = tryLookupClass("co.elastic.otel.openai.latest.ApiAdapterImpl");
-    }
-    if (implClass == null) {
-      throw new IllegalStateException(
-          "No Adapter implementation found in instrumentation helpers!");
-    }
-    try {
-      return (ApiAdapter) implClass.getConstructor().newInstance();
-    } catch (Exception e) {
-      throw new IllegalStateException("Failed to instantiate adapter", e);
+  public static ApiAdapter get() {
+    return instance;
+  }
+
+  protected static void init(Supplier<ApiAdapter> implementation) {
+    if (instance == null) {
+      synchronized (ApiAdapter.class) {
+        if (instance == null) {
+          instance = implementation.get();
+        }
+      }
     }
   }
 
   /**
-   * Extracts the concrete message object e.g. ({@link ChatCompletionUserMessageParam})
-   * from the given encapsulating {@link ChatCompletionMessageParam}.
+   * Extracts the concrete message object e.g. ({@link ChatCompletionUserMessageParam}) from the
+   * given encapsulating {@link ChatCompletionMessageParam}.
    *
    * @param base the encapsulating param
    * @return the unboxed concrete message param type
@@ -67,7 +84,8 @@ public abstract class ApiAdapter {
    * @return the text or refusal reason if either is available, otherwise null
    */
   public abstract String extractTextOrRefusal(
-      ChatCompletionAssistantMessageParam.Content.ChatCompletionRequestAssistantMessageContentPart part);
+      ChatCompletionAssistantMessageParam.Content.ChatCompletionRequestAssistantMessageContentPart
+          part);
 
   /**
    * @return the text if available, otherwise null
@@ -83,5 +101,4 @@ public abstract class ApiAdapter {
       return null;
     }
   }
-
 }

@@ -58,21 +58,24 @@ public class ChatCompletionEventsHelper {
     for (ChatCompletionMessageParam msg : request.messages()) {
       String eventType;
       MapValueBuilder bodyBuilder = new MapValueBuilder();
-      Object concreteMessageParam = ApiAdapter.INSTANCE.extractConcreteCompletionMessageParam(msg);
+      Object concreteMessageParam = ApiAdapter.get().extractConcreteCompletionMessageParam(msg);
       if (concreteMessageParam instanceof ChatCompletionSystemMessageParam) {
-        ChatCompletionSystemMessageParam sysMsg = (ChatCompletionSystemMessageParam) concreteMessageParam;
+        ChatCompletionSystemMessageParam sysMsg =
+            (ChatCompletionSystemMessageParam) concreteMessageParam;
         eventType = "gen_ai.system.message";
         if (settings.captureMessageContent) {
           putIfNotEmpty(bodyBuilder, "content", contentToString(sysMsg.content()));
         }
       } else if (concreteMessageParam instanceof ChatCompletionUserMessageParam) {
-        ChatCompletionUserMessageParam userMsg = (ChatCompletionUserMessageParam) concreteMessageParam;
+        ChatCompletionUserMessageParam userMsg =
+            (ChatCompletionUserMessageParam) concreteMessageParam;
         eventType = "gen_ai.user.message";
         if (settings.captureMessageContent) {
           putIfNotEmpty(bodyBuilder, "content", contentToString(userMsg.content()));
         }
       } else if (concreteMessageParam instanceof ChatCompletionAssistantMessageParam) {
-        ChatCompletionAssistantMessageParam assistantMsg = (ChatCompletionAssistantMessageParam) concreteMessageParam;
+        ChatCompletionAssistantMessageParam assistantMsg =
+            (ChatCompletionAssistantMessageParam) concreteMessageParam;
         eventType = "gen_ai.assistant.message";
         if (settings.captureMessageContent) {
           assistantMsg
@@ -91,7 +94,8 @@ public class ChatCompletionEventsHelper {
                   });
         }
       } else if (concreteMessageParam instanceof ChatCompletionToolMessageParam) {
-        ChatCompletionToolMessageParam toolMsg = (ChatCompletionToolMessageParam) concreteMessageParam;
+        ChatCompletionToolMessageParam toolMsg =
+            (ChatCompletionToolMessageParam) concreteMessageParam;
         eventType = "gen_ai.tool.message";
         if (settings.captureMessageContent) {
           putIfNotEmpty(bodyBuilder, "content", contentToString(toolMsg.content()));
@@ -111,7 +115,7 @@ public class ChatCompletionEventsHelper {
   }
 
   private static String contentToString(ChatCompletionToolMessageParam.Content content) {
-    String text = ApiAdapter.INSTANCE.asText(content);
+    String text = ApiAdapter.get().asText(content);
     if (text != null) {
       return text;
     } else if (content.isArrayOfContentParts()) {
@@ -124,12 +128,12 @@ public class ChatCompletionEventsHelper {
   }
 
   private static String contentToString(ChatCompletionAssistantMessageParam.Content content) {
-    String text = ApiAdapter.INSTANCE.asText(content);
+    String text = ApiAdapter.get().asText(content);
     if (text != null) {
       return text;
     } else if (content.isArrayOfContentParts()) {
       return content.asArrayOfContentParts().stream()
-          .map(ApiAdapter.INSTANCE::extractTextOrRefusal)
+          .map(ApiAdapter.get()::extractTextOrRefusal)
           .filter(Objects::nonNull)
           .collect(Collectors.joining());
     } else {
@@ -138,7 +142,7 @@ public class ChatCompletionEventsHelper {
   }
 
   private static String contentToString(ChatCompletionSystemMessageParam.Content content) {
-    String text = ApiAdapter.INSTANCE.asText(content);
+    String text = ApiAdapter.get().asText(content);
     if (text != null) {
       return text;
     } else if (content.isArrayOfContentParts()) {
@@ -151,12 +155,12 @@ public class ChatCompletionEventsHelper {
   }
 
   private static String contentToString(ChatCompletionUserMessageParam.Content content) {
-    String text = ApiAdapter.INSTANCE.asText(content);
+    String text = ApiAdapter.get().asText(content);
     if (text != null) {
       return text;
     } else if (content.isArrayOfContentParts()) {
       return content.asArrayOfContentParts().stream()
-          .map(ApiAdapter.INSTANCE::extractText)
+          .map(ApiAdapter.get()::extractText)
           .filter(Objects::nonNull)
           .collect(Collectors.joining());
     } else {

@@ -2238,7 +2238,6 @@ public abstract class ChatTestBase {
                                         equalTo(SERVER_PORT, (long) openai.getPort())))));
   }
 
-
   @Test
   void disableEvents() {
     // Override the enablement from setup()

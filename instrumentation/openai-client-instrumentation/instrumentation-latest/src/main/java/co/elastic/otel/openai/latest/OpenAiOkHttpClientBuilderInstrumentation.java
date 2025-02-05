@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.openai;
+package co.elastic.otel.openai.latest;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.returns;
@@ -40,7 +40,7 @@ public class OpenAiOkHttpClientBuilderInstrumentation implements TypeInstrumenta
   public void transform(TypeTransformer typeTransformer) {
     typeTransformer.applyAdviceToMethod(
         named("build").and(returns(named("com.openai.client.OpenAIClient"))),
-        "co.elastic.otel.openai.OpenAiOkHttpClientBuilderInstrumentation$AdviceClass");
+        getClass().getName() + "$AdviceClass");
   }
 
   public static class AdviceClass {
@@ -49,6 +49,9 @@ public class OpenAiOkHttpClientBuilderInstrumentation implements TypeInstrumenta
     @Advice.AssignReturned.ToReturned
     public static OpenAIClient onExit(
         @Advice.Return OpenAIClient result, @Advice.FieldValue("baseUrl") String baseUrl) {
+      // This initialization has two purposes:
+      // Initialize the correct adapter AND ensure that it is picked up by muzzle
+      ApiAdapterImpl.init();
       return InstrumentedOpenAiClient.wrap(result).baseUrl(baseUrl).build();
     }
   }

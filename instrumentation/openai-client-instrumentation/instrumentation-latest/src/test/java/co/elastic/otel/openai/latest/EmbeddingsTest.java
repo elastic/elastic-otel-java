@@ -20,6 +20,4 @@ package co.elastic.otel.openai.latest;
 
 import co.elastic.otel.openai.EmbeddingsTestBase;
 
-class EmbeddingsTest extends EmbeddingsTestBase {
-
-}
+class EmbeddingsTest extends EmbeddingsTestBase {}

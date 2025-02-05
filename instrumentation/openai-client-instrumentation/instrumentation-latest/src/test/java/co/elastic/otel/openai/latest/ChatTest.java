@@ -71,5 +71,4 @@ class ChatTest extends ChatTestBase {
             .content(ChatCompletionToolMessageParam.Content.ofText(response))
             .build());
   }
-
 }

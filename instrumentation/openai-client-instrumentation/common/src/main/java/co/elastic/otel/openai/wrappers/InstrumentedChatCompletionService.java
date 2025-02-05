@@ -139,7 +139,7 @@ public class InstrumentedChatCompletionService implements CompletionService {
                           val -> {
                             attributes.put(
                                 GEN_AI_OPENAI_REQUEST_RESPONSE_FORMAT,
-                                ApiAdapter.INSTANCE.extractType(val));
+                                ApiAdapter.get().extractType(val));
                           });
                 }
 
