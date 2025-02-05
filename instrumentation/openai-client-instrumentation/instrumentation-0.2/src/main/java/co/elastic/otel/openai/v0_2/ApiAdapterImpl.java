@@ -67,7 +67,7 @@ public class ApiAdapterImpl extends ApiAdapter {
     } else if (val.isResponseFormatJsonSchema()) {
       return val.asResponseFormatJsonSchema()._type().toString();
     }
-    return "";
+    return null;
   }
 
   @Override
@@ -85,33 +85,21 @@ public class ApiAdapterImpl extends ApiAdapter {
 
   @Override
   public String asText(ChatCompletionUserMessageParam.Content content) {
-    if (content.isTextContent()) {
-      return content.asTextContent();
-    }
-    return "";
+    return content.isTextContent() ? content.asTextContent() : null;
   }
 
   @Override
   public String asText(ChatCompletionSystemMessageParam.Content content) {
-    if (content.isTextContent()) {
-      return content.asTextContent();
-    }
-    return "";
+    return content.isTextContent() ? content.asTextContent() : null;
   }
 
   @Override
   public String asText(ChatCompletionAssistantMessageParam.Content content) {
-    if (content.isTextContent()) {
-      return content.asTextContent();
-    }
-    return "";
+    return content.isTextContent() ? content.asTextContent() : null;
   }
 
   @Override
   public String asText(ChatCompletionToolMessageParam.Content content) {
-    if (content.isTextContent()) {
-      return content.asTextContent();
-    }
-    return "";
+    return content.isTextContent() ? content.asTextContent() : null;
   }
 }

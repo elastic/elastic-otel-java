@@ -61,22 +61,22 @@ public abstract class ApiAdapter {
   public abstract Object extractConcreteCompletionMessageParam(ChatCompletionMessageParam base);
 
   /**
-   * @return the contained text, if the content is next. null otherwise.
+   * @return the contained text, if the content is text. null otherwise.
    */
   public abstract String asText(ChatCompletionToolMessageParam.Content content);
 
   /**
-   * @return the contained text, if the content is next. null otherwise.
+   * @return the contained text, if the content is text. null otherwise.
    */
   public abstract String asText(ChatCompletionAssistantMessageParam.Content content);
 
   /**
-   * @return the contained text, if the content is next. null otherwise.
+   * @return the contained text, if the content is text. null otherwise.
    */
   public abstract String asText(ChatCompletionSystemMessageParam.Content content);
 
   /**
-   * @return the contained text, if the content is next. null otherwise.
+   * @return the contained text, if the content is text. null otherwise.
    */
   public abstract String asText(ChatCompletionUserMessageParam.Content content);
 
@@ -92,5 +92,8 @@ public abstract class ApiAdapter {
    */
   public abstract String extractText(ChatCompletionContentPart part);
 
+  /**
+   * @return the type if available, otherwise null
+   */
   public abstract String extractType(ChatCompletionCreateParams.ResponseFormat val);
 }

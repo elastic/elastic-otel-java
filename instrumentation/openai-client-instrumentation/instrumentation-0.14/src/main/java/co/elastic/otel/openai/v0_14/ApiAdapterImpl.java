@@ -99,6 +99,6 @@ public class ApiAdapterImpl extends ApiAdapter {
     if (val.isJsonSchema()) {
       return val.asJsonSchema()._type().toString();
     }
-    return "";
+    return null;
   }
 }
