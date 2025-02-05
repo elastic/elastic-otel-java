@@ -4,7 +4,7 @@ plugins {
   id("elastic-otel.instrumentation-conventions")
 }
 
-val openAiVersion = "0.13.0"; // DO NOT UPGRADE
+val openAiVersion = "0" +".13.0"; // DO NOT UPGRADE, string operations are used to prevent renovate upgrades
 
 dependencies {
   compileOnly("com.openai:openai-java:${openAiVersion}")
