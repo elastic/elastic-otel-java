@@ -93,12 +93,4 @@ public abstract class ApiAdapter {
   public abstract String extractText(ChatCompletionContentPart part);
 
   public abstract String extractType(ChatCompletionCreateParams.ResponseFormat val);
-
-  private static Class<?> tryLookupClass(String className) {
-    try {
-      return Class.forName(className);
-    } catch (ClassNotFoundException e) {
-      return null;
-    }
-  }
 }
