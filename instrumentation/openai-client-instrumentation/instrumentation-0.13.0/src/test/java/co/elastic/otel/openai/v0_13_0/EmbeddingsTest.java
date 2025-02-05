@@ -16,8 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.openai;
+package co.elastic.otel.openai.v0_13_0;
 
-class ChatTest extends ChatTestBase {
+import co.elastic.otel.openai.EmbeddingsTestBase;
+
+class EmbeddingsTest extends EmbeddingsTestBase {
 
 }

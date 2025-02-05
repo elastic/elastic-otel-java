@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.openai;
+package co.elastic.otel.openai.latest;
 
+import co.elastic.otel.openai.OpenAiOkHttpClientBuilderInstrumentation;
 import co.elastic.otel.openai.wrappers.Constants;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.javaagent.extension.instrumentation.InstrumentationModule;
@@ -41,4 +42,10 @@ public class OpenAiClientInstrumentationModule extends InstrumentationModule {
   public boolean isHelperClass(String className) {
     return className.startsWith("co.elastic.otel.openai");
   }
+
+  @Override
+  public List<String> getAdditionalHelperClassNames() {
+    return Collections.singletonList("co.elastic.otel.openai.latest.ApiAdapterImpl");
+  }
+
 }

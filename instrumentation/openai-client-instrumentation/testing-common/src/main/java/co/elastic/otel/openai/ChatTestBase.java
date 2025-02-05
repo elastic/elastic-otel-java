@@ -53,16 +53,12 @@ import com.openai.core.http.StreamResponse;
 import com.openai.errors.NotFoundException;
 import com.openai.errors.OpenAIIoException;
 import com.openai.models.ChatCompletion;
-import com.openai.models.ChatCompletionAssistantMessageParam;
 import com.openai.models.ChatCompletionChunk;
 import com.openai.models.ChatCompletionCreateParams;
 import com.openai.models.ChatCompletionMessageParam;
 import com.openai.models.ChatCompletionMessageToolCall;
 import com.openai.models.ChatCompletionStreamOptions;
-import com.openai.models.ChatCompletionSystemMessageParam;
 import com.openai.models.ChatCompletionTool;
-import com.openai.models.ChatCompletionToolMessageParam;
-import com.openai.models.ChatCompletionUserMessageParam;
 import com.openai.models.FunctionDefinition;
 import com.openai.models.FunctionParameters;
 import com.openai.models.ResponseFormatText;
@@ -86,7 +82,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-class ChatTestBase {
+public abstract class ChatTestBase {
   private static final String TEST_CHAT_MODEL = "gpt-4o-mini";
   private static final String TEST_CHAT_RESPONSE_MODEL = "gpt-4o-mini-2024-07-18";
   private static final String TEST_CHAT_INPUT =
@@ -2045,12 +2041,7 @@ class ChatTestBase {
                                         equalTo(SERVER_PORT, (long) openai.getPort())))));
     testing.clearData();
 
-    ChatCompletionMessageParam assistantMessage =
-        ChatCompletionMessageParam.ofChatCompletionAssistantMessageParam(
-            ChatCompletionAssistantMessageParam.builder()
-                .content(ChatCompletionAssistantMessageParam.Content.ofTextContent(""))
-                .toolCalls(toolCalls)
-                .build());
+    ChatCompletionMessageParam assistantMessage = createAssistantMessage(toolCalls);
 
     chatMessages.add(assistantMessage);
     chatMessages.add(createToolMessage("25 degrees and sunny", newYorkCallId));
@@ -2247,6 +2238,7 @@ class ChatTestBase {
                                         equalTo(SERVER_PORT, (long) openai.getPort())))));
   }
 
+
   @Test
   void disableEvents() {
     // Override the enablement from setup()
@@ -2315,7 +2307,7 @@ class ChatTestBase {
         .build();
   }
 
-  static ChatCompletionTool buildGetDeliveryDateToolDefinition() {
+  public static ChatCompletionTool buildGetDeliveryDateToolDefinition() {
     Map<String, JsonValue> orderId = new HashMap<>();
     orderId.put("type", JsonValue.from("string"));
     orderId.put("description", JsonValue.from("The customer's order ID."));
@@ -2343,32 +2335,14 @@ class ChatTestBase {
         .build();
   }
 
-  private static ChatCompletionMessageParam createAssistantMessage(String content) {
-    return ChatCompletionMessageParam.ofChatCompletionAssistantMessageParam(
-        ChatCompletionAssistantMessageParam.builder()
-            .content(ChatCompletionAssistantMessageParam.Content.ofTextContent(content))
-            .build());
-  }
+  protected abstract ChatCompletionMessageParam createAssistantMessage(String content);
 
-  private static ChatCompletionMessageParam createUserMessage(String content) {
-    return ChatCompletionMessageParam.ofChatCompletionUserMessageParam(
-        ChatCompletionUserMessageParam.builder()
-            .content(ChatCompletionUserMessageParam.Content.ofTextContent(content))
-            .build());
-  }
+  protected abstract ChatCompletionMessageParam createAssistantMessage(
+      List<ChatCompletionMessageToolCall> toolCalls);
 
-  private static ChatCompletionMessageParam createSystemMessage(String content) {
-    return ChatCompletionMessageParam.ofChatCompletionSystemMessageParam(
-        ChatCompletionSystemMessageParam.builder()
-            .content(ChatCompletionSystemMessageParam.Content.ofTextContent(content))
-            .build());
-  }
+  protected abstract ChatCompletionMessageParam createUserMessage(String content);
 
-  private static ChatCompletionMessageParam createToolMessage(String response, String id) {
-    return ChatCompletionMessageParam.ofChatCompletionToolMessageParam(
-        ChatCompletionToolMessageParam.builder()
-            .toolCallId(id)
-            .content(ChatCompletionToolMessageParam.Content.ofTextContent(response))
-            .build());
-  }
+  protected abstract ChatCompletionMessageParam createSystemMessage(String content);
+
+  protected abstract ChatCompletionMessageParam createToolMessage(String response, String id);
 }

@@ -137,11 +137,9 @@ public class InstrumentedChatCompletionService implements CompletionService {
                       .responseFormat()
                       .ifPresent(
                           val -> {
-                            if (val.isResponseFormatText()) {
-                              attributes.put(
-                                  GEN_AI_OPENAI_REQUEST_RESPONSE_FORMAT,
-                                  val.asResponseFormatText()._type().toString());
-                            }
+                            attributes.put(
+                                GEN_AI_OPENAI_REQUEST_RESPONSE_FORMAT,
+                                ApiAdapter.INSTANCE.extractType(val));
                           });
                 }
 

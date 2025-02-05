@@ -22,7 +22,6 @@ import static co.elastic.otel.openai.wrappers.GenAiAttributes.GEN_AI_SYSTEM;
 
 import com.openai.models.ChatCompletion;
 import com.openai.models.ChatCompletionAssistantMessageParam;
-import com.openai.models.ChatCompletionContentPart;
 import com.openai.models.ChatCompletionContentPartText;
 import com.openai.models.ChatCompletionCreateParams;
 import com.openai.models.ChatCompletionMessage;
@@ -40,6 +39,7 @@ import io.opentelemetry.context.Context;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class ChatCompletionEventsHelper {
@@ -54,24 +54,25 @@ public class ChatCompletionEventsHelper {
     if (!settings.emitEvents) {
       return;
     }
+
     for (ChatCompletionMessageParam msg : request.messages()) {
       String eventType;
       MapValueBuilder bodyBuilder = new MapValueBuilder();
-      if (msg.isChatCompletionSystemMessageParam()) {
-        ChatCompletionSystemMessageParam sysMsg = msg.asChatCompletionSystemMessageParam();
+      Object concreteMessageParam = ApiAdapter.INSTANCE.extractConcreteCompletionMessageParam(msg);
+      if (concreteMessageParam instanceof ChatCompletionSystemMessageParam) {
+        ChatCompletionSystemMessageParam sysMsg = (ChatCompletionSystemMessageParam) concreteMessageParam;
         eventType = "gen_ai.system.message";
         if (settings.captureMessageContent) {
           putIfNotEmpty(bodyBuilder, "content", contentToString(sysMsg.content()));
         }
-      } else if (msg.isChatCompletionUserMessageParam()) {
-        ChatCompletionUserMessageParam userMsg = msg.asChatCompletionUserMessageParam();
+      } else if (concreteMessageParam instanceof ChatCompletionUserMessageParam) {
+        ChatCompletionUserMessageParam userMsg = (ChatCompletionUserMessageParam) concreteMessageParam;
         eventType = "gen_ai.user.message";
         if (settings.captureMessageContent) {
           putIfNotEmpty(bodyBuilder, "content", contentToString(userMsg.content()));
         }
-      } else if (msg.isChatCompletionAssistantMessageParam()) {
-        ChatCompletionAssistantMessageParam assistantMsg =
-            msg.asChatCompletionAssistantMessageParam();
+      } else if (concreteMessageParam instanceof ChatCompletionAssistantMessageParam) {
+        ChatCompletionAssistantMessageParam assistantMsg = (ChatCompletionAssistantMessageParam) concreteMessageParam;
         eventType = "gen_ai.assistant.message";
         if (settings.captureMessageContent) {
           assistantMsg
@@ -89,8 +90,8 @@ public class ChatCompletionEventsHelper {
                     bodyBuilder.put("tool_calls", Value.of(toolCallsJson));
                   });
         }
-      } else if (msg.isChatCompletionToolMessageParam()) {
-        ChatCompletionToolMessageParam toolMsg = msg.asChatCompletionToolMessageParam();
+      } else if (concreteMessageParam instanceof ChatCompletionToolMessageParam) {
+        ChatCompletionToolMessageParam toolMsg = (ChatCompletionToolMessageParam) concreteMessageParam;
         eventType = "gen_ai.tool.message";
         if (settings.captureMessageContent) {
           putIfNotEmpty(bodyBuilder, "content", contentToString(toolMsg.content()));
@@ -110,8 +111,9 @@ public class ChatCompletionEventsHelper {
   }
 
   private static String contentToString(ChatCompletionToolMessageParam.Content content) {
-    if (content.isTextContent()) {
-      return content.asTextContent();
+    String text = ApiAdapter.INSTANCE.asText(content);
+    if (text != null) {
+      return text;
     } else if (content.isArrayOfContentParts()) {
       return content.asArrayOfContentParts().stream()
           .map(ChatCompletionContentPartText::text)
@@ -122,19 +124,13 @@ public class ChatCompletionEventsHelper {
   }
 
   private static String contentToString(ChatCompletionAssistantMessageParam.Content content) {
-    if (content.isTextContent()) {
-      return content.asTextContent();
+    String text = ApiAdapter.INSTANCE.asText(content);
+    if (text != null) {
+      return text;
     } else if (content.isArrayOfContentParts()) {
       return content.asArrayOfContentParts().stream()
-          .map(
-              cnt -> {
-                if (cnt.isChatCompletionContentPartText()) {
-                  return cnt.asChatCompletionContentPartText().text();
-                } else if (cnt.isChatCompletionContentPartRefusal()) {
-                  return cnt.asChatCompletionContentPartRefusal().refusal();
-                }
-                return "";
-              })
+          .map(ApiAdapter.INSTANCE::extractTextOrRefusal)
+          .filter(Objects::nonNull)
           .collect(Collectors.joining());
     } else {
       throw new IllegalStateException("Unhandled content type for " + content);
@@ -142,8 +138,9 @@ public class ChatCompletionEventsHelper {
   }
 
   private static String contentToString(ChatCompletionSystemMessageParam.Content content) {
-    if (content.isTextContent()) {
-      return content.asTextContent();
+    String text = ApiAdapter.INSTANCE.asText(content);
+    if (text != null) {
+      return text;
     } else if (content.isArrayOfContentParts()) {
       return content.asArrayOfContentParts().stream()
           .map(ChatCompletionContentPartText::text)
@@ -154,13 +151,13 @@ public class ChatCompletionEventsHelper {
   }
 
   private static String contentToString(ChatCompletionUserMessageParam.Content content) {
-    if (content.isTextContent()) {
-      return content.asTextContent();
+    String text = ApiAdapter.INSTANCE.asText(content);
+    if (text != null) {
+      return text;
     } else if (content.isArrayOfContentParts()) {
       return content.asArrayOfContentParts().stream()
-          .filter(ChatCompletionContentPart::isChatCompletionContentPartText)
-          .map(ChatCompletionContentPart::asChatCompletionContentPartText)
-          .map(ChatCompletionContentPartText::text)
+          .map(ApiAdapter.INSTANCE::extractText)
+          .filter(Objects::nonNull)
           .collect(Collectors.joining());
     } else {
       throw new IllegalStateException("Unhandled content type for " + content);

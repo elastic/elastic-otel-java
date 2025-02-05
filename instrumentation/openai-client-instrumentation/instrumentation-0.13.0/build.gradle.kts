@@ -4,20 +4,21 @@ plugins {
   id("elastic-otel.instrumentation-conventions")
 }
 
+val openAiVersion = "0.13.0"; // DO NOT UPGRADE
+
 dependencies {
+  compileOnly("com.openai:openai-java:${openAiVersion}")
   implementation(project(":instrumentation:openai-client-instrumentation:common"))
 
-  testImplementation(catalog.openaiClient)
+  testImplementation("com.openai:openai-java:${openAiVersion}")
   testImplementation(project(":instrumentation:openai-client-instrumentation:testing-common"))
 }
 
 muzzle {
   pass {
-    val openaiClientLib = catalog.openaiClient.get()
-    group.set(openaiClientLib.group)
-    module.set(openaiClientLib.name)
-    versions.set("(,${openaiClientLib.version}]")
-    // no assertInverse.set(true) here because we don't want muzzle to fail for newer releases on our main branch
-    // instead, renovate will bump the version and failures will be automatically detected on that bump PR
+    group.set("com.openai")
+    module.set("openai-java")
+    versions.set("(,${openAiVersion}]")
+    assertInverse.set(true)
   }
 }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.openai;
+package co.elastic.otel.openai.latest;
 
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.equalTo;
@@ -32,6 +32,8 @@ import static io.opentelemetry.semconv.incubating.GenAiIncubatingAttributes.GEN_
 import static io.opentelemetry.semconv.incubating.GenAiIncubatingAttributes.GEN_AI_USAGE_INPUT_TOKENS;
 import static io.opentelemetry.semconv.incubating.GenAiIncubatingAttributes.GEN_AI_USAGE_OUTPUT_TOKENS;
 
+import co.elastic.otel.openai.ChatTestBase;
+import co.elastic.otel.openai.ValAssert;
 import co.elastic.otel.openai.wrappers.InstrumentationSettingsAccessor;
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
@@ -576,31 +578,31 @@ class LiveAPIChatIntegrationTest {
   }
 
   private static ChatCompletionMessageParam createAssistantMessage(String content) {
-    return ChatCompletionMessageParam.ofChatCompletionAssistantMessageParam(
+    return ChatCompletionMessageParam.ofAssistant(
         ChatCompletionAssistantMessageParam.builder()
-            .content(ChatCompletionAssistantMessageParam.Content.ofTextContent(content))
+            .content(ChatCompletionAssistantMessageParam.Content.ofText(content))
             .build());
   }
 
   private static ChatCompletionMessageParam createUserMessage(String content) {
-    return ChatCompletionMessageParam.ofChatCompletionUserMessageParam(
+    return ChatCompletionMessageParam.ofUser(
         ChatCompletionUserMessageParam.builder()
-            .content(ChatCompletionUserMessageParam.Content.ofTextContent(content))
+            .content(ChatCompletionUserMessageParam.Content.ofText(content))
             .build());
   }
 
   private static ChatCompletionMessageParam createSystemMessage(String content) {
-    return ChatCompletionMessageParam.ofChatCompletionSystemMessageParam(
+    return ChatCompletionMessageParam.ofSystem(
         ChatCompletionSystemMessageParam.builder()
-            .content(ChatCompletionSystemMessageParam.Content.ofTextContent(content))
+            .content(ChatCompletionSystemMessageParam.Content.ofText(content))
             .build());
   }
 
   private static ChatCompletionMessageParam createToolMessage(String response, String id) {
-    return ChatCompletionMessageParam.ofChatCompletionToolMessageParam(
+    return ChatCompletionMessageParam.ofTool(
         ChatCompletionToolMessageParam.builder()
             .toolCallId(id)
-            .content(ChatCompletionToolMessageParam.Content.ofTextContent(response))
+            .content(ChatCompletionToolMessageParam.Content.ofText(response))
             .build());
   }
 
