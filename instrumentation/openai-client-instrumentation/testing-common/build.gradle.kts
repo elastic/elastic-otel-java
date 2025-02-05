@@ -4,7 +4,6 @@ plugins {
 
 dependencies {
   compileOnly(catalog.openaiClient)
-
   compileOnly(project(":instrumentation:openai-client-instrumentation:common"))
   implementation("io.opentelemetry.javaagent:opentelemetry-testing-common")
   implementation("io.opentelemetry:opentelemetry-sdk-testing")
