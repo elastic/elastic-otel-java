@@ -1,3 +1,4 @@
+// If this project is moved or renamed, remember to update the exclude in renovate.json
 plugins {
   alias(catalog.plugins.muzzleGeneration)
   alias(catalog.plugins.muzzleCheck)

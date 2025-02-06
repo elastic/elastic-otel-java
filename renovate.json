@@ -18,6 +18,7 @@
     ".github/**",
     ".buildkite/**",
     "examples/**",
-    "jvmti-access/jni-build/*.Dockerfile"
+    "jvmti-access/jni-build/*.Dockerfile",
+    "instrumentation/openai-client-instrumentation/instrumentation-0.2/build.gradle.kts"
   ]
 }
