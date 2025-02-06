@@ -1,10 +1,11 @@
+// If this project is moved or renamed, remember to update the exclude in renovate.json
 plugins {
   alias(catalog.plugins.muzzleGeneration)
   alias(catalog.plugins.muzzleCheck)
   id("elastic-otel.instrumentation-conventions")
 }
 
-val openAiVersion = "0" +".13.0"; // DO NOT UPGRADE, string operations are used to prevent renovate upgrades
+val openAiVersion = "0.13.0"; // DO NOT UPGRADE
 
 dependencies {
   compileOnly("com.openai:openai-java:${openAiVersion}")
