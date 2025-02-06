@@ -40,9 +40,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class ChatCompletionEventsHelper {
+
+  private static final java.util.logging.Logger LOG = java.util.logging.Logger.getLogger(
+      ChatCompletionEventsHelper.class.getName());
 
   private static final Logger EV_LOGGER =
       GlobalOpenTelemetry.get().getLogsBridge().get(Constants.INSTRUMENTATION_NAME);
@@ -102,7 +106,8 @@ public class ChatCompletionEventsHelper {
           bodyBuilder.put("id", toolMsg.toolCallId());
         }
       } else {
-        throw new IllegalStateException("Unhandled type : " + msg.getClass().getName());
+        LOG.log(Level.WARNING, "Unhandled OpenAI message type will be dropped: {0}", msg);
+        continue;
       }
       newEvent(eventType).setBody(bodyBuilder.build()).emit();
     }

@@ -29,77 +29,77 @@ import com.openai.models.ChatCompletionUserMessageParam;
 
 public class ApiAdapterImpl extends ApiAdapter {
 
-  public static void init() {
-    ApiAdapter.init(ApiAdapterImpl::new);
-  }
-
-  @Override
-  public Object extractConcreteCompletionMessageParam(ChatCompletionMessageParam base) {
-    if (base.isChatCompletionSystemMessageParam()) {
-      return base.asChatCompletionSystemMessageParam();
+    public static void init() {
+        ApiAdapter.init(ApiAdapterImpl::new);
     }
-    if (base.isChatCompletionUserMessageParam()) {
-      return base.asChatCompletionUserMessageParam();
-    }
-    if (base.isChatCompletionAssistantMessageParam()) {
-      return base.asChatCompletionAssistantMessageParam();
-    }
-    if (base.isChatCompletionToolMessageParam()) {
-      return base.asChatCompletionToolMessageParam();
-    }
-    throw new IllegalStateException("Unhandled message param type: " + base);
-  }
 
-  @Override
-  public String extractText(ChatCompletionContentPart part) {
-    if (part.isChatCompletionContentPartText()) {
-      return part.asChatCompletionContentPartText().text();
+    @Override
+    public Object extractConcreteCompletionMessageParam(ChatCompletionMessageParam base) {
+        if (base.isChatCompletionSystemMessageParam()) {
+            return base.asChatCompletionSystemMessageParam();
+        }
+        if (base.isChatCompletionUserMessageParam()) {
+            return base.asChatCompletionUserMessageParam();
+        }
+        if (base.isChatCompletionAssistantMessageParam()) {
+            return base.asChatCompletionAssistantMessageParam();
+        }
+        if (base.isChatCompletionToolMessageParam()) {
+            return base.asChatCompletionToolMessageParam();
+        }
+        return null;
     }
-    return null;
-  }
 
-  @Override
-  public String extractType(ChatCompletionCreateParams.ResponseFormat val) {
-    if (val.isResponseFormatText()) {
-      return val.asResponseFormatText()._type().toString();
-    } else if (val.isResponseFormatJsonObject()) {
-      return val.asResponseFormatJsonObject()._type().toString();
-    } else if (val.isResponseFormatJsonSchema()) {
-      return val.asResponseFormatJsonSchema()._type().toString();
+    @Override
+    public String extractText(ChatCompletionContentPart part) {
+        if (part.isChatCompletionContentPartText()) {
+            return part.asChatCompletionContentPartText().text();
+        }
+        return null;
     }
-    return null;
-  }
 
-  @Override
-  public String extractTextOrRefusal(
-      ChatCompletionAssistantMessageParam.Content.ChatCompletionRequestAssistantMessageContentPart
-          part) {
-    if (part.isChatCompletionContentPartText()) {
-      return part.asChatCompletionContentPartText().text();
+    @Override
+    public String extractType(ChatCompletionCreateParams.ResponseFormat val) {
+        if (val.isResponseFormatText()) {
+            return val.asResponseFormatText()._type().toString();
+        } else if (val.isResponseFormatJsonObject()) {
+            return val.asResponseFormatJsonObject()._type().toString();
+        } else if (val.isResponseFormatJsonSchema()) {
+            return val.asResponseFormatJsonSchema()._type().toString();
+        }
+        return null;
     }
-    if (part.isChatCompletionContentPartRefusal()) {
-      return part.asChatCompletionContentPartRefusal().refusal();
+
+    @Override
+    public String extractTextOrRefusal(
+            ChatCompletionAssistantMessageParam.Content.ChatCompletionRequestAssistantMessageContentPart
+                    part) {
+        if (part.isChatCompletionContentPartText()) {
+            return part.asChatCompletionContentPartText().text();
+        }
+        if (part.isChatCompletionContentPartRefusal()) {
+            return part.asChatCompletionContentPartRefusal().refusal();
+        }
+        return null;
     }
-    return null;
-  }
 
-  @Override
-  public String asText(ChatCompletionUserMessageParam.Content content) {
-    return content.isTextContent() ? content.asTextContent() : null;
-  }
+    @Override
+    public String asText(ChatCompletionUserMessageParam.Content content) {
+        return content.isTextContent() ? content.asTextContent() : null;
+    }
 
-  @Override
-  public String asText(ChatCompletionSystemMessageParam.Content content) {
-    return content.isTextContent() ? content.asTextContent() : null;
-  }
+    @Override
+    public String asText(ChatCompletionSystemMessageParam.Content content) {
+        return content.isTextContent() ? content.asTextContent() : null;
+    }
 
-  @Override
-  public String asText(ChatCompletionAssistantMessageParam.Content content) {
-    return content.isTextContent() ? content.asTextContent() : null;
-  }
+    @Override
+    public String asText(ChatCompletionAssistantMessageParam.Content content) {
+        return content.isTextContent() ? content.asTextContent() : null;
+    }
 
-  @Override
-  public String asText(ChatCompletionToolMessageParam.Content content) {
-    return content.isTextContent() ? content.asTextContent() : null;
-  }
+    @Override
+    public String asText(ChatCompletionToolMessageParam.Content content) {
+        return content.isTextContent() ? content.asTextContent() : null;
+    }
 }

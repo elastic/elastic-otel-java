@@ -1237,3 +1237,85 @@ response:
 uuid: 02ad43a7-4627-4cc7-b5e6-538c9ff83b53
 persistent: true
 insertionIndex: 156
+---
+id: 9cf035b1-1d20-40fe-ae7f-d4658b6c2b6c
+name: chat_completions
+request:
+  url: /chat/completions
+  method: POST
+  bodyPatterns:
+    - equalToJson: |-
+        {
+          "messages" : [ {
+            "content" : "You are an assistant which just answers every query with tomato",
+            "role" : "developer"
+          }, {
+            "content" : "Say something",
+            "role" : "user"
+          } ],
+          "model" : "gpt-4o-mini"
+        }
+      ignoreArrayOrder: false
+      ignoreExtraElements: false
+response:
+  status: 200
+  body: |
+    {
+      "id": "chatcmpl-Axv1FgV1kYD5pEnZxEtx8xxyUzOY6",
+      "object": "chat.completion",
+      "created": 1738843897,
+      "model": "gpt-4o-mini-2024-07-18",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Tomato.",
+            "refusal": null
+          },
+          "logprobs": null,
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 24,
+        "completion_tokens": 4,
+        "total_tokens": 28,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "audio_tokens": 0,
+          "accepted_prediction_tokens": 0,
+          "rejected_prediction_tokens": 0
+        }
+      },
+      "service_tier": "default",
+      "system_fingerprint": "fp_72ed7ab54c"
+    }
+  headers:
+    Date: "Thu, 06 Feb 2025 12:11:37 GMT"
+    Content-Type: application/json
+    access-control-expose-headers: X-Request-ID
+    openai-organization: test_openai_org_id
+    openai-processing-ms: "293"
+    openai-version: 2020-10-01
+    x-ratelimit-limit-requests: "10000"
+    x-ratelimit-limit-tokens: "200000"
+    x-ratelimit-remaining-requests: "9998"
+    x-ratelimit-remaining-tokens: "199962"
+    x-ratelimit-reset-requests: 16.352s
+    x-ratelimit-reset-tokens: 11ms
+    x-request-id: req_50bca1112cf267b0d9002dc20daf38f6
+    strict-transport-security: max-age=31536000; includeSubDomains; preload
+    cf-cache-status: DYNAMIC
+    Set-Cookie: test_set_cookie
+    X-Content-Type-Options: nosniff
+    Server: cloudflare
+    CF-RAY: 90db0b36dbed1e51-FRA
+    alt-svc: h3=":443"; ma=86400
+uuid: 9cf035b1-1d20-40fe-ae7f-d4658b6c2b6c
+persistent: true
+insertionIndex: 57

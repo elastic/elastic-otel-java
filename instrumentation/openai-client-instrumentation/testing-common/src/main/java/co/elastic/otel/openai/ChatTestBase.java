@@ -239,6 +239,71 @@ public abstract class ChatTestBase {
   }
 
   @Test
+  void testDeveloperMessage() {
+    InstrumentationSettingsAccessor.setCaptureMessageContent(openai.client, true);
+
+    ChatCompletionCreateParams params =
+        ChatCompletionCreateParams.builder()
+            .messages(Arrays.asList(
+                createDeveloperMessage(
+                    "You are an assistant which just answers every query with tomato"),
+                createUserMessage("Say something")
+            ))
+            .model(TEST_CHAT_MODEL)
+            .build();
+
+    ChatCompletion chatCompletion = openai.client.chat().completions().create(params);
+    chatCompletion.validate();
+
+    List<SpanData> spans = testing.spans();
+    assertThat(spans.size()).isEqualTo(1);
+    SpanContext spanCtx = spans.get(0).getSpanContext();
+    assertThat(testing.logRecords())
+        .anySatisfy(
+            log -> {
+              assertThat(log)
+                  .hasAttributesSatisfying(
+                      attr ->
+                          assertThat(attr)
+                              .containsEntry(GEN_AI_SYSTEM, "openai")
+                              .containsEntry("event.name", "gen_ai.system.message"))
+                  .hasSpanContext(spanCtx);
+              assertThat(log.getBodyValue()).satisfies(ValAssert.map()
+                  .entry("content",
+                      "You are an assistant which just answers every query with tomato")
+                  .entry("role", "developer"));
+            })
+        .anySatisfy(
+            log -> {
+              assertThat(log)
+                  .hasAttributesSatisfying(
+                      attr ->
+                          assertThat(attr)
+                              .containsEntry(GEN_AI_SYSTEM, "openai")
+                              .containsEntry("event.name", "gen_ai.user.message"))
+                  .hasSpanContext(spanCtx);
+              assertThat(log.getBodyValue()).satisfies(ValAssert.map()
+                  .entry("content", "Say something")
+                  .entry("role", "user"));
+            })
+        .anySatisfy(
+            log -> {
+              assertThat(log)
+                  .hasAttributesSatisfying(
+                      attr ->
+                          assertThat(attr)
+                              .containsEntry(GEN_AI_SYSTEM, "openai")
+                              .containsEntry("event.name", "gen_ai.choice"))
+                  .hasSpanContext(spanCtx);
+              assertThat(log.getBodyValue()).satisfies(ValAssert.map()
+                  .entry("finish_reason", "stop")
+                  .entry("index", 0)
+                  .entry("message", "Tomato."));
+            })
+        .hasSize(3);
+  }
+
+  @Test
   void allTheClientOptions() {
     ChatCompletionCreateParams params =
         ChatCompletionCreateParams.builder()
@@ -2342,6 +2407,8 @@ public abstract class ChatTestBase {
   protected abstract ChatCompletionMessageParam createUserMessage(String content);
 
   protected abstract ChatCompletionMessageParam createSystemMessage(String content);
+
+  protected abstract ChatCompletionMessageParam createDeveloperMessage(String content);
 
   protected abstract ChatCompletionMessageParam createToolMessage(String response, String id);
 }
