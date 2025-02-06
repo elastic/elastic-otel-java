@@ -12,6 +12,13 @@
         "io.opentelemetry.contrib:**"
       ],
       "enabled": false
+    },
+    {
+      "description": "We don't want to automagically upgrade the OpenAI version, and instead want there to be human involvement to trigger the upgrade",
+      "matchPackageNames": [
+        "com.openai:openai-java"
+      ],
+      "dependencyDashboardApproval": true
     }
   ],
   "ignorePaths": [
