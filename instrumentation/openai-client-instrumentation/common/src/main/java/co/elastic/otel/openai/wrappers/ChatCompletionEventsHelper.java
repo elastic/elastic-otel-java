@@ -75,9 +75,9 @@ public class ChatCompletionEventsHelper {
         ChatCompletionDeveloperMessageParam sysMsg =
             (ChatCompletionDeveloperMessageParam) concreteMessageParam;
         eventType = "gen_ai.system.message";
+        putIfNotEmpty(bodyBuilder, "role", "developer");
         if (settings.captureMessageContent) {
           putIfNotEmpty(bodyBuilder, "content", contentToString(sysMsg.content()));
-          putIfNotEmpty(bodyBuilder, "role", "developer");
         }
       } else if (concreteMessageParam instanceof ChatCompletionUserMessageParam) {
         ChatCompletionUserMessageParam userMsg =
