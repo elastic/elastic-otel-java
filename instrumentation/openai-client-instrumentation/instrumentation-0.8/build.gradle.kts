@@ -19,7 +19,7 @@ muzzle {
   pass {
     group.set("com.openai")
     module.set("openai-java")
-    versions.set("(,${openAiVersion}]")
+    versions.set("[0.8,${openAiVersion}]")
     assertInverse.set(true)
   }
 }

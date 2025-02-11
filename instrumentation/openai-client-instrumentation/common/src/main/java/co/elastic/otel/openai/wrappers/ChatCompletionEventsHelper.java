@@ -77,7 +77,7 @@ public class ChatCompletionEventsHelper {
         eventType = "gen_ai.system.message";
         if (settings.captureMessageContent) {
           putIfNotEmpty(bodyBuilder, "content", contentToString(sysMsg.content()));
-          putIfNotEmpty(bodyBuilder, "role", sysMsg._role().toString());
+          putIfNotEmpty(bodyBuilder, "role", "developer");
         }
       } else if (concreteMessageParam instanceof ChatCompletionUserMessageParam) {
         ChatCompletionUserMessageParam userMsg =
@@ -255,7 +255,7 @@ public class ChatCompletionEventsHelper {
   private static Value<?> buildToolCallEventObject(ChatCompletionMessageToolCall call) {
     Map<String, Value<?>> result = new HashMap<>();
     result.put("id", Value.of(call.id()));
-    result.put("type", Value.of(call._type().toString()));
+    result.put("type", Value.of("function")); // "function" is the only currently supported type
     result.put("function", buildFunctionEventObject(call.function()));
     return Value.of(result);
   }
