@@ -244,11 +244,11 @@ public abstract class ChatTestBase {
 
     ChatCompletionCreateParams params =
         ChatCompletionCreateParams.builder()
-            .messages(Arrays.asList(
-                createDeveloperMessage(
-                    "You are an assistant which just answers every query with tomato"),
-                createUserMessage("Say something")
-            ))
+            .messages(
+                Arrays.asList(
+                    createDeveloperMessage(
+                        "You are an assistant which just answers every query with tomato"),
+                    createUserMessage("Say something")))
             .model(TEST_CHAT_MODEL)
             .build();
 
@@ -268,10 +268,13 @@ public abstract class ChatTestBase {
                               .containsEntry(GEN_AI_SYSTEM, "openai")
                               .containsEntry("event.name", "gen_ai.system.message"))
                   .hasSpanContext(spanCtx);
-              assertThat(log.getBodyValue()).satisfies(ValAssert.map()
-                  .entry("content",
-                      "You are an assistant which just answers every query with tomato")
-                  .entry("role", "developer"));
+              assertThat(log.getBodyValue())
+                  .satisfies(
+                      ValAssert.map()
+                          .entry(
+                              "content",
+                              "You are an assistant which just answers every query with tomato")
+                          .entry("role", "developer"));
             })
         .anySatisfy(
             log -> {
@@ -282,9 +285,8 @@ public abstract class ChatTestBase {
                               .containsEntry(GEN_AI_SYSTEM, "openai")
                               .containsEntry("event.name", "gen_ai.user.message"))
                   .hasSpanContext(spanCtx);
-              assertThat(log.getBodyValue()).satisfies(ValAssert.map()
-                  .entry("content", "Say something")
-                  .entry("role", "user"));
+              assertThat(log.getBodyValue())
+                  .satisfies(ValAssert.map().entry("content", "Say something"));
             })
         .anySatisfy(
             log -> {
@@ -295,10 +297,12 @@ public abstract class ChatTestBase {
                               .containsEntry(GEN_AI_SYSTEM, "openai")
                               .containsEntry("event.name", "gen_ai.choice"))
                   .hasSpanContext(spanCtx);
-              assertThat(log.getBodyValue()).satisfies(ValAssert.map()
-                  .entry("finish_reason", "stop")
-                  .entry("index", 0)
-                  .entry("message", "Tomato."));
+              assertThat(log.getBodyValue())
+                  .satisfies(
+                      ValAssert.map()
+                          .entry("finish_reason", "stop")
+                          .entry("index", 0)
+                          .entry("message", ValAssert.map().entry("content", "Tomato.")));
             })
         .hasSize(3);
   }

@@ -22,6 +22,7 @@ import co.elastic.otel.openai.wrappers.ApiAdapter;
 import com.openai.models.ChatCompletionAssistantMessageParam;
 import com.openai.models.ChatCompletionContentPart;
 import com.openai.models.ChatCompletionCreateParams;
+import com.openai.models.ChatCompletionDeveloperMessageParam;
 import com.openai.models.ChatCompletionMessageParam;
 import com.openai.models.ChatCompletionSystemMessageParam;
 import com.openai.models.ChatCompletionToolMessageParam;
@@ -37,6 +38,9 @@ public class ApiAdapterImpl extends ApiAdapter {
     public Object extractConcreteCompletionMessageParam(ChatCompletionMessageParam base) {
         if (base.isChatCompletionSystemMessageParam()) {
             return base.asChatCompletionSystemMessageParam();
+        }
+        if (base.isChatCompletionDeveloperMessageParam()) {
+            return base.asChatCompletionDeveloperMessageParam();
         }
         if (base.isChatCompletionUserMessageParam()) {
             return base.asChatCompletionUserMessageParam();
@@ -90,6 +94,11 @@ public class ApiAdapterImpl extends ApiAdapter {
 
     @Override
     public String asText(ChatCompletionSystemMessageParam.Content content) {
+        return content.isTextContent() ? content.asTextContent() : null;
+    }
+
+    @Override
+    public String asText(ChatCompletionDeveloperMessageParam.Content content) {
         return content.isTextContent() ? content.asTextContent() : null;
     }
 
