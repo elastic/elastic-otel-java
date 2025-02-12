@@ -5,7 +5,7 @@ plugins {
   id("elastic-otel.instrumentation-conventions")
 }
 
-val openAiVersion = "0" +".13.0"; // DO NOT UPGRADE, string operations are used to prevent renovate upgrades
+val openAiVersion = "0.13.0"; // DO NOT UPGRADE
 
 dependencies {
   compileOnly("com.openai:openai-java:${openAiVersion}")
@@ -19,7 +19,7 @@ muzzle {
   pass {
     group.set("com.openai")
     module.set("openai-java")
-    versions.set("(,${openAiVersion}]")
+    versions.set("[0.8,${openAiVersion}]")
     assertInverse.set(true)
   }
 }

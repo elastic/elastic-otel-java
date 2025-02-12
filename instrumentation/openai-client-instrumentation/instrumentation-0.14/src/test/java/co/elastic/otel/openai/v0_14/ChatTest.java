@@ -20,6 +20,7 @@ package co.elastic.otel.openai.v0_14;
 
 import co.elastic.otel.openai.ChatTestBase;
 import com.openai.models.ChatCompletionAssistantMessageParam;
+import com.openai.models.ChatCompletionDeveloperMessageParam;
 import com.openai.models.ChatCompletionMessageParam;
 import com.openai.models.ChatCompletionMessageToolCall;
 import com.openai.models.ChatCompletionSystemMessageParam;
@@ -60,6 +61,14 @@ class ChatTest extends ChatTestBase {
     return ChatCompletionMessageParam.ofSystem(
         ChatCompletionSystemMessageParam.builder()
             .content(ChatCompletionSystemMessageParam.Content.ofText(content))
+            .build());
+  }
+
+  @Override
+  protected ChatCompletionMessageParam createDeveloperMessage(String content) {
+    return ChatCompletionMessageParam.ofDeveloper(
+        ChatCompletionDeveloperMessageParam.builder()
+            .content(ChatCompletionDeveloperMessageParam.Content.ofText(content))
             .build());
   }
 

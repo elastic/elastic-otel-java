@@ -3,7 +3,7 @@ plugins {
 }
 
 val instrumentations = listOf<String>(
-  ":instrumentation:openai-client-instrumentation:instrumentation-0.2",
+  ":instrumentation:openai-client-instrumentation:instrumentation-0.8",
   ":instrumentation:openai-client-instrumentation:instrumentation-0.14"
 )
 

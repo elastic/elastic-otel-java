@@ -22,6 +22,7 @@ import co.elastic.otel.openai.wrappers.ApiAdapter;
 import com.openai.models.ChatCompletionAssistantMessageParam;
 import com.openai.models.ChatCompletionContentPart;
 import com.openai.models.ChatCompletionCreateParams;
+import com.openai.models.ChatCompletionDeveloperMessageParam;
 import com.openai.models.ChatCompletionMessageParam;
 import com.openai.models.ChatCompletionSystemMessageParam;
 import com.openai.models.ChatCompletionToolMessageParam;
@@ -38,6 +39,9 @@ public class ApiAdapterImpl extends ApiAdapter {
     if (base.isSystem()) {
       return base.asSystem();
     }
+    if (base.isDeveloper()) {
+      return base.asDeveloper();
+    }
     if (base.isUser()) {
       return base.asUser();
     }
@@ -47,7 +51,7 @@ public class ApiAdapterImpl extends ApiAdapter {
     if (base.isTool()) {
       return base.asTool();
     }
-    throw new IllegalStateException("Unhandled message param type: " + base);
+    return null;
   }
 
   @Override
@@ -62,6 +66,11 @@ public class ApiAdapterImpl extends ApiAdapter {
 
   @Override
   public String asText(ChatCompletionSystemMessageParam.Content content) {
+    return content.isText() ? content.asText() : null;
+  }
+
+  @Override
+  public String asText(ChatCompletionDeveloperMessageParam.Content content) {
     return content.isText() ? content.asText() : null;
   }
 

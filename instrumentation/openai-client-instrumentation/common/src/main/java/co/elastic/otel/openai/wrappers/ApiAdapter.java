@@ -21,6 +21,7 @@ package co.elastic.otel.openai.wrappers;
 import com.openai.models.ChatCompletionAssistantMessageParam;
 import com.openai.models.ChatCompletionContentPart;
 import com.openai.models.ChatCompletionCreateParams;
+import com.openai.models.ChatCompletionDeveloperMessageParam;
 import com.openai.models.ChatCompletionMessageParam;
 import com.openai.models.ChatCompletionSystemMessageParam;
 import com.openai.models.ChatCompletionToolMessageParam;
@@ -74,6 +75,11 @@ public abstract class ApiAdapter {
    * @return the contained text, if the content is text. null otherwise.
    */
   public abstract String asText(ChatCompletionSystemMessageParam.Content content);
+
+  /**
+   * @return the contained text, if the content is text. null otherwise.
+   */
+  public abstract String asText(ChatCompletionDeveloperMessageParam.Content content);
 
   /**
    * @return the contained text, if the content is text. null otherwise.

@@ -22,6 +22,7 @@ import co.elastic.otel.openai.wrappers.ApiAdapter;
 import com.openai.models.ChatCompletionAssistantMessageParam;
 import com.openai.models.ChatCompletionContentPart;
 import com.openai.models.ChatCompletionCreateParams;
+import com.openai.models.ChatCompletionDeveloperMessageParam;
 import com.openai.models.ChatCompletionMessageParam;
 import com.openai.models.ChatCompletionSystemMessageParam;
 import com.openai.models.ChatCompletionToolMessageParam;
@@ -38,6 +39,9 @@ public class ApiAdapterImpl extends ApiAdapter {
     if (base.isChatCompletionSystemMessageParam()) {
       return base.asChatCompletionSystemMessageParam();
     }
+    if (base.isChatCompletionDeveloperMessageParam()) {
+      return base.asChatCompletionDeveloperMessageParam();
+    }
     if (base.isChatCompletionUserMessageParam()) {
       return base.asChatCompletionUserMessageParam();
     }
@@ -47,7 +51,7 @@ public class ApiAdapterImpl extends ApiAdapter {
     if (base.isChatCompletionToolMessageParam()) {
       return base.asChatCompletionToolMessageParam();
     }
-    throw new IllegalStateException("Unhandled message param type: " + base);
+    return null;
   }
 
   @Override
@@ -61,11 +65,11 @@ public class ApiAdapterImpl extends ApiAdapter {
   @Override
   public String extractType(ChatCompletionCreateParams.ResponseFormat val) {
     if (val.isResponseFormatText()) {
-      return val.asResponseFormatText()._type().toString();
+      return "text";
     } else if (val.isResponseFormatJsonObject()) {
-      return val.asResponseFormatJsonObject()._type().toString();
+      return "json_object";
     } else if (val.isResponseFormatJsonSchema()) {
-      return val.asResponseFormatJsonSchema()._type().toString();
+      return "json_schema";
     }
     return null;
   }
@@ -90,6 +94,11 @@ public class ApiAdapterImpl extends ApiAdapter {
 
   @Override
   public String asText(ChatCompletionSystemMessageParam.Content content) {
+    return content.isTextContent() ? content.asTextContent() : null;
+  }
+
+  @Override
+  public String asText(ChatCompletionDeveloperMessageParam.Content content) {
     return content.isTextContent() ? content.asTextContent() : null;
   }
 
