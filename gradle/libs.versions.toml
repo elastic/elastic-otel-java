@@ -42,7 +42,7 @@ autoservice-processor = { group = "com.google.auto.service", name = "auto-servic
 autoservice-annotations = { group = "com.google.auto.service", name = "auto-service-annotations", version.ref = "autoservice" }
 
 assertj-core = "org.assertj:assertj-core:3.27.3"
-awaitility = "org.awaitility:awaitility:4.2.2"
+awaitility = "org.awaitility:awaitility:4.3.0"
 findbugs-jsr305 = "com.google.code.findbugs:jsr305:3.0.2"
 wiremock = "com.github.tomakehurst:wiremock-jre8:2.35.2"
 testcontainers = "org.testcontainers:testcontainers:1.20.5"
