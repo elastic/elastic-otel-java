@@ -18,7 +18,11 @@
  */
 package com.example.javaagent.smoketest;
 
-import io.opentelemetry.semconv.ResourceAttributes;
+import io.opentelemetry.semconv.ServiceAttributes;
+import io.opentelemetry.semconv.incubating.CloudIncubatingAttributes;
+import io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes;
+import io.opentelemetry.semconv.incubating.FaasIncubatingAttributes;
+import io.opentelemetry.semconv.incubating.K8sIncubatingAttributes;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -92,12 +96,13 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
         attributes ->
             attributes
                 .containsEntry(
-                    ResourceAttributes.CONTAINER_ID.getKey(), attributeValue(getContainerId()))
+                    ContainerIncubatingAttributes.CONTAINER_ID.getKey(),
+                    attributeValue(getContainerId()))
                 .containsEntry(
-                    ResourceAttributes.CLOUD_PLATFORM.getKey(),
-                    attributeValue(ResourceAttributes.CloudPlatformValues.AWS_EC2))
+                    CloudIncubatingAttributes.CLOUD_PLATFORM.getKey(),
+                    attributeValue(CloudIncubatingAttributes.CloudPlatformIncubatingValues.AWS_EC2))
                 .containsEntry(
-                    ResourceAttributes.CLOUD_AVAILABILITY_ZONE.getKey(),
+                    CloudIncubatingAttributes.CLOUD_AVAILABILITY_ZONE.getKey(),
                     attributeValue("us-west-2b")));
   }
 
@@ -126,9 +131,11 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
           attributes ->
               attributes
                   .containsEntry(
-                      ResourceAttributes.CLOUD_PLATFORM.getKey(),
-                      attributeValue(ResourceAttributes.CloudPlatformValues.AWS_ELASTIC_BEANSTALK))
-                  .containsEntry(ResourceAttributes.SERVICE_VERSION.getKey(), attributeValue("2")));
+                      CloudIncubatingAttributes.CLOUD_PLATFORM.getKey(),
+                      attributeValue(
+                          CloudIncubatingAttributes.CloudPlatformIncubatingValues
+                              .AWS_ELASTIC_BEANSTALK))
+                  .containsEntry(ServiceAttributes.SERVICE_VERSION.getKey(), attributeValue("2")));
     } finally {
       Files.delete(tempFile);
     }
@@ -159,10 +166,11 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
           attributes ->
               attributes
                   .containsEntry(
-                      ResourceAttributes.CLOUD_PLATFORM.getKey(),
-                      attributeValue(ResourceAttributes.CloudPlatformValues.AWS_EKS))
+                      CloudIncubatingAttributes.CLOUD_PLATFORM.getKey(),
+                      attributeValue(
+                          CloudIncubatingAttributes.CloudPlatformIncubatingValues.AWS_EKS))
                   .containsEntry(
-                      ResourceAttributes.K8S_CLUSTER_NAME.getKey(), attributeValue("2")));
+                      K8sIncubatingAttributes.K8S_CLUSTER_NAME.getKey(), attributeValue("2")));
 
     } finally {
       Files.delete(tokenFile);
@@ -184,10 +192,13 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
         attributes ->
             attributes
                 .containsEntry(
-                    ResourceAttributes.CLOUD_PLATFORM.getKey(),
-                    attributeValue(ResourceAttributes.CloudPlatformValues.AWS_LAMBDA))
-                .containsEntry(ResourceAttributes.FAAS_NAME.getKey(), attributeValue("my_function"))
-                .containsEntry(ResourceAttributes.FAAS_VERSION.getKey(), attributeValue("42")));
+                    CloudIncubatingAttributes.CLOUD_PLATFORM.getKey(),
+                    attributeValue(
+                        CloudIncubatingAttributes.CloudPlatformIncubatingValues.AWS_LAMBDA))
+                .containsEntry(
+                    FaasIncubatingAttributes.FAAS_NAME.getKey(), attributeValue("my_function"))
+                .containsEntry(
+                    FaasIncubatingAttributes.FAAS_VERSION.getKey(), attributeValue("42")));
   }
 
   @Test
@@ -204,8 +215,8 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
     testResourceProvider(
         attributes ->
             attributes.containsEntry(
-                ResourceAttributes.CLOUD_PLATFORM.getKey(),
-                attributeValue(ResourceAttributes.CloudPlatformValues.AWS_ECS)));
+                CloudIncubatingAttributes.CLOUD_PLATFORM.getKey(),
+                attributeValue(CloudIncubatingAttributes.CloudPlatformIncubatingValues.AWS_ECS)));
   }
 
   private void testResourceProvider(ResourceAttributesCheck check) {

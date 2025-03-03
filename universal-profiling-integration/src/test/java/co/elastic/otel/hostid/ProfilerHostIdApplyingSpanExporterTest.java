@@ -25,7 +25,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
-import io.opentelemetry.semconv.ResourceAttributes;
+import io.opentelemetry.semconv.incubating.HostIncubatingAttributes;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,7 +68,7 @@ public class ProfilerHostIdApplyingSpanExporterTest {
               data ->
                   assertThat(data.getResource().getAttributes())
                       .containsEntry("custom", "foobar")
-                      .containsEntry(ResourceAttributes.HOST_ID, "hooray"));
+                      .containsEntry(HostIncubatingAttributes.HOST_ID, "hooray"));
 
       Resource updated = exporter.getFinishedSpanItems().get(0).getResource();
 
@@ -91,7 +91,7 @@ public class ProfilerHostIdApplyingSpanExporterTest {
               data ->
                   assertThat(data.getResource().getAttributes())
                       .containsEntry("custom", "foobar")
-                      .containsEntry(ResourceAttributes.HOST_ID, "changed!"));
+                      .containsEntry(HostIncubatingAttributes.HOST_ID, "changed!"));
 
       // and finally a reset
       ProfilerProvidedHostId.set("");
@@ -109,7 +109,7 @@ public class ProfilerHostIdApplyingSpanExporterTest {
     Resource originalResource =
         Resource.builder()
             .put("custom", "foobar")
-            .put(ResourceAttributes.HOST_ID, "app-provided")
+            .put(HostIncubatingAttributes.HOST_ID, "app-provided")
             .build();
     InMemorySpanExporter exporter = InMemorySpanExporter.create();
     try (SdkTracerProvider tracerProvider =

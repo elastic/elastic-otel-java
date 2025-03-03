@@ -24,7 +24,7 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
-import io.opentelemetry.semconv.ResourceAttributes;
+import io.opentelemetry.semconv.ServiceAttributes;
 import java.util.concurrent.TimeUnit;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -82,7 +82,7 @@ public class UniversalProfilingIntegrationBenchmark {
       SdkTracerProviderBuilder builder = SdkTracerProvider.builder();
       if (universalProfilerProcessorActive) {
         Resource res =
-            Resource.builder().put(ResourceAttributes.SERVICE_NAME, "benchmark-service").build();
+            Resource.builder().put(ServiceAttributes.SERVICE_NAME, "benchmark-service").build();
         builder.addSpanProcessor(UniversalProfilingProcessor.builder(spanProcessor, res).build());
       }
       tracerProvider = builder.build();
