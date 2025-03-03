@@ -25,7 +25,7 @@ import com.google.auto.service.AutoService;
 import io.opentelemetry.sdk.autoconfigure.ResourceConfiguration;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ResourceAttributes;
+import io.opentelemetry.semconv.ServiceAttributes;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -71,7 +71,7 @@ public class UniversalProfilingProcessorAutoConfig
     }
     Resource resource = ResourceConfiguration.createEnvironmentResource(properties);
 
-    String serviceName = resource.getAttribute(ResourceAttributes.SERVICE_NAME);
+    String serviceName = resource.getAttribute(ServiceAttributes.SERVICE_NAME);
     if (serviceName == null || serviceName.isEmpty()) {
       logger.warning(
           "Cannot start universal profiling integration because no service name was configured");

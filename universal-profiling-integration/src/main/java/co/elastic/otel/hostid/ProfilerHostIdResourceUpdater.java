@@ -18,10 +18,10 @@
  */
 package co.elastic.otel.hostid;
 
+import co.elastic.otel.UniversalProfilingIncubatingAttributes;
 import co.elastic.otel.common.WeakConcurrent;
 import com.blogspot.mydailyjava.weaklockfree.WeakConcurrentMap;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.ResourceAttributes;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -64,10 +64,12 @@ public class ProfilerHostIdResourceUpdater {
     }
 
     private Resource doApplyHostId(Resource resource) {
-      String existingId = resource.getAttribute(ResourceAttributes.HOST_ID);
+      String existingId = resource.getAttribute(UniversalProfilingIncubatingAttributes.HOST_ID);
       if (existingId == null) {
         return resource.merge(
-            Resource.builder().put(ResourceAttributes.HOST_ID, profilerProvidedHostId).build());
+            Resource.builder()
+                .put(UniversalProfilingIncubatingAttributes.HOST_ID, profilerProvidedHostId)
+                .build());
       } else {
         if (!profilerProvidedHostId.equals(existingId)) {
           log.log(

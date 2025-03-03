@@ -47,7 +47,9 @@ import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
-import io.opentelemetry.semconv.ResourceAttributes;
+import io.opentelemetry.semconv.ServiceAttributes;
+import io.opentelemetry.semconv.incubating.HostIncubatingAttributes;
+import io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -96,13 +98,13 @@ public class UniversalProfilingProcessorTest {
   }
 
   private OpenTelemetrySdk initSdk(Consumer<UniversalProfilingProcessorBuilder> customizer) {
-    Resource res = Resource.builder().put(ResourceAttributes.SERVICE_NAME, "my-service").build();
+    Resource res = Resource.builder().put(ServiceAttributes.SERVICE_NAME, "my-service").build();
     return initSdk(res, customizer, Sampler.alwaysOn());
   }
 
   private OpenTelemetrySdk initSdk(
       Consumer<UniversalProfilingProcessorBuilder> customizer, Sampler sampler) {
-    Resource res = Resource.builder().put(ResourceAttributes.SERVICE_NAME, "my-service").build();
+    Resource res = Resource.builder().put(ServiceAttributes.SERVICE_NAME, "my-service").build();
     return initSdk(res, customizer, sampler);
   }
 
@@ -251,15 +253,15 @@ public class UniversalProfilingProcessorTest {
     public void testProcessStoragePopulated() {
       Resource withNamespace =
           Resource.builder()
-              .put(ResourceAttributes.SERVICE_NAME, "service Ä 1")
-              .put(ResourceAttributes.SERVICE_NAMESPACE, "my nameßspace")
+              .put(ServiceAttributes.SERVICE_NAME, "service Ä 1")
+              .put(ServiceIncubatingAttributes.SERVICE_NAMESPACE, "my nameßspace")
               .build();
       try (OpenTelemetrySdk sdk = initSdk(withNamespace, b -> {}, Sampler.alwaysOn())) {
         checkProcessStorage("service Ä 1", "my nameßspace");
       }
 
       Resource withoutNamespace =
-          Resource.builder().put(ResourceAttributes.SERVICE_NAME, "service Ä 2").build();
+          Resource.builder().put(ServiceAttributes.SERVICE_NAME, "service Ä 2").build();
       try (OpenTelemetrySdk sdk = initSdk(withoutNamespace, b -> {}, Sampler.alwaysOn())) {
         checkProcessStorage("service Ä 2", "");
       }
@@ -446,7 +448,7 @@ public class UniversalProfilingProcessorTest {
             .satisfies(
                 span -> {
                   assertThat(span.getResource().getAttributes())
-                      .containsEntry(ResourceAttributes.HOST_ID, "host1");
+                      .containsEntry(HostIncubatingAttributes.HOST_ID, "host1");
                 });
         spans.reset();
 
@@ -467,7 +469,7 @@ public class UniversalProfilingProcessorTest {
             .satisfies(
                 span -> {
                   assertThat(span.getResource().getAttributes())
-                      .containsEntry(ResourceAttributes.HOST_ID, "host1");
+                      .containsEntry(HostIncubatingAttributes.HOST_ID, "host1");
                 });
       }
     }
