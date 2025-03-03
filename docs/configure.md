@@ -83,6 +83,17 @@ EDOT Java uses different defaults than the OpenTelemetry Java agent for the foll
 | `OTEL_RESOURCE_PROVIDERS_GCP_ENABLED` | true (enabled) | false (disabled) ([docs](https://opentelemetry.io/docs/zero-code/java/agent/configuration/#enable-resource-providers-that-are-disabled-by-default)) |
 | `OTEL_INSTRUMENTATION_RUNTIME-TELEMETRY_EMIT-EXPERIMENTAL-TELEMETRY` | true (enabled) | false (disabled) ([docs](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/ec0223de59a6c7c09b0dcf72ba89addc0975a40d/instrumentation/runtime-telemetry/README.md)) |
 
+#### Micrometer metrics
+
+Micrometer metrics can be captured and automatically converted to OpenTelemetry metrics, however
+this is not enabled by default.
+
+To enable micrometer metrics, the `OTEL_INSTRUMENTATON_MICROMETER_ENABLED` configuration option must
+be explicitly set to `true` (default `false`).
+
+See also [micrometer configuration options](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/micrometer/micrometer-1.5/javaagent)
+for other Micrometer related configuration options.
+
 ### Configuration options from OpenTelemetry extensions
 
 EDOT Java includes several OpenTelemetry extensions from the [OpenTelemetry Java agent contrib repo](https://github.com/open-telemetry/opentelemetry-java-contrib/). These extensions offer the following additional `OTEL_` options:
