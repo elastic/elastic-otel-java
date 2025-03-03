@@ -28,7 +28,6 @@ import co.elastic.otel.testing.OtelReflectionUtils;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.incubator.events.GlobalEventLoggerProvider;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
@@ -51,7 +50,6 @@ public class ChainingSpanProcessorAutoConfigurationTest {
     AutoConfigA.delegate = (a, b) -> {};
     AutoConfigB.delegate = (a, b) -> {};
     GlobalOpenTelemetry.resetForTest();
-    GlobalEventLoggerProvider.resetForTest();
   }
 
   @Test
