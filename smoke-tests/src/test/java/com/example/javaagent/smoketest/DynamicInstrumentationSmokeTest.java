@@ -27,6 +27,7 @@ import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class DynamicInstrumentationSmokeTest extends TestAppSmokeTest {
@@ -58,11 +59,13 @@ class DynamicInstrumentationSmokeTest extends TestAppSmokeTest {
   }
 
   @Test
+  @Disabled // https://github.com/elastic/elastic-otel-java/issues/562
   public void flipMethodInstrumentation() throws InterruptedException {
     dynamicFlipInstrumentation("Methods", 1);
   }
 
   @Test
+  @Disabled // https://github.com/elastic/elastic-otel-java/issues/562
   public void flipAllInstrumentation() throws InterruptedException {
     dynamicFlipInstrumentation("All", 0);
   }

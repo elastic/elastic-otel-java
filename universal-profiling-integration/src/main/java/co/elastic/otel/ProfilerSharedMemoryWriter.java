@@ -24,7 +24,7 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.ReadableSpan;
-import io.opentelemetry.semconv.ResourceAttributes;
+import io.opentelemetry.semconv.ServiceAttributes;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -48,11 +48,12 @@ public class ProfilerSharedMemoryWriter {
 
   static ByteBuffer generateProcessCorrelationStorage(
       Resource serviceResource, String socketFilePath) {
-    String serviceName = serviceResource.getAttribute(ResourceAttributes.SERVICE_NAME);
+    String serviceName = serviceResource.getAttribute(ServiceAttributes.SERVICE_NAME);
     if (serviceName == null) {
       throw new IllegalStateException("A service name must be configured!");
     }
-    String environment = serviceResource.getAttribute(ResourceAttributes.SERVICE_NAMESPACE);
+    String environment =
+        serviceResource.getAttribute(UniversalProfilingIncubatingAttributes.SERVICE_NAMESPACE);
 
     ByteBuffer buffer = ByteBuffer.allocateDirect(4096);
     buffer.order(ByteOrder.nativeOrder());

@@ -22,6 +22,7 @@ import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.instrumentation.testing.junit.AgentInstrumentationExtension;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.semconv.incubating.TelemetryIncubatingAttributes;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -41,13 +42,17 @@ public class DistroResourceAttributesTest {
     boolean isRunningDistro = System.getProperty("otel.javaagent.extensions") == null;
 
     if (isRunningDistro) {
-      assertThat(resource.getAttributes()).containsEntry("telemetry.distro.name", "elastic");
-      assertThat(resource.getAttributes()).containsKey("telemetry.distro.version");
+      assertThat(resource.getAttributes())
+          .containsEntry(TelemetryIncubatingAttributes.TELEMETRY_DISTRO_NAME, "elastic");
+      assertThat(resource.getAttributes())
+          .containsKey(TelemetryIncubatingAttributes.TELEMETRY_DISTRO_VERSION);
     } else {
       // we are running with the vanilla agent as extension: we should not be setting the distro
       // name
-      assertThat(resource.getAttributes()).doesNotContainKey("telemetry.distro.name");
-      assertThat(resource.getAttributes()).doesNotContainKey("telemetry.distro.version");
+      assertThat(resource.getAttributes())
+          .doesNotContainKey(TelemetryIncubatingAttributes.TELEMETRY_DISTRO_NAME);
+      assertThat(resource.getAttributes())
+          .doesNotContainKey(TelemetryIncubatingAttributes.TELEMETRY_DISTRO_VERSION);
     }
   }
 }

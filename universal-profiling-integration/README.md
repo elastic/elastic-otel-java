@@ -36,7 +36,7 @@ If you manually set-up your `OpenTelemetrySDK`, you need to create and register 
 ```java
 
 Resource resource = Resource.builder()
-    .put(ResourceAttributes.SERVICE_NAME, "my-service")
+    .put(ServiceAttributes.SERVICE_NAME, "my-service")
     .build();
 
 SpanExporter exporter = OtlpGrpcSpanExporter.builder()
