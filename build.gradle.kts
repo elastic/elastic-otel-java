@@ -54,8 +54,8 @@ tasks {
     doLast {
       val agentVer = getResolvedDependency("io.opentelemetry.javaagent:opentelemetry-javaagent")!!.version
       val sdkVer = getResolvedDependency("io.opentelemetry:opentelemetry-sdk")!!.version
-      val semconvVer = libs.versions.opentelemetrySemconvAlpha.get().replace("-alpha", "")
-      val contribVer = libs.versions.opentelemetryContribAlpha.get().replace("-alpha", "")
+      val semconvVer = libs.versions.opentelemetrySemconv.get()
+      val contribVer = libs.versions.opentelemetryContribAlpha.get().replace("-alpha", "") // -alpha suffix is only on artifact, not release tag
       println("* opentelemetry-javaagent: [$agentVer](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v$agentVer)")
       println("* opentelemetry-sdk: [$sdkVer](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v$sdkVer)")
       println("* opentelemetry-semconv: [$semconvVer](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v$semconvVer)")

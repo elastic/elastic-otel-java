@@ -24,5 +24,5 @@ upstreamSemconvVersion="$(upstream_version 'dependencyManagement/build.gradle.kt
 
 sed -i -e "s/^opentelemetryJavaagentAlpha = \".*/opentelemetryJavaagentAlpha = \"${upstreamAgentAlphaVersion}\"/" "${folder}/libs.versions.toml"
 sed -i -e "s/^opentelemetryContribAlpha = \".*/opentelemetryContribAlpha = \"${upstreamContribVersion}\"/" "${folder}/libs.versions.toml"
-sed -i -e "s/^opentelemetrySemconvAlpha = \".*/opentelemetrySemconvAlpha = \"${upstreamSemconvVersion}\"/" "${folder}/libs.versions.toml"
+sed -i -e "s/^opentelemetrySemconv = \".*/opentelemetrySemconv = \"${upstreamSemconvVersion}\"/" "${folder}/libs.versions.toml"
 
