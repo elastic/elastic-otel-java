@@ -74,7 +74,7 @@ public class EventLoggingStreamedResponse implements StreamResponse<ChatCompleti
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() {
     delegate.close();
   }
 }

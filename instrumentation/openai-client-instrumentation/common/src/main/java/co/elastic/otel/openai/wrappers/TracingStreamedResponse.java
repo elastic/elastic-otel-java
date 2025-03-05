@@ -94,7 +94,7 @@ public class TracingStreamedResponse implements StreamResponse<ChatCompletionChu
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() {
     endSpan();
     delegate.close();
   }
