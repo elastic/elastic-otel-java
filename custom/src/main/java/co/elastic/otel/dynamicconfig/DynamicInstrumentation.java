@@ -18,9 +18,7 @@
  */
 package co.elastic.otel.dynamicconfig;
 
-import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.api.trace.TracerProvider;
-import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.internal.ScopeConfigurator;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
@@ -28,19 +26,14 @@ import io.opentelemetry.sdk.trace.internal.TracerConfig;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.logging.Logger;
 
 /**
  * Notes: 1. The instrumentation can't have been disabled by configuration, eg using
  * -Dotel.instrumentation.[name].enabled=false as in that case it is never initialized so can't be
- * "re-enabled" 2. The specific instrumentation name is used, you can see these by setting this
- * class logging level to j.u.l.Level.CONFIG 3. The disable/re-enable is eventually consistent,
- * needing the application to pass a synchronization barrier to take effect - but for most
- * applications these are very frequent
+ * "re-enabled" 2. The disable/re-enable is eventually consistent, needing the application to pass a
+ * synchronization barrier to take effect - but for most applications these are very frequent
  */
 public class DynamicInstrumentation {
-
-  private static final Logger logger = Logger.getLogger(DynamicInstrumentation.class.getName());
 
   private static Object getField(String fieldname, Object target) {
     try {
@@ -50,17 +43,6 @@ public class DynamicInstrumentation {
     } catch (NoSuchFieldException | IllegalAccessException e) {
       throw new IllegalStateException(
           "Error getting " + fieldname + " from " + target.getClass(), e);
-    }
-  }
-
-  private static Object call(String methodname, Object target) {
-    try {
-      Method method = target.getClass().getDeclaredMethod(methodname);
-      method.setAccessible(true);
-      return method.invoke(target);
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-      throw new IllegalStateException(
-          "Error calling " + methodname + " on " + target.getClass(), e);
     }
   }
 
@@ -83,21 +65,6 @@ public class DynamicInstrumentation {
       ScopeConfigurator<TracerConfig> configurator) {
     call("setTracerConfigurator", sdkTracerProviderBuilder, configurator, ScopeConfigurator.class);
     return sdkTracerProviderBuilder;
-  }
-
-  // SdkTracerProvider.getTracerConfig(InstrumentationScopeInfo instrumentationScopeInfo)
-  // here because it's not currently public
-  private static TracerConfig getTracerConfig(
-      SdkTracerProvider provider, InstrumentationScopeInfo instrumentationScopeInfo) {
-    return (TracerConfig)
-        call("getTracerConfig", provider, instrumentationScopeInfo, InstrumentationScopeInfo.class);
-  }
-
-  // SdkTracer.getInstrumentationScopeInfo()
-  // here because it's not currently public
-  private static InstrumentationScopeInfo getInstrumentationScopeInfo(Tracer sdkTracer)
-      throws NoSuchFieldException, IllegalAccessException {
-    return (InstrumentationScopeInfo) call("getInstrumentationScopeInfo", sdkTracer);
   }
 
   // SdkTracerProvider.setTracerConfigurator(ScopeConfigurator tracerConfigurator)
