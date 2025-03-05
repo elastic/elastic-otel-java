@@ -36,7 +36,6 @@ import static co.elastic.otel.openai.wrappers.GenAiAttributes.GEN_AI_SYSTEM;
 import static co.elastic.otel.openai.wrappers.GenAiAttributes.GEN_AI_USAGE_INPUT_TOKENS;
 import static co.elastic.otel.openai.wrappers.GenAiAttributes.GEN_AI_USAGE_OUTPUT_TOKENS;
 
-import com.google.errorprone.annotations.MustBeClosed;
 import com.openai.core.RequestOptions;
 import com.openai.core.http.StreamResponse;
 import com.openai.models.ChatCompletion;
@@ -50,12 +49,14 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.instrumentation.api.instrumenter.AttributesExtractor;
 import io.opentelemetry.instrumentation.api.instrumenter.Instrumenter;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class InstrumentedChatCompletionService implements CompletionService {
+public class InstrumentedChatCompletionService
+    extends DelegatingInvocationHandler<CompletionService, InstrumentedChatCompletionService> {
 
   public static class RequestHolder {
     final ChatCompletionCreateParams request;
@@ -174,15 +175,45 @@ public class InstrumentedChatCompletionService implements CompletionService {
           .addOperationMetrics(GenAiClientMetrics::new)
           .buildInstrumenter();
 
-  private final CompletionService delegate;
   private final InstrumentationSettings settings;
 
   InstrumentedChatCompletionService(CompletionService delegate, InstrumentationSettings settings) {
-    this.delegate = delegate;
+    super(delegate);
     this.settings = settings;
   }
 
   @Override
+  protected Class<CompletionService> getProxyType() {
+    return CompletionService.class;
+  }
+
+  @Override
+  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    String methodName = method.getName();
+    Class<?>[] parameterTypes = method.getParameterTypes();
+
+    if (methodName.equals("create")
+        && parameterTypes.length >= 1
+        && parameterTypes[0] == ChatCompletionCreateParams.class) {
+      if (parameterTypes.length == 1) {
+        return create((ChatCompletionCreateParams) args[0], RequestOptions.none());
+      } else if (parameterTypes.length == 2 && parameterTypes[1] == RequestOptions.class) {
+        return create((ChatCompletionCreateParams) args[0], (RequestOptions) args[1]);
+      }
+    }
+
+    if (methodName.equals("createStreaming")
+        && parameterTypes.length >= 1
+        && parameterTypes[0] == ChatCompletionCreateParams.class) {
+      if (parameterTypes.length == 1) {
+        return createStreaming((ChatCompletionCreateParams) args[0], RequestOptions.none());
+      } else if (parameterTypes.length == 2 && parameterTypes[1] == RequestOptions.class) {
+        return createStreaming((ChatCompletionCreateParams) args[0], (RequestOptions) args[1]);
+      }
+    }
+    return super.invoke(proxy, method, args);
+  }
+
   public ChatCompletion create(
       ChatCompletionCreateParams chatCompletionCreateParams, RequestOptions requestOptions) {
 
@@ -229,8 +260,6 @@ public class InstrumentedChatCompletionService implements CompletionService {
     return result;
   }
 
-  @MustBeClosed
-  @Override
   public StreamResponse<ChatCompletionChunk> createStreaming(
       ChatCompletionCreateParams chatCompletionCreateParams, RequestOptions requestOptions) {
     RequestHolder requestHolder = new RequestHolder(chatCompletionCreateParams, settings);
@@ -249,9 +278,7 @@ public class InstrumentedChatCompletionService implements CompletionService {
       throw t;
     }
 
-    TracingStreamedResponse wrappedResponse =
-        new TracingStreamedResponse(response, ctx, requestHolder);
-    return wrappedResponse;
+    return new TracingStreamedResponse(response, ctx, requestHolder);
   }
 
   private StreamResponse<ChatCompletionChunk> createStreamingWithLogs(
