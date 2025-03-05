@@ -115,7 +115,7 @@ public class InstrumentedOpenAiClient
       return new InstrumentedChatService(delegate.chat(), settings).createProxy();
     }
     if (methodName.equals("embeddings") && parameterTypes.length == 0) {
-      return new InstrumentedEmbeddingsService(delegate.embeddings(), settings);
+      return new InstrumentedEmbeddingsService(delegate.embeddings(), settings).createProxy();
     }
     return super.invoke(proxy, method, args);
   }

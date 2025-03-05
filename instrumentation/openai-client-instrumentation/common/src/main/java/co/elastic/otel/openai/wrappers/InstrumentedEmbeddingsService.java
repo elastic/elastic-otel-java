@@ -36,15 +36,16 @@ import io.opentelemetry.context.Scope;
 import io.opentelemetry.instrumentation.api.instrumenter.AttributesExtractor;
 import io.opentelemetry.instrumentation.api.instrumenter.Instrumenter;
 import io.opentelemetry.instrumentation.api.instrumenter.SpanKindExtractor;
+import java.lang.reflect.Method;
 import java.util.Collections;
 
-public class InstrumentedEmbeddingsService implements EmbeddingService {
+public class InstrumentedEmbeddingsService
+    extends DelegatingInvocationHandler<EmbeddingService, InstrumentedEmbeddingsService> {
 
-  private final EmbeddingService delegate;
   private final InstrumentationSettings settings;
 
   InstrumentedEmbeddingsService(EmbeddingService delegate, InstrumentationSettings settings) {
-    this.delegate = delegate;
+    super(delegate);
     this.settings = settings;
   }
 
@@ -102,6 +103,31 @@ public class InstrumentedEmbeddingsService implements EmbeddingService {
           .buildInstrumenter(SpanKindExtractor.alwaysClient());
 
   @Override
+  protected Class<EmbeddingService> getProxyType() {
+    return EmbeddingService.class;
+  }
+
+  @Override
+  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    String methodName = method.getName();
+    Class<?>[] parameterTypes = method.getParameterTypes();
+
+    if (methodName.equals("create")
+        && parameterTypes.length >= 1
+        && parameterTypes[0] == EmbeddingCreateParams.class) {
+      if (parameterTypes.length == 1) {
+        return create((EmbeddingCreateParams) args[0], RequestOptions.none());
+      } else if (parameterTypes.length == 2 && parameterTypes[1] == RequestOptions.class) {
+        return create((EmbeddingCreateParams) args[0], (RequestOptions) args[1]);
+      }
+    }
+
+    // TODO: the EmbeddingService.withRawResponse view is currently untraced
+    // Once the OpenAI client library is stable we should revisit and add support
+
+    return super.invoke(proxy, method, args);
+  }
+
   public CreateEmbeddingResponse create(
       EmbeddingCreateParams embeddingCreateParams, RequestOptions requestOptions) {
     RequestHolder requestHolder = new RequestHolder(embeddingCreateParams, settings);

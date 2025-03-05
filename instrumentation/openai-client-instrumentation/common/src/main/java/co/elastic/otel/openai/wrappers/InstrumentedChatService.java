@@ -41,7 +41,7 @@ public class InstrumentedChatService
     String methodName = method.getName();
     Class<?>[] parameterTypes = method.getParameterTypes();
     if (methodName.equals("completions") && parameterTypes.length == 0) {
-      return new InstrumentedChatCompletionService(delegate.completions(), settings);
+      return new InstrumentedChatCompletionService(delegate.completions(), settings).createProxy();
     }
     return super.invoke(proxy, method, args);
   }

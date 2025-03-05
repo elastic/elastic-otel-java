@@ -40,7 +40,9 @@ public class OpenAiClientInstrumentationModule extends InstrumentationModule {
     // HandlerReferencingAsyncStreamResponse was added in 0.14.1,
     // which is the next release after 0.13.0
     // 0.14.0 was a broken release which doesn't exist on maven central
-    return hasClassesNamed("com.openai.core.http.HandlerReferencingAsyncStreamResponse");
+    // HandlerReferencingAsyncStreamResponse was removed in 0.23.0 and replaced with TrackedHandler
+    return hasClassesNamed("com.openai.core.http.HandlerReferencingAsyncStreamResponse")
+        .or(hasClassesNamed("com.openai.core.http.TrackedHandler"));
   }
 
   @Override
