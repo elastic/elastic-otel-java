@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.dynamicconfig;
 
-import static co.elastic.otel.dynamicconfig.DynamicInstrumentation.updateTracerConfigurations;
+import static co.elastic.otel.dynamicconfig.DynamicInstrumentation.setProviderTracerConfigurator;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
@@ -111,14 +111,16 @@ public class DynamicConfiguration {
     UpdatableConfigurator.INSTANCE.put(
         InstrumentationScopeInfo.create(INSTRUMENTATION_NAME_PREPEND + instrumentationName),
         TracerConfig.enabled());
-    updateTracerConfigurations(GlobalOpenTelemetry.getTracerProvider());
+    setProviderTracerConfigurator(
+        GlobalOpenTelemetry.getTracerProvider(), UpdatableConfigurator.INSTANCE);
   }
 
   public void disableTracesFor(String instrumentationName) {
     UpdatableConfigurator.INSTANCE.put(
         InstrumentationScopeInfo.create(INSTRUMENTATION_NAME_PREPEND + instrumentationName),
         TracerConfig.disabled());
-    updateTracerConfigurations(GlobalOpenTelemetry.getTracerProvider());
+    setProviderTracerConfigurator(
+        GlobalOpenTelemetry.getTracerProvider(), UpdatableConfigurator.INSTANCE);
   }
 
   public void disableAllTraces() {

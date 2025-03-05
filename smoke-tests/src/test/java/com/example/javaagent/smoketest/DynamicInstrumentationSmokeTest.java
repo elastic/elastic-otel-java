@@ -59,13 +59,11 @@ class DynamicInstrumentationSmokeTest extends TestAppSmokeTest {
   }
 
   @Test
-  @Disabled // https://github.com/elastic/elastic-otel-java/issues/562
   public void flipMethodInstrumentation() throws InterruptedException {
     dynamicFlipInstrumentation("Methods", 1);
   }
 
   @Test
-  @Disabled // https://github.com/elastic/elastic-otel-java/issues/562
   public void flipAllInstrumentation() throws InterruptedException {
     dynamicFlipInstrumentation("All", 0);
   }
