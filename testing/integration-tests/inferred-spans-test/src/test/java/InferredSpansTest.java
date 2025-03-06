@@ -26,11 +26,17 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 import java.time.Duration;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledForJreRange;
 import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 @DisabledOnOs(OS.WINDOWS)
+// TODO: current async-profiler versions seems to often crash on current Java 23
+// This *should* be fixed with the next async-profiler release, but we need to check
+// So remove the @DisabledForJreRange when the inferred spans extension is upgraded to a newer async-profiler version than 3.0.0
+@DisabledForJreRange(min = JRE.JAVA_23, max = JRE.JAVA_23)
 public class InferredSpansTest {
 
   @RegisterExtension
@@ -89,8 +95,8 @@ public class InferredSpansTest {
                                                       .anySatisfy(
                                                           link -> {
                                                             assertThat(
-                                                                    link.getSpanContext()
-                                                                        .getSpanId())
+                                                                link.getSpanContext()
+                                                                    .getSpanId())
                                                                 .isEqualTo(child.getSpanId());
                                                             assertThat(link.getAttributes())
                                                                 .containsEntry("is_child", true)
