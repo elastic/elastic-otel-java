@@ -20,7 +20,6 @@ package co.elastic.otel.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.internal.ScopeConfigurator;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
@@ -39,15 +38,6 @@ public class DynamicInstrumentationTest {
         SdkTracerProviderBuilder.class.getDeclaredMethod(
             "setTracerConfigurator", ScopeConfigurator.class);
     assertThat(Modifier.toString(method1.getModifiers())).isNotEqualTo("public");
-
-    Method method2 =
-        SdkTracerProvider.class.getDeclaredMethod(
-            "getTracerConfig", InstrumentationScopeInfo.class);
-    assertThat(Modifier.toString(method2.getModifiers())).isNotEqualTo("public");
-
-    Class<?> sdkTracer = Class.forName("io.opentelemetry.sdk.trace.SdkTracer");
-    Method method3 = sdkTracer.getDeclaredMethod("getInstrumentationScopeInfo");
-    assertThat(Modifier.toString(method3.getModifiers())).isNotEqualTo("public");
 
     Method method4 =
         SdkTracerProvider.class.getDeclaredMethod("setTracerConfigurator", ScopeConfigurator.class);
