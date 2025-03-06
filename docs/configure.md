@@ -88,7 +88,7 @@ EDOT Java uses different defaults than the OpenTelemetry Java agent for the foll
 Micrometer metrics can be captured and automatically converted to OpenTelemetry metrics, however
 this is not enabled by default.
 
-To enable micrometer metrics, the `OTEL_INSTRUMENTATON_MICROMETER_ENABLED` configuration option must
+To enable micrometer metrics, the `OTEL_INSTRUMENTATION_MICROMETER_ENABLED` configuration option must
 be explicitly set to `true` (default `false`).
 
 See also [micrometer configuration options](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/micrometer/micrometer-1.5/javaagent)
