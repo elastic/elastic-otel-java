@@ -10,9 +10,9 @@ dependencies are the opentelemetry jars, so putting any
 of the code examples into a project and adding these three
 dependencies will allow for easy compilation
 
-- io.opentelemetry:opentelemetry-api
-- io.opentelemetry:opentelemetry-sdk
-- io.opentelemetry:opentelemetry-exporter-otlp
+- `io.opentelemetry:opentelemetry-api`
+- `io.opentelemetry:opentelemetry-sdk`
+- `io.opentelemetry:opentelemetry-exporter-otlp`
 
 (Manual compilation would require the jars and their dependencies downloaded, and then javac -cp <list of jars> path-to-java-file.)
 
