@@ -18,7 +18,7 @@ dependencies will allow for easy compilation
 
 # Traces
 
-The TestOtelSdkTrace class is a standalone class that creates
+The [`TestOtelSdkTrace`](./src/main/java/elastic/troubleshooting/TestOtelSdkTrace.java) class is a standalone class that creates
 a span (named `test span`) in a service that you name. It takes
 three arguments
 1. The name of the service you want to have displayed in the APM UI
