@@ -16,26 +16,36 @@ dependencies will allow for easy compilation
 
 (Manual compilation would require the jars and their dependencies downloaded, and then javac -cp <list of jars> path-to-java-file.)
 
-# Traces
+# Traces, Metrics, Logs
 
-The [`TestOtelSdkTrace`](./src/main/java/elastic/troubleshooting/TestOtelSdkTrace.java) class is a standalone class that creates
-a span (named `test span`) in a service that you name. It takes
-three arguments
+The examples in this section all take the same three arguments:
 1. The name of the service you want to have displayed in the APM UI
 2. The endpoint to send traces to, normally the Elastic APM server or the OpenTelemetry collector.
-   The url would typically look like `http://localhost:4318/v1/traces` or `https://somewhere:443/v1/traces` 
-   but if `/v1/traces` is missing from the argument, it is added to the endpoint 
-3. The secret token or apikey in the format secret:<token> or apikey:<apikey>. 
-   If the argument doesn't start with neither `secret:` nor `apikey:`, then the full argument is assumed to be a secret token
+   The url would typically look like `http://localhost:4318/v1/traces` or `https://somewhere:443/v1/traces`
+   but if `/v1/traces` is missing from the argument, it is added to the endpoint
+   - for metrics, replace `/traces` with `/metrics` in the above paths
+3. The secret token or apikey in the format secret:<token> or apikey:<apikey>.
+   If the argument doesn't start with neither `secret:` nor `apikey:`, then the full argument is
+   assumed to be a secret token
+
+## Traces
+
+The [`TestOtelSdkTrace`](./src/main/java/elastic/troubleshooting/TestOtelSdkTrace.java) class is a standalone class that creates
+a span (named `test span`) in a service that you name. 
 
 After running the class, you should see the trace in the APM UI, eg with service name set to `test1` and
 correct endpoint and token, you should see something similar to 
 ![this](images\test-trace.png)
 
-# Metrics
+## Metrics
 
-To do
+The [`TestOtelSdkMetrics`](./src/main/java/elastic/troubleshooting/TestOtelSdkMetrics.java) class is a standalone class that generates
+metrics for `jvm.thread.count` for a little over 3 minutes in a service that you name.
 
-# Logs
+After running the class, you should see the metrics in the APM UI, eg with service name set to `test1` and
+correct endpoint and token, you should see something similar to
+![this](images\test-metrics.png)
+
+## Logs
 
 To do
