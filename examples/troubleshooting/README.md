@@ -23,6 +23,7 @@ The examples in this section all take the same three arguments:
 2. The endpoint to send traces to, normally the Elastic APM server or the OpenTelemetry collector.
    The url would typically look like `http://localhost:4318/v1/traces` or `https://somewhere:443/v1/traces`
    but if `/v1/traces` is missing from the argument, it is added to the endpoint
+   - for metrics, replace `/traces` with `/metrics` in the above paths
 3. The secret token or apikey in the format secret:<token> or apikey:<apikey>.
    If the argument doesn't start with neither `secret:` nor `apikey:`, then the full argument is
    assumed to be a secret token
