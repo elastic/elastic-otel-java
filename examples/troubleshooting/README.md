@@ -35,7 +35,7 @@ a span (named `test span`) in a service that you name.
 
 After running the class, you should see the trace in the APM UI, eg with service name set to `test1` and
 correct endpoint and token, you should see something similar to 
-![this](images\test-trace.png)
+![this](images/test-trace.png)
 
 ## Metrics
 
@@ -44,7 +44,7 @@ metrics for `jvm.thread.count` for a little over 3 minutes in a service that you
 
 After running the class, you should see the metrics in the APM UI, eg with service name set to `test1` and
 correct endpoint and token, you should see something similar to
-![this](images\test-metrics.png)
+![this](images/test-metrics.png)
 
 ## Logs
 
