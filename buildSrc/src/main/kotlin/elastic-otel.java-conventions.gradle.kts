@@ -35,6 +35,7 @@ dependencies {
   testImplementation(catalog.findLibrary("mockito").get())
   testImplementation(enforcedPlatform(catalog.findLibrary("junitBom").get()))
   testImplementation("org.junit.jupiter:junit-jupiter")
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks {
