@@ -18,8 +18,8 @@ opentelemetryContribAlpha = "1.44.0-alpha"
 
 # otel semconv
 # updated from upstream agent with .ci/update-upstream.sh
-# While the semconv stable artifact is provided transitively by the agent, we still have to explicitly
-# reference the "incubating" version explicitly
+# While the semconv stable/incubating artifacts are provided as transitive dependencies, keeping
+# an explicit version here allows to easily override to a not-yet-released version.
 opentelemetrySemconv = "1.30.0"
 opentelemetrySemconvAlpha = "1.30.0-alpha"
 
