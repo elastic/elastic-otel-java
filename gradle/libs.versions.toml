@@ -10,7 +10,7 @@ opentelemetryProto = "1.3.2-alpha"
 
 # otel agent, we rely on the '*-alpha' and get the non-alpha dependencies transitively
 # updated from upstream agent with .ci/update-upstream.sh
-opentelemetryJavaagentAlpha = "2.13.3-alpha"
+opentelemetryJavaagentAlpha = "2.14.0-alpha"
 
 # otel contrib
 # updated from upstream agent with .ci/update-upstream.sh
@@ -20,7 +20,8 @@ opentelemetryContribAlpha = "1.44.0-alpha"
 # updated from upstream agent with .ci/update-upstream.sh
 # While the semconv stable artifact is provided transitively by the agent, we still have to explicitly
 # reference the "incubating" version explicitly
-opentelemetrySemconv = "1.30.0-rc.1"
+opentelemetrySemconv = "1.30.0"
+opentelemetrySemconvAlpha = "1.30.0-alpha"
 
 [libraries]
 
@@ -36,7 +37,7 @@ contribSpanStacktrace = { group = "io.opentelemetry.contrib", name = "openteleme
 contribInferredSpans = { group = "io.opentelemetry.contrib", name = "opentelemetry-inferred-spans", version.ref = "opentelemetryContribAlpha" }
 
 opentelemetrySemconv = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv", version.ref = "opentelemetrySemconv" }
-opentelemetrySemconvIncubating = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv-incubating", version.ref = "opentelemetrySemconv" }
+opentelemetrySemconvIncubating = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv-incubating", version.ref = "opentelemetrySemconvAlpha" }
 
 autoservice-processor = { group = "com.google.auto.service", name = "auto-service", version.ref = "autoservice" }
 autoservice-annotations = { group = "com.google.auto.service", name = "auto-service-annotations", version.ref = "autoservice" }

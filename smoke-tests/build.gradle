@@ -29,8 +29,7 @@ dependencies {
 
   testImplementation(catalog.assertj.core)
 
-  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv")
-  testImplementation("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
+  testImplementation(catalog.bundles.semconv)
 
   testImplementation(catalog.mockserver.client)
 
