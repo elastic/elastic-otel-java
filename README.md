@@ -83,7 +83,7 @@ Set `otel.instrumentation.runtime-telemetry.emit-experimental-telemetry` to `fal
 ### Metric Temporality
 
 Elasticsearch and Kibana work best with metrics provided in delta-temporality.
-Therefore, the EDOT Java changes sets the default value of `otel.exporter.otlp.metrics.temporality.preference` to `DELTA`.
+Therefore, the EDOT Java changes the default value of `otel.exporter.otlp.metrics.temporality.preference` to `DELTA`.
 You can override this default if needed, note though that some provided Kibana dashboards will not work correctly in this case.
 
 # License
