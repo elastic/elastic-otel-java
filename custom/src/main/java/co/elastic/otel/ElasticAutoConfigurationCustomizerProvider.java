@@ -42,7 +42,6 @@ public class ElasticAutoConfigurationCustomizerProvider
   private static final String METRIC_TEMPORALITY_PREFERENCE =
       "otel.exporter.otlp.metrics.temporality.preference";
 
-
   // must match value in io.opentelemetry.contrib.stacktrace.StackTraceAutoConfig
   private static final String STACKTRACE_OTEL_FILTER =
       "otel.java.experimental.span-stacktrace.filter";
