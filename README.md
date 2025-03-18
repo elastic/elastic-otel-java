@@ -79,6 +79,13 @@ in the [`span-stacktrace`](https://github.com/open-telemetry/opentelemetry-java-
 Experimental runtime metrics are enabled by default.
 Set `otel.instrumentation.runtime-telemetry.emit-experimental-telemetry` to `false` to disable them.
 
+
+### Metric Temporality
+
+Elasticsearch and Kibana work best with metrics provided in delta-temporality.
+Therefore, the EDOT Java changes sets the default value of `otel.exporter.otlp.metrics.temporality.preference` to `DELTA`.
+You can override this default if needed, note though that some provided Kibana dashboards will not work correctly in this case.
+
 # License
 
 The Elastic Distribution of OpenTelemetry Java is licensed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.html).

@@ -67,4 +67,13 @@ class ElasticAutoConfigurationCustomizerProviderTest {
     String value = config.get("otel.instrumentation.runtime-telemetry.emit-experimental-telemetry");
     assertThat(value).isEqualTo("false");
   }
+
+  @Test
+  void customizeMetricTemporalityPreference() {
+    Map<String, String> userConfig = new HashMap<>();
+    userConfig.put("otel.exporter.otlp.metrics.temporality.preference", "LOWMEMORY");
+    Map<String, String> config = propertiesCustomizer(DefaultConfigProperties.create(userConfig));
+    String value = config.get("otel.exporter.otlp.metrics.temporality.preference");
+    assertThat(value).isEqualTo("LOWMEMORY");
+  }
 }
