@@ -69,6 +69,14 @@ class ElasticAutoConfigurationCustomizerProviderTest {
   }
 
   @Test
+  void ensureDefaultMetricTemporalityIsDelta() {
+    Map<String, String> config =
+        propertiesCustomizer(DefaultConfigProperties.create(new HashMap<>()));
+    String value = config.get("otel.exporter.otlp.metrics.temporality.preference");
+    assertThat(value).isEqualTo("DELTA");
+  }
+
+  @Test
   void customizeMetricTemporalityPreference() {
     Map<String, String> userConfig = new HashMap<>();
     userConfig.put("otel.exporter.otlp.metrics.temporality.preference", "LOWMEMORY");
