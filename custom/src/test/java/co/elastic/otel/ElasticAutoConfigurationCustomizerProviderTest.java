@@ -19,12 +19,15 @@
 package co.elastic.otel;
 
 import static co.elastic.otel.ElasticAutoConfigurationCustomizerProvider.propertiesCustomizer;
-import static org.assertj.core.api.Assertions.assertThat;
+import static co.elastic.otel.ElasticAutoConfigurationCustomizerProvider.resourceProviders;
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 
 import io.opentelemetry.javaagent.tooling.EmptyConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 import java.util.HashMap;
 import java.util.Map;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.semconv.incubating.DeploymentIncubatingAttributes;
 import org.junit.jupiter.api.Test;
 
 class ElasticAutoConfigurationCustomizerProviderTest {
@@ -67,4 +70,34 @@ class ElasticAutoConfigurationCustomizerProviderTest {
     String value = config.get("otel.instrumentation.runtime-telemetry.emit-experimental-telemetry");
     assertThat(value).isEqualTo("false");
   }
+
+  @Test
+  void legacyDeploymentEnvironment() {
+    Resource input = Resource.builder()
+        .put(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT, "test")
+        .put("other", "other").build();
+    Resource resource = resourceProviders().apply(input, null);
+
+    assertThat(resource.getAttributes()).hasSize(2)
+        .doesNotContainKey(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT)
+        .containsEntry(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT_NAME, "test")
+        .containsEntry("other", "other");
+
+  }
+
+  @Test
+  void legacyDeploymentRemoveLegacyWhenBothSet() {
+    Resource input = Resource.builder()
+        .put(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT, "legacy")
+        .put(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT_NAME, "new")
+        .put("other", "other")
+        .build();
+    Resource resource = resourceProviders().apply(input, null);
+    assertThat(resource.getAttributes()).hasSize(3)
+        .containsEntry(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT, "legacy")
+        .containsEntry(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT_NAME, "new")
+        .containsEntry("other", "other");
+
+  }
+
 }

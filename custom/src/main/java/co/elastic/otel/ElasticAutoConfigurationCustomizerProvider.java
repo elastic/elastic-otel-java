@@ -24,13 +24,20 @@ import co.elastic.otel.dynamicconfig.BlockableSpanExporter;
 import co.elastic.otel.dynamicconfig.DynamicConfiguration;
 import co.elastic.otel.dynamicconfig.DynamicInstrumentation;
 import com.google.auto.service.AutoService;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.resources.ResourceBuilder;
+import io.opentelemetry.semconv.incubating.DeploymentIncubatingAttributes;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
 
 @AutoService(AutoConfigurationCustomizerProvider.class)
 public class ElasticAutoConfigurationCustomizerProvider
@@ -49,6 +56,9 @@ public class ElasticAutoConfigurationCustomizerProvider
       "elastic.otel.java.span-stacktrace.min.duration";
   static final String STACKTRACE_LEGACY2_DURATION =
       "elastic.otel.java.span.stacktrace.min.duration";
+
+  private static final AttributeKey<String> DEPLOYMENT_LEGACY = AttributeKey.stringKey("deployment.environment");
+  private static final AttributeKey<String> DEPLOYMENT = AttributeKey.stringKey("deployment.environment.name");
 
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
@@ -70,6 +80,7 @@ public class ElasticAutoConfigurationCustomizerProvider
               providerBuilder, DynamicConfiguration.UpdatableConfigurator.INSTANCE);
           return providerBuilder;
         });
+    autoConfiguration.addResourceCustomizer(resourceProviders());
   }
 
   static Map<String, String> propertiesCustomizer(ConfigProperties configProperties) {
@@ -80,6 +91,22 @@ public class ElasticAutoConfigurationCustomizerProvider
     spanStackTrace(config, configProperties);
 
     return config;
+  }
+
+  static BiFunction<Resource, ConfigProperties, Resource> resourceProviders() {
+    return (resource, configProperties) -> {
+
+      // convert deprecated deployment.environment to deployment.environment.name as a convenience
+      String deploymentLegacy = resource.getAttribute(DEPLOYMENT_LEGACY);
+      if (deploymentLegacy != null && resource.getAttribute(DEPLOYMENT) == null) {
+        ResourceBuilder builder = resource.toBuilder()
+            .put(DEPLOYMENT, deploymentLegacy)
+            .removeIf(DEPLOYMENT_LEGACY::equals);
+        resource = builder.build();
+      }
+
+      return resource;
+    };
   }
 
   private static void experimentalTelemetry(
