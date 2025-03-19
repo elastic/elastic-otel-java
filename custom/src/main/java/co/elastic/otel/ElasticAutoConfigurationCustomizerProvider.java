@@ -46,6 +46,8 @@ public class ElasticAutoConfigurationCustomizerProvider
   private static final String DISABLED_RESOURCE_PROVIDERS = "otel.java.disabled.resource.providers";
   private static final String RUNTIME_EXPERIMENTAL_TELEMETRY =
       "otel.instrumentation.runtime-telemetry.emit-experimental-telemetry";
+  private static final String METRIC_TEMPORALITY_PREFERENCE =
+      "otel.exporter.otlp.metrics.temporality.preference";
 
   // must match value in io.opentelemetry.contrib.stacktrace.StackTraceAutoConfig
   private static final String STACKTRACE_OTEL_FILTER =
@@ -87,6 +89,7 @@ public class ElasticAutoConfigurationCustomizerProvider
     Map<String, String> config = new HashMap<>();
 
     experimentalTelemetry(config, configProperties);
+    deltaMetricsTemporality(config, configProperties);
     resourceProviders(config, configProperties);
     spanStackTrace(config, configProperties);
 
@@ -113,6 +116,14 @@ public class ElasticAutoConfigurationCustomizerProvider
     boolean experimentalTelemetry =
         configProperties.getBoolean(RUNTIME_EXPERIMENTAL_TELEMETRY, true);
     config.put(RUNTIME_EXPERIMENTAL_TELEMETRY, Boolean.toString(experimentalTelemetry));
+  }
+
+  private static void deltaMetricsTemporality(
+      Map<String, String> config, ConfigProperties configProperties) {
+    // enable experimental telemetry metrics by default if not explicitly disabled
+    String temporalityPreference =
+        configProperties.getString(METRIC_TEMPORALITY_PREFERENCE, "DELTA");
+    config.put(METRIC_TEMPORALITY_PREFERENCE, temporalityPreference);
   }
 
   private static void resourceProviders(
