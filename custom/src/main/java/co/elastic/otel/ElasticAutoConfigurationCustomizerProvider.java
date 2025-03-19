@@ -25,19 +25,15 @@ import co.elastic.otel.dynamicconfig.DynamicConfiguration;
 import co.elastic.otel.dynamicconfig.DynamicInstrumentation;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.sdk.resources.ResourceBuilder;
-import io.opentelemetry.semconv.incubating.DeploymentIncubatingAttributes;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Predicate;
 
 @AutoService(AutoConfigurationCustomizerProvider.class)
 public class ElasticAutoConfigurationCustomizerProvider
@@ -59,8 +55,10 @@ public class ElasticAutoConfigurationCustomizerProvider
   static final String STACKTRACE_LEGACY2_DURATION =
       "elastic.otel.java.span.stacktrace.min.duration";
 
-  private static final AttributeKey<String> DEPLOYMENT_LEGACY = AttributeKey.stringKey("deployment.environment");
-  private static final AttributeKey<String> DEPLOYMENT = AttributeKey.stringKey("deployment.environment.name");
+  private static final AttributeKey<String> DEPLOYMENT_LEGACY =
+      AttributeKey.stringKey("deployment.environment");
+  private static final AttributeKey<String> DEPLOYMENT =
+      AttributeKey.stringKey("deployment.environment.name");
 
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
@@ -102,8 +100,7 @@ public class ElasticAutoConfigurationCustomizerProvider
       // duplicate deprecated deployment.environment to deployment.environment.name as a convenience
       String deploymentLegacy = resource.getAttribute(DEPLOYMENT_LEGACY);
       if (deploymentLegacy != null && resource.getAttribute(DEPLOYMENT) == null) {
-        resource = resource.toBuilder()
-            .put(DEPLOYMENT, deploymentLegacy).build();
+        resource = resource.toBuilder().put(DEPLOYMENT, deploymentLegacy).build();
       }
 
       return resource;
