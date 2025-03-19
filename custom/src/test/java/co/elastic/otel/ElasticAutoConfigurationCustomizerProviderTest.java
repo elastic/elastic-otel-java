@@ -78,8 +78,9 @@ class ElasticAutoConfigurationCustomizerProviderTest {
         .put("other", "other").build();
     Resource resource = resourceProviders().apply(input, null);
 
-    assertThat(resource.getAttributes()).hasSize(2)
-        .doesNotContainKey(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT)
+    assertThat(resource.getAttributes()).hasSize(3)
+        .describedAs("when legacy attribute set agent should send both")
+        .containsEntry(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT, "test")
         .containsEntry(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT_NAME, "test")
         .containsEntry("other", "other");
 
@@ -94,6 +95,7 @@ class ElasticAutoConfigurationCustomizerProviderTest {
         .build();
     Resource resource = resourceProviders().apply(input, null);
     assertThat(resource.getAttributes()).hasSize(3)
+        .describedAs("when both attributes are set, agent should send them as-is")
         .containsEntry(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT, "legacy")
         .containsEntry(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT_NAME, "new")
         .containsEntry("other", "other");

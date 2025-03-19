@@ -96,13 +96,11 @@ public class ElasticAutoConfigurationCustomizerProvider
   static BiFunction<Resource, ConfigProperties, Resource> resourceProviders() {
     return (resource, configProperties) -> {
 
-      // convert deprecated deployment.environment to deployment.environment.name as a convenience
+      // duplicate deprecated deployment.environment to deployment.environment.name as a convenience
       String deploymentLegacy = resource.getAttribute(DEPLOYMENT_LEGACY);
       if (deploymentLegacy != null && resource.getAttribute(DEPLOYMENT) == null) {
-        ResourceBuilder builder = resource.toBuilder()
-            .put(DEPLOYMENT, deploymentLegacy)
-            .removeIf(DEPLOYMENT_LEGACY::equals);
-        resource = builder.build();
+        resource = resource.toBuilder()
+            .put(DEPLOYMENT, deploymentLegacy).build();
       }
 
       return resource;
