@@ -19,10 +19,13 @@
 package co.elastic.otel;
 
 import static co.elastic.otel.ElasticAutoConfigurationCustomizerProvider.propertiesCustomizer;
-import static org.assertj.core.api.Assertions.assertThat;
+import static co.elastic.otel.ElasticAutoConfigurationCustomizerProvider.resourceProviders;
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 
 import io.opentelemetry.javaagent.tooling.EmptyConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.semconv.incubating.DeploymentIncubatingAttributes;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -83,5 +86,39 @@ class ElasticAutoConfigurationCustomizerProviderTest {
     Map<String, String> config = propertiesCustomizer(DefaultConfigProperties.create(userConfig));
     String value = config.get("otel.exporter.otlp.metrics.temporality.preference");
     assertThat(value).isEqualTo("LOWMEMORY");
+  }
+
+  @Test
+  void legacyDeploymentEnvironment() {
+    Resource input =
+        Resource.builder()
+            .put(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT, "test")
+            .put("other", "other")
+            .build();
+    Resource resource = resourceProviders().apply(input, null);
+
+    assertThat(resource.getAttributes())
+        .hasSize(3)
+        .describedAs("when legacy attribute set agent should send both")
+        .containsEntry(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT, "test")
+        .containsEntry(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT_NAME, "test")
+        .containsEntry("other", "other");
+  }
+
+  @Test
+  void legacyDeploymentRemoveLegacyWhenBothSet() {
+    Resource input =
+        Resource.builder()
+            .put(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT, "legacy")
+            .put(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT_NAME, "new")
+            .put("other", "other")
+            .build();
+    Resource resource = resourceProviders().apply(input, null);
+    assertThat(resource.getAttributes())
+        .hasSize(3)
+        .describedAs("when both attributes are set, agent should send them as-is")
+        .containsEntry(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT, "legacy")
+        .containsEntry(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT_NAME, "new")
+        .containsEntry("other", "other");
   }
 }
