@@ -1,2 +1,2 @@
-rootProject.name = "troubleshoting-example"
+rootProject.name = "troubleshooting-example"
 
