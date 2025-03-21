@@ -41,7 +41,7 @@ In the APM UI, you should see something similar to this screenshot:
 
 ## Logs
 
-With the `logs` signal, a dozen of log messages with `` are sent over a short time for the service `<service-name>`.
+With the `logs` signal, a dozen of log messages with a dummy message are sent over a short time for the service `<service-name>`.
 
 In the APM UI, you should see something similar to this screenshot:
 ![](images/test-logs.png)
