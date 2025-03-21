@@ -2,3 +2,4 @@
 elastic-otel-javaagent*.jar
 shdotenv
 .env
+./build
