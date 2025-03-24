@@ -23,7 +23,7 @@ import io.opentelemetry.contrib.attach.core.CoreRuntimeAttach;
 public class RuntimeAttach {
 
   public static void attachJavaagentToCurrentJvm() {
-    CoreRuntimeAttach distroRuntimeAttach = new CoreRuntimeAttach("/otel-agent.jar");
+    CoreRuntimeAttach distroRuntimeAttach = new CoreRuntimeAttach("/edot-agent.jar");
     distroRuntimeAttach.attachJavaagentToCurrentJvm();
   }
 

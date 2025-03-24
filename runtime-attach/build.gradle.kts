@@ -18,6 +18,6 @@ tasks {
     from({
       agent.singleFile
     })
-    rename("^(.*)\\.jar\$", "otel-agent.jar")
+    rename("^(.*)\\.jar\$", "edot-agent.jar")
   }
 }
