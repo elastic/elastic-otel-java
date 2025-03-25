@@ -52,12 +52,12 @@ class DynamicConfigSmokeTest extends TestAppSmokeTest {
   }
 
   @AfterEach
-  public void endTest() throws InterruptedException {
+  public void endTest() {
     doRequest(getUrl("/dynamicconfig/reset"), okResponseBody("reset"));
   }
 
   @Test
-  public void flipSending() throws InterruptedException, IOException {
+  public void flipSending() throws IOException {
     doRequest(getUrl("/health"), okResponseBody("Alive!"));
     doRequest(getUrl("/dynamicconfig/flipSending"), okResponseBody("stopped"));
 

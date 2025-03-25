@@ -161,7 +161,7 @@ abstract class SmokeTest {
   }
 
   @BeforeEach
-  void beforeEach() throws IOException, InterruptedException {
+  void beforeEach() throws IOException {
     // because traces reporting is asynchronous we need to wait for the healthcheck traces to be
     // reported and only then
     // flush before the test, otherwise the first test will see the healthcheck trace captured.
