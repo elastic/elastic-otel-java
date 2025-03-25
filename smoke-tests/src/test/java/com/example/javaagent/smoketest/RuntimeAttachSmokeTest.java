@@ -48,7 +48,7 @@ public class RuntimeAttachSmokeTest extends TestAppSmokeTest {
           }
 
           // make the app use runtime-attach
-          container.withEnv("TEST_RUNTIME_ATTACH", "true");
+          container.withEnv("EDOT_RUNTIME_ATTACH", "true");
         });
   }
 

@@ -20,6 +20,8 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-api")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations")
 
+  implementation(project(":runtime-attach"))
+
 }
 
 java {
