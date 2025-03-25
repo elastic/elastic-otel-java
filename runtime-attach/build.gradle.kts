@@ -1,6 +1,11 @@
 plugins {
-  id("elastic-otel.library-packaging-conventions")
+  id("elastic-otel.java-conventions")
+  id("elastic-otel.sign-and-publish-conventions")
 }
+
+description = "Elastic Distribution of OpenTelemetry Java Agent - runtime attach"
+
+base.archivesName.set("elastic-otel-runtime-attach")
 
 val agent: Configuration by configurations.creating {
   isCanBeResolved = true

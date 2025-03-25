@@ -20,8 +20,10 @@ package co.elastic.otel.agent.attach;
 
 import io.opentelemetry.contrib.attach.core.CoreRuntimeAttach;
 
+/** Provides ability to attach EDOT Java agent to the current JVM at runtime. */
 public class RuntimeAttach {
 
+  /** Attaches EDOT Java agent to the current JVM, must be called early at application startup */
   public static void attachJavaagentToCurrentJvm() {
     CoreRuntimeAttach distroRuntimeAttach = new CoreRuntimeAttach("/edot-agent.jar");
     distroRuntimeAttach.attachJavaagentToCurrentJvm();
