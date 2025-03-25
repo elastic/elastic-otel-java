@@ -24,12 +24,34 @@ import java.lang.instrument.Instrumentation;
 /** Elastic agent entry point, delegates to OpenTelemetry agent */
 public class ElasticAgent {
 
-  @SuppressWarnings("unused")
+  /**
+   * Entry point for -javaagent JVM argument attach
+   *
+   * @param agentArgs agent arguments
+   * @param inst instrumentation
+   */
   public static void premain(String agentArgs, Instrumentation inst) {
     OpenTelemetryAgent.premain(agentArgs, inst);
   }
 
+  /**
+   * Entry point for runtime attach
+   *
+   * @param agentArgs agent arguments
+   * @param inst instrumentation
+   */
+  public static void agentmain(String agentArgs, Instrumentation inst) {
+    OpenTelemetryAgent.agentmain(agentArgs, inst);
+  }
+
+  /**
+   * Entry point to execute as program
+   *
+   * @param args arguments
+   */
   public static void main(String[] args) {
     OpenTelemetryAgent.main(args);
   }
+
+  private ElasticAgent() {}
 }

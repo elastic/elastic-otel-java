@@ -16,19 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.test;
+package co.elastic.otel.agent.attach;
 
-import co.elastic.otel.agent.attach.RuntimeAttach;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import io.opentelemetry.contrib.attach.core.CoreRuntimeAttach;
 
-@SpringBootApplication
-public class AppMain {
+/** Provides ability to attach EDOT Java agent to the current JVM at runtime. */
+public class RuntimeAttach {
 
-  public static void main(String[] args) {
-    if (System.getenv("EDOT_RUNTIME_ATTACH") != null) {
-      RuntimeAttach.attachJavaagentToCurrentJvm();
-    }
-    SpringApplication.run(AppMain.class, args);
+  /** Attaches EDOT Java agent to the current JVM, must be called early at application startup */
+  public static void attachJavaagentToCurrentJvm() {
+    CoreRuntimeAttach distroRuntimeAttach = new CoreRuntimeAttach("/edot-agent.jar");
+    distroRuntimeAttach.attachJavaagentToCurrentJvm();
   }
+
+  private RuntimeAttach() {}
 }

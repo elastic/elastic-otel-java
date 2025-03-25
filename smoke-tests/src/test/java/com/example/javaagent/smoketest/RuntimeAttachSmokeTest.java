@@ -22,27 +22,33 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.trace.v1.Span;
-import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-class DynamicConfigSmokeTest extends TestAppSmokeTest {
+public class RuntimeAttachSmokeTest extends TestAppSmokeTest {
 
   @BeforeAll
   public static void start() {
     startTestApp(
-        (container) -> {
-          container.addEnv(
-              "OTEL_INSTRUMENTATION_METHODS_INCLUDE",
-              "co.elastic.otel.test.DynamicConfigController[flipSending]");
-          container.addEnv(
-              "ELASTIC_OTEL_JAVA_EXPERIMENTAL_DISABLE_INSTRUMENTATIONS_CHECKER", "true");
-          container.addEnv(
-              "ELASTIC_OTEL_JAVA_EXPERIMENTAL_DISABLE_INSTRUMENTATIONS_CHECKER_INTERVAL_MS", "300");
-          container.addEnv("OTEL_JAVAAGENT_DEBUG", "true");
+        container -> {
+          String jvmOptions = container.getEnvMap().get("JAVA_TOOL_OPTIONS");
+          if (jvmOptions != null) {
+            // remove '-javaagent' from JVM args
+            jvmOptions =
+                Arrays.asList(jvmOptions.split(" ")).stream()
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .filter(s -> !s.startsWith("-javaagent:"))
+                    .collect(Collectors.joining());
+            container.withEnv("JAVA_TOOL_OPTIONS", jvmOptions);
+          }
+
+          // make the app use runtime-attach
+          container.withEnv("EDOT_RUNTIME_ATTACH", "true");
         });
   }
 
@@ -51,31 +57,14 @@ class DynamicConfigSmokeTest extends TestAppSmokeTest {
     stopApp();
   }
 
-  @AfterEach
-  public void endTest() {
-    doRequest(getUrl("/dynamicconfig/reset"), okResponseBody("reset"));
-  }
-
   @Test
-  public void flipSending() throws IOException {
-    doRequest(getUrl("/health"), okResponseBody("Alive!"));
-    doRequest(getUrl("/dynamicconfig/flipSending"), okResponseBody("stopped"));
+  void runtimeAttachTrace() {
+    // runtime attach is working if we can capture any signal, for simplicity we only test traces
 
-    // the first flip-sending request should not be part of the exported traces anymore
+    doRequest(getUrl("/health"), okResponseBody("Alive!"));
+
     List<ExportTraceServiceRequest> traces = waitForTraces();
     List<Span> spans = getSpans(traces).toList();
     assertThat(spans).hasSize(1).extracting("name").containsOnly("GET /health");
-
-    clearBackend();
-
-    doRequest(getUrl("/health"), okResponseBody("Alive!"));
-    doRequest(getUrl("/dynamicconfig/flipSending"), okResponseBody("restarted"));
-    // During /health, the sending should still have been disabled, /flipSending should be recorded
-    traces = waitForTraces();
-    spans = getSpans(traces).toList();
-    assertThat(spans)
-        .hasSize(2)
-        .extracting("name")
-        .containsOnly("GET /dynamicconfig/flipSending", "DynamicConfigController.flipSending");
   }
 }
