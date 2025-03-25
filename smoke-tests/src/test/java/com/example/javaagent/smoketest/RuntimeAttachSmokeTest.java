@@ -18,16 +18,16 @@
  */
 package com.example.javaagent.smoketest;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
+import io.opentelemetry.proto.trace.v1.Span;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
-import io.opentelemetry.proto.trace.v1.Span;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class RuntimeAttachSmokeTest extends TestAppSmokeTest {
 
@@ -67,5 +67,4 @@ public class RuntimeAttachSmokeTest extends TestAppSmokeTest {
     List<Span> spans = getSpans(traces).toList();
     assertThat(spans).hasSize(1).extracting("name").containsOnly("GET /health");
   }
-
 }
