@@ -165,9 +165,5 @@ public class ElasticAutoConfigurationCustomizerProvider
 
     config.put(STACKTRACE_OTEL_FILTER, SpanStackTraceFilter.class.getName());
   }
-
-  @Override
-  public int order() {
-    return AutoConfigurationCustomizerProvider.super.order();
-  }
+  
 }
