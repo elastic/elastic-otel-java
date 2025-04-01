@@ -23,6 +23,7 @@ dependencies {
   testImplementation(catalog.okhttp)
   testImplementation(catalog.opentelemetryProto)
   testImplementation(catalog.awaitility)
+  testImplementation(catalog.wiremock)
   testImplementation("io.opentelemetry:opentelemetry-api")
 
   testImplementation(catalog.logback)

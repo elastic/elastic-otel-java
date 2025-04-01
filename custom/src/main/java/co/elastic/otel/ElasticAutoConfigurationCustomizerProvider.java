@@ -62,15 +62,9 @@ public class ElasticAutoConfigurationCustomizerProvider
 
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
-    autoConfiguration.addMetricExporterCustomizer(
-        (metricexporter, configProperties) ->
-            BlockableMetricExporter.createCustomInstance(metricexporter));
-    autoConfiguration.addSpanExporterCustomizer(
-        (spanExporter, configProperties) ->
-            BlockableSpanExporter.createCustomInstance(spanExporter));
-    autoConfiguration.addLogRecordExporterCustomizer(
-        (logExporter, configProperties) ->
-            BlockableLogRecordExporter.createCustomInstance(logExporter));
+    // Order is important: configureExporterUserAgentHeaders needs access to the unwrapped exporters
+    configureExporterUserAgentHeaders(autoConfiguration);
+    configureBlockableExporters(autoConfiguration);
 
     autoConfiguration.addPropertiesCustomizer(
         ElasticAutoConfigurationCustomizerProvider::propertiesCustomizer);
@@ -81,6 +75,29 @@ public class ElasticAutoConfigurationCustomizerProvider
           return providerBuilder;
         });
     autoConfiguration.addResourceCustomizer(resourceProviders());
+  }
+
+  private void configureExporterUserAgentHeaders(AutoConfigurationCustomizer autoConfiguration) {
+    autoConfiguration.addSpanExporterCustomizer(
+        (spanExporter, configProperties) ->
+            ElasticUserAgentHeader.configureIfPossible(spanExporter));
+    autoConfiguration.addMetricExporterCustomizer(
+        (metricExporter, configProperties) ->
+            ElasticUserAgentHeader.configureIfPossible(metricExporter));
+    autoConfiguration.addLogRecordExporterCustomizer(
+        (logExporter, configProperties) -> ElasticUserAgentHeader.configureIfPossible(logExporter));
+  }
+
+  private static void configureBlockableExporters(AutoConfigurationCustomizer autoConfiguration) {
+    autoConfiguration.addMetricExporterCustomizer(
+        (metricexporter, configProperties) ->
+            BlockableMetricExporter.createCustomInstance(metricexporter));
+    autoConfiguration.addSpanExporterCustomizer(
+        (spanExporter, configProperties) ->
+            BlockableSpanExporter.createCustomInstance(spanExporter));
+    autoConfiguration.addLogRecordExporterCustomizer(
+        (logExporter, configProperties) ->
+            BlockableLogRecordExporter.createCustomInstance(logExporter));
   }
 
   static Map<String, String> propertiesCustomizer(ConfigProperties configProperties) {
@@ -147,5 +164,10 @@ public class ElasticAutoConfigurationCustomizerProvider
     }
 
     config.put(STACKTRACE_OTEL_FILTER, SpanStackTraceFilter.class.getName());
+  }
+
+  @Override
+  public int order() {
+    return AutoConfigurationCustomizerProvider.super.order();
   }
 }
