@@ -24,9 +24,9 @@ import org.testcontainers.containers.wait.strategy.Wait;
 
 public class TestAppSmokeTest extends SmokeTest {
 
-  private static final String TEST_APP_IMAGE =
+  public static final String TEST_APP_IMAGE =
       "docker.elastic.co/open-telemetry/elastic-otel-java/smoke-test/test-app:latest";
-  private static final int PORT = 8080;
+  public static final int PORT = 8080;
 
   private static GenericContainer<?> target;
 

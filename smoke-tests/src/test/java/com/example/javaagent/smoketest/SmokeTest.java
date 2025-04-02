@@ -74,7 +74,7 @@ abstract class SmokeTest {
   protected static OkHttpClient client = OkHttpUtils.client();
 
   private static final Network network = Network.newNetwork();
-  private static final String agentPath =
+  public static final String AGENT_PATH =
       System.getProperty("io.opentelemetry.smoketest.agent.shadowJar.path");
 
   // keep track of all started containers in case they aren't properly stopped
@@ -113,7 +113,7 @@ abstract class SmokeTest {
         new GenericContainer<>(image)
             .withNetwork(network)
             .withLogConsumer(new Slf4jLogConsumer(logger))
-            .withCopyFileToContainer(MountableFile.forHostPath(agentPath), JAVAAGENT_JAR_PATH)
+            .withCopyFileToContainer(MountableFile.forHostPath(AGENT_PATH), JAVAAGENT_JAR_PATH)
 
             // batch span processor: very small batch size for testing
             .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
