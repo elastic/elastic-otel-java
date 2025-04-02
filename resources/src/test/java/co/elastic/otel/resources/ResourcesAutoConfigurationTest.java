@@ -20,9 +20,7 @@ package co.elastic.otel.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.opentelemetry.instrumentation.resources.ResourceProviderPropertiesCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,10 +30,8 @@ import org.junit.jupiter.api.Test;
 
 class ResourcesAutoConfigurationTest {
 
-  private static final List<String> LIST = Arrays.asList(
-      config("gcp"),
-      config("aws"),
-      config("azure"));
+  private static final List<String> LIST =
+      Arrays.asList(config("gcp"), config("aws"), config("azure"));
 
   private static String config(String provider) {
     return String.format("otel.resource.providers.%s.enabled", provider);
