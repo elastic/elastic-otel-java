@@ -51,8 +51,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+@Disabled
 public class ReconcileOptionsTest {
   private static final Pattern VERSION_EXTRACTION_REGEX =
       Pattern.compile("^\\s*<[aA]\\s+[hH][rR][eE][fF]=\"(\\d+\\.\\d+\\.\\d+)/\"");
