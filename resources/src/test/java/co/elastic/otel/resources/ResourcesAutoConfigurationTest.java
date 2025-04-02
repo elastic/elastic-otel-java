@@ -20,17 +20,26 @@ package co.elastic.otel.resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.opentelemetry.instrumentation.resources.ResourceProviderPropertiesCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class ResourcesAutoConfigurationTest {
 
-  public static final String GCP_ENABLED = "otel.resource.providers.gcp.enabled";
-  public static final String AWS_ENABLED = "otel.resource.providers.aws.enabled";
-  public static final String AZURE_ENABLED = "otel.resource.providers.azure.enabled";
+  private static final List<String> LIST = Arrays.asList(
+      config("gcp"),
+      config("aws"),
+      config("azure"));
+
+  private static String config(String provider) {
+    return String.format("otel.resource.providers.%s.enabled", provider);
+  }
 
   @Test
   void elastic_defaults() {
@@ -38,9 +47,8 @@ class ResourcesAutoConfigurationTest {
 
     Map<String, String> explicitConfig = Collections.emptyMap();
     Map<String, String> expectedResult = new HashMap<>();
-    expectedResult.put(GCP_ENABLED, "true");
-    expectedResult.put(AWS_ENABLED, "true");
-    expectedResult.put(AZURE_ENABLED, "true");
+
+    LIST.forEach(v -> expectedResult.put(v, "true"));
 
     testConfig(explicitConfig, expectedResult);
   }
@@ -48,12 +56,10 @@ class ResourcesAutoConfigurationTest {
   @Test
   void explicitly_enabled() {
     Map<String, String> explicitConfig = new HashMap<>();
-    explicitConfig.put(GCP_ENABLED, "true");
+    explicitConfig.put(LIST.get(0), "true");
 
     Map<String, String> expectedResult = new HashMap<>();
-    expectedResult.put(GCP_ENABLED, "true");
-    expectedResult.put(AWS_ENABLED, "true");
-    expectedResult.put(AZURE_ENABLED, "true");
+    LIST.forEach(v -> expectedResult.put(v, "true"));
 
     testConfig(explicitConfig, expectedResult);
   }
@@ -61,12 +67,13 @@ class ResourcesAutoConfigurationTest {
   @Test
   void explicitly_disabled() {
     Map<String, String> explicitConfig = new HashMap<>();
-    explicitConfig.put(GCP_ENABLED, "false");
+    explicitConfig.put(LIST.get(0), "false");
 
     Map<String, String> expectedResult = new HashMap<>();
-    expectedResult.put(GCP_ENABLED, "false");
-    expectedResult.put(AWS_ENABLED, "true");
-    expectedResult.put(AZURE_ENABLED, "true");
+    expectedResult.put(LIST.get(0), "false");
+    for (int i = 1; i < LIST.size(); i++) {
+      expectedResult.put(LIST.get(i), "true");
+    }
 
     testConfig(explicitConfig, expectedResult);
   }
