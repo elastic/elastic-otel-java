@@ -165,5 +165,4 @@ public class ElasticAutoConfigurationCustomizerProvider
 
     config.put(STACKTRACE_OTEL_FILTER, SpanStackTraceFilter.class.getName());
   }
-  
 }
