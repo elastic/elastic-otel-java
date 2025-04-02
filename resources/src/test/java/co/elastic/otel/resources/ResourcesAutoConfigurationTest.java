@@ -30,6 +30,7 @@ class ResourcesAutoConfigurationTest {
 
   public static final String GCP_ENABLED = "otel.resource.providers.gcp.enabled";
   public static final String AWS_ENABLED = "otel.resource.providers.aws.enabled";
+  public static final String AZURE_ENABLED = "otel.resource.providers.azure.enabled";
 
   @Test
   void elastic_defaults() {
@@ -39,6 +40,7 @@ class ResourcesAutoConfigurationTest {
     Map<String, String> expectedResult = new HashMap<>();
     expectedResult.put(GCP_ENABLED, "true");
     expectedResult.put(AWS_ENABLED, "true");
+    expectedResult.put(AZURE_ENABLED, "true");
 
     testConfig(explicitConfig, expectedResult);
   }
@@ -51,6 +53,7 @@ class ResourcesAutoConfigurationTest {
     Map<String, String> expectedResult = new HashMap<>();
     expectedResult.put(GCP_ENABLED, "true");
     expectedResult.put(AWS_ENABLED, "true");
+    expectedResult.put(AZURE_ENABLED, "true");
 
     testConfig(explicitConfig, expectedResult);
   }
@@ -63,6 +66,7 @@ class ResourcesAutoConfigurationTest {
     Map<String, String> expectedResult = new HashMap<>();
     expectedResult.put(GCP_ENABLED, "false");
     expectedResult.put(AWS_ENABLED, "true");
+    expectedResult.put(AZURE_ENABLED, "true");
 
     testConfig(explicitConfig, expectedResult);
   }

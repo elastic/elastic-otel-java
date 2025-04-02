@@ -28,7 +28,7 @@ import java.util.Map;
 @AutoService(AutoConfigurationCustomizerProvider.class)
 public class ResourcesAutoConfiguration implements AutoConfigurationCustomizerProvider {
 
-  private static final String[] PROVIDERS = {"aws", "gcp"};
+  private static final String[] PROVIDERS = {"aws", "gcp", "azure"};
 
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
