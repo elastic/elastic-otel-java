@@ -77,7 +77,7 @@ muzzleGenerationPlugin = { group = "io.opentelemetry.instrumentation.muzzle-gene
 # Ant should be kept in sync with the version used in the shadow plugin
 ant = "org.apache.ant:ant:1.10.15"
 # ASM is currently only used during compile-time, so it is okay to diverge from the version used in ByteBuddy
-asm = "org.ow2.asm:asm:9.7"
+asm = "org.ow2.asm:asm:9.8"
 
 # Instrumented libraries
 openaiClient = "com.openai:openai-java:0.33.0"
