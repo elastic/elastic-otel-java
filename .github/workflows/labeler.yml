@@ -30,6 +30,9 @@ jobs:
 
     - name: Add agent-java label
       run: gh issue edit "${NUMBER}" --add-label "agent-java" --repo "${{ github.repository }}"
+      env:
+        NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - id: is_elastic_member
       uses: elastic/oblt-actions/github/is-member-of@v1
@@ -41,6 +44,9 @@ jobs:
     - name: Add community and triage labels
       if: contains(steps.is_elastic_member.outputs.result, 'false') && github.actor != 'dependabot[bot]' && github.actor != 'elastic-renovate-prod[bot]' && github.actor != 'elastic-observability-automation[bot]'
       run: gh issue edit "${NUMBER}" --add-label "community,triage" --repo "${{ github.repository }}"
+      env:
+        NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Add comment for community PR
       if: contains(steps.is_elastic_member.outputs.result, 'false') && github.actor != 'dependabot[bot]' && github.actor != 'elastic-renovate-prod[bot]' && github.actor != 'elastic-observability-automation[bot]'
@@ -61,7 +67,7 @@ jobs:
       with:
         github-token: ${{ steps.get_token.outputs.token }}
         project-id: 1829
-        item-url: "https://github.com/elastic/apm-agent-java/pull/${{ github.event.pull_request.number }}"
+        item-url: ${{ github.event.pull_request.url }}
 
     - name: set status in project
       id: set-project-status-field
