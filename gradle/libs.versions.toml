@@ -2,7 +2,7 @@
 shadow = "8.3.6"
 jib = "3.4.5"
 spotless = "7.0.3"
-junit = "5.12.1"
+junit = "5.12.2"
 autoservice = "1.1.1"
 
 # otel protocol (OTLP)
