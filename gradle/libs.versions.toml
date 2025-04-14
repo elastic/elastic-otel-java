@@ -1,7 +1,7 @@
 [versions]
 shadow = "8.3.6"
 jib = "3.4.5"
-spotless = "7.0.2"
+spotless = "7.0.3"
 junit = "5.12.1"
 autoservice = "1.1.1"
 
@@ -10,18 +10,18 @@ opentelemetryProto = "1.3.2-alpha"
 
 # otel agent, we rely on the '*-alpha' and get the non-alpha dependencies transitively
 # updated from upstream agent with gradle/update-upstream.sh
-opentelemetryJavaagentAlpha = "2.14.0-alpha"
+opentelemetryJavaagentAlpha = "2.15.0-alpha"
 
 # otel contrib
 # updated from upstream agent with gradle/update-upstream.sh
-opentelemetryContribAlpha = "1.44.0-alpha"
+opentelemetryContribAlpha = "1.45.0-alpha"
 
 # otel semconv
 # updated from upstream agent with gradle/update-upstream.sh
 # While the semconv stable/incubating artifacts are provided as transitive dependencies, keeping
 # an explicit version here allows to easily override to a not-yet-released version.
-opentelemetrySemconv = "1.30.0"
-opentelemetrySemconvAlpha = "1.30.0-alpha"
+opentelemetrySemconv = "1.32.0"
+opentelemetrySemconvAlpha = "1.32.0-alpha"
 
 [libraries]
 
@@ -75,7 +75,7 @@ muzzleGenerationPlugin = { group = "io.opentelemetry.instrumentation.muzzle-gene
 # Ant should be kept in sync with the version used in the shadow plugin
 ant = "org.apache.ant:ant:1.10.15"
 # ASM is currently only used during compile-time, so it is okay to diverge from the version used in ByteBuddy
-asm = "org.ow2.asm:asm:9.7"
+asm = "org.ow2.asm:asm:9.8"
 
 # Instrumented libraries
 openaiClient = "com.openai:openai-java:0.33.0"
