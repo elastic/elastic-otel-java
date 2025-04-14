@@ -16,17 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.openai;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.proxyAllTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.recordSpec;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
+package co.elastic.otel.openai.v1_1;
 
 import com.github.tomakehurst.wiremock.common.SingleRootFileSource;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.proxyAllTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.recordSpec;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 
 final class OpenAIRecordingExtension extends WireMockExtension {
 

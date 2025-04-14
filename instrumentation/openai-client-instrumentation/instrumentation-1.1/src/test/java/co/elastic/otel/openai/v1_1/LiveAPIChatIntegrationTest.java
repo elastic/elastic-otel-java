@@ -32,8 +32,6 @@ import static io.opentelemetry.semconv.incubating.GenAiIncubatingAttributes.GEN_
 import static io.opentelemetry.semconv.incubating.GenAiIncubatingAttributes.GEN_AI_USAGE_INPUT_TOKENS;
 import static io.opentelemetry.semconv.incubating.GenAiIncubatingAttributes.GEN_AI_USAGE_OUTPUT_TOKENS;
 
-import co.elastic.otel.openai.ChatTestBase;
-import co.elastic.otel.openai.ValAssert;
 import co.elastic.otel.openai.v1_1.wrappers.InstrumentationSettingsAccessor;
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
@@ -125,7 +123,7 @@ class LiveAPIChatIntegrationTest {
                         "Hi there! I can help with that. Can you please provide your order ID?"),
                     createUserMessage("i think it is order_12345")))
             .model(TEST_CHAT_MODEL)
-            .addTool(ChatTestBase.buildGetDeliveryDateToolDefinition())
+            .addTool(ChatTest.buildGetDeliveryDateToolDefinition())
             .build();
 
     long startTimeNanos = System.nanoTime();
