@@ -134,15 +134,16 @@ public class ChatCompletionEventsHelper {
       return content.asText();
     } else if (content.isArrayOfContentParts()) {
       return content.asArrayOfContentParts().stream()
-          .map(part -> {
-            if (part.isText()) {
-              return part.asText().text();
-            }
-            if (part.isRefusal()) {
-              return part.asRefusal().refusal();
-            }
-            return null;
-          })
+          .map(
+              part -> {
+                if (part.isText()) {
+                  return part.asText().text();
+                }
+                if (part.isRefusal()) {
+                  return part.asRefusal().refusal();
+                }
+                return null;
+              })
           .filter(Objects::nonNull)
           .collect(Collectors.joining());
     } else {

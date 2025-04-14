@@ -92,8 +92,10 @@ class ChatTest {
 
   @RegisterExtension
   static final AgentInstrumentationExtension testing = AgentInstrumentationExtension.create();
+
   @RegisterExtension
   static final OpenAIRecordingExtension openai = new OpenAIRecordingExtension("ChatTest");
+
   private static final String TEST_CHAT_MODEL = "gpt-4o-mini";
   private static final String TEST_CHAT_RESPONSE_MODEL = "gpt-4o-mini-2024-07-18";
   private static final String TEST_CHAT_INPUT =
@@ -2209,7 +2211,6 @@ class ChatTest {
 
     assertThat(testing.logRecords()).isEmpty();
   }
-
 
   static Consumer<HistogramPointData> assertThatDurationIsLessThan(long toNanos) {
     double nanosPerSecond = Duration.ofSeconds(1).toNanos();

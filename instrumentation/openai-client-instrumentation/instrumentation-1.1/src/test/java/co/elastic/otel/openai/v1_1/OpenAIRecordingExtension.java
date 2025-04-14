@@ -18,15 +18,15 @@
  */
 package co.elastic.otel.openai.v1_1;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.proxyAllTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.recordSpec;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
+
 import com.github.tomakehurst.wiremock.common.SingleRootFileSource;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.proxyAllTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.recordSpec;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 
 final class OpenAIRecordingExtension extends WireMockExtension {
 
@@ -50,8 +50,7 @@ final class OpenAIRecordingExtension extends WireMockExtension {
                         PrettyPrintEqualToJsonStubMappingTransformer.class)
                     .mappingSource(
                         new YamlFileMappingsSource(
-                            new SingleRootFileSource("./src/test/resources")
-                                .child("mappings")))));
+                            new SingleRootFileSource("./src/test/resources").child("mappings")))));
     this.testName = testName;
   }
 

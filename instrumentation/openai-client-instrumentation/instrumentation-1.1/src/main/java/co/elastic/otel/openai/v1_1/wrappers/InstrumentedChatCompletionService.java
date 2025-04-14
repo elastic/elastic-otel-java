@@ -190,8 +190,8 @@ public class InstrumentedChatCompletionService
 
   private final InstrumentationSettings settings;
 
-  InstrumentedChatCompletionService(ChatCompletionService delegate,
-      InstrumentationSettings settings) {
+  InstrumentedChatCompletionService(
+      ChatCompletionService delegate, InstrumentationSettings settings) {
     super(delegate);
     this.settings = settings;
   }

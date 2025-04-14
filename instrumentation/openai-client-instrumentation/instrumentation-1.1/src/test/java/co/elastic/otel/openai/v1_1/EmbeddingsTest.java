@@ -43,8 +43,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 class EmbeddingsTest {
   @RegisterExtension
   static final AgentInstrumentationExtension testing = AgentInstrumentationExtension.create();
+
   @RegisterExtension
   static final OpenAIRecordingExtension openai = new OpenAIRecordingExtension("EmbeddingsTest");
+
   private static final String MODEL =
       System.getenv().getOrDefault("OPENAI_MODEL", "text-embedding-3-small");
 
