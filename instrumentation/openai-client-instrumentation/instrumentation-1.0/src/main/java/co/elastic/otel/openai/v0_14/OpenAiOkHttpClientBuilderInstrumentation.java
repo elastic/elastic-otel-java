@@ -23,6 +23,7 @@ import static net.bytebuddy.matcher.ElementMatchers.returns;
 
 import co.elastic.otel.openai.wrappers.InstrumentedOpenAiClient;
 import com.openai.client.OpenAIClient;
+import com.openai.core.ClientOptions;
 import io.opentelemetry.javaagent.extension.instrumentation.TypeInstrumentation;
 import io.opentelemetry.javaagent.extension.instrumentation.TypeTransformer;
 import net.bytebuddy.asm.Advice;
@@ -48,8 +49,9 @@ public class OpenAiOkHttpClientBuilderInstrumentation implements TypeInstrumenta
     @Advice.OnMethodExit(suppress = Throwable.class, onThrowable = Throwable.class)
     @Advice.AssignReturned.ToReturned
     public static OpenAIClient onExit(
-        @Advice.Return OpenAIClient result, @Advice.FieldValue("baseUrl") String baseUrl) {
-      return InstrumentedOpenAiClient.wrap(result).baseUrl(baseUrl).build();
+        @Advice.Return OpenAIClient result,
+        @Advice.FieldValue("clientOptions") ClientOptions.Builder clientOptions) {
+      return InstrumentedOpenAiClient.wrap(result).baseUrl(clientOptions.baseUrl()).build();
     }
   }
 }

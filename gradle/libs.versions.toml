@@ -79,7 +79,7 @@ ant = "org.apache.ant:ant:1.10.15"
 asm = "org.ow2.asm:asm:9.8"
 
 # Instrumented libraries
-openaiClient = "com.openai:openai-java:1.0.0"
+openaiClient = "com.openai:openai-java:1.2.0"
 
 [bundles]
 

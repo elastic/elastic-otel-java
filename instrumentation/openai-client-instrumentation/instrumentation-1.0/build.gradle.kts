@@ -23,7 +23,7 @@ muzzle {
     val openaiClientLib = catalog.openaiClient.get()
     group.set(openaiClientLib.group)
     module.set(openaiClientLib.name)
-    versions.set("(0.13.0,${openaiClientLib.version}]")
+    versions.set("[1.0.0,${openaiClientLib.version}]")
     // no assertInverse.set(true) here because we don't want muzzle to fail for newer releases on our main branch
     // instead, renovate will bump the version and failures will be automatically detected on that bump PR
   }
