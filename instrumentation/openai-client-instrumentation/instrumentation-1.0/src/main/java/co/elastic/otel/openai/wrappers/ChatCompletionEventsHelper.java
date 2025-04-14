@@ -20,17 +20,17 @@ package co.elastic.otel.openai.wrappers;
 
 import static co.elastic.otel.openai.wrappers.GenAiAttributes.GEN_AI_SYSTEM;
 
-import com.openai.models.ChatCompletion;
-import com.openai.models.ChatCompletionAssistantMessageParam;
-import com.openai.models.ChatCompletionContentPartText;
-import com.openai.models.ChatCompletionCreateParams;
-import com.openai.models.ChatCompletionDeveloperMessageParam;
-import com.openai.models.ChatCompletionMessage;
-import com.openai.models.ChatCompletionMessageParam;
-import com.openai.models.ChatCompletionMessageToolCall;
-import com.openai.models.ChatCompletionSystemMessageParam;
-import com.openai.models.ChatCompletionToolMessageParam;
-import com.openai.models.ChatCompletionUserMessageParam;
+import com.openai.models.chat.completions.ChatCompletion;
+import com.openai.models.chat.completions.ChatCompletionAssistantMessageParam;
+import com.openai.models.chat.completions.ChatCompletionContentPartText;
+import com.openai.models.chat.completions.ChatCompletionCreateParams;
+import com.openai.models.chat.completions.ChatCompletionDeveloperMessageParam;
+import com.openai.models.chat.completions.ChatCompletionMessage;
+import com.openai.models.chat.completions.ChatCompletionMessageParam;
+import com.openai.models.chat.completions.ChatCompletionMessageToolCall;
+import com.openai.models.chat.completions.ChatCompletionSystemMessageParam;
+import com.openai.models.chat.completions.ChatCompletionToolMessageParam;
+import com.openai.models.chat.completions.ChatCompletionUserMessageParam;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Value;
@@ -63,32 +63,24 @@ public class ChatCompletionEventsHelper {
     for (ChatCompletionMessageParam msg : request.messages()) {
       String eventType;
       MapValueBuilder bodyBuilder = new MapValueBuilder();
-      Object concreteMessageParam = ApiAdapter.get().extractConcreteCompletionMessageParam(msg);
-      if (concreteMessageParam instanceof ChatCompletionSystemMessageParam) {
-        ChatCompletionSystemMessageParam sysMsg =
-            (ChatCompletionSystemMessageParam) concreteMessageParam;
+      if (msg.isSystem()) {
         eventType = "gen_ai.system.message";
         if (settings.captureMessageContent) {
-          putIfNotEmpty(bodyBuilder, "content", contentToString(sysMsg.content()));
+          putIfNotEmpty(bodyBuilder, "content", contentToString(msg.asSystem().content()));
         }
-      } else if (concreteMessageParam instanceof ChatCompletionDeveloperMessageParam) {
-        ChatCompletionDeveloperMessageParam sysMsg =
-            (ChatCompletionDeveloperMessageParam) concreteMessageParam;
+      } else if (msg.isDeveloper()) {
         eventType = "gen_ai.system.message";
         putIfNotEmpty(bodyBuilder, "role", "developer");
         if (settings.captureMessageContent) {
-          putIfNotEmpty(bodyBuilder, "content", contentToString(sysMsg.content()));
+          putIfNotEmpty(bodyBuilder, "content", contentToString(msg.asDeveloper().content()));
         }
-      } else if (concreteMessageParam instanceof ChatCompletionUserMessageParam) {
-        ChatCompletionUserMessageParam userMsg =
-            (ChatCompletionUserMessageParam) concreteMessageParam;
+      } else if (msg.isUser()) {
         eventType = "gen_ai.user.message";
         if (settings.captureMessageContent) {
-          putIfNotEmpty(bodyBuilder, "content", contentToString(userMsg.content()));
+          putIfNotEmpty(bodyBuilder, "content", contentToString(msg.asUser().content()));
         }
-      } else if (concreteMessageParam instanceof ChatCompletionAssistantMessageParam) {
-        ChatCompletionAssistantMessageParam assistantMsg =
-            (ChatCompletionAssistantMessageParam) concreteMessageParam;
+      } else if (msg.isAssistant()) {
+        ChatCompletionAssistantMessageParam assistantMsg = msg.asAssistant();
         eventType = "gen_ai.assistant.message";
         if (settings.captureMessageContent) {
           assistantMsg
@@ -106,9 +98,8 @@ public class ChatCompletionEventsHelper {
                     bodyBuilder.put("tool_calls", Value.of(toolCallsJson));
                   });
         }
-      } else if (concreteMessageParam instanceof ChatCompletionToolMessageParam) {
-        ChatCompletionToolMessageParam toolMsg =
-            (ChatCompletionToolMessageParam) concreteMessageParam;
+      } else if (msg.isTool()) {
+        ChatCompletionToolMessageParam toolMsg = msg.asTool();
         eventType = "gen_ai.tool.message";
         if (settings.captureMessageContent) {
           putIfNotEmpty(bodyBuilder, "content", contentToString(toolMsg.content()));
@@ -129,9 +120,8 @@ public class ChatCompletionEventsHelper {
   }
 
   private static String contentToString(ChatCompletionToolMessageParam.Content content) {
-    String text = ApiAdapter.get().asText(content);
-    if (text != null) {
-      return text;
+    if (content.isText()) {
+      return content.asText();
     } else if (content.isArrayOfContentParts()) {
       return joinContentParts(content.asArrayOfContentParts());
     } else {
@@ -140,12 +130,19 @@ public class ChatCompletionEventsHelper {
   }
 
   private static String contentToString(ChatCompletionAssistantMessageParam.Content content) {
-    String text = ApiAdapter.get().asText(content);
-    if (text != null) {
-      return text;
+    if (content.isText()) {
+      return content.asText();
     } else if (content.isArrayOfContentParts()) {
       return content.asArrayOfContentParts().stream()
-          .map(ApiAdapter.get()::extractTextOrRefusal)
+          .map(part -> {
+            if (part.isText()) {
+              return part.asText().text();
+            }
+            if (part.isRefusal()) {
+              return part.asRefusal().refusal();
+            }
+            return null;
+          })
           .filter(Objects::nonNull)
           .collect(Collectors.joining());
     } else {
@@ -154,9 +151,8 @@ public class ChatCompletionEventsHelper {
   }
 
   private static String contentToString(ChatCompletionSystemMessageParam.Content content) {
-    String text = ApiAdapter.get().asText(content);
-    if (text != null) {
-      return text;
+    if (content.isText()) {
+      return content.asText();
     } else if (content.isArrayOfContentParts()) {
       return joinContentParts(content.asArrayOfContentParts());
     } else {
@@ -165,9 +161,8 @@ public class ChatCompletionEventsHelper {
   }
 
   private static String contentToString(ChatCompletionDeveloperMessageParam.Content content) {
-    String text = ApiAdapter.get().asText(content);
-    if (text != null) {
-      return text;
+    if (content.isText()) {
+      return content.asText();
     } else if (content.isArrayOfContentParts()) {
       return joinContentParts(content.asArrayOfContentParts());
     } else {
@@ -182,12 +177,11 @@ public class ChatCompletionEventsHelper {
   }
 
   private static String contentToString(ChatCompletionUserMessageParam.Content content) {
-    String text = ApiAdapter.get().asText(content);
-    if (text != null) {
-      return text;
+    if (content.isText()) {
+      return content.asText();
     } else if (content.isArrayOfContentParts()) {
       return content.asArrayOfContentParts().stream()
-          .map(ApiAdapter.get()::extractText)
+          .map(part -> part.isText() ? part.asText().text() : null)
           .filter(Objects::nonNull)
           .collect(Collectors.joining());
     } else {

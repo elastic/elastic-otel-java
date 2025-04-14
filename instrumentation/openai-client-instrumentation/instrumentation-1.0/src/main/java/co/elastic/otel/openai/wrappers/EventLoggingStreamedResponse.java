@@ -19,7 +19,7 @@
 package co.elastic.otel.openai.wrappers;
 
 import com.openai.core.http.StreamResponse;
-import com.openai.models.ChatCompletionChunk;
+import com.openai.models.chat.completions.ChatCompletionChunk;
 import io.opentelemetry.context.Context;
 import java.util.HashMap;
 import java.util.Map;

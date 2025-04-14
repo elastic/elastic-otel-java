@@ -50,7 +50,7 @@ final class OpenAIRecordingExtension extends WireMockExtension {
                         PrettyPrintEqualToJsonStubMappingTransformer.class)
                     .mappingSource(
                         new YamlFileMappingsSource(
-                            new SingleRootFileSource("../testing-common/src/main/resources")
+                            new SingleRootFileSource("./src/test/resources")
                                 .child("mappings")))));
     this.testName = testName;
   }

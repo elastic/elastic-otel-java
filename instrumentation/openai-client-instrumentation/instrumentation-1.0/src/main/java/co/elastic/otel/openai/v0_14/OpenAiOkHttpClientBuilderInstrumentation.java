@@ -49,9 +49,6 @@ public class OpenAiOkHttpClientBuilderInstrumentation implements TypeInstrumenta
     @Advice.AssignReturned.ToReturned
     public static OpenAIClient onExit(
         @Advice.Return OpenAIClient result, @Advice.FieldValue("baseUrl") String baseUrl) {
-      // This initialization has two purposes:
-      // Initialize the correct adapter AND ensure that it is picked up by muzzle
-      ApiAdapterImpl.init();
       return InstrumentedOpenAiClient.wrap(result).baseUrl(baseUrl).build();
     }
   }

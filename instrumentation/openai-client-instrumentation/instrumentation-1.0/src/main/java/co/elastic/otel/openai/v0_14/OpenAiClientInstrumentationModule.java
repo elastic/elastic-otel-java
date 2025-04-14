@@ -18,31 +18,18 @@
  */
 package co.elastic.otel.openai.v0_14;
 
-import static io.opentelemetry.javaagent.extension.matcher.AgentElementMatchers.hasClassesNamed;
-
 import co.elastic.otel.openai.wrappers.Constants;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.javaagent.extension.instrumentation.InstrumentationModule;
 import io.opentelemetry.javaagent.extension.instrumentation.TypeInstrumentation;
 import java.util.Collections;
 import java.util.List;
-import net.bytebuddy.matcher.ElementMatcher;
 
 @AutoService(InstrumentationModule.class)
 public class OpenAiClientInstrumentationModule extends InstrumentationModule {
 
   public OpenAiClientInstrumentationModule() {
     super(Constants.INSTRUMENTATION_NAME);
-  }
-
-  @Override
-  public ElementMatcher.Junction<ClassLoader> classLoaderMatcher() {
-    // HandlerReferencingAsyncStreamResponse was added in 0.14.1,
-    // which is the next release after 0.13.0
-    // 0.14.0 was a broken release which doesn't exist on maven central
-    // HandlerReferencingAsyncStreamResponse was removed in 0.23.0 and replaced with TrackedHandler
-    return hasClassesNamed("com.openai.core.http.HandlerReferencingAsyncStreamResponse")
-        .or(hasClassesNamed("com.openai.core.http.TrackedHandler"));
   }
 
   @Override

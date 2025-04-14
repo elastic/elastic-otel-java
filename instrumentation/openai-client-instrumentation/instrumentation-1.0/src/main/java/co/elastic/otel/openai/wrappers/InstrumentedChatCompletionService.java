@@ -38,11 +38,11 @@ import static co.elastic.otel.openai.wrappers.GenAiAttributes.GEN_AI_USAGE_OUTPU
 
 import com.openai.core.RequestOptions;
 import com.openai.core.http.StreamResponse;
-import com.openai.models.ChatCompletion;
-import com.openai.models.ChatCompletionChunk;
-import com.openai.models.ChatCompletionCreateParams;
-import com.openai.models.CompletionUsage;
-import com.openai.services.blocking.chat.CompletionService;
+import com.openai.models.chat.completions.ChatCompletion;
+import com.openai.models.chat.completions.ChatCompletionChunk;
+import com.openai.models.chat.completions.ChatCompletionCreateParams;
+import com.openai.models.completions.CompletionUsage;
+import com.openai.services.blocking.chat.ChatCompletionService;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributesBuilder;
 import io.opentelemetry.context.Context;
@@ -56,7 +56,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class InstrumentedChatCompletionService
-    extends DelegatingInvocationHandler<CompletionService, InstrumentedChatCompletionService> {
+    extends DelegatingInvocationHandler<ChatCompletionService, InstrumentedChatCompletionService> {
 
   public static class RequestHolder {
     final ChatCompletionCreateParams request;
@@ -138,7 +138,7 @@ public class InstrumentedChatCompletionService
                       .responseFormat()
                       .ifPresent(
                           val -> {
-                            String typeString = ApiAdapter.get().extractType(val);
+                            String typeString = extractType(val);
                             if (typeString != null) {
                               attributes.put(GEN_AI_OPENAI_REQUEST_RESPONSE_FORMAT, typeString);
                             }
@@ -175,16 +175,30 @@ public class InstrumentedChatCompletionService
           .addOperationMetrics(GenAiClientMetrics::new)
           .buildInstrumenter();
 
+  private static String extractType(ChatCompletionCreateParams.ResponseFormat val) {
+    if (val.isText()) {
+      return val.asText()._type().toString();
+    }
+    if (val.isJsonObject()) {
+      return val.asJsonObject()._type().toString();
+    }
+    if (val.isJsonSchema()) {
+      return val.asJsonSchema()._type().toString();
+    }
+    return null;
+  }
+
   private final InstrumentationSettings settings;
 
-  InstrumentedChatCompletionService(CompletionService delegate, InstrumentationSettings settings) {
+  InstrumentedChatCompletionService(ChatCompletionService delegate,
+      InstrumentationSettings settings) {
     super(delegate);
     this.settings = settings;
   }
 
   @Override
-  protected Class<CompletionService> getProxyType() {
-    return CompletionService.class;
+  protected Class<ChatCompletionService> getProxyType() {
+    return ChatCompletionService.class;
   }
 
   @Override

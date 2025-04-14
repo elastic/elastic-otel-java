@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.openai.wrappers;
 
-import com.openai.models.ChatCompletionChunk;
+import com.openai.models.chat.completions.ChatCompletionChunk;
 import io.opentelemetry.api.common.Value;
 import java.util.HashMap;
 import java.util.List;

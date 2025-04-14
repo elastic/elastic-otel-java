@@ -26,8 +26,8 @@ import static co.elastic.otel.openai.wrappers.GenAiAttributes.GEN_AI_SYSTEM;
 import static co.elastic.otel.openai.wrappers.GenAiAttributes.GEN_AI_USAGE_INPUT_TOKENS;
 
 import com.openai.core.RequestOptions;
-import com.openai.models.CreateEmbeddingResponse;
-import com.openai.models.EmbeddingCreateParams;
+import com.openai.models.embeddings.CreateEmbeddingResponse;
+import com.openai.models.embeddings.EmbeddingCreateParams;
 import com.openai.services.blocking.EmbeddingService;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.common.AttributesBuilder;

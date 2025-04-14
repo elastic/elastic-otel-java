@@ -19,13 +19,13 @@
 package co.elastic.otel.openai.v0_14;
 
 import co.elastic.otel.openai.ChatTestBase;
-import com.openai.models.ChatCompletionAssistantMessageParam;
-import com.openai.models.ChatCompletionDeveloperMessageParam;
-import com.openai.models.ChatCompletionMessageParam;
-import com.openai.models.ChatCompletionMessageToolCall;
-import com.openai.models.ChatCompletionSystemMessageParam;
-import com.openai.models.ChatCompletionToolMessageParam;
-import com.openai.models.ChatCompletionUserMessageParam;
+import com.openai.models.chat.completions.ChatCompletionAssistantMessageParam;
+import com.openai.models.chat.completions.ChatCompletionDeveloperMessageParam;
+import com.openai.models.chat.completions.ChatCompletionMessageParam;
+import com.openai.models.chat.completions.ChatCompletionMessageToolCall;
+import com.openai.models.chat.completions.ChatCompletionSystemMessageParam;
+import com.openai.models.chat.completions.ChatCompletionToolMessageParam;
+import com.openai.models.chat.completions.ChatCompletionUserMessageParam;
 import java.util.List;
 
 class ChatTest extends ChatTestBase {
