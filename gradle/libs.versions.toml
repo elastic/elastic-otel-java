@@ -76,6 +76,9 @@ ant = "org.apache.ant:ant:1.10.15"
 # ASM is currently only used during compile-time, so it is okay to diverge from the version used in ByteBuddy
 asm = "org.ow2.asm:asm:9.8"
 
+slf4j-api = "org.slf4j:slf4j-api:2.0.17"
+log4j2 = "org.apache.logging.log4j:log4j-slf4j-impl:2.24.3"
+
 # Instrumented libraries
 openaiClient = "com.openai:openai-java:1.3.0"
 

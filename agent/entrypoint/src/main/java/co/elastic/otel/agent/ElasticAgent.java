@@ -31,6 +31,9 @@ public class ElasticAgent {
    * @param inst instrumentation
    */
   public static void premain(String agentArgs, Instrumentation inst) {
+
+    System.setProperty("otel.javaagent.logging", "elastic");
+
     OpenTelemetryAgent.premain(agentArgs, inst);
   }
 
