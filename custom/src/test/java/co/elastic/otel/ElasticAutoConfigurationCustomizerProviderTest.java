@@ -22,11 +22,18 @@ import static co.elastic.otel.ElasticAutoConfigurationCustomizerProvider.propert
 import static co.elastic.otel.ElasticAutoConfigurationCustomizerProvider.resourceProviders;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 
+import co.elastic.otel.testing.OtelReflectionUtils;
 import io.opentelemetry.javaagent.tooling.EmptyConfigProperties;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
+import io.opentelemetry.sdk.metrics.InstrumentType;
+import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
+import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.semconv.incubating.DeploymentIncubatingAttributes;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -86,6 +93,29 @@ class ElasticAutoConfigurationCustomizerProviderTest {
     Map<String, String> config = propertiesCustomizer(DefaultConfigProperties.create(userConfig));
     String value = config.get("otel.exporter.otlp.metrics.temporality.preference");
     assertThat(value).isEqualTo("LOWMEMORY");
+  }
+
+  @Test
+  void verifyEffectiveDefaultTemporality() {
+    try (OpenTelemetrySdk sdk =
+        AutoConfiguredOpenTelemetrySdk.builder().build().getOpenTelemetrySdk()) {
+      List<MetricExporter> metricExporters =
+          OtelReflectionUtils.extractMetricExporters(sdk.getSdkMeterProvider());
+
+      assertThat(metricExporters).hasSize(1);
+
+      MetricExporter otlp = metricExporters.get(0);
+      assertThat(otlp.getAggregationTemporality(InstrumentType.COUNTER))
+          .isEqualTo(AggregationTemporality.DELTA);
+      assertThat(otlp.getAggregationTemporality(InstrumentType.OBSERVABLE_COUNTER))
+          .isEqualTo(AggregationTemporality.DELTA);
+      assertThat(otlp.getAggregationTemporality(InstrumentType.HISTOGRAM))
+          .isEqualTo(AggregationTemporality.DELTA);
+      assertThat(otlp.getAggregationTemporality(InstrumentType.UP_DOWN_COUNTER))
+          .isEqualTo(AggregationTemporality.CUMULATIVE);
+      assertThat(otlp.getAggregationTemporality(InstrumentType.OBSERVABLE_UP_DOWN_COUNTER))
+          .isEqualTo(AggregationTemporality.CUMULATIVE);
+    }
   }
 
   @Test
