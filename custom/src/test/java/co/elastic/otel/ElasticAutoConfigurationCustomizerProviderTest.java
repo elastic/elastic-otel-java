@@ -23,18 +23,21 @@ import static co.elastic.otel.ElasticAutoConfigurationCustomizerProvider.resourc
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 
 import co.elastic.otel.testing.OtelReflectionUtils;
+import io.opentelemetry.exporter.otlp.http.metrics.OtlpHttpMetricExporter;
 import io.opentelemetry.javaagent.tooling.EmptyConfigProperties;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
+import io.opentelemetry.sdk.metrics.export.AggregationTemporalitySelector;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.semconv.incubating.DeploymentIncubatingAttributes;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 class ElasticAutoConfigurationCustomizerProviderTest {
@@ -93,6 +96,27 @@ class ElasticAutoConfigurationCustomizerProviderTest {
     Map<String, String> config = propertiesCustomizer(DefaultConfigProperties.create(userConfig));
     String value = config.get("otel.exporter.otlp.metrics.temporality.preference");
     assertThat(value).isEqualTo("LOWMEMORY");
+  }
+
+  @Test
+  void testTemporalityWorkaroundStilLRequired() {
+    // Verifies that the workaround for
+    // https://github.com/open-telemetry/opentelemetry-java/issues/7276
+    // is still required. Once not needed anymore, fix the TODO in
+    // co.elastic.otel.ElasticUserAgentHeader and remove this test
+
+    OtlpHttpMetricExporter original =
+        OtlpHttpMetricExporter.builder()
+            .setAggregationTemporalitySelector(AggregationTemporalitySelector.deltaPreferred())
+            .build();
+    Assertions.assertThat(original.getAggregationTemporality(InstrumentType.COUNTER))
+        .isEqualTo(AggregationTemporality.DELTA);
+
+    OtlpHttpMetricExporter modified = original.toBuilder().build();
+
+    // The bug causes the temporality to become cumulative, though it should be delta
+    assertThat(modified.getAggregationTemporality(InstrumentType.COUNTER))
+        .isEqualTo(AggregationTemporality.CUMULATIVE);
   }
 
   @Test
