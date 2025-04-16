@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import io.opentelemetry.javaagent.bootstrap.InternalLogger;
 import io.opentelemetry.javaagent.tooling.LoggingCustomizer;
 import io.opentelemetry.javaagent.tooling.config.EarlyInitAgentConfig;
+import org.apache.logging.log4j.Level;
 import org.slf4j.LoggerFactory;
 
 @AutoService(LoggingCustomizer.class)
@@ -26,9 +27,9 @@ public class ElasticLoggingCustomizer implements LoggingCustomizer {
 
     // set debug logging when enabled through configuration to behave like the upstream distribution
     if (earlyConfig.getBoolean("otel.javaagent.debug", false)) {
-      AgentLog.setLevel(InternalLogger.Level.DEBUG);
+      AgentLog.setLevel(Level.DEBUG);
     } else {
-      AgentLog.setLevel(InternalLogger.Level.INFO);
+      AgentLog.setLevel(Level.INFO);
     }
 
   }
