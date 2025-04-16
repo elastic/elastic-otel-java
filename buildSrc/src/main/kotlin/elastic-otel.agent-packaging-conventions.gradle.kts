@@ -182,6 +182,9 @@ tasks {
     dependsOn(isolateJavaagentLibs)
     configurations = listOf(bootstrapLibs, upstreamAgent)
 
+    // exclude slf4j-simple from the shadow jar as we use log4j2-slf4j instead
+    exclude("inst/io/opentelemetry/javaagent/slf4j/simple/**")
+
     from(isolateJavaagentLibs.get().outputs)
 
     archiveClassifier.set("")

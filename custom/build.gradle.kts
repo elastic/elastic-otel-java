@@ -22,7 +22,7 @@ dependencies {
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-bootstrap")
   compileOnly(libs.slf4j.api)
-  implementation(libs.log4j2)
+  implementation(libs.bundles.log4j2)
   compileOnly(libs.bundles.semconv)
 
   implementation(libs.contribSpanStacktrace) {

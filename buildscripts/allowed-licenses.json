@@ -11,7 +11,7 @@
     },
     {
       "moduleLicense": "MIT License",
-      "moduleVersion": "1.7.36",
+      "moduleVersion": ".*",
       "moduleName": "org.slf4j:slf4j-api"
     }
   ]
