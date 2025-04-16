@@ -96,7 +96,7 @@ class ElasticAutoConfigurationCustomizerProviderTest {
   }
 
   @Test
-  void verifyEffectiveDefaultTemporality() {
+  void verifyDefaultTemporalityOverriddenToDelta() {
     try (OpenTelemetrySdk sdk =
         AutoConfiguredOpenTelemetrySdk.builder().build().getOpenTelemetrySdk()) {
       List<MetricExporter> metricExporters =
