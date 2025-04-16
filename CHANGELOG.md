@@ -1,3 +1,12 @@
+# 1.4.1 - 16/04/2025
+* Fix `otel.exporter.otlp.metrics.temporality.preference` config option having no effect. - #610
+
+This release is based on the following upstream versions:
+
+* opentelemetry-javaagent: [2.15.0](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.15.0)
+* opentelemetry-sdk: [1.49.0](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.49.0)
+* opentelemetry-semconv: [1.32.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.32.0)
+* opentelemetry-java-contrib: [1.45.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.45.0)
 # 1.4.0 - 15/04/2025
 * Switched the default of `otel.exporter.otlp.metrics.temporality.preference` from `CUMULATIVE` to `DELTA` to improve dashboarding experience with Kibana. If you want to restore the previous behaviour, you can manually override `otel.exporter.otlp.metrics.temporality.preference` to `CUMULATIVE` via JVM-properties or environment variables. - #583
 * Set elastic-specific User-Agent header for OTLP exporters - #593
