@@ -45,11 +45,21 @@ public class ElasticLoggingCustomizer implements LoggingCustomizer {
 
     AgentLog.init();
 
-    AgentLog.setLevel(Level.INFO);
-    // set debug logging when enabled through configuration to behave like the upstream distribution
-    if (earlyConfig.getBoolean("otel.javaagent.debug", false)) {
-      AgentLog.setLevel(Level.DEBUG);
+    String levelConfig = earlyConfig.getString("elastic.otel.javaagent.log.level");
+    if (levelConfig == null) {
+      // explicit level not set
+      AgentLog.setLevel(Level.INFO);
+      // set debug logging when enabled through configuration to behave like the upstream distribution
+      if (earlyConfig.getBoolean("otel.javaagent.debug", false)) {
+        AgentLog.setLevel(Level.DEBUG);
+      }
+    } else {
+      // explicit level provided
+      Level level = Level.getLevel(levelConfig);
+      AgentLog.setLevel(level == null ? Level.INFO : level);
     }
+
+
   }
 
   @Override
