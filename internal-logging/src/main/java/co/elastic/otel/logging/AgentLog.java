@@ -26,7 +26,7 @@ import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 
 public class AgentLog {
 
-  private static final String PATTERN = "%msg%n";
+  private static final String PATTERN = "%d{DEFAULT} [%t] %-5level %logger{36} - %msg{nolookups}%n";
 
   private AgentLog() {}
 
@@ -35,14 +35,13 @@ public class AgentLog {
     ConfigurationBuilder<BuiltConfiguration> conf =
         ConfigurationBuilderFactory.newConfigurationBuilder();
 
-    //    conf.add(
-    //        conf.newAppender("stdout", ConsoleAppender.PLUGIN_NAME)
-    //            .add(conf.newLayout(PatternLayout.class.getName()))
-    //            .addAttribute("pattern", PATTERN));
+    conf.add(
+        conf.newAppender("stdout", "Console")
+            .add(conf.newLayout("PatternLayout").addAttribute("pattern", PATTERN)));
 
-    //    conf.add(conf.newRootLogger().add(conf.newAppenderRef("stdout")));
+    conf.add(conf.newRootLogger().add(conf.newAppenderRef("stdout")));
 
-    Configurator.initialize(conf.build());
+    Configurator.initialize(conf.build(false));
   }
 
   /**
