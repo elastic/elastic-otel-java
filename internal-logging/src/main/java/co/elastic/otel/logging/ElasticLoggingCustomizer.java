@@ -40,10 +40,10 @@ public class ElasticLoggingCustomizer implements LoggingCustomizer {
     // trigger loading the slf4j provider from the agent CL, this should load log4j implementation
     LoggerFactory.getILoggerFactory();
 
-    AgentLog.init();
-
     // make the agent internal logger delegate to slf4j, which will delegate to log4j
     InternalLogger.initialize(Slf4jInternalLogger::create);
+
+    AgentLog.init();
 
     AgentLog.setLevel(Level.INFO);
     // set debug logging when enabled through configuration to behave like the upstream distribution

@@ -32,6 +32,7 @@ public class ElasticAgent {
    */
   public static void premain(String agentArgs, Instrumentation inst) {
 
+    // must match value returned by ElasticLoggingCustomizer#getName
     System.setProperty("otel.javaagent.logging", "elastic");
 
     OpenTelemetryAgent.premain(agentArgs, inst);

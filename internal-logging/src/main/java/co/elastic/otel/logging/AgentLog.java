@@ -19,12 +19,10 @@
 package co.elastic.otel.logging;
 
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.appender.ConsoleAppender;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilder;
 import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
-import org.apache.logging.log4j.core.layout.PatternLayout;
 
 public class AgentLog {
 
@@ -36,10 +34,11 @@ public class AgentLog {
 
     ConfigurationBuilder<BuiltConfiguration> conf =
         ConfigurationBuilderFactory.newConfigurationBuilder();
-    conf.add(
-        conf.newAppender("stdout", ConsoleAppender.PLUGIN_NAME)
-            .add(conf.newLayout(PatternLayout.class.getName()))
-            .addAttribute("pattern", PATTERN));
+
+    //    conf.add(
+    //        conf.newAppender("stdout", ConsoleAppender.PLUGIN_NAME)
+    //            .add(conf.newLayout(PatternLayout.class.getName()))
+    //            .addAttribute("pattern", PATTERN));
 
     //    conf.add(conf.newRootLogger().add(conf.newAppenderRef("stdout")));
 

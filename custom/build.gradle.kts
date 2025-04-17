@@ -11,6 +11,7 @@ dependencies {
   implementation(project(":inferred-spans"))
   implementation(project(":universal-profiling-integration"))
   implementation(project(":resources"))
+  implementation(project(":internal-logging"))
   instrumentations.forEach {
     implementation(project(it))
   }
@@ -21,8 +22,6 @@ dependencies {
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-extension-api")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-bootstrap")
-  compileOnly(libs.slf4j.api)
-  implementation(libs.bundles.log4j2)
   compileOnly(libs.bundles.semconv)
 
   implementation(libs.contribSpanStacktrace) {
