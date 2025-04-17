@@ -20,7 +20,6 @@ package co.elastic.otel.agent;
 
 import io.opentelemetry.javaagent.OpenTelemetryAgent;
 import java.lang.instrument.Instrumentation;
-import java.util.Locale;
 
 /** Elastic agent entry point, delegates to OpenTelemetry agent */
 public class ElasticAgent {
