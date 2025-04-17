@@ -28,6 +28,9 @@ public class AgentLog {
 
   private static final String PATTERN = "%d{DEFAULT} [%t] %-5level %logger{36} - %msg{nolookups}%n";
 
+  // logger is an empty string
+  private static final String ROOT_LOGGER_NAME = "";
+
   private AgentLog() {}
 
   public static void init() {
@@ -52,11 +55,12 @@ public class AgentLog {
   public static void setLevel(Level level) {
     // Using log4j2 implementation allows to change the log level programmatically at runtime
     // which is not directly possible through the slf4j API and simple implementation used in
-    // upstream distribution
+    // upstream distribution.
 
-    Configurator.setAllLevels("", level);
+    Configurator.setAllLevels(ROOT_LOGGER_NAME, level);
 
     // when debugging we should avoid very chatty http client debug messages
+    // this behavior is replicated from the upstream distribution.
     if (level.intLevel() >= Level.DEBUG.intLevel()) {
       Configurator.setLevel("okhttp3.internal.http2", Level.INFO);
       Configurator.setLevel("okhttp3.internal.concurrent.TaskRunner", Level.INFO);
