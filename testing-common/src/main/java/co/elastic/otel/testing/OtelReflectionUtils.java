@@ -22,6 +22,10 @@ import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.TracerProvider;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.metrics.SdkMeterProvider;
+import io.opentelemetry.sdk.metrics.export.MetricExporter;
+import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
+import io.opentelemetry.sdk.metrics.internal.export.RegisteredReader;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SpanProcessor;
 import java.lang.reflect.Field;
@@ -118,5 +122,17 @@ public class OtelReflectionUtils {
     } catch (Exception e) {
       throw new IllegalStateException(e);
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  public static List<MetricExporter> extractMetricExporters(SdkMeterProvider sdkMeterProvider) {
+    List<RegisteredReader> readers =
+        (List<RegisteredReader>) readField(sdkMeterProvider, "registeredReaders");
+
+    return readers.stream()
+        .map(reader -> reader.getReader())
+        .filter(reader -> reader instanceof PeriodicMetricReader)
+        .map(periodicReader -> (MetricExporter) readField(periodicReader, "exporter"))
+        .collect(Collectors.toList());
   }
 }
