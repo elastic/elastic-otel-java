@@ -20,9 +20,13 @@ package co.elastic.otel.agent;
 
 import io.opentelemetry.javaagent.OpenTelemetryAgent;
 import java.lang.instrument.Instrumentation;
+import java.util.Locale;
 
 /** Elastic agent entry point, delegates to OpenTelemetry agent */
 public class ElasticAgent {
+
+  private static final String OTEL_JAVAAGENT_LOGGING = "otel.javaagent.logging";
+  private static final String OTEL_JAVAAGENT_LOGGING_ENV = "OTEL_JAVAAGENT_LOGGING";
 
   /**
    * Entry point for -javaagent JVM argument attach
@@ -31,10 +35,7 @@ public class ElasticAgent {
    * @param inst instrumentation
    */
   public static void premain(String agentArgs, Instrumentation inst) {
-
-    // must match value returned by ElasticLoggingCustomizer#getName
-    System.setProperty("otel.javaagent.logging", "elastic");
-
+    initLogging();
     OpenTelemetryAgent.premain(agentArgs, inst);
   }
 
@@ -45,6 +46,7 @@ public class ElasticAgent {
    * @param inst instrumentation
    */
   public static void agentmain(String agentArgs, Instrumentation inst) {
+    initLogging();
     OpenTelemetryAgent.agentmain(agentArgs, inst);
   }
 
@@ -55,6 +57,18 @@ public class ElasticAgent {
    */
   public static void main(String[] args) {
     OpenTelemetryAgent.main(args);
+  }
+
+  private static void initLogging() {
+
+    // do not override explicitly provided configuration
+    if (System.getProperty(OTEL_JAVAAGENT_LOGGING) != null
+        || System.getenv(OTEL_JAVAAGENT_LOGGING_ENV) != null) {
+      return;
+    }
+
+    // must match value returned by ElasticLoggingCustomizer#getName
+    System.setProperty(OTEL_JAVAAGENT_LOGGING, "elastic");
   }
 
   private ElasticAgent() {}

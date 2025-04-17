@@ -13,9 +13,6 @@ dependencies {
   compileOnly(libs.slf4j.api)
   implementation(libs.bundles.log4j2)
 
-  // needs to be added in order to allow access to AgentListener interface
-  // this is currently required because autoconfigure is currently not exposed to the extension API.
-  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
 }
 
 tasks {
