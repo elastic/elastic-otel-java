@@ -26,6 +26,7 @@ public class ElasticAgent {
 
   private static final String OTEL_JAVAAGENT_LOGGING = "otel.javaagent.logging";
   private static final String OTEL_JAVAAGENT_LOGGING_ENV = "OTEL_JAVAAGENT_LOGGING";
+  private static final String OTEL_JAVAAGENT_LOGGING_DEFAULT = "simple";
 
   /**
    * Entry point for -javaagent JVM argument attach
@@ -60,14 +61,19 @@ public class ElasticAgent {
 
   private static void initLogging() {
 
-    // do not override explicitly provided configuration
-    if (System.getProperty(OTEL_JAVAAGENT_LOGGING) != null
-        || System.getenv(OTEL_JAVAAGENT_LOGGING_ENV) != null) {
+    // Do not override explicitly provided configuration unless it's using the default as the
+    // 'simple' provider is not included in this distribution and that triggers an SLF4j error.
+    if (isLoggingNotDefault(System.getProperty(OTEL_JAVAAGENT_LOGGING))
+        || isLoggingNotDefault(System.getenv(OTEL_JAVAAGENT_LOGGING_ENV))) {
       return;
     }
 
     // must match value returned by ElasticLoggingCustomizer#getName
     System.setProperty(OTEL_JAVAAGENT_LOGGING, "elastic");
+  }
+
+  private static boolean isLoggingNotDefault(String value) {
+    return value != null && !OTEL_JAVAAGENT_LOGGING_DEFAULT.equals(value);
   }
 
   private ElasticAgent() {}
