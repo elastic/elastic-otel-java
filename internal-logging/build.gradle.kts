@@ -20,6 +20,10 @@ tasks {
     // required for META-INF/services files relocation
     mergeServiceFiles()
 
+    // Excluding property source SPI prevents log4j system properties and env variables that might
+    // be set at the application level to change the behavior of this internal log4j instance.
+    exclude("**/*.log4j.util.PropertySource")
+
     transform(Log4j2PluginsCacheFileTransformer::class.java)
 
     // relocate slf4j and log4j for internal logging to prevent any conflict
