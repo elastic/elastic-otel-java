@@ -8,6 +8,11 @@
       "moduleLicense": "The 2-Clause BSD License",
       "moduleVersion": ".*",
       "moduleName": "org.hdrhistogram:HdrHistogram"
+    },
+    {
+      "moduleLicense": "MIT License",
+      "moduleVersion": ".*",
+      "moduleName": "org.slf4j:slf4j-api"
     }
   ]
 }
