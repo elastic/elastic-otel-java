@@ -11,6 +11,7 @@ dependencies {
   implementation(project(":inferred-spans"))
   implementation(project(":universal-profiling-integration"))
   implementation(project(":resources"))
+  implementation(project(":internal-logging", configuration = "shadow"))
   instrumentations.forEach {
     implementation(project(it))
   }
