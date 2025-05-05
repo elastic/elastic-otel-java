@@ -25,7 +25,8 @@ jobs:
           {
             "members": "read",
             "organization_projects": "write",
-            "issues": "read"
+            "issues": "read",
+            "pull_requests": "write"
           }
 
     - name: Add agent-java label
