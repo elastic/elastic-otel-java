@@ -41,6 +41,12 @@ jobs:
         github-user: ${{ github.actor }}
         github-token: ${{ steps.get_token.outputs.token }}
 
+    - name: debug
+      run: |
+        echo "is_elastic_member=${{ steps.is_elastic_member.outputs.result }}"
+        echo "github.actor=${{ github.actor }}"
+        echo "github.event_name=${{ github.event_name }}"
+
     - name: Add community and triage labels
       if: contains(steps.is_elastic_member.outputs.result, 'false') && github.actor != 'dependabot[bot]' && github.actor != 'elastic-renovate-prod[bot]' && github.actor != 'elastic-observability-automation[bot]'
       run: gh issue edit "${NUMBER}" --add-label "community,triage" --repo "${{ github.repository }}"
