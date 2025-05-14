@@ -1,1 +1,1 @@
-This page has been moved to [EDOT documentation](https://elastic.github.io/opentelemetry/edot-sdks/java/configuration.html) 
+This page has been moved to [EDOT documentation](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/java/configuration.html) 
