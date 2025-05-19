@@ -157,19 +157,19 @@ public class UserAgentHeaderTest {
                 // Traces ands logs are generated via the container health check
                 verify(
                     postRequestedFor(
-                            urlEqualTo(
-                                "/opentelemetry.proto.collector.trace.v1.TraceService/Export"))
+                        urlEqualTo(
+                            "/opentelemetry.proto.collector.trace.v1.TraceService/Export"))
                         .withHeader(
                             "User-Agent", equalTo("elastic-otlp-grpc-java/" + AGENT_VERSION)));
                 verify(
                     postRequestedFor(
-                            urlEqualTo(
-                                "/opentelemetry.proto.collector.metrics.v1.MetricsService/Export"))
+                        urlEqualTo(
+                            "/opentelemetry.proto.collector.metrics.v1.MetricsService/Export"))
                         .withHeader(
                             "User-Agent", equalTo("elastic-otlp-grpc-java/" + AGENT_VERSION)));
                 verify(
                     postRequestedFor(
-                            urlEqualTo("/opentelemetry.proto.collector.logs.v1.LogsService/Export"))
+                        urlEqualTo("/opentelemetry.proto.collector.logs.v1.LogsService/Export"))
                         .withHeader(
                             "User-Agent", equalTo("elastic-otlp-grpc-java/" + AGENT_VERSION)));
               });
@@ -188,6 +188,8 @@ public class UserAgentHeaderTest {
             .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
             .withEnv("OTEL_BLRP_MAX_EXPORT_BATCH", "1")
             .withEnv("OTEL_BLRP_SCHEDULE_DELAY", "10")
+            // metric exporter interval needed to be increased due to
+            // https://github.com/open-telemetry/opentelemetry-java/issues/7354
             .withEnv("OTEL_METRIC_EXPORT_INTERVAL", "1000")
             // use grpc endpoint as default is now http/protobuf with agent 2.x
             .withExposedPorts(TestAppSmokeTest.PORT)
