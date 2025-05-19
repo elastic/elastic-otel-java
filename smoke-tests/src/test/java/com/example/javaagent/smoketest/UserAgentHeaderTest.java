@@ -157,19 +157,19 @@ public class UserAgentHeaderTest {
                 // Traces ands logs are generated via the container health check
                 verify(
                     postRequestedFor(
-                        urlEqualTo(
-                            "/opentelemetry.proto.collector.trace.v1.TraceService/Export"))
+                            urlEqualTo(
+                                "/opentelemetry.proto.collector.trace.v1.TraceService/Export"))
                         .withHeader(
                             "User-Agent", equalTo("elastic-otlp-grpc-java/" + AGENT_VERSION)));
                 verify(
                     postRequestedFor(
-                        urlEqualTo(
-                            "/opentelemetry.proto.collector.metrics.v1.MetricsService/Export"))
+                            urlEqualTo(
+                                "/opentelemetry.proto.collector.metrics.v1.MetricsService/Export"))
                         .withHeader(
                             "User-Agent", equalTo("elastic-otlp-grpc-java/" + AGENT_VERSION)));
                 verify(
                     postRequestedFor(
-                        urlEqualTo("/opentelemetry.proto.collector.logs.v1.LogsService/Export"))
+                            urlEqualTo("/opentelemetry.proto.collector.logs.v1.LogsService/Export"))
                         .withHeader(
                             "User-Agent", equalTo("elastic-otlp-grpc-java/" + AGENT_VERSION)));
               });
