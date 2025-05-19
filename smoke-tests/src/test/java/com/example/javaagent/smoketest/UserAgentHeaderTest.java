@@ -188,7 +188,9 @@ public class UserAgentHeaderTest {
             .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
             .withEnv("OTEL_BLRP_MAX_EXPORT_BATCH", "1")
             .withEnv("OTEL_BLRP_SCHEDULE_DELAY", "10")
-            .withEnv("OTEL_METRIC_EXPORT_INTERVAL", "10")
+            // metric exporter interval needed to be increased due to
+            // https://github.com/open-telemetry/opentelemetry-java/issues/7354
+            .withEnv("OTEL_METRIC_EXPORT_INTERVAL", "1000")
             // use grpc endpoint as default is now http/protobuf with agent 2.x
             .withExposedPorts(TestAppSmokeTest.PORT)
             .waitingFor(Wait.forHttp("/health").forPort(TestAppSmokeTest.PORT));
