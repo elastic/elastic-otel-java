@@ -47,23 +47,16 @@ public class ElasticUserAgentHeader {
   }
 
   public static MetricExporter configureIfPossible(MetricExporter metricExporter) {
-    // TODO remove workaround for https://github.com/open-telemetry/opentelemetry-java/issues/7276
-    // once fixed, setAggregationTemporalitySelector and setDefaultAggregationSelector can then be
-    // removed
     if (metricExporter instanceof OtlpGrpcMetricExporter) {
       return ((OtlpGrpcMetricExporter) metricExporter)
           .toBuilder()
-              .setAggregationTemporalitySelector(metricExporter)
-              .setDefaultAggregationSelector(metricExporter)
-              .addHeader(HEADER_NAME, GRPC_VALUE)
-              .build();
+          .addHeader(HEADER_NAME, GRPC_VALUE)
+          .build();
     } else if (metricExporter instanceof OtlpHttpMetricExporter) {
       return ((OtlpHttpMetricExporter) metricExporter)
           .toBuilder()
-              .setAggregationTemporalitySelector(metricExporter)
-              .setDefaultAggregationSelector(metricExporter)
-              .addHeader(HEADER_NAME, HTTP_VALUE)
-              .build();
+          .addHeader(HEADER_NAME, HTTP_VALUE)
+          .build();
     }
     return metricExporter;
   }
