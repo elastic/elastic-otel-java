@@ -49,14 +49,10 @@ public class ElasticUserAgentHeader {
   public static MetricExporter configureIfPossible(MetricExporter metricExporter) {
     if (metricExporter instanceof OtlpGrpcMetricExporter) {
       return ((OtlpGrpcMetricExporter) metricExporter)
-          .toBuilder()
-          .addHeader(HEADER_NAME, GRPC_VALUE)
-          .build();
+          .toBuilder().addHeader(HEADER_NAME, GRPC_VALUE).build();
     } else if (metricExporter instanceof OtlpHttpMetricExporter) {
       return ((OtlpHttpMetricExporter) metricExporter)
-          .toBuilder()
-          .addHeader(HEADER_NAME, HTTP_VALUE)
-          .build();
+          .toBuilder().addHeader(HEADER_NAME, HTTP_VALUE).build();
     }
     return metricExporter;
   }
