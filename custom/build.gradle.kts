@@ -8,6 +8,7 @@ val instrumentations = listOf<String>(
 
 dependencies {
   implementation(project(":common"))
+  implementation(project(":opamp"))
   implementation(project(":inferred-spans"))
   implementation(project(":universal-profiling-integration"))
   implementation(project(":resources"))
