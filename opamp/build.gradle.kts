@@ -1,7 +1,6 @@
 plugins {
   id("elastic-otel.library-packaging-conventions")
   id("java-library")
-  id("com.google.protobuf") version "0.9.4"
 }
 
 dependencies {
@@ -22,24 +21,3 @@ dependencies {
 tasks.test {
   useJUnitPlatform()
 }
-
-protobuf {
-  protoc {
-    artifact = "com.google.protobuf:protoc:3.25.7"
-  }
-  generateProtoTasks {
-    all().forEach { task ->
-      task.builtins {
-        java {}
-      }
-    }
-  }
-  sourceSets {
-    main {
-      proto {
-        srcDir("../../opamp-spec/proto")
-      }
-    }
-  }
-}
-
