@@ -157,7 +157,7 @@ public class DynamicConfiguration {
       Set<String> keySet = alreadyDeactivated.keySet();
       for (String instrumentation : keySet) {
         DynamicConfiguration.getInstance().reenableTracesFor(instrumentation);
-        alreadyDeactivated.remove(instrumentation);
+        keySet.remove(instrumentation);
       }
     } else {
       // Applying (2)
