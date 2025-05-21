@@ -134,8 +134,8 @@ public class DynamicConfiguration {
     reenableTracesFor(ALL_INSTRUMENTATION);
   }
 
-  //okay to synchronize as this should only be called after multi-second intervals and
-  //additionally only called from threads which are not doing anything application blocking
+  // okay to synchronize as this should only be called after multi-second intervals and
+  // additionally only called from threads which are not doing anything application blocking
   public synchronized void deactivateInstrumentations(String deactivateList) {
     if (deactivateList != null && !deactivateList.trim().isEmpty()) {
       // some values in the disable_instrumentations list
