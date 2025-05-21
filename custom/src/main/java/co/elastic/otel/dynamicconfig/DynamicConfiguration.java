@@ -85,6 +85,54 @@ public class DynamicConfiguration {
   }
 
   /** Can be executed repeatedly even if sending is currently stopped */
+  public void stopSendingSpans() {
+    initSendingStates();
+    if (recoverySendSpansState != null) {
+      BlockableSpanExporter.getInstance().setSendingSpans(false);
+    }
+  }
+
+  /** Can be executed repeatedly even if sending is currently stopped */
+  public void startSendingSpans() {
+    initSendingStates();
+    if (recoverySendSpansState != null) {
+      BlockableSpanExporter.getInstance().setSendingSpans(true);
+    }
+  }
+
+  /** Can be executed repeatedly even if sending is currently stopped */
+  public void stopSendingMetrics() {
+    initSendingStates();
+    if (recoverySendMetricsState != null) {
+      BlockableMetricExporter.getInstance().setSendingMetrics(false);
+    }
+  }
+
+  /** Can be executed repeatedly even if sending is currently stopped */
+  public void startSendingMetrics() {
+    initSendingStates();
+    if (recoverySendMetricsState != null) {
+      BlockableMetricExporter.getInstance().setSendingMetrics(true);
+    }
+  }
+
+  /** Can be executed repeatedly even if sending is currently stopped */
+  public void stopSendingLogs() {
+    initSendingStates();
+    if (recoverySendLogsState != null) {
+      BlockableLogRecordExporter.getInstance().setSendingLogs(false);
+    }
+  }
+
+  /** Can be executed repeatedly even if sending is currently stopped */
+  public void startSendingLogs() {
+    initSendingStates();
+    if (recoverySendLogsState != null) {
+      BlockableLogRecordExporter.getInstance().setSendingLogs(true);
+    }
+  }
+
+  /** Can be executed repeatedly even if sending is currently stopped */
   public void stopAllSending() {
     initSendingStates();
     if (recoverySendSpansState != null) {
