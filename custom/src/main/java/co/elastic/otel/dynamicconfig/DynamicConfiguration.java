@@ -182,7 +182,7 @@ public class DynamicConfiguration {
     final Set<String> instrumentationsToReactivate;
     final Set<String> instrumentationsToDeactivate;
 
-    public <E> Deactivations(Set<String> deactivateList, Set<String> alreadyDeactivated) {
+    public Deactivations(Set<String> deactivateList, Set<String> alreadyDeactivated) {
       instrumentationsToReactivate = new HashSet<>();
       instrumentationsToDeactivate = new HashSet<>();
       for (String instrumentation : deactivateList) {
