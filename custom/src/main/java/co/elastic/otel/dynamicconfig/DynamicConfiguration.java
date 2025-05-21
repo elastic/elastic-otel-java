@@ -25,6 +25,7 @@ import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.internal.ScopeConfigurator;
 import io.opentelemetry.sdk.trace.internal.TracerConfig;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -51,6 +52,7 @@ public class DynamicConfiguration {
   private Boolean recoverySendLogsState;
   private Boolean recoverySendMetricsState;
   private final ConcurrentMap<String, Boolean> alreadyDeactivated = new ConcurrentHashMap<>();
+  private String cachedDeactivationList;
 
   private void initSendingStates() {
     if (recoverySendSpansState == null) {
@@ -135,39 +137,76 @@ public class DynamicConfiguration {
   }
 
   // okay to synchronize as this should only be called after multi-second intervals and
-  // additionally only called from threads which are not doing anything application blocking
+  // additionally only called from threads which are not doing anything application-blocking
   public synchronized void deactivateInstrumentations(String deactivateList) {
-    if (deactivateList != null && !deactivateList.trim().isEmpty()) {
-      // some values in the disable_instrumentations list
-      Set<String> toBeEnabled = null;
-      if (!alreadyDeactivated.isEmpty()) {
-        toBeEnabled = new HashSet<>(alreadyDeactivated.keySet());
-      }
-      for (String toBeDisabled : deactivateList.split(",")) {
-        toBeDisabled = toBeDisabled.trim();
-        if (alreadyDeactivated.containsKey(toBeDisabled)) {
-          // already disabled and keep it that way
-          if (toBeEnabled != null) {
-            toBeEnabled.remove(toBeDisabled);
-          }
-        } else {
-          DynamicConfiguration.getInstance().disableTracesFor(toBeDisabled);
-          alreadyDeactivated.put(toBeDisabled, Boolean.TRUE);
-        }
-      }
-      if (toBeEnabled != null) {
-        for (String instrumentation : toBeEnabled) {
-          DynamicConfiguration.getInstance().reenableTracesFor(instrumentation);
-          alreadyDeactivated.remove(instrumentation);
-        }
+    // Avoid doing anything if the deactivateList hasn't changed -
+    // this is just a GC optimization to avoid creating new objects in the most common case
+    if (Objects.equals(deactivateList, cachedDeactivationList)) {
+      return;
+    }
+    cachedDeactivationList = deactivateList;
+
+    // Algorithm:
+    // 1. If the list is empty, then everything alreadyDeactivated needs to be re-activated
+    // 2. Otherwise
+    // 2a. everything in both deactivateList and alreadyDeactivated is ignored (already deactivated)
+    // 2b. everything in deactivateList not in alreadyDeactivated is deactivated
+    // 2c. everything in alreadyDeactivated not in deactivateList is re-eactivated
+    if (deactivateList == null || deactivateList.trim().isEmpty()) {
+      // Applying (1) - keySet.remove() is a valid concurrent mutation here within the loop
+      Set<String> keySet = alreadyDeactivated.keySet();
+      for (String instrumentation : keySet) {
+        DynamicConfiguration.getInstance().reenableTracesFor(instrumentation);
+        alreadyDeactivated.remove(instrumentation);
       }
     } else {
-      // empty list so anything currently disabled should be re-enabled
-      if (!alreadyDeactivated.isEmpty()) {
-        for (String instrumentation : new HashSet<>(alreadyDeactivated.keySet())) {
-          DynamicConfiguration.getInstance().reenableTracesFor(instrumentation);
-          alreadyDeactivated.remove(instrumentation);
+      // Applying (2)
+      Deactivations deactivations =
+          new Deactivations(
+              convertToSet(deactivateList), new HashSet<>(alreadyDeactivated.keySet()));
+      deactivations.applyDeactivations(alreadyDeactivated);
+    }
+  }
+
+  private static Set<String> convertToSet(String deactivateList) {
+    Set<String> theSet = new HashSet<>();
+    if (deactivateList != null && !deactivateList.trim().isEmpty()) {
+      for (String toBeDisabled : deactivateList.split(",")) {
+        theSet.add(toBeDisabled.trim());
+      }
+    }
+    return theSet;
+  }
+
+  public static class Deactivations {
+    final Set<String> instrumentationsToReactivate;
+    final Set<String> instrumentationsToDeactivate;
+
+    public <E> Deactivations(Set<String> deactivateList, Set<String> alreadyDeactivated) {
+      instrumentationsToReactivate = new HashSet<>();
+      instrumentationsToDeactivate = new HashSet<>();
+      for (String instrumentation : deactivateList) {
+        if (!alreadyDeactivated.contains(instrumentation)) {
+          // Requested to deactivate this and it's not already deactivated, so
+          instrumentationsToDeactivate.add(instrumentation);
         }
+      }
+      for (String instrumentation : alreadyDeactivated) {
+        if (!deactivateList.contains(instrumentation)) {
+          // Currently deactivated but now NOT requested to be deactivated, so
+          instrumentationsToReactivate.add(instrumentation);
+        }
+      }
+    }
+
+    public void applyDeactivations(ConcurrentMap<String, Boolean> alreadyDeactivated) {
+      for (String instrumentation : instrumentationsToReactivate) {
+        DynamicConfiguration.getInstance().reenableTracesFor(instrumentation);
+        alreadyDeactivated.remove(instrumentation);
+      }
+      for (String instrumentation : instrumentationsToDeactivate) {
+        DynamicConfiguration.getInstance().disableTracesFor(instrumentation);
+        alreadyDeactivated.put(instrumentation, Boolean.TRUE);
       }
     }
   }
