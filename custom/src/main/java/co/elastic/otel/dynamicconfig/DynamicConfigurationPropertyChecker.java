@@ -58,8 +58,6 @@ public class DynamicConfigurationPropertyChecker implements Runnable {
     }
   }
 
-  private final Map<String, Boolean> alreadyDisabled = new HashMap<>();
-
   private void checkSending() {
     boolean stopSending;
     synchronized (this) {
@@ -83,39 +81,7 @@ public class DynamicConfigurationPropertyChecker implements Runnable {
     synchronized (this) {
       disableList = System.getProperty(DynamicConfiguration.INSTRUMENTATION_DISABLE_OPTION);
     }
-    if (disableList != null && !disableList.trim().isEmpty()) {
-      // some values in the disable_instrumentations list
-      Set<String> toBeEnabled = null;
-      if (!alreadyDisabled.isEmpty()) {
-        toBeEnabled = new HashSet<>(alreadyDisabled.keySet());
-      }
-      for (String toBeDisabled : disableList.split(",")) {
-        toBeDisabled = toBeDisabled.trim();
-        if (alreadyDisabled.containsKey(toBeDisabled)) {
-          // already disabled and keep it that way
-          if (toBeEnabled != null) {
-            toBeEnabled.remove(toBeDisabled);
-          }
-        } else {
-          DynamicConfiguration.getInstance().disableTracesFor(toBeDisabled);
-          alreadyDisabled.put(toBeDisabled, Boolean.TRUE);
-        }
-      }
-      if (toBeEnabled != null) {
-        for (String instrumentation : toBeEnabled) {
-          DynamicConfiguration.getInstance().reenableTracesFor(instrumentation);
-          alreadyDisabled.remove(instrumentation);
-        }
-      }
-    } else {
-      // empty list so anything currently disabled should be re-enabled
-      if (!alreadyDisabled.isEmpty()) {
-        for (String instrumentation : new HashSet<>(alreadyDisabled.keySet())) {
-          DynamicConfiguration.getInstance().reenableTracesFor(instrumentation);
-          alreadyDisabled.remove(instrumentation);
-        }
-      }
-    }
+    DynamicConfiguration.getInstance().deactivateInstrumentations(disableList);
   }
 
   @Override

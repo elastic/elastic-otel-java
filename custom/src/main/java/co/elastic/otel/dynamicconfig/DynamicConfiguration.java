@@ -24,6 +24,8 @@ import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
 import io.opentelemetry.sdk.internal.ScopeConfigurator;
 import io.opentelemetry.sdk.trace.internal.TracerConfig;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
@@ -48,6 +50,7 @@ public class DynamicConfiguration {
   private Boolean recoverySendSpansState;
   private Boolean recoverySendLogsState;
   private Boolean recoverySendMetricsState;
+  private final ConcurrentMap<String, Boolean> alreadyDeactivated = new ConcurrentHashMap<>();
 
   private void initSendingStates() {
     if (recoverySendSpansState == null) {
@@ -129,6 +132,44 @@ public class DynamicConfiguration {
 
   public void stopDisablingAllTraces() {
     reenableTracesFor(ALL_INSTRUMENTATION);
+  }
+
+  //okay to synchronize as this should only be called after multi-second intervals and
+  //additionally only called from threads which are not doing anything application blocking
+  public synchronized void deactivateInstrumentations(String deactivateList) {
+    if (deactivateList != null && !deactivateList.trim().isEmpty()) {
+      // some values in the disable_instrumentations list
+      Set<String> toBeEnabled = null;
+      if (!alreadyDeactivated.isEmpty()) {
+        toBeEnabled = new HashSet<>(alreadyDeactivated.keySet());
+      }
+      for (String toBeDisabled : deactivateList.split(",")) {
+        toBeDisabled = toBeDisabled.trim();
+        if (alreadyDeactivated.containsKey(toBeDisabled)) {
+          // already disabled and keep it that way
+          if (toBeEnabled != null) {
+            toBeEnabled.remove(toBeDisabled);
+          }
+        } else {
+          DynamicConfiguration.getInstance().disableTracesFor(toBeDisabled);
+          alreadyDeactivated.put(toBeDisabled, Boolean.TRUE);
+        }
+      }
+      if (toBeEnabled != null) {
+        for (String instrumentation : toBeEnabled) {
+          DynamicConfiguration.getInstance().reenableTracesFor(instrumentation);
+          alreadyDeactivated.remove(instrumentation);
+        }
+      }
+    } else {
+      // empty list so anything currently disabled should be re-enabled
+      if (!alreadyDeactivated.isEmpty()) {
+        for (String instrumentation : new HashSet<>(alreadyDeactivated.keySet())) {
+          DynamicConfiguration.getInstance().reenableTracesFor(instrumentation);
+          alreadyDeactivated.remove(instrumentation);
+        }
+      }
+    }
   }
 
   public static class UpdatableConfigurator implements ScopeConfigurator<TracerConfig> {
