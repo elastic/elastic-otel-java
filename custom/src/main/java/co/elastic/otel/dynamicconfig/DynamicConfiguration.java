@@ -151,7 +151,7 @@ public class DynamicConfiguration {
     // 2. Otherwise
     // 2a. everything in both deactivateList and alreadyDeactivated is ignored (already deactivated)
     // 2b. everything in deactivateList not in alreadyDeactivated is deactivated
-    // 2c. everything in alreadyDeactivated not in deactivateList is re-eactivated
+    // 2c. everything in alreadyDeactivated not in deactivateList is re-activated
     if (deactivateList == null || deactivateList.trim().isEmpty()) {
       // Applying (1) - keySet.remove() is a valid concurrent mutation here within the loop
       Set<String> keySet = alreadyDeactivated.keySet();
