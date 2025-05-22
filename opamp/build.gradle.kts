@@ -11,10 +11,10 @@ dependencies {
   implementation("com.github.f4b6a3:uuid-creator:6.0.0")
   compileOnly("com.google.auto.value:auto-value-annotations:1.11.0")
   annotationProcessor("com.google.auto.value:auto-value:1.11.0")
-  testImplementation("org.mockito:mockito-junit-jupiter:4.11.0")
+  testImplementation("org.mockito:mockito-junit-jupiter:5.18.0")
   testImplementation(libs.mockito)
   testImplementation(libs.assertj.core)
-  testImplementation("org.mockito:mockito-inline:4.11.0")
+  testImplementation("org.mockito:mockito-inline:5.2.0")
 
 }
 
