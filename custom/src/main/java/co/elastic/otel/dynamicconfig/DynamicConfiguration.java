@@ -84,6 +84,30 @@ public class DynamicConfiguration {
     }
   }
 
+  /** Can be executed repeatedly regardless of the current state */
+  public void setSendingSpans(boolean send) {
+    initSendingStates();
+    if (recoverySendSpansState != null) {
+      BlockableSpanExporter.getInstance().setSendingSpans(send);
+    }
+  }
+
+  /** Can be executed repeatedly regardless of the current state */
+  public void setSendingMetrics(boolean send) {
+    initSendingStates();
+    if (recoverySendMetricsState != null) {
+      BlockableMetricExporter.getInstance().setSendingMetrics(send);
+    }
+  }
+
+  /** Can be executed repeatedly regardless of the current state */
+  public void setSendingLogs(boolean send) {
+    initSendingStates();
+    if (recoverySendLogsState != null) {
+      BlockableLogRecordExporter.getInstance().setSendingLogs(send);
+    }
+  }
+
   /** Can be executed repeatedly even if sending is currently stopped */
   public void stopAllSending() {
     initSendingStates();
