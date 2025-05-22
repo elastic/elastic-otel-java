@@ -84,51 +84,27 @@ public class DynamicConfiguration {
     }
   }
 
-  /** Can be executed repeatedly even if sending is currently stopped */
-  public void stopSendingSpans() {
+  /** Can be executed repeatedly regardless of the current state */
+  public void setSendingSpans(boolean send) {
     initSendingStates();
     if (recoverySendSpansState != null) {
-      BlockableSpanExporter.getInstance().setSendingSpans(false);
+      BlockableSpanExporter.getInstance().setSendingSpans(send);
     }
   }
 
-  /** Can be executed repeatedly even if sending is currently stopped */
-  public void startSendingSpans() {
-    initSendingStates();
-    if (recoverySendSpansState != null) {
-      BlockableSpanExporter.getInstance().setSendingSpans(true);
-    }
-  }
-
-  /** Can be executed repeatedly even if sending is currently stopped */
-  public void stopSendingMetrics() {
+  /** Can be executed repeatedly regardless of the current state */
+  public void setSendingMetrics(boolean send) {
     initSendingStates();
     if (recoverySendMetricsState != null) {
-      BlockableMetricExporter.getInstance().setSendingMetrics(false);
+      BlockableMetricExporter.getInstance().setSendingMetrics(send);
     }
   }
 
-  /** Can be executed repeatedly even if sending is currently stopped */
-  public void startSendingMetrics() {
-    initSendingStates();
-    if (recoverySendMetricsState != null) {
-      BlockableMetricExporter.getInstance().setSendingMetrics(true);
-    }
-  }
-
-  /** Can be executed repeatedly even if sending is currently stopped */
-  public void stopSendingLogs() {
+  /** Can be executed repeatedly regardless of the current state */
+  public void setSendingLogs(boolean send) {
     initSendingStates();
     if (recoverySendLogsState != null) {
-      BlockableLogRecordExporter.getInstance().setSendingLogs(false);
-    }
-  }
-
-  /** Can be executed repeatedly even if sending is currently stopped */
-  public void startSendingLogs() {
-    initSendingStates();
-    if (recoverySendLogsState != null) {
-      BlockableLogRecordExporter.getInstance().setSendingLogs(true);
+      BlockableLogRecordExporter.getInstance().setSendingLogs(send);
     }
   }
 
