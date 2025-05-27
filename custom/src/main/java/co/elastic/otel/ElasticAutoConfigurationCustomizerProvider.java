@@ -21,8 +21,7 @@ package co.elastic.otel;
 import co.elastic.otel.dynamicconfig.BlockableLogRecordExporter;
 import co.elastic.otel.dynamicconfig.BlockableMetricExporter;
 import co.elastic.otel.dynamicconfig.BlockableSpanExporter;
-import co.elastic.otel.dynamicconfig.DynamicConfiguration;
-import co.elastic.otel.dynamicconfig.DynamicInstrumentation;
+import co.elastic.otel.dynamicconfig.CentralConfig;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
@@ -68,13 +67,13 @@ public class ElasticAutoConfigurationCustomizerProvider
 
     autoConfiguration.addPropertiesCustomizer(
         ElasticAutoConfigurationCustomizerProvider::propertiesCustomizer);
+    autoConfiguration.addResourceCustomizer(resourceProviders());
+    // make sure this comes after anything that might set the service name
     autoConfiguration.addTracerProviderCustomizer(
         (providerBuilder, properties) -> {
-          DynamicInstrumentation.setTracerConfigurator(
-              providerBuilder, DynamicConfiguration.UpdatableConfigurator.INSTANCE);
+          CentralConfig.init(providerBuilder, properties);
           return providerBuilder;
         });
-    autoConfiguration.addResourceCustomizer(resourceProviders());
   }
 
   private void configureExporterUserAgentHeaders(AutoConfigurationCustomizer autoConfiguration) {
