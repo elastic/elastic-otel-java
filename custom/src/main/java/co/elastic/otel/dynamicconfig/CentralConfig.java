@@ -25,11 +25,12 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
 import java.text.MessageFormat;
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CentralConfig {
   private static final Logger logger = Logger.getLogger(CentralConfig.class.getName());
@@ -98,18 +99,19 @@ public class CentralConfig {
   }
 
   public static class Configs {
-    private static final Map<String, ConfigOption> configNameToConfig = new HashMap<>();
+    private static final Map<String, ConfigOption> configNameToConfig;
     private static final Set<String> currentNonDefaultConfigsApplied = new HashSet<>();
 
     static {
-      ConfigOption option;
-      configNameToConfig.put((option = new SendLogs()).getConfigName(), option);
-      configNameToConfig.put((option = new SendMetrics()).getConfigName(), option);
-      configNameToConfig.put((option = new SendTraces()).getConfigName(), option);
-      configNameToConfig.put(
-          (option = new DeactivateAllInstrumentations()).getConfigName(), option);
-      configNameToConfig.put((option = new DeactivateInstrumentations()).getConfigName(), option);
-      configNameToConfig.put((option = new LoggingLevel()).getConfigName(), option);
+      configNameToConfig =
+          Stream.of(
+                  new SendLogs(),
+                  new SendMetrics(),
+                  new SendTraces(),
+                  new DeactivateAllInstrumentations(),
+                  new DeactivateInstrumentations(),
+                  new LoggingLevel())
+              .collect(Collectors.toMap(ConfigOption::getConfigName, option -> option));
     }
 
     public static synchronized void applyConfigurations(Map<String, String> configuration) {
