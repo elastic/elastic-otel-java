@@ -9,8 +9,7 @@ ENV CROSS_TRIPLE x86_64-linux-musl
 ENV CROSS_ROOT ${XCC_PREFIX}/${CROSS_TRIPLE}-cross
 
 RUN mkdir -p ${XCC_PREFIX}
-RUN curl --max-time 180 --retry 5 -LO http://musl.cc/${CROSS_TRIPLE}-cross.tgz
-
+RUN curl --max-time 180 --retry 5 -LO https://github.com/JonasKunz/musl-x86_64-cross/raw/3aeb31dcddb450822e02b7d432c567873dc8c26b/x86_64-linux-musl-cross.tgz
 # Verify that the downloaded file has not been altered via sha256 checksum
 RUN test "$(sha256sum -b ${CROSS_TRIPLE}-cross.tgz)" = "c5d410d9f82a4f24c549fe5d24f988f85b2679b452413a9f7e5f7b956f2fe7ea *${CROSS_TRIPLE}-cross.tgz"
 
