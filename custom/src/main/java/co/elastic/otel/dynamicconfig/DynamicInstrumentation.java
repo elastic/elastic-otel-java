@@ -82,9 +82,4 @@ public class DynamicInstrumentation {
           "Expected SdkTracerProvider but got " + provider.getClass().getName());
     }
   }
-
-  static {
-    // will refactor this when DynamicInstrumentation class becomes mostly empty
-    DynamicConfigurationPropertyChecker.startCheckerThread();
-  }
 }

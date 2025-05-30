@@ -136,7 +136,7 @@ public class DynamicConfiguration {
     }
   }
 
-  public void reenableTracesFor(String instrumentationName) {
+  private void reactivateInstrumentation(String instrumentationName) {
     UpdatableConfigurator.INSTANCE.put(
         InstrumentationScopeInfo.create(INSTRUMENTATION_NAME_PREPEND + instrumentationName),
         TracerConfig.enabled());
@@ -144,7 +144,7 @@ public class DynamicConfiguration {
         GlobalOpenTelemetry.getTracerProvider(), UpdatableConfigurator.INSTANCE);
   }
 
-  public void disableTracesFor(String instrumentationName) {
+  private void deactivateInstrumentation(String instrumentationName) {
     UpdatableConfigurator.INSTANCE.put(
         InstrumentationScopeInfo.create(INSTRUMENTATION_NAME_PREPEND + instrumentationName),
         TracerConfig.disabled());
@@ -152,12 +152,12 @@ public class DynamicConfiguration {
         GlobalOpenTelemetry.getTracerProvider(), UpdatableConfigurator.INSTANCE);
   }
 
-  public void disableAllTraces() {
-    disableTracesFor(ALL_INSTRUMENTATION);
+  public void deactivateAllInstrumentations() {
+    deactivateInstrumentation(ALL_INSTRUMENTATION);
   }
 
-  public void stopDisablingAllTraces() {
-    reenableTracesFor(ALL_INSTRUMENTATION);
+  public void reactivateAllInstrumentations() {
+    reactivateInstrumentation(ALL_INSTRUMENTATION);
   }
 
   // okay to synchronize as this should only be called after multi-second intervals and
@@ -180,7 +180,7 @@ public class DynamicConfiguration {
       // Applying (1) - keySet.remove() is a valid concurrent mutation here within the loop
       Set<String> keySet = alreadyDeactivated.keySet();
       for (String instrumentation : keySet) {
-        DynamicConfiguration.getInstance().reenableTracesFor(instrumentation);
+        DynamicConfiguration.getInstance().reactivateInstrumentation(instrumentation);
         keySet.remove(instrumentation);
       }
     } else {
@@ -225,11 +225,11 @@ public class DynamicConfiguration {
 
     public void applyDeactivations(ConcurrentMap<String, Boolean> alreadyDeactivated) {
       for (String instrumentation : instrumentationsToReactivate) {
-        DynamicConfiguration.getInstance().reenableTracesFor(instrumentation);
+        DynamicConfiguration.getInstance().reactivateInstrumentation(instrumentation);
         alreadyDeactivated.remove(instrumentation);
       }
       for (String instrumentation : instrumentationsToDeactivate) {
-        DynamicConfiguration.getInstance().disableTracesFor(instrumentation);
+        DynamicConfiguration.getInstance().deactivateInstrumentation(instrumentation);
         alreadyDeactivated.put(instrumentation, Boolean.TRUE);
       }
     }

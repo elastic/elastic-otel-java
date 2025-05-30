@@ -47,6 +47,34 @@ public class AgentLog {
     Configurator.initialize(conf.build(false));
   }
 
+  public static void setLevel(String level) {
+    switch (level) {
+      case "trace":
+        setLevel(Level.TRACE);
+        return;
+      case "debug":
+        setLevel(Level.DEBUG);
+        return;
+      case "info":
+        setLevel(Level.INFO);
+        return;
+      case "warn":
+        setLevel(Level.WARN);
+        return;
+      case "error":
+        setLevel(Level.ERROR);
+        return;
+      case "fatal":
+        setLevel(Level.FATAL);
+        return;
+      case "off":
+        setLevel(Level.OFF);
+        return;
+      default:
+        setLevel(Level.INFO);
+    }
+  }
+
   /**
    * Sets the agent log level at runtime
    *
