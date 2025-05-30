@@ -1,4 +1,4 @@
-FROM docker.elastic.co/wolfi/chainguard-base:latest@sha256:3d19648819612728a676ab4061edfb3283bd7117a22c6c4479ee1c1d51831832
+FROM docker.elastic.co/wolfi/chainguard-base:latest@sha256:d05de806903139d26bd08aa7de04c6893c433f4b361674814f9a43dd74c4faee
 ARG JAR_FILE
 ARG EXTENSION_JAR_FILE
 COPY ${JAR_FILE} /javaagent.jar
