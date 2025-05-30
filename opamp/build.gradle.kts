@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
   api(libs.okhttp)
-  implementation("com.google.protobuf:protobuf-java:3.25.7")
+  implementation("com.google.protobuf:protobuf-java:3.25.8")
   implementation("com.dslplatform:dsl-json-java8:1.10.0")
   implementation(libs.protobuf.util)
   implementation("com.github.f4b6a3:uuid-creator:6.1.1")
