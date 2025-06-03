@@ -41,10 +41,10 @@ public class CentralConfig {
 
   public static void init(SdkTracerProviderBuilder providerBuilder, ConfigProperties properties) {
     String endpoint = properties.getString("elastic.otel.opamp.endpoint");
-    logger.info("Enabling OpAMP as endpoint is defined: " + endpoint);
     if (endpoint == null || endpoint.isEmpty()) {
       return;
     }
+    logger.info("Enabling OpAMP as endpoint is defined: " + endpoint);
     if (!endpoint.endsWith("v1/opamp")) {
       if (endpoint.endsWith("/")) {
         endpoint += "v1/opamp";
