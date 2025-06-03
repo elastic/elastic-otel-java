@@ -42,6 +42,7 @@ public class CentralConfig {
   public static void init(SdkTracerProviderBuilder providerBuilder, ConfigProperties properties) {
     String endpoint = properties.getString("elastic.otel.opamp.endpoint");
     if (endpoint == null || endpoint.isEmpty()) {
+      logger.fine("OpAMP is not enabled");
       return;
     }
     logger.info("Enabling OpAMP as endpoint is defined: " + endpoint);
