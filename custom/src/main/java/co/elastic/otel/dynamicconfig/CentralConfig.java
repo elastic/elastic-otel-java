@@ -40,16 +40,11 @@ public class CentralConfig {
   }
 
   public static void init(SdkTracerProviderBuilder providerBuilder, ConfigProperties properties) {
-    // TODO flip default when EDOT collector supports op amp
-    boolean startOpAmp = properties.getBoolean("elastic.otel.opamp.start", false);
-    if (!startOpAmp) {
+    String endpoint = properties.getString("elastic.otel.opamp.endpoint");
+    logger.info("Enabling OpAMP as endpoint is defined: " + endpoint);
+    if (endpoint == null || endpoint.isEmpty()) {
       return;
     }
-    String serviceName = getServiceName(properties);
-    // TODO agree on polling interval property name
-    int pollingInterval = properties.getInt("elastic.otel.opamp.polling.interval_in_seconds", 30);
-    // TODO derive default endpoint from main endpoint when EDOT collector endpoint is stable
-    String endpoint = properties.getString("elastic.otel.opamp.endpoint", "http://localhost:4320");
     if (!endpoint.endsWith("v1/opamp")) {
       if (endpoint.endsWith("/")) {
         endpoint += "v1/opamp";
@@ -57,13 +52,14 @@ public class CentralConfig {
         endpoint += "/v1/opamp";
       }
     }
-    logger.info("============= Starting OpAmp client for: " + serviceName);
+    String serviceName = getServiceName(properties);
+    logger.info("Starting OpAmp client for: " + serviceName + " on endpoint " + endpoint);
     DynamicInstrumentation.setTracerConfigurator(
         providerBuilder, DynamicConfiguration.UpdatableConfigurator.INSTANCE);
     CentralConfigurationManager centralConfigurationManager =
         CentralConfigurationManager.builder()
             .setServiceName(serviceName)
-            .setPollingInterval(Duration.ofSeconds(pollingInterval))
+            .setPollingInterval(Duration.ofSeconds(30))
             .setConfigurationEndpoint(endpoint)
             .build();
 
@@ -95,7 +91,7 @@ public class CentralConfig {
         return serviceName;
       }
     }
-    return "unknown_service"; // Specified default
+    return "unknown_service:java"; // Specified default
   }
 
   public static class Configs {
