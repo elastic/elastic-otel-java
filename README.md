@@ -7,12 +7,12 @@ The Elastic Distribution of OpenTelemetry Java (EDOT Java) is a customized versi
 
 With EDOT Java you have access to all the features and supported technologies of the OpenTelemetry Java instrumentation agent plus:
 
-- additional [features](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/java/features.html), for example:
-  - [Inferred spans](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/java/features.html#inferred-spans)
-  - [Span stacktrace](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/java/features.html#span-stacktrace)
-  - [Elastic universal profiling integration](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/java/features.html#elastic-universal-profiling-integration)
+- additional [features](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/java/features), for example:
+  - [Inferred spans](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/java/features#inferred-spans)
+  - [Span stacktrace](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/java/features#span-stacktrace)
+  - [Elastic universal profiling integration](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/java/features#elastic-universal-profiling-integration)
   - ...
-- additional [supported technologies](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/java/supported-technologies.html)
+- additional [supported technologies](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/java/supported-technologies)
 
 We welcome your feedback! You can reach us by [opening a GitHub issue](https://github.com/elastic/elastic-otel-java/issues) or starting a discussion thread on the [Elastic Discuss forum](https://discuss.elastic.co/tags/c/observability/apm/58/java).
 
@@ -36,8 +36,8 @@ Using the `JAVA_TOOL_OPTIONS` environment variable can be used when modifying th
 ## Read the docs
 
 * [EDOT Java](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/java/index.html)
-* [EDOT Java configuration](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/java/configuration.html)
-* [EDOT Java migration](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/java/migration.html) from the [Elastic APM Java agent](https://github.com/elastic/apm-agent-java)
+* [EDOT Java configuration](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/java/configuration)
+* [EDOT Java migration](https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/java/migration) from the [Elastic APM Java agent](https://github.com/elastic/apm-agent-java)
 
 ## Build and Test
 
