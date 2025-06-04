@@ -13,7 +13,7 @@ products:
 
 # Elastic Distribution of OpenTelemetry Java breaking changes [edot-java-breaking-changes]
 
-Breaking changes can impact your Elastic applications, potentially disrupting normal operations. Before you upgrade, carefully review the Elastic Distribution of OpenTelemetry Java breaking changes and take the necessary steps to mitigate any issues.
+Breaking changes can impact your applications, potentially disrupting normal operations and their monitoring. Before you upgrade, carefully review the Elastic Distribution of OpenTelemetry Java breaking changes and take the necessary steps to mitigate any issues.
 
 % ## Next version [edot-X.X.X-breaking-changes]
 
