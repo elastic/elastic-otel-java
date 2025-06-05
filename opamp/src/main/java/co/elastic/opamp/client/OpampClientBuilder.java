@@ -110,6 +110,11 @@ public final class OpampClientBuilder {
     return this;
   }
 
+  public OpampClientBuilder setServiceEnvironment(String environment) {
+    addIdentifyingAttribute("deployment.environment.name", environment);
+    return this;
+  }
+
   /**
    * Adds the AcceptsRemoteConfig and ReportsRemoteConfig capabilities to the Client so that the
    * Server can offer remote config values as explained <a

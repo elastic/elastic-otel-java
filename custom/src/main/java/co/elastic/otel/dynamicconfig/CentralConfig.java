@@ -54,6 +54,7 @@ public class CentralConfig {
       }
     }
     String serviceName = getServiceName(properties);
+    String environment = getServiceEnvironment(properties);
     logger.info("Starting OpAmp client for: " + serviceName + " on endpoint " + endpoint);
     DynamicInstrumentation.setTracerConfigurator(
         providerBuilder, DynamicConfiguration.UpdatableConfigurator.INSTANCE);
@@ -62,6 +63,7 @@ public class CentralConfig {
             .setServiceName(serviceName)
             .setPollingInterval(Duration.ofSeconds(30))
             .setConfigurationEndpoint(endpoint)
+            .setServiceEnvironment(environment)
             .build();
 
     centralConfigurationManager.start(
@@ -93,6 +95,18 @@ public class CentralConfig {
       }
     }
     return "unknown_service:java"; // Specified default
+  }
+
+  private static String getServiceEnvironment(ConfigProperties properties) {
+    Map<String, String> resourceMap = properties.getMap("otel.resource.attributes");
+    if (resourceMap != null) {
+      String environment = resourceMap.get("deployment.environment.name"); // semconv
+      if (environment != null) {
+        return environment;
+      }
+      return resourceMap.get("deployment.environment"); // backward compatible, can be null
+    }
+    return null;
   }
 
   public static class Configs {
