@@ -49,14 +49,14 @@ jobs:
         echo "github.event_name=${{ github.event_name }}"
 
     - name: Add community and triage labels
-      if: contains(steps.is_elastic_member.outputs.result, 'false') && github.actor != 'dependabot[bot]' && github.actor != 'elastic-renovate-prod[bot]' && github.actor != 'elastic-observability-automation[bot]'
+      if: contains(steps.is_elastic_member.outputs.result, 'false')
       run: gh issue edit "${NUMBER}" --add-label "community,triage" --repo "${{ github.repository }}"
       env:
         NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Add comment for community PR
-      if: contains(steps.is_elastic_member.outputs.result, 'false') && github.actor != 'dependabot[bot]' && github.actor != 'elastic-renovate-prod[bot]' && github.actor != 'elastic-observability-automation[bot]'
+      if: contains(steps.is_elastic_member.outputs.result, 'false')
       uses: wow-actions/auto-comment@v1
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
