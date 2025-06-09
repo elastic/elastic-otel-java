@@ -43,7 +43,7 @@ jobs:
         github-token: ${{ steps.get_token.outputs.token }}
 
     - id: user_type
-      uses: elastic/oblt-actions/github/user-type@github-is-bot
+      uses: elastic/oblt-actions/github/user-type@v1
       with:
         github-user: ${{ github.actor }}
         github-token: ${{ steps.get_token.outputs.token }}
@@ -56,14 +56,14 @@ jobs:
         echo "::notice:: github.event_name=${{ github.event_name }}"
 
     - name: Add community and triage labels
-      if: steps.is_elastic_member.outputs.result == 'false' && steps.user_type.outputs.result == 'User'
+      if: steps.is_elastic_member.outputs.result == 'false' && steps.user_type.outputs.result == 'user'
       run: gh issue edit "${NUMBER}" --add-label "community,triage" --repo "${{ github.repository }}"
       env:
         NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Add comment for community PR
-      if: steps.is_elastic_member.outputs.result == 'false' && steps.user_type.outputs.result == 'User'
+      if: steps.is_elastic_member.outputs.result == 'false' && steps.user_type.outputs.result == 'user'
       uses: wow-actions/auto-comment@v1
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
