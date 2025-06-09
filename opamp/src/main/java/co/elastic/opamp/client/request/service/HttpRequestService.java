@@ -27,6 +27,8 @@ import co.elastic.opamp.client.request.delay.PeriodicDelay;
 import co.elastic.opamp.client.response.Response;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.ConnectException;
+import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -164,7 +166,12 @@ public final class HttpRequestService implements RequestService, Runnable {
     } catch (InterruptedException e) {
       callback.onRequestFailed(e);
     } catch (ExecutionException e) {
-      callback.onRequestFailed(e.getCause());
+      Throwable cause = e.getCause();
+      if (cause instanceof UnknownHostException || cause instanceof ConnectException) {
+        callback.onConnectionFailed(cause);
+      } else {
+        callback.onRequestFailed(cause);
+      }
     }
   }
 

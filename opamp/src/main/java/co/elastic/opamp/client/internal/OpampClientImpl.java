@@ -161,6 +161,21 @@ public final class OpampClientImpl
 
   @Override
   public void onRequestFailed(Throwable throwable) {
+    final Opamp.ServerErrorResponse error;
+    if (throwable == null) {
+      error =
+          Opamp.ServerErrorResponse.newBuilder()
+              .setErrorMessageBytes(ByteString.copyFromUtf8("null"))
+              .build();
+    } else {
+      error =
+          Opamp.ServerErrorResponse.newBuilder()
+              .setErrorMessageBytes(
+                  ByteString.copyFromUtf8(
+                      throwable.getClass().getName() + ": " + throwable.getMessage()))
+              .build();
+    }
+    callback.onErrorResponse(this, error);
     preserveFailedRequestRecipe();
   }
 
