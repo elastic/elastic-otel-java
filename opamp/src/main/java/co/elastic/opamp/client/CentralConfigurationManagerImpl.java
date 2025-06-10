@@ -67,8 +67,7 @@ public final class CentralConfigurationManagerImpl
 
   private void processRemoteConfig(OpampClient client, Opamp.AgentRemoteConfig remoteConfig) {
     Map<String, Opamp.AgentConfigFile> configMapMap = remoteConfig.getConfig().getConfigMapMap();
-    // TODO change the key to "elastic" when the collector has that
-    Opamp.AgentConfigFile centralConfig = configMapMap.get("");
+    Opamp.AgentConfigFile centralConfig = configMapMap.get("elastic");
     if (centralConfig != null) {
       Map<String, String> configuration = parseCentralConfiguration(centralConfig.getBody());
       Opamp.RemoteConfigStatuses status;
