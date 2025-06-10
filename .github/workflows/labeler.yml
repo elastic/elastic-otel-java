@@ -42,43 +42,38 @@ jobs:
         github-user: ${{ github.actor }}
         github-token: ${{ steps.get_token.outputs.token }}
 
+    - id: user_type
+      uses: elastic/oblt-actions/github/user-type@v1
+      with:
+        github-user: ${{ github.actor }}
+        github-token: ${{ steps.get_token.outputs.token }}
+
     - name: debug
       run: |
-        echo "is_elastic_member=${{ steps.is_elastic_member.outputs.result }}"
-        echo "github.actor=${{ github.actor }}"
-        echo "github.event_name=${{ github.event_name }}"
+        echo "::notice:: is_elastic_member=${{ steps.is_elastic_member.outputs.result }}"
+        echo "::notice:: user_type=${{ steps.user_type.outputs.result }}"
+        echo "::notice:: github.actor=${{ github.actor }}"
+        echo "::notice:: github.event_name=${{ github.event_name }}"
 
     - name: Add community and triage labels
-      if: contains(steps.is_elastic_member.outputs.result, 'false') && github.actor != 'dependabot[bot]' && github.actor != 'elastic-renovate-prod[bot]' && github.actor != 'elastic-observability-automation[bot]'
+      if: steps.is_elastic_member.outputs.result == 'false' && steps.user_type.outputs.result == 'user'
       run: gh issue edit "${NUMBER}" --add-label "community,triage" --repo "${{ github.repository }}"
       env:
         NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Add comment for community PR
-      if: contains(steps.is_elastic_member.outputs.result, 'false') && github.actor != 'dependabot[bot]' && github.actor != 'elastic-renovate-prod[bot]' && github.actor != 'elastic-observability-automation[bot]'
-      uses: wow-actions/auto-comment@v1
-      with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        pullRequestOpened: |
-          👋 @{{ author }} Thanks a lot for your contribution! 
-          
-          It may take some time before we review a PR, so even if you don’t see activity for some time, it **does not** mean that we have forgotten about it. 
-          
-          Every once in a while we go through a process of prioritization, after which we are focussing on the tasks that were planned for the upcoming [milestone](https://github.com/elastic/apm-agent-java/milestones). The prioritization status is typically reflected through the PR labels. It could be pending triage, a candidate for a future milestone, or have a target milestone set to it.
-
     - name: Assign new internal pull requests to project
       id: add-to-project
-      if: contains(steps.is_elastic_member.outputs.result, 'true') && github.event_name == 'pull_request_target'
+      if: steps.is_elastic_member.outputs.result == 'true' && github.event_name == 'pull_request_target'
       uses: elastic/oblt-actions/github/project-add@v1
       with:
         github-token: ${{ steps.get_token.outputs.token }}
         project-id: 1829
-        item-url: ${{ github.event.pull_request.url }}
+        item-url: ${{ github.event.pull_request.html_url }}
 
     - name: set status in project
       id: set-project-status-field
-      if: contains(steps.is_elastic_member.outputs.result, 'true') && github.event_name == 'pull_request_target'
+      if: steps.is_elastic_member.outputs.result == 'true' && github.event_name == 'pull_request_target'
       uses: elastic/oblt-actions/github/project-field-set@v1
       with:
         github-token: ${{ steps.get_token.outputs.token }}
@@ -89,7 +84,7 @@ jobs:
 
     - name: set agent in project
       id: set-project-agent-field
-      if: contains(steps.is_elastic_member.outputs.result, 'true') && github.event_name == 'pull_request_target'
+      if: steps.is_elastic_member.outputs.result == 'true' && github.event_name == 'pull_request_target'
       uses: elastic/oblt-actions/github/project-field-set@v1
       with:
         github-token: ${{ steps.get_token.outputs.token }}
@@ -100,7 +95,7 @@ jobs:
 
     - name: set iteration in project
       id: set-project-iteration-field
-      if: contains(steps.is_elastic_member.outputs.result, 'true') && github.event_name == 'pull_request_target'
+      if: steps.is_elastic_member.outputs.result == 'true' && github.event_name == 'pull_request_target'
       uses: elastic/oblt-actions/github/project-field-set@v1
       with:
         github-token: ${{ steps.get_token.outputs.token }}

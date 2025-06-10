@@ -1,5 +1,5 @@
+* @elastic/apm-agent-java
 /.github/actions/  @elastic/apm-agent-java @elastic/observablt-ci
 /.github/workflows/  @elastic/apm-agent-java @elastic/observablt-ci
-* @elastic/apm-agent-java
 *.md @elastic/ingest-docs 
 /docs/ @elastic/ingest-docs 

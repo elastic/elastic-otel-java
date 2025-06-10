@@ -67,7 +67,7 @@ public final class CentralConfigurationManagerImpl
 
   private void processRemoteConfig(OpampClient client, Opamp.AgentRemoteConfig remoteConfig) {
     Map<String, Opamp.AgentConfigFile> configMapMap = remoteConfig.getConfig().getConfigMapMap();
-    Opamp.AgentConfigFile centralConfig = configMapMap.get("");
+    Opamp.AgentConfigFile centralConfig = configMapMap.get("elastic");
     if (centralConfig != null) {
       Map<String, String> configuration = parseCentralConfiguration(centralConfig.getBody());
       Opamp.RemoteConfigStatuses status;
@@ -135,6 +135,7 @@ public final class CentralConfigurationManagerImpl
     private String serviceName;
     private String serviceNamespace;
     private String serviceVersion;
+    private String environment;
     private String configurationEndpoint;
     private Duration pollingInterval;
 
@@ -165,6 +166,11 @@ public final class CentralConfigurationManagerImpl
       return this;
     }
 
+    public Builder setServiceEnvironment(String environment) {
+      this.environment = environment;
+      return this;
+    }
+
     public CentralConfigurationManagerImpl build() {
       OpampClientBuilder builder = OpampClient.builder();
       OkHttpSender httpSender = OkHttpSender.create("http://localhost:4320/v1/opamp");
@@ -177,6 +183,9 @@ public final class CentralConfigurationManagerImpl
       }
       if (serviceVersion != null) {
         builder.setServiceVersion(serviceVersion);
+      }
+      if (environment != null) {
+        builder.setServiceEnvironment(environment);
       }
       if (configurationEndpoint != null) {
         httpSender = OkHttpSender.create(configurationEndpoint);

@@ -144,7 +144,7 @@ class CentralConfigurationManagerTest {
             .build();
 
     Opamp.AgentConfigMap configMap =
-        Opamp.AgentConfigMap.newBuilder().putConfigMap("", agentConfigFile).build();
+        Opamp.AgentConfigMap.newBuilder().putConfigMap("elastic", agentConfigFile).build();
 
     return MessageData.builder()
         .setRemoteConfig(Opamp.AgentRemoteConfig.newBuilder().setConfig(configMap).build())
