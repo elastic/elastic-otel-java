@@ -39,6 +39,7 @@ import co.elastic.opamp.client.response.MessageData;
 import co.elastic.opamp.client.response.Response;
 import co.elastic.opamp.client.state.State;
 import com.google.protobuf.ByteString;
+import java.time.Duration;
 import opamp.proto.Opamp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -220,7 +221,7 @@ class OpampClientImplTest {
     client.onConnectionSuccess();
 
     verify(callback).onConnect(client);
-    verify(callback, never()).onConnectFailed(any(), any());
+    verify(callback, never()).onConnectFailed(any(), any(), any());
   }
 
   @Test
@@ -232,7 +233,7 @@ class OpampClientImplTest {
 
     client.onRequestSuccess(Response.create(serverToAgent));
 
-    verify(callback).onErrorResponse(client, errorResponse);
+    verify(callback).onErrorResponse(client, errorResponse, null);
     verify(callback, never()).onMessage(any(), any());
   }
 
@@ -241,9 +242,9 @@ class OpampClientImplTest {
     client.start(callback);
     Throwable throwable = mock();
 
-    client.onConnectionFailed(throwable);
+    client.onConnectionFailed(throwable, null);
 
-    verify(callback).onConnectFailed(client, throwable);
+    verify(callback).onConnectFailed(client, throwable, null);
     verify(callback, never()).onConnect(any());
   }
 
@@ -292,7 +293,7 @@ class OpampClientImplTest {
     client.start(callback);
     assertThat(state.sequenceNumberState.get()).isEqualTo(1);
 
-    client.onRequestFailed(new Exception());
+    client.onRequestFailed(new Exception(), null);
 
     assertThat(state.sequenceNumberState.get()).isEqualTo(1);
   }
@@ -358,10 +359,11 @@ class OpampClientImplTest {
     public void onConnect(OpampClient client) {}
 
     @Override
-    public void onConnectFailed(OpampClient client, Throwable throwable) {}
+    public void onConnectFailed(OpampClient client, Throwable throwable, Duration nextTry) {}
 
     @Override
-    public void onErrorResponse(OpampClient client, Opamp.ServerErrorResponse errorResponse) {}
+    public void onErrorResponse(
+        OpampClient client, Opamp.ServerErrorResponse errorResponse, Duration nextTry) {}
 
     @Override
     public void onMessage(OpampClient client, MessageData messageData) {}

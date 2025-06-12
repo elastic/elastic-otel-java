@@ -19,6 +19,7 @@
 package co.elastic.opamp.client;
 
 import co.elastic.opamp.client.response.MessageData;
+import java.time.Duration;
 import opamp.proto.Opamp;
 
 public interface OpampClient {
@@ -31,7 +32,7 @@ public interface OpampClient {
    * Starts the client and begin attempts to connect to the Server. Once connection is established
    * the client will attempt to maintain it by reconnecting if the connection is lost. All failed
    * connection attempts will be reported via {@link Callback#onConnectFailed(OpampClient,
-   * Throwable)} callback.
+   * Throwable, Duration)} callback.
    *
    * <p>This method does not wait until the connection to the Server is established and will likely
    * return before the connection attempts are even made.
@@ -78,7 +79,7 @@ public interface OpampClient {
      * @param client The relevant {@link co.elastic.opamp.client.OpampClient} instance.
      * @param throwable The exception.
      */
-    void onConnectFailed(OpampClient client, Throwable throwable);
+    void onConnectFailed(OpampClient client, Throwable throwable, Duration nextTry);
 
     /**
      * Called when the Server reports an error in response to some previously sent request. Useful
@@ -89,7 +90,8 @@ public interface OpampClient {
      * @param client The relevant {@link co.elastic.opamp.client.OpampClient} instance.
      * @param errorResponse The error returned by the Server.
      */
-    void onErrorResponse(OpampClient client, Opamp.ServerErrorResponse errorResponse);
+    void onErrorResponse(
+        OpampClient client, Opamp.ServerErrorResponse errorResponse, Duration nextTry);
 
     /**
      * Called when the Agent receives a message that needs processing. See {@link
