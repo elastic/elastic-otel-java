@@ -21,6 +21,7 @@ package co.elastic.opamp.client.request.service;
 import co.elastic.opamp.client.OpampClient;
 import co.elastic.opamp.client.request.Request;
 import co.elastic.opamp.client.response.Response;
+import java.time.Duration;
 import java.util.function.Supplier;
 
 /**
@@ -66,7 +67,7 @@ public interface RequestService {
      *
      * @param throwable The detailed error.
      */
-    void onConnectionFailed(Throwable throwable);
+    void onConnectionFailed(Throwable throwable, Duration nextTry);
 
     /**
      * For WebSocket implementations, this is called every time there's a new message from the
@@ -83,6 +84,6 @@ public interface RequestService {
      *
      * @param throwable The detailed error.
      */
-    void onRequestFailed(Throwable throwable);
+    void onRequestFailed(Throwable throwable, Duration nextTry);
   }
 }

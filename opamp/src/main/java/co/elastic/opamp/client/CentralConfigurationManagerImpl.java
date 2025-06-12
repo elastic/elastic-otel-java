@@ -122,13 +122,28 @@ public final class CentralConfigurationManagerImpl
   }
 
   @Override
-  public void onConnectFailed(OpampClient client, Throwable throwable) {
-    logger.log(Level.INFO, "onConnect({0}, {1})", new Object[] {client, throwable});
+  public void onConnectFailed(OpampClient client, Throwable throwable, Duration nextTry) {
+    if (nextTry == null) {
+      logger.log(Level.INFO, "onConnect({0}, {1})", new Object[] {client, throwable});
+    } else {
+      logger.log(
+          Level.INFO,
+          "onConnect({0}, {1}, next attempt to connect in {2})",
+          new Object[] {client, throwable, nextTry});
+    }
   }
 
   @Override
-  public void onErrorResponse(OpampClient client, Opamp.ServerErrorResponse errorResponse) {
-    logger.log(Level.INFO, "onErrorResponse({0}, {1})", new Object[] {client, errorResponse});
+  public void onErrorResponse(
+      OpampClient client, Opamp.ServerErrorResponse errorResponse, Duration nextTry) {
+    if (nextTry == null) {
+      logger.log(Level.INFO, "onErrorResponse({0}, {1})", new Object[] {client, errorResponse});
+    } else {
+      logger.log(
+          Level.INFO,
+          "onErrorResponse({0}, {1}, next attempt to send in {2})",
+          new Object[] {client, errorResponse, nextTry});
+    }
   }
 
   public static class Builder {
@@ -175,6 +190,7 @@ public final class CentralConfigurationManagerImpl
       OpampClientBuilder builder = OpampClient.builder();
       OkHttpSender httpSender = OkHttpSender.create("http://localhost:4320/v1/opamp");
       PeriodicDelay pollingDelay = HttpRequestService.DEFAULT_DELAY_BETWEEN_REQUESTS;
+      PeriodicDelay retryDelay = PeriodicDelay.ofVariableDuration(pollingDelay.getNextDelay());
       if (serviceName != null) {
         builder.setServiceName(serviceName);
       }
@@ -192,8 +208,9 @@ public final class CentralConfigurationManagerImpl
       }
       if (pollingInterval != null) {
         pollingDelay = PeriodicDelay.ofFixedDuration(pollingInterval);
+        retryDelay = PeriodicDelay.ofVariableDuration(pollingInterval);
       }
-      builder.setRequestService(HttpRequestService.create(httpSender, pollingDelay, pollingDelay));
+      builder.setRequestService(HttpRequestService.create(httpSender, pollingDelay, retryDelay));
       return new CentralConfigurationManagerImpl(builder.build());
     }
   }

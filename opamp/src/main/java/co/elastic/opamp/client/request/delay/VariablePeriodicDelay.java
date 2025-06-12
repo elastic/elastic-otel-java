@@ -20,16 +20,23 @@ package co.elastic.opamp.client.request.delay;
 
 import java.time.Duration;
 
-public interface PeriodicDelay {
-  static PeriodicDelay ofFixedDuration(Duration duration) {
-    return new FixedPeriodicDelay(duration);
+final class VariablePeriodicDelay implements PeriodicDelay, AcceptsDelaySuggestion {
+  private volatile Duration duration;
+
+  public VariablePeriodicDelay(Duration duration) {
+    this.duration = duration;
   }
 
-  static PeriodicDelay ofVariableDuration(Duration duration) {
-    return new VariablePeriodicDelay(duration);
+  @Override
+  public Duration getNextDelay() {
+    return duration;
   }
 
-  Duration getNextDelay();
+  @Override
+  public void reset() {}
 
-  void reset();
+  @Override
+  public void suggestDelay(Duration delay) {
+    duration = delay;
+  }
 }

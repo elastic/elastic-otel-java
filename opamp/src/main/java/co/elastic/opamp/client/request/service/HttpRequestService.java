@@ -45,6 +45,7 @@ public final class HttpRequestService implements RequestService, Runnable {
   private Supplier<Request> requestSupplier;
   private boolean isRunning = false;
   private boolean isStopped = false;
+  private int exponentialBackoffSkips;
   public static final PeriodicDelay DEFAULT_DELAY_BETWEEN_REQUESTS =
       PeriodicDelay.ofFixedDuration(Duration.ofSeconds(30));
 
@@ -114,12 +115,23 @@ public final class HttpRequestService implements RequestService, Runnable {
     }
   }
 
-  private void enableRetryMode(Duration suggestedDelay) {
-    if (retryModeEnabled.compareAndSet(false, true)) {
+  private void setRetryMode(Duration suggestedDelay) {
+    retryModeEnabled.set(true);
+    setRetryModeIfEnabled(suggestedDelay);
+  }
+
+  private void setRetryModeIfEnabled(Duration suggestedDelay) {
+    if (retryModeEnabled.get()) {
       if (suggestedDelay != null && periodicRetryDelay instanceof AcceptsDelaySuggestion) {
         ((AcceptsDelaySuggestion) periodicRetryDelay).suggestDelay(suggestedDelay);
       }
       executor.setPeriodicDelay(periodicRetryDelay);
+    }
+  }
+
+  private void enableRetryMode(Duration suggestedDelay) {
+    if (retryModeEnabled.compareAndSet(false, true)) {
+      setRetryModeIfEnabled(suggestedDelay);
     }
   }
 
@@ -152,25 +164,27 @@ public final class HttpRequestService implements RequestService, Runnable {
                   agentToServer.getSerializedSize())
               .get()) {
         if (isSuccessful(response)) {
+          resetExponentialBackoffSkips();
           handleResponse(
               Response.create(Opamp.ServerToAgent.parseFrom(response.bodyInputStream())));
         } else {
           handleHttpError(response);
         }
-      } catch (IOException e) {
-        callback.onRequestFailed(e);
       }
-
-    } catch (InterruptedException e) {
-      callback.onRequestFailed(e);
+    } catch (IOException | InterruptedException e) {
+      incrementExponentialBackoff();
+      callback.onConnectionFailed(e, periodicRetryDelay.getNextDelay());
     } catch (ExecutionException e) {
-      callback.onRequestFailed(e.getCause());
+      incrementExponentialBackoff();
+      callback.onConnectionFailed(e.getCause(), periodicRetryDelay.getNextDelay());
     }
   }
 
   private void handleHttpError(HttpSender.Response response) {
     int errorCode = response.statusCode();
-    callback.onRequestFailed(new HttpErrorException(errorCode, response.statusMessage()));
+    callback.onRequestFailed(
+        new HttpErrorException(errorCode, response.statusMessage()),
+        periodicRetryDelay.getNextDelay());
 
     if (errorCode == 503 || errorCode == 429) {
       String retryAfterHeader = response.getHeader("Retry-After");
@@ -208,7 +222,28 @@ public final class HttpRequestService implements RequestService, Runnable {
         retryAfter = Duration.ofNanos(errorResponse.getRetryInfo().getRetryAfterNanoseconds());
       }
       enableRetryMode(retryAfter);
+    } else {
+      incrementExponentialBackoff();
+      Duration retryAfter = Duration.ofSeconds(30 * exponentialBackoffSkips);
+      enableRetryMode(retryAfter);
     }
+  }
+
+  private void incrementExponentialBackoff() {
+    if (exponentialBackoffSkips == 0) {
+      exponentialBackoffSkips = 1;
+    } else {
+      exponentialBackoffSkips *= 2;
+    }
+    if (exponentialBackoffSkips >= 32) {
+      exponentialBackoffSkips = 32;
+    }
+    setRetryMode(Duration.ofSeconds(30 * exponentialBackoffSkips));
+  }
+
+  private void resetExponentialBackoffSkips() {
+    exponentialBackoffSkips = 0;
+    disableRetryMode();
   }
 
   private static class ByteArrayWriter implements Consumer<OutputStream> {

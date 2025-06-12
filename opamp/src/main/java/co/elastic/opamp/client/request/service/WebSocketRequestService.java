@@ -97,7 +97,7 @@ public final class WebSocketRequestService implements RequestService, WebSocketL
       codedOutput.flush();
       webSocket.send(outputStream.toByteArray());
     } catch (IOException e) {
-      callback.onRequestFailed(e);
+      callback.onRequestFailed(e, null);
     }
   }
 
@@ -128,7 +128,7 @@ public final class WebSocketRequestService implements RequestService, WebSocketL
 
       callback.onRequestSuccess(Response.create(serverToAgent));
     } catch (IOException e) {
-      callback.onRequestFailed(e);
+      callback.onRequestFailed(e, null);
     }
   }
 
@@ -185,7 +185,7 @@ public final class WebSocketRequestService implements RequestService, WebSocketL
 
   @Override
   public void onFailure(WebSocket webSocket, Throwable t) {
-    callback.onConnectionFailed(t);
+    callback.onConnectionFailed(t, null);
     enableRetryMode(null);
   }
 

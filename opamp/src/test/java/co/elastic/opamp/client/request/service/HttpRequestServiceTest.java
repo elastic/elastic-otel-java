@@ -141,7 +141,7 @@ class HttpRequestServiceTest {
     httpRequestService.run();
 
     verify(requestSender).send(any(), eq(REQUEST_SIZE));
-    verify(callback).onRequestFailed(any());
+    verify(callback).onConnectionFailed(any(), any());
   }
 
   @Test
@@ -156,7 +156,7 @@ class HttpRequestServiceTest {
     httpRequestService.run();
 
     verify(requestSender).send(any(), eq(REQUEST_SIZE));
-    verify(callback).onRequestFailed(myException);
+    verify(callback).onConnectionFailed(eq(myException), any());
   }
 
   @Test
@@ -171,7 +171,7 @@ class HttpRequestServiceTest {
     httpRequestService.run();
 
     verify(requestSender).send(any(), eq(REQUEST_SIZE));
-    verify(callback).onRequestFailed(myException);
+    verify(callback).onConnectionFailed(eq(myException), any());
   }
 
   @Test
@@ -184,7 +184,7 @@ class HttpRequestServiceTest {
 
     httpRequestService.run();
 
-    verify(callback).onRequestFailed(new HttpErrorException(500, "Error message"));
+    verify(callback).onRequestFailed(eq(new HttpErrorException(500, "Error message")), any());
     verifyNoInteractions(executor);
   }
 
@@ -198,7 +198,7 @@ class HttpRequestServiceTest {
 
     httpRequestService.run();
 
-    verify(callback).onRequestFailed(new HttpErrorException(429, "Error message"));
+    verify(callback).onRequestFailed(eq(new HttpErrorException(429, "Error message")), any());
     verify(executor).setPeriodicDelay(periodicRetryDelay);
   }
 
@@ -257,7 +257,7 @@ class HttpRequestServiceTest {
 
     httpRequestService.run();
 
-    verify(callback).onRequestFailed(new HttpErrorException(503, "Error message"));
+    verify(callback).onRequestFailed(eq(new HttpErrorException(503, "Error message")), any());
     verify(executor).setPeriodicDelay(periodicRetryDelay);
   }
 
