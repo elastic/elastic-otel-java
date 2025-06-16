@@ -82,6 +82,7 @@ public final class CentralConfigurationManagerImpl
         status = Opamp.RemoteConfigStatuses.RemoteConfigStatuses_FAILED;
       }
 
+      //Note if FAILED is sent, the config change is effectively dropped as the server will not re-send it
       client.setRemoteConfigStatus(getRemoteConfigStatus(status, remoteConfig.getConfigHash()));
     }
   }
@@ -188,6 +189,7 @@ public final class CentralConfigurationManagerImpl
 
     public CentralConfigurationManagerImpl build() {
       OpampClientBuilder builder = OpampClient.builder();
+      builder.enableRemoteConfig();
       OkHttpSender httpSender = OkHttpSender.create("http://localhost:4320/v1/opamp");
       PeriodicDelay pollingDelay = HttpRequestService.DEFAULT_DELAY_BETWEEN_REQUESTS;
       PeriodicDelay retryDelay = PeriodicDelay.ofVariableDuration(pollingDelay.getNextDelay());
