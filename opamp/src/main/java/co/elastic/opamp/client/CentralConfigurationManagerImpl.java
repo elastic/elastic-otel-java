@@ -82,7 +82,8 @@ public final class CentralConfigurationManagerImpl
         status = Opamp.RemoteConfigStatuses.RemoteConfigStatuses_FAILED;
       }
 
-      //Note if FAILED is sent, the config change is effectively dropped as the server will not re-send it
+      // Note if FAILED is sent, the config change is effectively dropped as the server will not
+      // re-send it
       client.setRemoteConfigStatus(getRemoteConfigStatus(status, remoteConfig.getConfigHash()));
     }
   }
