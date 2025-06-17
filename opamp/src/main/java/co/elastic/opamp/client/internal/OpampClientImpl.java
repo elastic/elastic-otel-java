@@ -40,6 +40,7 @@ import co.elastic.opamp.client.response.MessageData;
 import co.elastic.opamp.client.response.Response;
 import co.elastic.opamp.client.state.observer.Observable;
 import com.google.protobuf.ByteString;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -146,8 +147,8 @@ public final class OpampClientImpl
   }
 
   @Override
-  public void onConnectionFailed(Throwable throwable) {
-    callback.onConnectFailed(this, throwable);
+  public void onConnectionFailed(Throwable throwable, Duration nextTry) {
+    callback.onConnectFailed(this, throwable, nextTry);
     preserveFailedRequestRecipe();
   }
 
@@ -160,14 +161,29 @@ public final class OpampClientImpl
   }
 
   @Override
-  public void onRequestFailed(Throwable throwable) {
+  public void onRequestFailed(Throwable throwable, Duration nextTry) {
+    final Opamp.ServerErrorResponse error;
+    if (throwable == null) {
+      error =
+          Opamp.ServerErrorResponse.newBuilder()
+              .setErrorMessageBytes(ByteString.copyFromUtf8("null"))
+              .build();
+    } else {
+      error =
+          Opamp.ServerErrorResponse.newBuilder()
+              .setErrorMessageBytes(
+                  ByteString.copyFromUtf8(
+                      throwable.getClass().getName() + ": " + throwable.getMessage()))
+              .build();
+    }
+    callback.onErrorResponse(this, error, nextTry);
     preserveFailedRequestRecipe();
   }
 
   private void handleResponsePayload(Opamp.ServerToAgent response) {
     if (response.hasErrorResponse()) {
       Opamp.ServerErrorResponse errorResponse = response.getErrorResponse();
-      callback.onErrorResponse(this, errorResponse);
+      callback.onErrorResponse(this, errorResponse, null);
     }
     long reportFullState = Opamp.ServerToAgentFlags.ServerToAgentFlags_ReportFullState_VALUE;
     if ((response.getFlags() & reportFullState) == reportFullState) {
