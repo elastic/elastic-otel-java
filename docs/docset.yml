@@ -1,0 +1,10 @@
+project: 'EDOT Java release notes'
+cross_links:
+  - docs-content
+  - opentelemetry
+toc:
+  - toc: release-notes
+subs:
+  agent:   "Elastic Agent"
+  agents:   "Elastic Agents"
+  edot:    "Elastic Distribution of OpenTelemetry"
