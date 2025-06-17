@@ -41,3 +41,5 @@ Breaking changes can impact your applications, potentially disrupting normal ope
 % 
 % 4. You can then call the link from any Kibana code. For example: `href: docLinks.links.upgradeAssistant.id`
 % Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
+
+No breaking changes currently.
