@@ -12,7 +12,7 @@ dependencies {
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-bootstrap")
   compileOnly(libs.slf4j.api)
   implementation(libs.bundles.log4j2) {
-    // this is a optional, provided transitive dependency requiring Java 11
+    // this is an optional, provided transitive dependency requiring Java 11
     // for some reason gradle still tries to resolve it and then complains about it not being java 8 compatible
     exclude(group = "com.github.spotbugs", module = "spotbugs-annotations")
   }
