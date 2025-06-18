@@ -13,4 +13,4 @@ products:
 
 # Elastic Distribution of OpenTelemetry Java known issues
 
-No known issues currently.
+No known issues.
