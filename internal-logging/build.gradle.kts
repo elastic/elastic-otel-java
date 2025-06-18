@@ -11,7 +11,11 @@ dependencies {
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-bootstrap")
   compileOnly(libs.slf4j.api)
-  implementation(libs.bundles.log4j2)
+  implementation(libs.bundles.log4j2) {
+    // Workaround for https://github.com/apache/logging-log4j2/issues/3754
+    // TODO: Can be probably removed with log4j2 2.25.1+
+    exclude(group = "com.github.spotbugs", module = "spotbugs-annotations")
+  }
 
 }
 
