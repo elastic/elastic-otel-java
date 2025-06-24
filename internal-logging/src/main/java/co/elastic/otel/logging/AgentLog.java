@@ -18,6 +18,17 @@
  */
 package co.elastic.otel.logging;
 
+import static java.util.Collections.emptyList;
+
+import io.opentelemetry.exporter.logging.LoggingSpanExporter;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
+import io.opentelemetry.sdk.common.CompletableResultCode;
+import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
+import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import io.opentelemetry.sdk.trace.export.SpanExporter;
+import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilder;
@@ -26,10 +37,20 @@ import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 
 public class AgentLog {
 
+  /** Upstream instrumentation debug boolean option */
+  public static final String OTEL_JAVAAGENT_DEBUG = "otel.javaagent.debug";
+
   private static final String PATTERN = "%d{DEFAULT} [%t] %-5level %logger{36} - %msg{nolookups}%n";
 
-  // logger is an empty string
+  /** root logger is an empty string */
   private static final String ROOT_LOGGER_NAME = "";
+
+  /**
+   * debug span logging exporter that can be controlled at runtime, only used when logging span
+   * exporter has not been explicitly configured.
+   */
+  private static final DebugLogSpanExporter debugLogSpanExporter =
+      new DebugLogSpanExporter(LoggingSpanExporter.create());
 
   private AgentLog() {}
 
@@ -45,6 +66,22 @@ public class AgentLog {
     conf.add(conf.newRootLogger().add(conf.newAppenderRef("stdout")));
 
     Configurator.initialize(conf.build(false));
+  }
+
+  public static void addSpanLoggingIfRequired(
+      SdkTracerProviderBuilder providerBuilder, ConfigProperties config) {
+
+    boolean otelDebug = config.getBoolean(OTEL_JAVAAGENT_DEBUG, false);
+
+    // Replicate behavior of upstream agent: span logging exporter is automatically added
+    // when not already present when debugging.
+    // When logging exporter has been explicitly configured, spans logging will be done by the
+    // explicitly configured logging exporter instance
+    boolean loggingExporterNotAlreadyConfigured =
+        !config.getList("otel.traces.exporter", emptyList()).contains("logging");
+    if (otelDebug && loggingExporterNotAlreadyConfigured) {
+      providerBuilder.addSpanProcessor(SimpleSpanProcessor.create(debugLogSpanExporter));
+    }
   }
 
   public static void setLevel(String level) {
@@ -87,11 +124,46 @@ public class AgentLog {
 
     Configurator.setAllLevels(ROOT_LOGGER_NAME, level);
 
-    // when debugging we should avoid very chatty http client debug messages
+    boolean isDebug = level.intLevel() >= Level.DEBUG.intLevel();
+
+    // When debugging, we should avoid very chatty http client debug messages
     // this behavior is replicated from the upstream distribution.
-    if (level.intLevel() >= Level.DEBUG.intLevel()) {
+    if (isDebug) {
       Configurator.setLevel("okhttp3.internal.http2", Level.INFO);
       Configurator.setLevel("okhttp3.internal.concurrent.TaskRunner", Level.INFO);
+    }
+
+    // when debugging the upstream otel agent configures an extra debug exporter
+    debugLogSpanExporter.setEnabled(isDebug);
+  }
+
+  private static class DebugLogSpanExporter implements SpanExporter {
+
+    private final SpanExporter delegate;
+    private final AtomicBoolean enabled;
+
+    DebugLogSpanExporter(SpanExporter delegate) {
+      this.delegate = delegate;
+      this.enabled = new AtomicBoolean(false);
+    }
+
+    void setEnabled(boolean value) {
+      enabled.set(value);
+    }
+
+    @Override
+    public CompletableResultCode export(Collection<SpanData> spans) {
+      return enabled.get() ? delegate.export(spans) : CompletableResultCode.ofSuccess();
+    }
+
+    @Override
+    public CompletableResultCode flush() {
+      return enabled.get() ? delegate.flush() : CompletableResultCode.ofSuccess();
+    }
+
+    @Override
+    public CompletableResultCode shutdown() {
+      return enabled.get() ? delegate.shutdown() : CompletableResultCode.ofSuccess();
     }
   }
 }
