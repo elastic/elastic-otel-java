@@ -71,15 +71,12 @@ public class AgentLog {
   public static void addSpanLoggingIfRequired(
       SdkTracerProviderBuilder providerBuilder, ConfigProperties config) {
 
-    boolean otelDebug = config.getBoolean(OTEL_JAVAAGENT_DEBUG, false);
-
-    // Replicate behavior of upstream agent: span logging exporter is automatically added
-    // when not already present when debugging.
-    // When logging exporter has been explicitly configured, spans logging will be done by the
-    // explicitly configured logging exporter instance
+    // Replicate behavior of the upstream agent: span logging exporter is automatically added when
+    // not already present when debugging. When logging exporter has been explicitly configured,
+    // spans logging will be done by the explicitly configured logging exporter instance.
     boolean loggingExporterNotAlreadyConfigured =
         !config.getList("otel.traces.exporter", emptyList()).contains("logging");
-    if (otelDebug && loggingExporterNotAlreadyConfigured) {
+    if (loggingExporterNotAlreadyConfigured) {
       providerBuilder.addSpanProcessor(SimpleSpanProcessor.create(debugLogSpanExporter));
     }
   }
