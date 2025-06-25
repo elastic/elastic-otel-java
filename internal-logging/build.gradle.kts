@@ -12,6 +12,7 @@ dependencies {
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-bootstrap")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   compileOnly("io.opentelemetry:opentelemetry-exporter-logging")
+  compileOnly("io.opentelemetry:opentelemetry-exporter-logging-otlp")
   compileOnly(libs.slf4j.api)
   implementation(libs.bundles.log4j2) {
     // Workaround for https://github.com/apache/logging-log4j2/issues/3754

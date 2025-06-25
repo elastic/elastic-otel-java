@@ -21,6 +21,7 @@ package co.elastic.otel.logging;
 import static java.util.Collections.emptyList;
 
 import io.opentelemetry.exporter.logging.LoggingSpanExporter;
+import io.opentelemetry.exporter.logging.otlp.OtlpJsonLoggingSpanExporter;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
@@ -45,16 +46,32 @@ public class AgentLog {
   /** root logger is an empty string */
   private static final String ROOT_LOGGER_NAME = "";
 
+  private static boolean logPlainText = false;
+
   /**
    * debug span logging exporter that can be controlled at runtime, only used when logging span
    * exporter has not been explicitly configured.
    */
-  private static final DebugLogSpanExporter debugLogSpanExporter =
-      new DebugLogSpanExporter(LoggingSpanExporter.create());
+  private static DebugLogSpanExporter debugLogSpanExporter = null;
 
   private AgentLog() {}
 
-  public static void init() {
+  /**
+   * Initializes agent logging
+   *
+   * @param usePlainTextLog {@literal true} to use plain text logging, `{@literal false} to use JSON
+   * @param initialLevel initial log level to configure
+   */
+  public static void init(boolean usePlainTextLog, Level initialLevel) {
+    internalInit();
+    setLevel(initialLevel);
+    logPlainText = usePlainTextLog;
+    debugLogSpanExporter =
+        new DebugLogSpanExporter(
+            logPlainText ? LoggingSpanExporter.create() : OtlpJsonLoggingSpanExporter.create());
+  }
+
+  private static void internalInit() {
 
     ConfigurationBuilder<BuiltConfiguration> conf =
         ConfigurationBuilderFactory.newConfigurationBuilder();
@@ -74,8 +91,11 @@ public class AgentLog {
     // Replicate behavior of the upstream agent: span logging exporter is automatically added when
     // not already present when debugging. When logging exporter has been explicitly configured,
     // spans logging will be done by the explicitly configured logging exporter instance.
+
+    String exporterName = logPlainText ? "logging" : "otlp-logging";
+
     boolean loggingExporterNotAlreadyConfigured =
-        !config.getList("otel.traces.exporter", emptyList()).contains("logging");
+        !config.getList("otel.traces.exporter", emptyList()).contains(exporterName);
     if (loggingExporterNotAlreadyConfigured) {
       providerBuilder.addSpanProcessor(SimpleSpanProcessor.create(debugLogSpanExporter));
     }
@@ -114,7 +134,7 @@ public class AgentLog {
    *
    * @param level log level
    */
-  public static void setLevel(Level level) {
+  public static synchronized void setLevel(Level level) {
     // Using log4j2 implementation allows to change the log level programmatically at runtime
     // which is not directly possible through the slf4j API and simple implementation used in
     // upstream distribution.
