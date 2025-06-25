@@ -153,7 +153,7 @@ public class AgentLog {
     }
 
     // when debugging the upstream otel agent configures an extra debug exporter
-    if(debugLogSpanExporter != null) {
+    if (debugLogSpanExporter != null) {
       debugLogSpanExporter.setEnabled(isDebug);
     }
   }
