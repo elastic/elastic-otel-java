@@ -66,9 +66,6 @@ public class AgentLog {
     internalInit();
     setLevel(initialLevel);
     logPlainText = usePlainTextLog;
-    debugLogSpanExporter =
-        new DebugLogSpanExporter(
-            logPlainText ? LoggingSpanExporter.create() : OtlpJsonLoggingSpanExporter.create());
   }
 
   private static void internalInit() {
@@ -92,11 +89,16 @@ public class AgentLog {
     // not already present when debugging. When logging exporter has been explicitly configured,
     // spans logging will be done by the explicitly configured logging exporter instance.
 
+    logPlainText = config.getBoolean(OTEL_JAVAAGENT_DEBUG, false);
     String exporterName = logPlainText ? "logging" : "otlp-logging";
 
     boolean loggingExporterNotAlreadyConfigured =
         !config.getList("otel.traces.exporter", emptyList()).contains(exporterName);
     if (loggingExporterNotAlreadyConfigured) {
+      debugLogSpanExporter =
+          new DebugLogSpanExporter(
+              logPlainText ? LoggingSpanExporter.create() : OtlpJsonLoggingSpanExporter.create());
+
       providerBuilder.addSpanProcessor(SimpleSpanProcessor.create(debugLogSpanExporter));
     }
   }
@@ -151,7 +153,9 @@ public class AgentLog {
     }
 
     // when debugging the upstream otel agent configures an extra debug exporter
-    debugLogSpanExporter.setEnabled(isDebug);
+    if(debugLogSpanExporter != null) {
+      debugLogSpanExporter.setEnabled(isDebug);
+    }
   }
 
   private static class DebugLogSpanExporter implements SpanExporter {
