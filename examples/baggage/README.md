@@ -58,4 +58,3 @@ All the spans and logs captured within the scope of the baggage will have the fo
 As a result, it is now possible to use those custom attributes to filter data and create
 dedicated dashboards. The only code modification required is in the gateway code.
 
-
