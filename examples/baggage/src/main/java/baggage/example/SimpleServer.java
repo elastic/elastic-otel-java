@@ -49,7 +49,7 @@ public class SimpleServer {
       //
       // To enable this, configure the backend with the following JVM arguments:
       // -Dotel.java.experimental.span-attributes.copy-from-baggage.include=example.customer.id,example.customer.name
-      // -Dotel.java.experimental.logs-attributes.copy-from-baggage.include=example.customer.id,example.customer.name
+      // -Dotel.java.experimental.log-attributes.copy-from-baggage.include=example.customer.id,example.customer.name
 
       // This log statement in the backend should only have access to the customer ID.
       // The log even captured will include the baggage entries, which include both ID and name.
@@ -99,7 +99,7 @@ public class SimpleServer {
         //
         // To enable this, configure the gateway with the following JVM arguments:
         // -Dotel.java.experimental.span-attributes.copy-from-baggage.include=example.customer.id,example.customer.name
-        // -Dotel.java.experimental.logs-attributes.copy-from-baggage.include=example.customer.id,example.customer.name
+        // -Dotel.java.experimental.log-attributes.copy-from-baggage.include=example.customer.id,example.customer.name
         log.atInfo().setMessage("gateway request for customer ID = " + customerId).log();
 
         // call backend and forward its response
