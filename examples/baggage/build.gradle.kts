@@ -1,37 +1,37 @@
 plugins {
-    application
-    java
+  application
+  java
 
-    id("com.gradleup.shadow") version "8.3.5"
+  id("com.gradleup.shadow") version "8.3.5"
 }
 
 group = "baggage.example"
 version = "1.0-SNAPSHOT"
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 dependencies {
-    implementation(platform("org.slf4j:slf4j-bom:2.0.16"))
-    implementation("com.openai:openai-java:1.2.0")
-    implementation("org.slf4j:slf4j-simple")
+  implementation("co.elastic.otel:elastic-otel-runtime-attach:1.4.1")
+  implementation(platform("org.slf4j:slf4j-bom:2.0.16"))
+  implementation("org.slf4j:slf4j-simple")
 }
 
 application {
-    mainClass = "openai.example.Chat"
+  mainClass = "baggage.example.Main"
 }
 
 tasks {
-    compileJava {
-        options.release.set(21)
-    }
+  compileJava {
+    options.release.set(21)
+  }
 
-    shadowJar {
-        archiveFileName.set("openai-example-all.jar")
-    }
+  shadowJar {
+    archiveFileName.set("baggage-example-all.jar")
+  }
 
-    assemble {
-        dependsOn("shadowJar")
-    }
+  assemble {
+    dependsOn("shadowJar")
+  }
 }
