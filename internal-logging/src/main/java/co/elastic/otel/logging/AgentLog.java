@@ -29,6 +29,7 @@ import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -90,11 +91,11 @@ public class AgentLog {
     // spans logging will be done by the explicitly configured logging exporter instance.
 
     logPlainText = config.getBoolean(OTEL_JAVAAGENT_DEBUG, false);
-    String exporterName = logPlainText ? "logging" : "otlp-logging";
 
-    boolean loggingExporterNotAlreadyConfigured =
-        !config.getList("otel.traces.exporter", emptyList()).contains(exporterName);
-    if (loggingExporterNotAlreadyConfigured) {
+    List<String> configuredExporters = config.getList("otel.traces.exporter", emptyList());
+    boolean loggingConfigured =
+        configuredExporters.stream().anyMatch(e -> e.equals("logging") || e.equals("otlp-logging"));
+    if (!loggingConfigured) {
       debugLogSpanExporter =
           new DebugLogSpanExporter(
               logPlainText ? LoggingSpanExporter.create() : OtlpJsonLoggingSpanExporter.create());
