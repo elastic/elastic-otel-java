@@ -92,10 +92,8 @@ public class AgentLog {
 
     logPlainText = config.getBoolean(OTEL_JAVAAGENT_DEBUG, false);
 
-    List<String> configuredExporters = config.getList("otel.traces.exporter", emptyList());
-    boolean loggingConfigured =
-        configuredExporters.stream().anyMatch(e -> e.equals("logging") || e.equals("otlp-logging"));
-    if (!loggingConfigured) {
+    List<String> exporters = config.getList("otel.traces.exporter", emptyList());
+    if (!exporters.contains("logging") && !exporters.contains("otlp-logging")) {
       debugLogSpanExporter =
           new DebugLogSpanExporter(
               logPlainText ? LoggingSpanExporter.create() : OtlpJsonLoggingSpanExporter.create());
