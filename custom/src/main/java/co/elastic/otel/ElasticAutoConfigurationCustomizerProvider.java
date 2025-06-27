@@ -22,6 +22,7 @@ import co.elastic.otel.dynamicconfig.BlockableLogRecordExporter;
 import co.elastic.otel.dynamicconfig.BlockableMetricExporter;
 import co.elastic.otel.dynamicconfig.BlockableSpanExporter;
 import co.elastic.otel.dynamicconfig.CentralConfig;
+import co.elastic.otel.logging.AgentLog;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
@@ -72,6 +73,7 @@ public class ElasticAutoConfigurationCustomizerProvider
     autoConfiguration.addTracerProviderCustomizer(
         (providerBuilder, properties) -> {
           CentralConfig.init(providerBuilder, properties);
+          AgentLog.addSpanLoggingIfRequired(providerBuilder, properties);
           return providerBuilder;
         });
   }

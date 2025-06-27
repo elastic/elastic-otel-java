@@ -22,6 +22,7 @@ import com.google.auto.service.AutoService;
 import io.opentelemetry.javaagent.bootstrap.InternalLogger;
 import io.opentelemetry.javaagent.tooling.LoggingCustomizer;
 import io.opentelemetry.javaagent.tooling.config.EarlyInitAgentConfig;
+import java.util.Optional;
 import org.apache.logging.log4j.Level;
 import org.slf4j.LoggerFactory;
 
@@ -43,20 +44,19 @@ public class ElasticLoggingCustomizer implements LoggingCustomizer {
     // make the agent internal logger delegate to slf4j, which will delegate to log4j
     InternalLogger.initialize(Slf4jInternalLogger::create);
 
-    AgentLog.init();
-
-    Level level = null;
-    if (earlyConfig.getBoolean("otel.javaagent.debug", false)) {
+    boolean upstreamDebugEnabled = earlyConfig.getBoolean(AgentLog.OTEL_JAVAAGENT_DEBUG, false);
+    Level level;
+    if (upstreamDebugEnabled) {
       // set debug logging when enabled through configuration to behave like the upstream
       // distribution
       level = Level.DEBUG;
     } else {
-      String levelConfig = earlyConfig.getString("elastic.otel.javaagent.log.level");
-      if (levelConfig != null) {
-        level = Level.getLevel(levelConfig);
-      }
+      level =
+          Optional.ofNullable(earlyConfig.getString("elastic.otel.javaagent.log.level"))
+              .map(Level::getLevel)
+              .orElse(Level.INFO);
     }
-    AgentLog.setLevel(level != null ? level : Level.INFO);
+    AgentLog.init(upstreamDebugEnabled, level);
   }
 
   @Override
