@@ -52,7 +52,7 @@ backend request for customer ID = 12345
 ```
 
 All the spans and logs captured within the scope of the baggage will have the following attributes:
-- `example.customer.id` with value `my-awesome-customer-12345`
+- `example.customer.name` with value `my-awesome-customer-12345`
 - `example.customer.id` with value `12345`
 
 As a result, it is now possible to use those custom attributes to filter data and create
