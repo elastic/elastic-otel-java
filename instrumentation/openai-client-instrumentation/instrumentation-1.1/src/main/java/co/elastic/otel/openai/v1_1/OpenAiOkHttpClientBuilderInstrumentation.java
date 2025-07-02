@@ -51,7 +51,7 @@ public class OpenAiOkHttpClientBuilderInstrumentation implements TypeInstrumenta
     public static OpenAIClient onExit(
         @Advice.Return OpenAIClient result,
         @Advice.FieldValue("clientOptions") ClientOptions.Builder clientOptions) {
-      return InstrumentedOpenAiClient.wrap(result).baseUrl(clientOptions.baseUrl()).build();
+      return InstrumentedOpenAiClient.wrap(result).baseUrl(clientOptions.build().baseUrl()).build();
     }
   }
 }
