@@ -62,9 +62,26 @@ public class ElasticAutoConfigurationCustomizerProvider
 
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
-    // Order is important: configureExporterUserAgentHeaders needs access to the unwrapped exporters
-    configureExporterUserAgentHeaders(autoConfiguration);
-    configureBlockableExporters(autoConfiguration);
+    // Order is important: headers and server certificate bypass need access to the unwrapped
+    // exporters and must execute first
+    autoConfiguration.addSpanExporterCustomizer(
+        (exporter, config) -> {
+          exporter = ElasticUserAgentHeader.configureIfPossible(exporter);
+          exporter = ElasticVerifyServerCert.configureIfPossible(exporter, config);
+          return BlockableSpanExporter.createCustomInstance(exporter);
+        });
+    autoConfiguration.addMetricExporterCustomizer(
+        (exporter, config) -> {
+          exporter = ElasticUserAgentHeader.configureIfPossible(exporter);
+          exporter = ElasticVerifyServerCert.configureIfPossible(exporter, config);
+          return BlockableMetricExporter.createCustomInstance(exporter);
+        });
+    autoConfiguration.addLogRecordExporterCustomizer(
+        (exporter, config) -> {
+          exporter = ElasticUserAgentHeader.configureIfPossible(exporter);
+          exporter = ElasticVerifyServerCert.configureIfPossible(exporter, config);
+          return BlockableLogRecordExporter.createCustomInstance(exporter);
+        });
 
     autoConfiguration.addPropertiesCustomizer(
         ElasticAutoConfigurationCustomizerProvider::propertiesCustomizer);
@@ -76,29 +93,6 @@ public class ElasticAutoConfigurationCustomizerProvider
           AgentLog.addSpanLoggingIfRequired(providerBuilder, properties);
           return providerBuilder;
         });
-  }
-
-  private void configureExporterUserAgentHeaders(AutoConfigurationCustomizer autoConfiguration) {
-    autoConfiguration.addSpanExporterCustomizer(
-        (spanExporter, configProperties) ->
-            ElasticUserAgentHeader.configureIfPossible(spanExporter));
-    autoConfiguration.addMetricExporterCustomizer(
-        (metricExporter, configProperties) ->
-            ElasticUserAgentHeader.configureIfPossible(metricExporter));
-    autoConfiguration.addLogRecordExporterCustomizer(
-        (logExporter, configProperties) -> ElasticUserAgentHeader.configureIfPossible(logExporter));
-  }
-
-  private static void configureBlockableExporters(AutoConfigurationCustomizer autoConfiguration) {
-    autoConfiguration.addMetricExporterCustomizer(
-        (metricexporter, configProperties) ->
-            BlockableMetricExporter.createCustomInstance(metricexporter));
-    autoConfiguration.addSpanExporterCustomizer(
-        (spanExporter, configProperties) ->
-            BlockableSpanExporter.createCustomInstance(spanExporter));
-    autoConfiguration.addLogRecordExporterCustomizer(
-        (logExporter, configProperties) ->
-            BlockableLogRecordExporter.createCustomInstance(logExporter));
   }
 
   static Map<String, String> propertiesCustomizer(ConfigProperties configProperties) {
