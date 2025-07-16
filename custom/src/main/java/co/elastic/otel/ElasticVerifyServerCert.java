@@ -160,17 +160,21 @@ public class ElasticVerifyServerCert {
 
   // package private for testing
   @Nullable
-  static KeyStore getKeyStore(String keyStore, @Nullable String keyStorePassword,
-      @Nullable String keyStoreType, @Nullable String keyStoreProvider)
+  static KeyStore getKeyStore(
+      String keyStore,
+      @Nullable String keyStorePassword,
+      @Nullable String keyStoreType,
+      @Nullable String keyStoreProvider)
       throws IOException, GeneralSecurityException {
     String type = keyStoreType != null ? keyStoreType : KeyStore.getDefaultType();
     if (keyStore == null) {
       return null;
     }
     try (FileInputStream input = new FileInputStream(keyStore)) {
-      KeyStore ks = keyStoreProvider == null
-          ? KeyStore.getInstance(type)
-          : KeyStore.getInstance(type, keyStoreProvider);
+      KeyStore ks =
+          keyStoreProvider == null
+              ? KeyStore.getInstance(type)
+              : KeyStore.getInstance(type, keyStoreProvider);
       ks.load(input, keyStorePassword != null ? keyStorePassword.toCharArray() : null);
       return ks;
     }
