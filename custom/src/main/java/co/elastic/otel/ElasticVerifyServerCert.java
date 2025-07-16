@@ -35,6 +35,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.util.Properties;
 import javax.annotation.Nullable;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -58,7 +59,8 @@ public class ElasticVerifyServerCert {
         }
       };
 
-  private static boolean verifyServerCertificate(ConfigProperties config) {
+  // package protected for testing
+  static boolean verifyServerCertificate(ConfigProperties config) {
     return config.getBoolean("elastic.otel.verify.server.cert", true);
   }
 
@@ -117,7 +119,7 @@ public class ElasticVerifyServerCert {
 
     KeyManager[] keyManagers = null;
     try {
-      keyManagers = getKeyManagers();
+      keyManagers = getKeyManagers(System.getProperties());
     } catch (IOException | GeneralSecurityException e) {
       // silently ignored
       // trust and key stores won't be available, which means client certificate can't be used
@@ -134,33 +136,43 @@ public class ElasticVerifyServerCert {
   }
 
   @Nullable
-  public static KeyManager[] getKeyManagers() throws IOException, GeneralSecurityException {
+  static KeyManager[] getKeyManagers(Properties properties)
+      throws IOException, GeneralSecurityException {
     // re-implements parts of sun.security.ssl.SSLContextImpl.DefaultManagersHolder.getKeyManagers
     // as there is no simple way to reuse existing implementation
 
-    String keyStore = System.getProperty("javax.net.ssl.keyStore");
-    String keyStorePassword = System.getProperty("javax.net.ssl.keyStorePassword");
-    String keyStoreType = System.getProperty("javax.net.ssl.keyStoreType");
-    String keyStoreProvider = System.getProperty("javax.net.ssl.keyStoreProvider");
-
-    if (keyStore == null) {
-      return null;
-    }
-    char[] pwd = keyStorePassword != null ? keyStorePassword.toCharArray() : null;
+    String path = properties.getProperty("javax.net.ssl.keyStore");
+    String pwd = properties.getProperty("javax.net.ssl.keyStorePassword");
+    String type = properties.getProperty("javax.net.ssl.keyStoreType");
+    String provider = properties.getProperty("javax.net.ssl.keyStoreProvider");
 
     KeyStore ks = null;
-    try (FileInputStream input = new FileInputStream(keyStore)) {
-      if (keyStoreType != null) {
-        ks =
-            keyStoreProvider == null
-                ? KeyStore.getInstance(keyStoreType)
-                : KeyStore.getInstance(keyStoreType, keyStoreProvider);
-        ks.load(input, pwd);
-      }
+    try {
+      ks = getKeyStore(path, pwd, type, provider);
+    } catch (IOException | GeneralSecurityException e) {
+      // silently ignore, client certificate won't work
     }
 
     KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-    kmf.init(ks, pwd);
+    kmf.init(ks, pwd != null ? pwd.toCharArray() : null);
     return kmf.getKeyManagers();
+  }
+
+  // package private for testing
+  @Nullable
+  static KeyStore getKeyStore(String keyStore, @Nullable String keyStorePassword,
+      @Nullable String keyStoreType, @Nullable String keyStoreProvider)
+      throws IOException, GeneralSecurityException {
+    String type = keyStoreType != null ? keyStoreType : KeyStore.getDefaultType();
+    if (keyStore == null) {
+      return null;
+    }
+    try (FileInputStream input = new FileInputStream(keyStore)) {
+      KeyStore ks = keyStoreProvider == null
+          ? KeyStore.getInstance(type)
+          : KeyStore.getInstance(type, keyStoreProvider);
+      ks.load(input, keyStorePassword != null ? keyStorePassword.toCharArray() : null);
+      return ks;
+    }
   }
 }
