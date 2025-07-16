@@ -59,7 +59,7 @@ public class ElasticVerifyServerCert {
       };
 
   private static boolean verifyServerCertificate(ConfigProperties config) {
-    return config.getBoolean(" elastic.otel.verify.server.cert", true);
+    return config.getBoolean("elastic.otel.verify.server.cert", true);
   }
 
   public static SpanExporter configureIfPossible(
@@ -71,7 +71,8 @@ public class ElasticVerifyServerCert {
       return ((OtlpGrpcSpanExporter) spanExporter)
           .toBuilder().setSslContext(getSslContext(), X_509_TRUST_ALL).build();
     } else if (spanExporter instanceof OtlpHttpSpanExporter) {
-      return ((OtlpHttpSpanExporter) spanExporter).toBuilder().build();
+      return ((OtlpHttpSpanExporter) spanExporter)
+          .toBuilder().setSslContext(getSslContext(), X_509_TRUST_ALL).build();
     }
     return spanExporter;
   }
@@ -159,9 +160,7 @@ public class ElasticVerifyServerCert {
     }
 
     KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-
     kmf.init(ks, pwd);
-
     return kmf.getKeyManagers();
   }
 }
