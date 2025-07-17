@@ -164,8 +164,8 @@ jobs:
 
       - name: Copy build jars
         run: |
-          curl -L -s -o elastic-otel-agentextension.jar "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=co.elastic.otel&a=elastic-otel-agentextension&v=${{ env.RELEASE_VERSION }}"
-          curl -L -s -o elastic-otel-javaagent.jar "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=co.elastic.otel&a=elastic-otel-javaagent&v=${{ env.RELEASE_VERSION }}"
+          curl -L -s --fail-with-body -o elastic-otel-agentextension.jar "https://repo1.maven.org/maven2/co/elastic/otel/elastic-otel-agentextension/${{ env.RELEASE_VERSION }}/elastic-otel-agentextension-${{ env.RELEASE_VERSION }}.jar"
+          curl -L -s --fail-with-body -o elastic-otel-javaagent.jar "https://repo1.maven.org/maven2/co/elastic/otel/elastic-otel-javaagent/${{ env.RELEASE_VERSION }}/elastic-otel-javaagent-${{ env.RELEASE_VERSION }}.jar"
 
       - name: Build and push image
         id: push
@@ -197,6 +197,8 @@ jobs:
     steps:
       - uses: elastic/oblt-actions/maven/await-artifact@v1
         with:
+          maven-central: true
+          sonatype-central: false
           group-id: 'co.elastic.otel'
           artifact-id: 'elastic-otel-javaagent'
           version: ${{ inputs.version }}
