@@ -25,34 +25,44 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.KeyStore;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class ElasticVerifyServerCertTest {
 
-  private static final String DUMMY_KEYSTORE_PATH;
-  public static final String DUMMY_KEYSTORE_PWD = "1234";
+  private static final String DUMMY_KEYSTORE_PWD = "1234";
 
-  static {
+  private static @TempDir Path tmp;
+
+  private static Path createKeyStore(String type) {
+    Path path;
     try {
-      URL url = ElasticVerifyServerCert.class.getClassLoader().getResource("dummy.keystore");
-      assertThat(url).isNotNull();
-      Path path = Paths.get(url.toURI());
-      assertThat(path).exists();
-      DUMMY_KEYSTORE_PATH = path.toAbsolutePath().toString();
-    } catch (URISyntaxException e) {
+      path = Files.createTempFile(tmp, "dummy-keystore", "." + type);
+      KeyStore keyStore = KeyStore.getInstance(type);
+      keyStore.load(null, null);
+      try (OutputStream output =
+          Files.newOutputStream(
+              path,
+              StandardOpenOption.WRITE,
+              StandardOpenOption.TRUNCATE_EXISTING,
+              StandardOpenOption.CREATE)) {
+        keyStore.store(output, DUMMY_KEYSTORE_PWD.toCharArray());
+      }
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
+    return path.toAbsolutePath();
   }
 
   @Test
@@ -70,11 +80,13 @@ class ElasticVerifyServerCertTest {
     assertThat(verifyServerCertificate(config)).isEqualTo(verify);
   }
 
-  @Test
-  void openKnownKeystore() throws Exception {
-    KeyStore ks = getKeyStore(DUMMY_KEYSTORE_PATH, DUMMY_KEYSTORE_PWD, null, null);
+  @ParameterizedTest
+  @ValueSource(strings = {"pkcs12", "jks"})
+  void openKeystore(String type) throws Exception {
+    Path path = createKeyStore(type);
+    KeyStore ks = getKeyStore(path, DUMMY_KEYSTORE_PWD, null, null);
     assertThat(ks).isNotNull();
-    assertThat(ks.getType()).isEqualTo("pkcs12");
+    assertThat(ks.getType()).isEqualTo(KeyStore.getDefaultType());
     assertThat(ks.getProvider().getName()).isEqualTo("SUN");
   }
 
@@ -84,12 +96,14 @@ class ElasticVerifyServerCertTest {
     assertThat(getKeyManagers(config)).isNotNull();
   }
 
-  @Test
-  void keyManagers_knownKeyStore() throws Exception {
+  @ParameterizedTest
+  @ValueSource(strings = {"pkcs12", "jks"})
+  void keyManagers_keyStore(String type) throws Exception {
+    Path path = createKeyStore(type);
     Properties config = new Properties();
-    config.put("javax.net.ssl.keyStore", DUMMY_KEYSTORE_PATH);
+    config.put("javax.net.ssl.keyStore", path.toString());
     config.put("javax.net.ssl.keyStorePassword", DUMMY_KEYSTORE_PWD);
-    config.put("javax.net.ssl.keyStoreType", "pkcs12");
+    config.put("javax.net.ssl.keyStoreType", KeyStore.getDefaultType());
     config.put("javax.net.ssl.keyStoreProvider", "SUN");
     assertThat(getKeyManagers(config)).isNotNull();
   }

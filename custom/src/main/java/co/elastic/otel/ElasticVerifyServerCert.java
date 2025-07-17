@@ -28,8 +28,11 @@ import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -148,7 +151,9 @@ public class ElasticVerifyServerCert {
 
     KeyStore ks = null;
     try {
-      ks = getKeyStore(path, pwd, type, provider);
+      if (path != null) {
+        ks = getKeyStore(Paths.get(path), pwd, type, provider);
+      }
     } catch (IOException | GeneralSecurityException e) {
       // silently ignore, client certificate won't work
     }
@@ -161,7 +166,7 @@ public class ElasticVerifyServerCert {
   // package private for testing
   @Nullable
   static KeyStore getKeyStore(
-      String keyStore,
+      Path keyStore,
       @Nullable String keyStorePassword,
       @Nullable String keyStoreType,
       @Nullable String keyStoreProvider)
@@ -170,7 +175,7 @@ public class ElasticVerifyServerCert {
     if (keyStore == null) {
       return null;
     }
-    try (FileInputStream input = new FileInputStream(keyStore)) {
+    try (InputStream input = Files.newInputStream(keyStore)) {
       KeyStore ks =
           keyStoreProvider == null
               ? KeyStore.getInstance(type)
