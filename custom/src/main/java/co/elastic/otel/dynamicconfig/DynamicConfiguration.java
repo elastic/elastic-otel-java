@@ -254,5 +254,10 @@ public class DynamicConfiguration {
     public void put(InstrumentationScopeInfo scope, TracerConfig tracerConfig) {
       map.put(scope.getName(), tracerConfig);
     }
+
+    @Override
+    public String toString() {
+      return "UpdatableConfigurator{" + "map=" + map + '}';
+    }
   }
 }
