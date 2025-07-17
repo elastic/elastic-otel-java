@@ -69,4 +69,14 @@ public class BlockableSpanExporter implements SpanExporter {
   public CompletableResultCode shutdown() {
     return delegate.shutdown();
   }
+
+  @Override
+  public String toString() {
+    return "BlockableSpanExporter{"
+        + "sendingSpans="
+        + sendingSpans
+        + ", delegate="
+        + delegate
+        + '}';
+  }
 }

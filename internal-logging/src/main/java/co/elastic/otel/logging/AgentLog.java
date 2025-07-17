@@ -185,5 +185,10 @@ public class AgentLog {
     public CompletableResultCode shutdown() {
       return enabled.get() ? delegate.shutdown() : CompletableResultCode.ofSuccess();
     }
+
+    @Override
+    public String toString() {
+      return "DebugLogSpanExporter{" + "enabled=" + enabled + ", delegate=" + delegate + '}';
+    }
   }
 }

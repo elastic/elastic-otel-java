@@ -74,4 +74,14 @@ public class BlockableLogRecordExporter implements LogRecordExporter {
   public void close() {
     delegate.close();
   }
+
+  @Override
+  public String toString() {
+    return "BlockableLogRecordExporter{"
+        + "sendingLogs="
+        + sendingLogs
+        + ", delegate="
+        + delegate
+        + '}';
+  }
 }
