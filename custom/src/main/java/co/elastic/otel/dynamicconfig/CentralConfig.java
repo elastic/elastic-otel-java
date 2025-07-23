@@ -70,6 +70,7 @@ public class CentralConfig {
         configuration -> {
           logger.fine("Received configuration: " + configuration);
           Configs.applyConfigurations(configuration);
+          ConfigLogger.logConfig();
           return CentralConfigurationProcessor.Result.SUCCESS;
         });
 
