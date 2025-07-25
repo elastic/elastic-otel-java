@@ -1,4 +1,5 @@
 name: Upgrade the upstream agent version and related transitive dependencies
+pipelineid: 'upgrade-upstream-agent-version'
 # This task
 # - checks if the current otel-agent version referenced by the distro is the latest release
 # - if not, it will update the agent version AND the semconv and contrib versions to match the upstream
@@ -14,6 +15,7 @@ scms:
       username: '{{ requiredEnv "GITHUB_ACTOR" }}'
       branch: main
       commitusingapi: true
+      force: false
 
 sources:
 
