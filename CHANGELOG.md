@@ -1,5 +1,6 @@
 # 1.5.0 - 28/07/2025
 * Add support of `elastic.otel.verify.server.cert` config option to disable server certificate validation - #726
+* tech preview release of central configuration support for dynamically changing instrumentation and sending, using OpAMP protocol
 
 This release is based on the following upstream versions:
 
