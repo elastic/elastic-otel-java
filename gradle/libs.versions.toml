@@ -63,7 +63,7 @@ hdrhistogram = "org.hdrhistogram:HdrHistogram:2.2.2"
 lmax-disruptor = "com.lmax:disruptor:3.4.4"
 jctools = "org.jctools:jctools-core:4.0.5"
 github-api = "org.kohsuke:github-api:1.327"
-apachecommons-compress = "org.apache.commons:commons-compress:1.27.1"
+apachecommons-compress = "org.apache.commons:commons-compress:1.28.0"
 
 freemarker = "org.freemarker:freemarker:2.3.34"
 
