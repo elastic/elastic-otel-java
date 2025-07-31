@@ -27,6 +27,20 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [edot-java-X.X.X-fixes]
 % *
 
+# 1.5.0 [edot-java-1.5.0-release-notes]
+
+### Features and enhancements [edot-java-1.5.0-features-enhancements]
+
+* Add support of `elastic.otel.verify.server.cert` config option to disable server certificate validation - #726
+* tech preview release of central configuration support for dynamically changing instrumentation and sending, using OpAMP protocol
+
+This release is based on the following upstream versions:
+
+* opentelemetry-javaagent: [2.17.1](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.17.1)
+* opentelemetry-sdk: [1.51.0](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.51.0)
+* opentelemetry-semconv: [1.34.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.34.0)
+* opentelemetry-java-contrib: [1.46.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.46.0)
+
 ## 1.4.1 [edot-java-1.4.1-release-notes]
 
 ### Fixes [edot-java-1.4.1-fixes]
