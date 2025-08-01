@@ -82,7 +82,7 @@ log4j2-slf4j = { group= "org.apache.logging.log4j", name="log4j-slf4j2-impl", ve
 log4j2-core = { group= "org.apache.logging.log4j", name="log4j-core", version.ref="log4j2"}
 
 # Instrumented libraries
-openaiClient = "com.openai:openai-java:2.17.0"
+openaiClient = "com.openai:openai-java:2.20.1"
 
 [bundles]
 
