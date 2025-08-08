@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.config;
+package co.elastic.otel.dynamicconfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
