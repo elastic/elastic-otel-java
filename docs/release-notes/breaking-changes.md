@@ -29,7 +29,7 @@ Breaking changes can impact your applications, potentially disrupting normal ope
 % TEMPLATE END
 
 ::::{dropdown} OpenAI instrumentation switched from openai-client to openai
-In OpenTelemetry Java agent version 2.18.0, an `openai` instrumentation module was added. This conflicted with the `openai-client` instrumentation module that was implemented in the EDOT agent. Since the `openai` module is on by default, we switched off the `openai-client` instrumentation module (previously on by default). The functionality is broadly the same
+In OpenTelemetry Java agent version 2.18.0, an `openai` instrumentation module was added. This conflicted with the `openai-client` instrumentation module that was implemented in the EDOT agent. Since the `openai` module is on by default, we switched off the `openai-client` instrumentation module (previously on by default). The functionality is broadly the same.
 **Impact**<br> Small changes in span names and attributes expected. If the elastic specific `ELASTIC_OTEL_JAVA_INSTRUMENTATION_GENAI_EMIT_EVENTS` was previously set to true, this would no longer produce events
 **Action**<br> the equivalent of `ELASTIC_OTEL_JAVA_INSTRUMENTATION_GENAI_EMIT_EVENTS` is simply `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT`. If you want to revert entirely to the previous setup, you can disable the upstream implementation and enable the EDOT one, eg `OTEL_INSTRUMENTATION_OPENAI=false` and `OTEL_INSTRUMENTATION_OPENAI_CLIENT=true`
 View [PR #763](https://github.com/elastic/elastic-otel-java/pull/763).
