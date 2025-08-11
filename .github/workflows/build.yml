@@ -87,7 +87,7 @@ jobs:
     steps:
       # We use the cached working directory so that we don't have to recompile everything
       - name: Download cached build working directory
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: working-dir-build-cache
           path: ./
