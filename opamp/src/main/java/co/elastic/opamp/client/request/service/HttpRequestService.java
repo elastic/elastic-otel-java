@@ -135,6 +135,12 @@ public final class HttpRequestService implements RequestService, Runnable {
     }
   }
 
+  public void resetPeriodicDelay(Duration suggestedDelay) {
+    ((AcceptsDelaySuggestion) periodicRequestDelay).suggestDelay(suggestedDelay);
+    ((AcceptsDelaySuggestion) periodicRetryDelay).suggestDelay(suggestedDelay);
+    executor.setPeriodicDelay(periodicRequestDelay);
+  }
+
   private void disableRetryMode() {
     if (retryModeEnabled.compareAndSet(true, false)) {
       executor.setPeriodicDelay(periodicRequestDelay);

@@ -35,6 +35,7 @@ import co.elastic.opamp.client.internal.request.fields.recipe.RecipeManager;
 import co.elastic.opamp.client.internal.request.fields.recipe.RequestRecipe;
 import co.elastic.opamp.client.internal.state.OpampClientState;
 import co.elastic.opamp.client.request.Request;
+import co.elastic.opamp.client.request.service.HttpRequestService;
 import co.elastic.opamp.client.request.service.RequestService;
 import co.elastic.opamp.client.response.MessageData;
 import co.elastic.opamp.client.response.Response;
@@ -139,6 +140,13 @@ public final class OpampClientImpl
   @Override
   public void setRemoteConfigStatus(Opamp.RemoteConfigStatus remoteConfigStatus) {
     state.remoteConfigStatusState.set(remoteConfigStatus);
+  }
+
+  @Override
+  public void resetPeriodicDelay(Duration duration) {
+    if (requestService instanceof HttpRequestService) {
+      ((HttpRequestService) requestService).resetPeriodicDelay(duration);
+    }
   }
 
   @Override
