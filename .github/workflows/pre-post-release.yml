@@ -107,7 +107,7 @@ jobs:
         if: inputs.phase == 'post'
         run: |
           echo "# ${VERSION} - $(date +'%d/%m/%Y')" > tmpchangelog
-          echo "$$CHANGELOG}" >> tmpchangelog
+          echo "${CHANGELOG}" >> tmpchangelog
           cat CHANGELOG.md >> tmpchangelog
           mv tmpchangelog CHANGELOG.md
         env:
