@@ -56,7 +56,7 @@ tasks.test {
 
   // depends on the packaged test app war file
   dependsOn(":smoke-tests:test-app-war:assemble")
-  def warFile = project.configurations.warOnly.files.stream().findFirst().get()
+  def warFile = project.configurations.warOnly.files.stream().filter { it.name.endsWith(".war")}.findFirst().get()
   inputs.files(layout.files(warFile))
 
   doFirst {
