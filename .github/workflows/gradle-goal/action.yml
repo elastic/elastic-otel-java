@@ -29,7 +29,7 @@ runs:
         java-version-file: ${{ inputs.java-version-file }}
         distribution: ${{ inputs.distribution }}
         cache: 'gradle'
-    - run: "$COMMAND"
+    - run: "${COMMAND}"
       shell: ${{ inputs.shell }}
       env:
-        COMMAD: ${{ inputs.command }}
+        COMMAND: ${{ inputs.command }}
