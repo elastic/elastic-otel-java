@@ -32,6 +32,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import opamp.proto.Opamp;
 
 public final class HttpRequestService implements RequestService, Runnable {
@@ -48,6 +50,7 @@ public final class HttpRequestService implements RequestService, Runnable {
   private int exponentialBackoffSkips;
   public static final PeriodicDelay DEFAULT_DELAY_BETWEEN_REQUESTS =
       PeriodicDelay.ofFixedDuration(Duration.ofSeconds(30));
+  private static final Logger logger = Logger.getLogger(HttpRequestService.class.getName());
 
   /**
    * Creates an {@link HttpRequestService}.
@@ -135,6 +138,12 @@ public final class HttpRequestService implements RequestService, Runnable {
     }
   }
 
+  public void resetPeriodicDelay(Duration suggestedDelay) {
+    ((AcceptsDelaySuggestion) periodicRequestDelay).suggestDelay(suggestedDelay);
+    ((AcceptsDelaySuggestion) periodicRetryDelay).suggestDelay(suggestedDelay);
+    executor.setPeriodicDelay(periodicRequestDelay);
+  }
+
   private void disableRetryMode() {
     if (retryModeEnabled.compareAndSet(true, false)) {
       executor.setPeriodicDelay(periodicRequestDelay);
@@ -156,6 +165,9 @@ public final class HttpRequestService implements RequestService, Runnable {
   private void doSendRequest() {
     try {
       Opamp.AgentToServer agentToServer = requestSupplier.get().getAgentToServer();
+      if (logger.isLoggable(Level.FINE)) {
+        logger.fine(agentToServer.toString().replace('\n', '/'));
+      }
 
       try (HttpSender.Response response =
           requestSender

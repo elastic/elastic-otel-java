@@ -59,6 +59,8 @@ public interface OpampClient {
    */
   void setRemoteConfigStatus(Opamp.RemoteConfigStatus remoteConfigStatus);
 
+  void resetPeriodicDelay(Duration duration);
+
   interface Callback {
     /**
      * Called when the connection is successfully established to the Server. May be called after
