@@ -22,6 +22,7 @@ import co.elastic.otel.openai.v1_1.wrappers.Constants;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.javaagent.extension.instrumentation.InstrumentationModule;
 import io.opentelemetry.javaagent.extension.instrumentation.TypeInstrumentation;
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import java.util.Collections;
 import java.util.List;
 
@@ -40,5 +41,14 @@ public class OpenAiClientInstrumentationModule extends InstrumentationModule {
   @Override
   public boolean isHelperClass(String className) {
     return className.startsWith("co.elastic.otel.openai");
+  }
+
+  @Override
+  public boolean defaultEnabled(ConfigProperties config) {
+    // the upstream implementation - openai or openai-java - is used in preference to this
+    // you could disable that and enable this with
+    // OTEL_INSTRUMENTATION_OPENAI=false
+    // OTEL_INSTRUMENTATION_OPENAI_CLIENT=true
+    return false;
   }
 }
