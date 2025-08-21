@@ -19,12 +19,14 @@
 package co.elastic.otel.dynamicconfig;
 
 import co.elastic.opamp.client.CentralConfigurationManager;
+import co.elastic.opamp.client.CentralConfigurationManagerImpl;
 import co.elastic.opamp.client.CentralConfigurationProcessor;
 import co.elastic.otel.logging.AgentLog;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
 import java.text.MessageFormat;
 import java.time.Duration;
+import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -69,7 +71,7 @@ public class CentralConfig {
     centralConfigurationManager.start(
         configuration -> {
           logger.fine("Received configuration: " + configuration);
-          Configs.applyConfigurations(configuration);
+          Configs.applyConfigurations(configuration, centralConfigurationManager);
           return CentralConfigurationProcessor.Result.SUCCESS;
         });
 
@@ -121,17 +123,20 @@ public class CentralConfig {
                   new SendTraces(),
                   new DeactivateAllInstrumentations(),
                   new DeactivateInstrumentations(),
-                  new LoggingLevel())
+                  new LoggingLevel(),
+                  new PollingInterval())
               .collect(Collectors.toMap(ConfigOption::getConfigName, option -> option));
     }
 
-    public static synchronized void applyConfigurations(Map<String, String> configuration) {
+    public static synchronized void applyConfigurations(
+        Map<String, String> configuration,
+        CentralConfigurationManager centralConfigurationManager) {
       Set<String> copyOfCurrentNonDefaultConfigsApplied =
           new HashSet<>(currentNonDefaultConfigsApplied);
       configuration.forEach(
           (configurationName, configurationValue) -> {
             copyOfCurrentNonDefaultConfigsApplied.remove(configurationName);
-            applyConfiguration(configurationName, configurationValue);
+            applyConfiguration(configurationName, configurationValue, centralConfigurationManager);
             currentNonDefaultConfigsApplied.add(configurationName);
           });
       if (!copyOfCurrentNonDefaultConfigsApplied.isEmpty()) {
@@ -139,19 +144,25 @@ public class CentralConfig {
         // have been removed from the configs being sent - so for all of these we need to set the
         // config back to default
         for (String configurationName : copyOfCurrentNonDefaultConfigsApplied) {
-          applyDefaultConfiguration(configurationName);
+          applyDefaultConfiguration(configurationName, centralConfigurationManager);
           currentNonDefaultConfigsApplied.remove(configurationName);
         }
       }
     }
 
-    public static void applyDefaultConfiguration(String configurationName) {
-      configNameToConfig.get(configurationName).updateToDefault();
+    public static void applyDefaultConfiguration(
+        String configurationName, CentralConfigurationManager centralConfigurationManager) {
+      configNameToConfig.get(configurationName).updateToDefault(centralConfigurationManager);
     }
 
-    public static void applyConfiguration(String configurationName, String configurationValue) {
+    public static void applyConfiguration(
+        String configurationName,
+        String configurationValue,
+        CentralConfigurationManager centralConfigurationManager) {
       if (configNameToConfig.containsKey(configurationName)) {
-        configNameToConfig.get(configurationName).updateOrLog(configurationValue);
+        configNameToConfig
+            .get(configurationName)
+            .updateOrLog(configurationValue, centralConfigurationManager);
       } else {
         logger.warning(
             "Ignoring unknown confguration option: '"
@@ -193,18 +204,21 @@ public class CentralConfig {
       }
     }
 
-    public void updateOrLog(String configurationValue) {
+    public void updateOrLog(
+        String configurationValue, CentralConfigurationManager centralConfigurationManager) {
       try {
-        update(configurationValue);
+        update(configurationValue, centralConfigurationManager);
       } catch (IllegalArgumentException e) {
         logger.warning(e.getMessage());
       }
     }
 
-    abstract void update(String configurationValue) throws IllegalArgumentException;
+    abstract void update(
+        String configurationValue, CentralConfigurationManager centralConfigurationManager)
+        throws IllegalArgumentException;
 
-    public void updateToDefault() {
-      update(defaultConfigStringValue);
+    public void updateToDefault(CentralConfigurationManager centralConfigurationManager) {
+      update(defaultConfigStringValue, centralConfigurationManager);
     }
 
     protected DynamicConfiguration config() {
@@ -218,7 +232,8 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue) throws IllegalArgumentException {
+    void update(String configurationValue, CentralConfigurationManager centralConfigurationManager)
+        throws IllegalArgumentException {
       config().setSendingLogs(getBoolean(configurationValue));
     }
   }
@@ -229,7 +244,8 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue) throws IllegalArgumentException {
+    void update(String configurationValue, CentralConfigurationManager centralConfigurationManager)
+        throws IllegalArgumentException {
       config().setSendingMetrics(getBoolean(configurationValue));
     }
   }
@@ -240,7 +256,8 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue) throws IllegalArgumentException {
+    void update(String configurationValue, CentralConfigurationManager centralConfigurationManager)
+        throws IllegalArgumentException {
       config().setSendingSpans(getBoolean(configurationValue));
     }
   }
@@ -251,7 +268,8 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue) throws IllegalArgumentException {
+    void update(String configurationValue, CentralConfigurationManager centralConfigurationManager)
+        throws IllegalArgumentException {
       if (getBoolean(configurationValue)) {
         config().deactivateAllInstrumentations();
       } else {
@@ -266,7 +284,8 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue) throws IllegalArgumentException {
+    void update(String configurationValue, CentralConfigurationManager centralConfigurationManager)
+        throws IllegalArgumentException {
       config().deactivateInstrumentations(configurationValue);
     }
   }
@@ -277,8 +296,30 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue) throws IllegalArgumentException {
+    void update(String configurationValue, CentralConfigurationManager centralConfigurationManager)
+        throws IllegalArgumentException {
       AgentLog.setLevel(configurationValue);
+    }
+  }
+
+  public static final class PollingInterval extends ConfigOption {
+    PollingInterval() {
+      super("polling_interval", "30s");
+    }
+
+    @Override
+    void update(String configurationValue, CentralConfigurationManager centralConfigurationManager)
+        throws IllegalArgumentException {
+      if (centralConfigurationManager instanceof CentralConfigurationManagerImpl) {
+        try {
+          Duration duration = Duration.parse(configurationValue);
+          ((CentralConfigurationManagerImpl) centralConfigurationManager)
+              .resetPeriodicDelay(duration);
+        } catch (DateTimeParseException e) {
+          logger.warning(
+              "Failed to update the polling interval, value passed was invalid: " + e.getMessage());
+        }
+      }
     }
   }
 }

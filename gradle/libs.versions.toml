@@ -1,5 +1,5 @@
 [versions]
-shadow = "8.3.8"
+shadow = "8.3.9"
 jib = "3.4.5"
 spotless = "7.2.1"
 junit = "5.13.4"
@@ -11,11 +11,11 @@ opentelemetryProto = "1.3.2-alpha"
 
 # otel agent, we rely on the '*-alpha' and get the non-alpha dependencies transitively
 # updated from upstream agent with gradle/update-upstream.sh
-opentelemetryJavaagentAlpha = "2.19.0-alpha"
+opentelemetryJavaagentAlpha = "2.17.1-alpha"
 
 # otel contrib
 # updated from upstream agent with gradle/update-upstream.sh
-opentelemetryContribAlpha = "1.48.0-alpha"
+opentelemetryContribAlpha = "1.46.0-alpha"
 
 # otel semconv
 # updated from upstream agent with gradle/update-upstream.sh
@@ -42,7 +42,7 @@ opentelemetrySemconvIncubating = { group = "io.opentelemetry.semconv", name = "o
 autoservice-processor = { group = "com.google.auto.service", name = "auto-service", version.ref = "autoservice" }
 autoservice-annotations = { group = "com.google.auto.service", name = "auto-service-annotations", version.ref = "autoservice" }
 
-assertj-core = "org.assertj:assertj-core:3.27.3"
+assertj-core = "org.assertj:assertj-core:3.27.4"
 awaitility = "org.awaitility:awaitility:4.3.0"
 findbugs-jsr305 = "com.google.code.findbugs:jsr305:3.0.2"
 wiremockjre8 = "com.github.tomakehurst:wiremock-jre8:2.35.2"
@@ -62,8 +62,8 @@ okhttp = "com.squareup.okhttp3:okhttp:5.1.0"
 hdrhistogram = "org.hdrhistogram:HdrHistogram:2.2.2"
 lmax-disruptor = "com.lmax:disruptor:3.4.4"
 jctools = "org.jctools:jctools-core:4.0.5"
-github-api = "org.kohsuke:github-api:1.327"
-apachecommons-compress = "org.apache.commons:commons-compress:1.27.1"
+github-api = "org.kohsuke:github-api:1.329"
+apachecommons-compress = "org.apache.commons:commons-compress:1.28.0"
 
 freemarker = "org.freemarker:freemarker:2.3.34"
 
@@ -82,7 +82,7 @@ log4j2-slf4j = { group= "org.apache.logging.log4j", name="log4j-slf4j2-impl", ve
 log4j2-core = { group= "org.apache.logging.log4j", name="log4j-core", version.ref="log4j2"}
 
 # Instrumented libraries
-openaiClient = "com.openai:openai-java:2.17.0"
+openaiClient = "com.openai:openai-java:2.20.1"
 
 [bundles]
 

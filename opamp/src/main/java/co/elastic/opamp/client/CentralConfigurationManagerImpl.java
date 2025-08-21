@@ -148,6 +148,10 @@ public final class CentralConfigurationManagerImpl
     }
   }
 
+  public synchronized void resetPeriodicDelay(Duration duration) {
+    client.resetPeriodicDelay(duration);
+  }
+
   public static class Builder {
     private String serviceName;
     private String serviceNamespace;
@@ -192,7 +196,9 @@ public final class CentralConfigurationManagerImpl
       OpampClientBuilder builder = OpampClient.builder();
       builder.enableRemoteConfig();
       OkHttpSender httpSender = OkHttpSender.create("http://localhost:4320/v1/opamp");
-      PeriodicDelay pollingDelay = HttpRequestService.DEFAULT_DELAY_BETWEEN_REQUESTS;
+      PeriodicDelay pollingDelay =
+          PeriodicDelay.ofVariableDuration(
+              HttpRequestService.DEFAULT_DELAY_BETWEEN_REQUESTS.getNextDelay());
       PeriodicDelay retryDelay = PeriodicDelay.ofVariableDuration(pollingDelay.getNextDelay());
       if (serviceName != null) {
         builder.setServiceName(serviceName);
@@ -210,7 +216,7 @@ public final class CentralConfigurationManagerImpl
         httpSender = OkHttpSender.create(configurationEndpoint);
       }
       if (pollingInterval != null) {
-        pollingDelay = PeriodicDelay.ofFixedDuration(pollingInterval);
+        pollingDelay = PeriodicDelay.ofVariableDuration(pollingInterval);
         retryDelay = PeriodicDelay.ofVariableDuration(pollingInterval);
       }
       builder.setRequestService(HttpRequestService.create(httpSender, pollingDelay, retryDelay));

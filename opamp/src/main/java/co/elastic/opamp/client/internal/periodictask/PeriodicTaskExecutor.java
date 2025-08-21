@@ -32,6 +32,7 @@ public final class PeriodicTaskExecutor {
   private PeriodicDelay periodicDelay;
   private ScheduledFuture<?> scheduledFuture;
   private Runnable periodicTask;
+  private PeriodicRunner runnerInstance;
 
   public static PeriodicTaskExecutor create(PeriodicDelay initialPeriodicDelay) {
     return new PeriodicTaskExecutor(
@@ -46,6 +47,10 @@ public final class PeriodicTaskExecutor {
 
   public void start(Runnable periodicTask) {
     this.periodicTask = periodicTask;
+    if (runnerInstance != null) {
+      runnerInstance.stop = true;
+    }
+    runnerInstance = new PeriodicRunner();
     scheduleNext();
   }
 
@@ -74,19 +79,27 @@ public final class PeriodicTaskExecutor {
   private void scheduleNext() {
     delaySetLock.lock();
     try {
+      if (runnerInstance != null) {
+        runnerInstance.stop = true;
+      }
+      runnerInstance = new PeriodicRunner();
       scheduledFuture =
           executorService.schedule(
-              new PeriodicRunner(), periodicDelay.getNextDelay().toNanos(), TimeUnit.NANOSECONDS);
+              runnerInstance, periodicDelay.getNextDelay().toNanos(), TimeUnit.NANOSECONDS);
     } finally {
       delaySetLock.unlock();
     }
   }
 
   private class PeriodicRunner implements Runnable {
+    volatile boolean stop = false;
+
     @Override
     public void run() {
       periodicTask.run();
-      scheduleNext();
+      if (!stop) {
+        scheduleNext();
+      }
     }
   }
 }
