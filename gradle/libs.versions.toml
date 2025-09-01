@@ -1,5 +1,5 @@
 [versions]
-shadow = "8.3.9"
+shadow = "9.1.0"
 jib = "3.4.5"
 spotless = "7.2.1"
 junit = "5.13.4"
