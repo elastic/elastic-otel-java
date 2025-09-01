@@ -12,7 +12,7 @@ dependencies {
 
   testImplementation(catalog.openaiClient)
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-  testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.19.1")
+  testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.20.0")
   testImplementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.19.2")
   testImplementation("org.slf4j:slf4j-simple:2.0.17")
   testImplementation(catalog.wiremockjre8)
