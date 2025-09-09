@@ -8,7 +8,8 @@ val instrumentations = listOf<String>(
 
 dependencies {
   implementation(project(":common"))
-  implementation(project(":opamp"))
+  implementation(libs.opentelemetry.opamp)
+  implementation(libs.dslJson)
   implementation(project(":inferred-spans"))
   implementation(project(":universal-profiling-integration"))
   implementation(project(":resources"))
