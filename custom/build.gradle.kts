@@ -50,6 +50,7 @@ dependencies {
   testImplementation("io.opentelemetry.javaagent:opentelemetry-testing-common")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation(libs.freemarker)
+  testImplementation(libs.mockwebserver)
 }
 
 tasks {
