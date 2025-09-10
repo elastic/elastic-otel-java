@@ -53,7 +53,7 @@ public final class OpampManager implements Closeable, OpampClient.Callbacks {
   private volatile MutablePeriodicDelay pollingDelay;
   private volatile CentralConfigurationProcessor processor;
 
-  OpampManager(Configuration configuration) {
+  private OpampManager(Configuration configuration) {
     this.configuration = configuration;
   }
 
