@@ -8,7 +8,10 @@ val instrumentations = listOf<String>(
 
 dependencies {
   implementation(project(":common"))
-  implementation(libs.opentelemetry.opamp)
+  implementation(libs.opentelemetry.opamp) {
+    // exclude transitive dependency as it's provided through agent packaging
+    exclude(group = "io.opentelemetry", module = "opentelemetry-api")
+  }
   implementation(libs.dslJson)
   implementation(project(":inferred-spans"))
   implementation(project(":universal-profiling-integration"))
