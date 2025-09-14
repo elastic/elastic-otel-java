@@ -1,0 +1,200 @@
+{
+  "origin": {
+    "branch": "add-docs",
+    "remote": " git@github.com:elastic/elastic-otel-java",
+    "ref": "e37ae5d266d767c1152560d4c25d832c79806b9e",
+    "name": "elastic-otel-java"
+  },
+  "url_path_prefix": "",
+  "links": {
+    "release-notes/known-issues.md": {
+      "hidden": true
+    },
+    "release-notes/breaking-changes.md": {
+      "hidden": true
+    },
+    "release-notes/deprecations.md": {
+      "hidden": true
+    },
+    "reference/setup/k8s.md": {
+      "anchors": [
+        "extensions-consideration",
+        "instrument-a-java-app",
+        "troubleshooting"
+      ]
+    },
+    "reference/setup/runtime-attach.md": {
+      "anchors": [
+        "add-runtime-attach-to-application-dependencies",
+        "modify-the-main-method",
+        "package-and-redeploy-the-application",
+        "limitations",
+        "instrument-a-java-app",
+        "jvm-runtime-attach-warnings"
+      ]
+    },
+    "reference/configuration.md": {
+      "anchors": [
+        "minimal-configuration",
+        "configuration-options",
+        "openai-client-settings",
+        "central-configuration",
+        "turn-on-central-configuration",
+        "central-configuration-settings",
+        "configuration-methods",
+        "environment-variables",
+        "system-properties",
+        "properties-configuration-file",
+        "agent-logging",
+        "exporter-certificate-verification",
+        "prevent-logs-export"
+      ]
+    },
+    "reference/features.md": {
+      "anchors": [
+        "resource-attributes",
+        "inferred-spans",
+        "span-stacktrace",
+        "runtime-metrics",
+        "metric-temporality",
+        "central-configuration",
+        "elastic-universal-profiling-integration",
+        "baggage"
+      ]
+    },
+    "reference/supported-technologies.md": {
+      "anchors": [
+        "edot-collector-and-elastic-stack-versions",
+        "jvm-versions",
+        "jvm-languages",
+        "application-servers",
+        "libraries-and-frameworks-instrumentations",
+        "openai-client-instrumentation"
+      ]
+    },
+    "reference/migration.md": {
+      "anchors": [
+        "optional-migrate-manual-instrumentation-api",
+        "replace-configuration-options",
+        "replace-the-agent-binary",
+        "migration-steps",
+        "configuration-mapping",
+        "server_url",
+        "server_urls",
+        "secret_token",
+        "api_key",
+        "service_name",
+        "enabled",
+        "service_version",
+        "environment",
+        "global_labels",
+        "trace_methods",
+        "capture_jmx_metrics",
+        "capture_headers",
+        "span_stack_trace_min_duration",
+        "disable_instrumentations",
+        "enable_instrumentations",
+        "hostname",
+        "service_node_name",
+        "cloud_provider",
+        "log_sending",
+        "verify_server_cert",
+        "limitations",
+        "supported-java-versions",
+        "missing-instrumentations",
+        "central-and-dynamic-configuration",
+        "span-compression",
+        "breakdown-metrics",
+        "no-remote-attach",
+        "micrometer-turned-off-by-default",
+        "troubleshooting"
+      ]
+    },
+    "reference/overhead.md": {
+      "anchors": [
+        "benchmark",
+        "optimizing-application-startup"
+      ]
+    },
+    "release-notes/index.md": {
+      "anchors": [
+        "edot-java-1.5.0-features-enhancements",
+        "edot-java-1.4.1-release-notes",
+        "edot-java-1.4.1-fixes",
+        "edot-java-1.4.0-release-notes",
+        "edot-java-1.4.0-features-enhancements",
+        "edot-java-1.3.0-release-notes",
+        "edot-java-1.3.0-features-enhancements",
+        "edot-java-1.2.1-release-notes",
+        "edot-java-1.2.1-features-enhancements",
+        "edot-java-1.2.0-release-notes",
+        "edot-java-1.2.0-features-enhancements",
+        "edot-java-1.1.0-release-notes",
+        "edot-java-1.1.0-fixes",
+        "edot-java-1.0.0-release-notes"
+      ]
+    },
+    "reference/index.md": {
+      "anchors": [
+        "features",
+        "release-notes"
+      ]
+    },
+    "reference/setup/index.md": {
+      "anchors": [
+        "kubernetes",
+        "runtime-attach",
+        "all-other-environments",
+        "download-the-agent",
+        "prerequisites",
+        "configure-the-java-agent",
+        "local-edot-collector",
+        "self-managed-edot-collector",
+        "elastic-managed-otlp-endpoint",
+        "run-the-java-agent",
+        "troubleshooting"
+      ]
+    }
+  },
+  "cross_links": [
+    "docs-content://solutions/observability/get-started/opentelemetry/use-cases/kubernetes/instrumenting-applications.md#troubleshooting-auto-instrumentation",
+    "docs-content://solutions/observability/get-started/opentelemetry/use-cases/kubernetes/deployment.md",
+    "docs-content://solutions/observability/get-started/opentelemetry/use-cases/kubernetes/instrumenting-applications.md#how-auto-instrumentation-works",
+    "docs-content://solutions/observability/get-started/opentelemetry/use-cases/kubernetes/instrumenting-applications.md",
+    "elastic-agent://reference/edot-collector/config/configure-logs-collection.md#exclude-logs-paths",
+    "docs-content://troubleshoot/ingest/opentelemetry/edot-sdks/java/index.md#agent-debug-logging",
+    "opentelemetry://reference/central-configuration.md",
+    "docs-content://troubleshoot/ingest/opentelemetry/edot-sdks/java/index.md",
+    "docs-content://solutions/observability/get-started/opentelemetry/quickstart/index.md",
+    "docs-content://solutions/observability/get-started/opentelemetry/quickstart/serverless/index.md",
+    "docs-content://solutions/observability/apm/apm-agent-central-configuration.md",
+    "apm-agent-java://reference/setup-attach-api.md",
+    "apm-agent-java://reference/setup-attach-cli.md",
+    "docs-content://solutions/observability/apm/metrics.md#_breakdown_metrics",
+    "docs-content://solutions/observability/apm/spans.md#apm-spans-span-compression",
+    "apm-agent-java://reference/config-reporter.md#config-verify-server-cert",
+    "apm-agent-java://reference/config-logging.md#config-log-sending",
+    "apm-agent-java://reference/config-core.md#config-cloud-provider",
+    "apm-agent-java://reference/config-core.md#config-service-node-name",
+    "apm-agent-java://reference/config-core.md#config-hostname",
+    "apm-agent-java://reference/config-jmx.md#config-capture-jmx-metrics",
+    "apm-agent-java://reference/config-core.md#config-global-labels",
+    "apm-agent-java://reference/config-core.md#config-environment",
+    "apm-agent-java://reference/config-core.md#config-service-version",
+    "apm-agent-java://reference/config-core.md#config-enabled",
+    "apm-agent-java://reference/config-core.md#config-service-name",
+    "apm-agent-java://reference/config-reporter.md#config-api-key",
+    "apm-agent-java://reference/config-reporter.md#config-secret-token",
+    "apm-agent-java://reference/config-reporter.md#config-server-urls",
+    "apm-agent-java://reference/config-reporter.md#config-server-url",
+    "apm-agent-java://reference/public-api.md#api-transaction",
+    "apm-agent-java://reference/public-api.md#api-annotation",
+    "apm-agent-java://reference/public-api.md",
+    "opentelemetry://reference/compatibility/sdks.md",
+    "docs-content://deploy-manage/deploy/elastic-cloud/serverless.md",
+    "elastic-agent://reference/edot-collector/index.md",
+    "opentelemetry://reference/compatibility/nomenclature.md",
+    "docs-content://deploy-manage/upgrade.md"
+  ],
+  "redirects": null
+}
