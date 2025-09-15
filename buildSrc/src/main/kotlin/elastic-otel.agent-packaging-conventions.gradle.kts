@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowCopyAction
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.github.jengelman.gradle.plugins.shadow.transformers.TransformerContext
 import org.apache.tools.zip.ZipEntry
@@ -77,7 +78,7 @@ tasks {
     archiveFileName.set("javaagentLibs-relocated.jar")
 
     mergeServiceFiles()
-    exclude("**/module-info.class")
+    exclude("**/module-info.class", "**/LICENSE", "**/NOTICE")
     relocatePackages(this)
 
     // exclude known bootstrap dependencies - they can't appear in the inst/ directory
@@ -116,7 +117,7 @@ tasks {
   // This transformer injects a new Field into the Opentelemetry SdkSpan class to be used
   // as efficient storage for co.elastic.otel.common.SpanValues
   // Check the FieldBackedSpanValueStorageProvider for details
-  val injectSpanValueFieldTransformer = object: com.github.jengelman.gradle.plugins.shadow.transformers.Transformer {
+  val injectSpanValueFieldTransformer = object: com.github.jengelman.gradle.plugins.shadow.transformers.ResourceTransformer {
 
     @Internal
     val SDK_SPAN_CLASS_FILE = "inst/io/opentelemetry/sdk/trace/SdkSpan.classdata"
@@ -139,7 +140,7 @@ tasks {
         throw IllegalStateException("Multiple SdkSpan classes detected")
       }
 
-      val inputStream = context.getIs()
+      val inputStream = context.inputStream
       val reader = ClassReader(inputStream)
       val writer = ClassWriter(reader, 0)
       val visitor = object : ClassVisitor(Opcodes.ASM9, writer) {
@@ -168,11 +169,14 @@ tasks {
       }
 
       val entry = ZipEntry(SDK_SPAN_CLASS_FILE)
-      entry.time = TransformerContext.getEntryTimestamp(preserveFileTimestamps, entry.time)
+      entry.time = getEntryTimestamp(preserveFileTimestamps, entry.time)
       os.putNextEntry(entry)
       os.write(bytecode)
     }
 
+    private fun getEntryTimestamp(preserveFileTimestamps: Boolean, entryTime: Long): Long {
+      return if (preserveFileTimestamps) entryTime else ShadowCopyAction.CONSTANT_TIME_FOR_ZIP_ENTRIES
+    }
   }
 
   // 3. the relocated and isolated javaagent libs are merged together with the bootstrap libs (which undergo relocation
