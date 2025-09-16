@@ -11,3 +11,5 @@ toc:
   - file: overhead.md
   - title: Troubleshooting
     crosslink: docs-content://troubleshoot/ingest/opentelemetry/edot-sdks/java/index.md
+  - title: Release notes
+    crosslink: elastic-otel-java://release-notes/index.md
