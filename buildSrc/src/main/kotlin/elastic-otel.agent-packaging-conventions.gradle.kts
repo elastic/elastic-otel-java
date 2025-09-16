@@ -73,12 +73,13 @@ tasks {
   val relocateJavaagentLibs = register<ShadowJar>("relocateJavaagentLibs") {
     configurations = listOf(javaagentLibs)
 
-    duplicatesStrategy = DuplicatesStrategy.FAIL
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    failOnDuplicateEntries = true
 
     archiveFileName.set("javaagentLibs-relocated.jar")
 
     mergeServiceFiles()
-    exclude("**/module-info.class", "**/LICENSE", "**/NOTICE")
+    exclude("**/module-info.class", "META-INF/LICENSE*", "META-INF/NOTICE*")
     relocatePackages(this)
 
     // exclude known bootstrap dependencies - they can't appear in the inst/ directory
@@ -132,7 +133,7 @@ tasks {
     }
 
     override fun canTransformResource(element: FileTreeElement): Boolean {
-      return element.name.equals(SDK_SPAN_CLASS_FILE)
+      return element.path == SDK_SPAN_CLASS_FILE
     }
 
     override fun transform(context: TransformerContext) {
@@ -195,10 +196,10 @@ tasks {
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-    mergeServiceFiles {
-      include("inst/META-INF/services/*")
+    mergeServiceFiles()
+    filesMatching("META-INF/services/**") {
+      duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
-    exclude("**/module-info.class")
     relocatePackages(this)
     transform(injectSpanValueFieldTransformer)
 
