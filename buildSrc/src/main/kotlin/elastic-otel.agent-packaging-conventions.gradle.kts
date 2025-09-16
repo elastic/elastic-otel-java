@@ -21,12 +21,30 @@ plugins {
 // this configuration collects libs that will be placed in the bootstrap classloader
 val bootstrapLibs: Configuration by configurations.creating {
   isCanBeConsumed = false
+  isCanBeResolved = false
 }
 val javaagentLibs: Configuration by configurations.creating {
   isCanBeConsumed = false
+  isCanBeResolved = false
 }
 val upstreamAgent: Configuration by configurations.creating {
   isCanBeConsumed = false
+  isCanBeResolved = false
+}
+val bootstrapLibsClasspath: Configuration by configurations.creating {
+  extendsFrom(bootstrapLibs)
+  isCanBeConsumed = false
+  isCanBeResolved = true
+}
+val javaagentLibsClasspath: Configuration by configurations.creating {
+  extendsFrom(javaagentLibs)
+  isCanBeConsumed = false
+  isCanBeResolved = true
+}
+val upstreamAgentClasspath: Configuration by configurations.creating {
+  extendsFrom(upstreamAgent)
+  isCanBeConsumed = false
+  isCanBeResolved = true
 }
 
 dependencies {
@@ -71,7 +89,7 @@ tasks {
 
   // 1. all distro specific javaagent libs are relocated
   val relocateJavaagentLibs = register<ShadowJar>("relocateJavaagentLibs") {
-    configurations = listOf(javaagentLibs)
+    configurations = listOf(javaagentLibsClasspath)
 
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     failOnDuplicateEntries = true
@@ -183,22 +201,24 @@ tasks {
   // 3. the relocated and isolated javaagent libs are merged together with the bootstrap libs (which undergo relocation
   // in this task) and the upstream javaagent jar; duplicates are removed
   shadowJar {
-
-    dependsOn(isolateJavaagentLibs)
-    configurations = listOf(bootstrapLibs, upstreamAgent)
+    configurations = listOf(bootstrapLibsClasspath, upstreamAgentClasspath)
 
     // exclude slf4j-simple from the shadow jar as we use log4j2-slf4j with internal-logging instead
     exclude("inst/io/opentelemetry/javaagent/slf4j/simple/**")
 
-    from(isolateJavaagentLibs.get().outputs)
+    from(isolateJavaagentLibs)
 
     archiveClassifier.set("")
 
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    failOnDuplicateEntries = true
 
-    mergeServiceFiles()
-    filesMatching("META-INF/services/**") {
-      duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    mergeServiceFiles{
+      include("inst/META-INF/services/**")
+      path = "inst/META-INF/services"
+    }
+    filesNotMatching("inst/META-INF/services/**") {
+      duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
     relocatePackages(this)
     transform(injectSpanValueFieldTransformer)
