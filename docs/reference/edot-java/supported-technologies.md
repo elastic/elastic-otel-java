@@ -47,7 +47,7 @@ Note that [some supported technologies are deactivated by default](https://githu
 
 The EDOT Java agent also supports technologies listed here that are not available in the [OpenTelemetry Java Instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation).
 
-Refer to the [EDOT Java agent configuration](/reference/configuration.md#configuration-options) for defaults that might differ from the OpenTelemetry Java Instrumentation.
+Refer to the [EDOT Java agent configuration](/reference/edot-java/configuration.md#configuration-options) for defaults that might differ from the OpenTelemetry Java Instrumentation.
 
 ## OpenAI Client instrumentation
 

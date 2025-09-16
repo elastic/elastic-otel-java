@@ -6,7 +6,7 @@ cross_links:
   - apm-agent-java
 toc:
   - toc: release-notes
-  - toc: reference
+  - toc: reference/edot-java
 subs:
   motlp: Elastic Cloud Managed OTLP Endpoint
   edot: Elastic Distribution of OpenTelemetry

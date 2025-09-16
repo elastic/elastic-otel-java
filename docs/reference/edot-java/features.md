@@ -20,9 +20,9 @@ The EDOT Java agent is a [distribution](https://opentelemetry.io/docs/concepts/d
 The EDOT Java agent also provides:
 
 - Exclusive features that are not available in the [OpenTelemetry Java Instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation).
-- Features of [OpenTelemetry Java Instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation) with [different default configuration](/reference/configuration.md#configuration-options).
+- Features of [OpenTelemetry Java Instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation) with [different default configuration](/reference/edot-java/configuration.md#configuration-options).
 
-In addition to the features listed, refer to [Supported technologies](/reference/supported-technologies.md).
+In addition to the features listed, refer to [Supported technologies](/reference/edot-java/supported-technologies.md).
 
 ## Resource attributes
 

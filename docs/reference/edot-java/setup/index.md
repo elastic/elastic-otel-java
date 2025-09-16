@@ -23,11 +23,11 @@ Avoid using the Java SDK alongside any other APM agent, including Elastic APM ag
 
 ## Kubernetes
 
-For Kubernetes, use the OTel Kubernetes Operator. The Operator also manages the auto-instrumentation of Java applications. Follow the [quickstart guide](docs-content://solutions/observability/get-started/opentelemetry/quickstart/index.md) for Kubernetes or learn more about [instrumentation details on Kubernetes for Java](/reference/setup/k8s.md).
+For Kubernetes, use the OTel Kubernetes Operator. The Operator also manages the auto-instrumentation of Java applications. Follow the [quickstart guide](docs-content://solutions/observability/get-started/opentelemetry/quickstart/index.md) for Kubernetes or learn more about [instrumentation details on Kubernetes for Java](/reference/edot-java/setup/k8s.md).
 
 ## Runtime attach
 
-For environments where modifying the JVM arguments or configuration is not possible, or when including the EDOT Java in the application binary is necessary or preferred, use the [runtime attach](/reference/setup/runtime-attach.md) setup option.
+For environments where modifying the JVM arguments or configuration is not possible, or when including the EDOT Java in the application binary is necessary or preferred, use the [runtime attach](/reference/edot-java/setup/runtime-attach.md) setup option.
 
 ## All other environments
 
@@ -55,7 +55,7 @@ export OTEL_EXPORTER_OTLP_HEADERS="Authorization=ApiKey P....l"
 export OTEL_SERVICE_NAME="my-awesome-service"
 ```
 
-For more advanced configuration, refer to [Configuration](/reference/configuration.md). 
+For more advanced configuration, refer to [Configuration](/reference/edot-java/configuration.md). 
 
 Configuration of those environment values depends on the deployment model.
 
@@ -92,7 +92,7 @@ When modifying the JVM command line arguments is not possible, use the `JAVA_TOO
 
 Some application servers require manual steps or modification of their configuration files. Refer to [dedicated instructions](https://opentelemetry.io/docs/zero-code/java/agent/server-config/) for more details.
 
-For applications deployed with Kubernetes, use the [OpenTelemetry Operator](/reference/setup/k8s.md).
+For applications deployed with Kubernetes, use the [OpenTelemetry Operator](/reference/edot-java/setup/k8s.md).
 
 ## Troubleshooting
 
