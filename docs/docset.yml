@@ -4,6 +4,7 @@ cross_links:
   - opentelemetry
   - elastic-agent
   - apm-agent-java
+  - elastic-otel-java
 toc:
   - toc: release-notes
   - toc: reference/edot-java
