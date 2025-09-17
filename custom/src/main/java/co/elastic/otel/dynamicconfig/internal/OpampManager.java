@@ -146,7 +146,7 @@ public final class OpampManager implements Closeable, OpampClient.Callbacks {
 
   @Override
   public void onConnectFailed(@Nullable Throwable throwable) {
-    logger.log(Level.INFO, "onConnect({0}, {1})", new Object[] {client, throwable});
+    logger.log(Level.FINE, "onConnect({0}, {1})", new Object[] {client, throwable});
   }
 
   @Override
