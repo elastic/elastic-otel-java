@@ -197,13 +197,13 @@ class OpampManagerTest {
     LoggedRequest secondRequest = requests.get(1);
     LoggedRequest thirdRequest = requests.get(2);
     LoggedRequest fourthRequest = requests.get(3);
-    // The time between the first and second request must be of at least 1 second.
+    // The time diff between the first and second request must be of at least 1 second.
     assertThat(secondRequest.getLoggedDate().getTime() - firstRequest.getLoggedDate().getTime())
         .isGreaterThan(TimeUnit.SECONDS.toMillis(1));
-    // The time between the second and third request must be of at least 2 seconds.
+    // The time diff between the second and third request must be of at least 2 seconds.
     assertThat(thirdRequest.getLoggedDate().getTime() - secondRequest.getLoggedDate().getTime())
         .isGreaterThan(TimeUnit.SECONDS.toMillis(2));
-    // The time between the third and fourth request must be of at least 4 seconds.
+    // The time diff between the third and fourth request must be of at least 4 seconds.
     assertThat(fourthRequest.getLoggedDate().getTime() - thirdRequest.getLoggedDate().getTime())
         .isGreaterThan(TimeUnit.SECONDS.toMillis(4));
   }
