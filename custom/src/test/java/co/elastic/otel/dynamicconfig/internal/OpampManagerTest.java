@@ -178,7 +178,7 @@ class OpampManagerTest {
         (config) -> OpampManager.CentralConfigurationProcessor.Result.FAILURE;
     stubFor(any(anyUrl()).willReturn(aResponse().withStatus(503)));
 
-    // Set up manager with small polling interval
+    // Set up manager with initial polling interval of 1 second.
     opampManager =
         OpampManager.builder()
             .setConfigurationEndpoint(wmRuntimeInfo.getHttpBaseUrl())
