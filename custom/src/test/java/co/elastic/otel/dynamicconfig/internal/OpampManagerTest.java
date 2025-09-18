@@ -18,12 +18,14 @@
  */
 package co.elastic.otel.dynamicconfig.internal;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.any;
 import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
 import static com.github.tomakehurst.wiremock.client.WireMock.getAllServeEvents;
 import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
+import static java.lang.Thread.sleep;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.awaitility.Awaitility.await;
@@ -41,6 +43,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import okio.ByteString;
 import opamp.proto.AgentConfigFile;
@@ -49,6 +52,7 @@ import opamp.proto.AgentRemoteConfig;
 import opamp.proto.AgentToServer;
 import opamp.proto.RemoteConfigStatuses;
 import opamp.proto.ServerToAgent;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -88,7 +92,7 @@ class OpampManagerTest {
     opampManager.start(processor);
 
     // Await for server requests
-    List<LoggedRequest> requests = getLoggedRequestsInOrder(2);
+    List<LoggedRequest> requests = awaitAndGetLoggedRequestsInOrder(2);
 
     // Verify parsed config from server response:
     assertThat(parsedConfig.get())
@@ -128,7 +132,7 @@ class OpampManagerTest {
     opampManager.start(processor);
 
     // Await for requests
-    List<LoggedRequest> requests = getLoggedRequestsInOrder(2);
+    List<LoggedRequest> requests = awaitAndGetLoggedRequestsInOrder(2);
 
     // Verify opamp client communication:
     LoggedRequest statusUpdateRequest = requests.get(1);
@@ -138,7 +142,7 @@ class OpampManagerTest {
   }
 
   @Test
-  void verifyConfigProcessing_whenThereIsAParsingError() throws InterruptedException, IOException {
+  void verifyConfigProcessing_whenThereIsAParsingError() throws IOException {
     OpampManager.CentralConfigurationProcessor processor =
         (config) -> OpampManager.CentralConfigurationProcessor.Result.FAILURE;
     String centralConfigValue = "{invalid:\"json\"";
@@ -158,13 +162,55 @@ class OpampManagerTest {
     opampManager.start(processor);
 
     // Await for requests
-    List<LoggedRequest> requests = getLoggedRequestsInOrder(2);
+    List<LoggedRequest> requests = awaitAndGetLoggedRequestsInOrder(2);
 
     // Verify opamp client communication:
     LoggedRequest statusUpdateRequest = requests.get(1);
     AgentToServer agentToServer = getAgentToServerMessage(statusUpdateRequest);
     assertThat(agentToServer.remote_config_status.status)
         .isEqualTo(RemoteConfigStatuses.RemoteConfigStatuses_FAILED);
+  }
+
+  @Test
+  void verifyRetry_ExponentialBackoff(WireMockRuntimeInfo wmRuntimeInfo)
+      throws InterruptedException {
+    OpampManager.CentralConfigurationProcessor processor =
+        (config) -> OpampManager.CentralConfigurationProcessor.Result.FAILURE;
+    stubFor(any(anyUrl()).willReturn(aResponse().withStatus(503)));
+
+    // Set up manager with small polling interval
+    opampManager =
+        OpampManager.builder()
+            .setConfigurationEndpoint(wmRuntimeInfo.getHttpBaseUrl())
+            .setPollingInterval(Duration.ofSeconds(1))
+            .build();
+    long initialTimeNanos = System.nanoTime();
+    opampManager.start(processor);
+
+    // |--timelineInSeconds--|0--------1--------------3---------------------7-----------------------------15
+    // |------requests-------|--first--|----second----|--------third--------|------------fourth-----------|
+    List<Long> requestExpectedAfterTimeInNanos = new ArrayList<>();
+    // First request happens after the 0s mark.
+    requestExpectedAfterTimeInNanos.add(TimeUnit.SECONDS.toNanos(0));
+    // Second request happens after the 1s mark.
+    requestExpectedAfterTimeInNanos.add(TimeUnit.SECONDS.toNanos(1));
+    // Third request happens after the 3s mark.
+    requestExpectedAfterTimeInNanos.add(TimeUnit.SECONDS.toNanos(3));
+    // Fourth request happens after the 7s mark.
+    requestExpectedAfterTimeInNanos.add(TimeUnit.SECONDS.toNanos(7));
+
+    sleep(TimeUnit.SECONDS.toMillis(10));
+    List<LoggedRequest> requests = getLoggedRequestsInOrder();
+
+    // Only 4 requests should be recorded in a span of 10s with exponential delay starting with 1s.
+    assertThat(requests).hasSize(4);
+    // Verify request times
+    for (int i = 0; i < requestExpectedAfterTimeInNanos.size(); i++) {
+      LoggedRequest request = requests.get(i);
+      long requestTimeNanos = TimeUnit.MILLISECONDS.toNanos(request.getLoggedDate().getTime());
+      Long expectedAfterTimeNanos = requestExpectedAfterTimeInNanos.get(i);
+      assertThat(requestTimeNanos - initialTimeNanos).isGreaterThan(expectedAfterTimeNanos);
+    }
   }
 
   private ServerToAgent createServerToAgentWithCentralConfig(String centralConfig, String hash) {
@@ -194,11 +240,21 @@ class OpampManagerTest {
     return AgentToServer.ADAPTER.decode(statusUpdateRequest.getBody());
   }
 
-  private static List<LoggedRequest> getLoggedRequestsInOrder(int expectedRequests) {
+  private static List<LoggedRequest> awaitAndGetLoggedRequestsInOrder(int expectedRequests) {
+    return awaitAndGetLoggedRequestsInOrder(expectedRequests, Duration.ofSeconds(1));
+  }
+
+  private static List<LoggedRequest> awaitAndGetLoggedRequestsInOrder(
+      int expectedRequests, Duration awaitForExpectedRequests) {
     await()
-        .atMost(Duration.ofSeconds(1))
+        .atMost(awaitForExpectedRequests)
         .until(() -> getAllServeEvents().size() == expectedRequests);
 
+    return getLoggedRequestsInOrder();
+  }
+
+  @NotNull
+  private static List<LoggedRequest> getLoggedRequestsInOrder() {
     List<LoggedRequest> requests = new ArrayList<>();
     for (ServeEvent serveEvent : getAllServeEvents()) {
       requests.add(serveEvent.getRequest());
