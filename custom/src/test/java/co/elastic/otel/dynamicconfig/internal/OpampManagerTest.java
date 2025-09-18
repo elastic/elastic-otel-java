@@ -184,33 +184,28 @@ class OpampManagerTest {
             .setConfigurationEndpoint(wmRuntimeInfo.getHttpBaseUrl())
             .setPollingInterval(Duration.ofSeconds(1))
             .build();
-    long initialTimeNanos = System.nanoTime();
     opampManager.start(processor);
-
-    // |--timelineInSeconds--|0--------1--------------3---------------------7-----------------------------15
-    // |------requests-------|--first--|----second----|--------third--------|------------fourth-----------|
-    List<Long> requestExpectedAfterTimeInNanos = new ArrayList<>();
-    // First request happens after the 0s mark.
-    requestExpectedAfterTimeInNanos.add(TimeUnit.SECONDS.toNanos(0));
-    // Second request happens after the 1s mark.
-    requestExpectedAfterTimeInNanos.add(TimeUnit.SECONDS.toNanos(1));
-    // Third request happens after the 3s mark.
-    requestExpectedAfterTimeInNanos.add(TimeUnit.SECONDS.toNanos(3));
-    // Fourth request happens after the 7s mark.
-    requestExpectedAfterTimeInNanos.add(TimeUnit.SECONDS.toNanos(7));
 
     sleep(TimeUnit.SECONDS.toMillis(10));
     List<LoggedRequest> requests = getLoggedRequestsInOrder();
 
     // Only 4 requests should be recorded in a span of 10s with exponential delay starting with 1s.
     assertThat(requests).hasSize(4);
+
     // Verify request times
-    for (int i = 0; i < requestExpectedAfterTimeInNanos.size(); i++) {
-      LoggedRequest request = requests.get(i);
-      long requestTimeNanos = TimeUnit.MILLISECONDS.toNanos(request.getLoggedDate().getTime());
-      Long expectedAfterTimeNanos = requestExpectedAfterTimeInNanos.get(i);
-      assertThat(requestTimeNanos - initialTimeNanos).isGreaterThan(expectedAfterTimeNanos);
-    }
+    LoggedRequest firstRequest = requests.get(0);
+    LoggedRequest secondRequest = requests.get(1);
+    LoggedRequest thirdRequest = requests.get(2);
+    LoggedRequest fourthRequest = requests.get(3);
+    // The time between the first and second request must be of at least 1 second.
+    assertThat(secondRequest.getLoggedDate().getTime() - firstRequest.getLoggedDate().getTime())
+        .isGreaterThan(TimeUnit.SECONDS.toMillis(1));
+    // The time between the second and third request must be of at least 2 seconds.
+    assertThat(thirdRequest.getLoggedDate().getTime() - secondRequest.getLoggedDate().getTime())
+        .isGreaterThan(TimeUnit.SECONDS.toMillis(2));
+    // The time between the third and fourth request must be of at least 4 seconds.
+    assertThat(fourthRequest.getLoggedDate().getTime() - thirdRequest.getLoggedDate().getTime())
+        .isGreaterThan(TimeUnit.SECONDS.toMillis(4));
   }
 
   private ServerToAgent createServerToAgentWithCentralConfig(String centralConfig, String hash) {
