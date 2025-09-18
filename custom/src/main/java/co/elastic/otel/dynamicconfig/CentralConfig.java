@@ -304,7 +304,7 @@ public class CentralConfig {
 
   public static final class PollingInterval extends ConfigOption {
     PollingInterval() {
-      super("polling_interval", "30s");
+      super("opamp_polling_interval", "30s");
     }
 
     @Override
@@ -312,7 +312,7 @@ public class CentralConfig {
         throws IllegalArgumentException {
       if (centralConfigurationManager instanceof CentralConfigurationManagerImpl) {
         try {
-          Duration duration = Duration.parse(configurationValue);
+          Duration duration = Duration.parse("PT" + configurationValue);
           ((CentralConfigurationManagerImpl) centralConfigurationManager)
               .resetPeriodicDelay(duration);
         } catch (DateTimeParseException e) {
