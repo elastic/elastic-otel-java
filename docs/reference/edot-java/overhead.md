@@ -13,7 +13,7 @@ products:
   - id: edot-sdk
 ---
 
-# Performance overhead of the EDOT SDK for Java
+# Performance overhead for Java in Elastic OpenTelemetry SDK
 
 This page details the expected performance impact when instrumenting Java applications with the Elastic Distribution of OpenTelemetry SDK, including benchmarks and optimization tips.
 
