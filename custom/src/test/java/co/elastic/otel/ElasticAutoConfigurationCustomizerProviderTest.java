@@ -46,7 +46,7 @@ class ElasticAutoConfigurationCustomizerProviderTest {
         .describedAs("upstream distro version resource provider must be disabled")
         .containsEntry(
             "otel.java.disabled.resource.providers",
-            "io.opentelemetry.javaagent.tooling.DistroVersionResourceProvider");
+            "io.opentelemetry.javaagent.tooling.resources.DistroResourceProvider");
 
     assertThat(config)
         .describedAs("runtime experimental metrics must be enabled")
@@ -66,7 +66,7 @@ class ElasticAutoConfigurationCustomizerProviderTest {
             v ->
                 assertThat(v.split(","))
                     .containsExactly(
-                        "io.opentelemetry.javaagent.tooling.DistroVersionResourceProvider",
+                        "io.opentelemetry.javaagent.tooling.resources.DistroResourceProvider",
                         "my.disabled.provider.Provider"));
   }
 
