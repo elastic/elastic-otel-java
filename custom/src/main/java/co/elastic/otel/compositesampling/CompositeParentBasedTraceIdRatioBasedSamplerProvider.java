@@ -19,7 +19,6 @@
 package co.elastic.otel.compositesampling;
 
 import com.google.auto.service.AutoService;
-import io.opentelemetry.contrib.sampler.consistent56.ConsistentSampler;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSamplerProvider;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
@@ -27,13 +26,14 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 @AutoService(ConfigurableSamplerProvider.class)
 public class CompositeParentBasedTraceIdRatioBasedSamplerProvider
     implements ConfigurableSamplerProvider {
-  private static final double DEFAULT_TRACEIDRATIO_SAMPLE_RATIO = 1.0d;
 
   @Override
   public Sampler createSampler(ConfigProperties config) {
-    return ConsistentSampler.parentBased(
-        ConsistentSampler.probabilityBased(
-            config.getDouble("otel.traces.sampler.arg", DEFAULT_TRACEIDRATIO_SAMPLE_RATIO)));
+    DynamicCompositeParentBasedTraceIdRatioBasedSampler.setRatio(
+        config.getDouble(
+            "otel.traces.sampler.arg",
+            DynamicCompositeParentBasedTraceIdRatioBasedSampler.DEFAULT_TRACEIDRATIO_SAMPLE_RATIO));
+    return DynamicCompositeParentBasedTraceIdRatioBasedSampler.INSTANCE;
   }
 
   @Override
