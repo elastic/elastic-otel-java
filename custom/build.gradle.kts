@@ -8,7 +8,11 @@ val instrumentations = listOf<String>(
 
 dependencies {
   implementation(project(":common"))
-  implementation(project(":opamp"))
+  implementation(libs.opentelemetry.opamp) {
+    // exclude transitive dependency as it's provided through agent packaging
+    exclude(group = "io.opentelemetry", module = "opentelemetry-api")
+  }
+  implementation(libs.dslJson)
   implementation(project(":inferred-spans"))
   implementation(project(":universal-profiling-integration"))
   implementation(project(":resources"))
@@ -49,6 +53,7 @@ dependencies {
   testImplementation("io.opentelemetry.javaagent:opentelemetry-testing-common")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation(libs.freemarker)
+  testImplementation(libs.wiremockjre8)
 }
 
 tasks {
