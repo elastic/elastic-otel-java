@@ -142,7 +142,7 @@ public class ElasticAutoConfigurationCustomizerProvider
 
     // disable upstream distro name & version provider
     disabledResourceProviders.add(
-        "io.opentelemetry.javaagent.tooling.DistroVersionResourceProvider");
+        "io.opentelemetry.javaagent.tooling.resources.DistroResourceProvider");
     config.put(DISABLED_RESOURCE_PROVIDERS, String.join(",", disabledResourceProviders));
   }
 

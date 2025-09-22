@@ -1,9 +1,3 @@
-import com.github.jk1.license.filter.LicenseBundleNormalizer
-import com.github.jk1.license.render.InventoryMarkdownReportRenderer
-import java.nio.file.Files
-import java.util.*
-import java.util.stream.Collectors
-
 plugins {
   id("elastic-otel.agent-packaging-conventions")
   id("elastic-otel.sign-and-publish-conventions")
@@ -28,8 +22,8 @@ dependencies {
 
 licenseReport {
   configurations = arrayOf(
-    project.configurations.bootstrapLibs.name,
-    project.configurations.javaagentLibs.name
+    project.configurations.bootstrapLibsClasspath.name,
+    project.configurations.javaagentLibsClasspath.name
     // No need to include the upstreamAgent, because it already has all dependent licenses packaged
     // Those will be preserved in our JAR
   )
