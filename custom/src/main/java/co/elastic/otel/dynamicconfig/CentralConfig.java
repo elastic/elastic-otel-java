@@ -18,18 +18,18 @@
  */
 package co.elastic.otel.dynamicconfig;
 
-import co.elastic.opamp.client.CentralConfigurationManager;
-import co.elastic.opamp.client.CentralConfigurationManagerImpl;
-import co.elastic.opamp.client.CentralConfigurationProcessor;
+import co.elastic.otel.dynamicconfig.internal.OpampManager;
 import co.elastic.otel.logging.AgentLog;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -60,27 +60,31 @@ public class CentralConfig {
     logger.info("Starting OpAmp client for: " + serviceName + " on endpoint " + endpoint);
     DynamicInstrumentation.setTracerConfigurator(
         providerBuilder, DynamicConfiguration.UpdatableConfigurator.INSTANCE);
-    CentralConfigurationManager centralConfigurationManager =
-        CentralConfigurationManager.builder()
+    OpampManager opampManager =
+        OpampManager.builder()
             .setServiceName(serviceName)
             .setPollingInterval(Duration.ofSeconds(30))
             .setConfigurationEndpoint(endpoint)
             .setServiceEnvironment(environment)
             .build();
 
-    centralConfigurationManager.start(
+    opampManager.start(
         configuration -> {
           logger.fine("Received configuration: " + configuration);
-          Configs.applyConfigurations(configuration, centralConfigurationManager);
-          return CentralConfigurationProcessor.Result.SUCCESS;
+          Configs.applyConfigurations(configuration, opampManager);
+          return OpampManager.CentralConfigurationProcessor.Result.SUCCESS;
         });
 
     Runtime.getRuntime()
         .addShutdownHook(
             new Thread(
                 () -> {
-                  logger.info("=========== Shutting down OpAmp client for: " + serviceName);
-                  centralConfigurationManager.stop();
+                  logger.info("=========== Shutting down OpAMP client for: " + serviceName);
+                  try {
+                    opampManager.close();
+                  } catch (IOException e) {
+                    logger.log(Level.SEVERE, "Error during OpAMP shutdown", e);
+                  }
                 }));
   }
 
@@ -129,14 +133,13 @@ public class CentralConfig {
     }
 
     public static synchronized void applyConfigurations(
-        Map<String, String> configuration,
-        CentralConfigurationManager centralConfigurationManager) {
+        Map<String, String> configuration, OpampManager opampManager) {
       Set<String> copyOfCurrentNonDefaultConfigsApplied =
           new HashSet<>(currentNonDefaultConfigsApplied);
       configuration.forEach(
           (configurationName, configurationValue) -> {
             copyOfCurrentNonDefaultConfigsApplied.remove(configurationName);
-            applyConfiguration(configurationName, configurationValue, centralConfigurationManager);
+            applyConfiguration(configurationName, configurationValue, opampManager);
             currentNonDefaultConfigsApplied.add(configurationName);
           });
       if (!copyOfCurrentNonDefaultConfigsApplied.isEmpty()) {
@@ -144,25 +147,21 @@ public class CentralConfig {
         // have been removed from the configs being sent - so for all of these we need to set the
         // config back to default
         for (String configurationName : copyOfCurrentNonDefaultConfigsApplied) {
-          applyDefaultConfiguration(configurationName, centralConfigurationManager);
+          applyDefaultConfiguration(configurationName, opampManager);
           currentNonDefaultConfigsApplied.remove(configurationName);
         }
       }
     }
 
     public static void applyDefaultConfiguration(
-        String configurationName, CentralConfigurationManager centralConfigurationManager) {
-      configNameToConfig.get(configurationName).updateToDefault(centralConfigurationManager);
+        String configurationName, OpampManager opampManager) {
+      configNameToConfig.get(configurationName).updateToDefault(opampManager);
     }
 
     public static void applyConfiguration(
-        String configurationName,
-        String configurationValue,
-        CentralConfigurationManager centralConfigurationManager) {
+        String configurationName, String configurationValue, OpampManager opampManager) {
       if (configNameToConfig.containsKey(configurationName)) {
-        configNameToConfig
-            .get(configurationName)
-            .updateOrLog(configurationValue, centralConfigurationManager);
+        configNameToConfig.get(configurationName).updateOrLog(configurationValue, opampManager);
       } else {
         logger.warning(
             "Ignoring unknown confguration option: '"
@@ -204,21 +203,19 @@ public class CentralConfig {
       }
     }
 
-    public void updateOrLog(
-        String configurationValue, CentralConfigurationManager centralConfigurationManager) {
+    public void updateOrLog(String configurationValue, OpampManager opampManager) {
       try {
-        update(configurationValue, centralConfigurationManager);
+        update(configurationValue, opampManager);
       } catch (IllegalArgumentException e) {
         logger.warning(e.getMessage());
       }
     }
 
-    abstract void update(
-        String configurationValue, CentralConfigurationManager centralConfigurationManager)
+    abstract void update(String configurationValue, OpampManager opampManager)
         throws IllegalArgumentException;
 
-    public void updateToDefault(CentralConfigurationManager centralConfigurationManager) {
-      update(defaultConfigStringValue, centralConfigurationManager);
+    public void updateToDefault(OpampManager opampManager) {
+      update(defaultConfigStringValue, opampManager);
     }
 
     protected DynamicConfiguration config() {
@@ -232,7 +229,7 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue, CentralConfigurationManager centralConfigurationManager)
+    void update(String configurationValue, OpampManager opampManager)
         throws IllegalArgumentException {
       config().setSendingLogs(getBoolean(configurationValue));
     }
@@ -244,7 +241,7 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue, CentralConfigurationManager centralConfigurationManager)
+    void update(String configurationValue, OpampManager opampManager)
         throws IllegalArgumentException {
       config().setSendingMetrics(getBoolean(configurationValue));
     }
@@ -256,7 +253,7 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue, CentralConfigurationManager centralConfigurationManager)
+    void update(String configurationValue, OpampManager opampManager)
         throws IllegalArgumentException {
       config().setSendingSpans(getBoolean(configurationValue));
     }
@@ -268,7 +265,7 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue, CentralConfigurationManager centralConfigurationManager)
+    void update(String configurationValue, OpampManager opampManager)
         throws IllegalArgumentException {
       if (getBoolean(configurationValue)) {
         config().deactivateAllInstrumentations();
@@ -284,7 +281,7 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue, CentralConfigurationManager centralConfigurationManager)
+    void update(String configurationValue, OpampManager opampManager)
         throws IllegalArgumentException {
       config().deactivateInstrumentations(configurationValue);
     }
@@ -296,7 +293,7 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue, CentralConfigurationManager centralConfigurationManager)
+    void update(String configurationValue, OpampManager opampManager)
         throws IllegalArgumentException {
       AgentLog.setLevel(configurationValue);
     }
@@ -308,17 +305,14 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue, CentralConfigurationManager centralConfigurationManager)
+    void update(String configurationValue, OpampManager opampManager)
         throws IllegalArgumentException {
-      if (centralConfigurationManager instanceof CentralConfigurationManagerImpl) {
-        try {
-          Duration duration = Duration.parse("PT" + configurationValue);
-          ((CentralConfigurationManagerImpl) centralConfigurationManager)
-              .resetPeriodicDelay(duration);
-        } catch (DateTimeParseException e) {
-          logger.warning(
-              "Failed to update the polling interval, value passed was invalid: " + e.getMessage());
-        }
+      try {
+        Duration duration = Duration.parse("PT" + configurationValue);
+        opampManager.setPollingDelay(duration);
+      } catch (DateTimeParseException e) {
+        logger.warning(
+            "Failed to update the polling interval, value passed was invalid: " + e.getMessage());
       }
     }
   }
