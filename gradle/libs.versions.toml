@@ -1,5 +1,5 @@
 [versions]
-shadow = "8.3.9"
+shadow = "9.1.0"
 jib = "3.4.5"
 spotless = "7.2.1"
 junit = "5.13.4"
@@ -35,6 +35,7 @@ contribResources = { group = "io.opentelemetry.contrib", name = "opentelemetry-r
 contribSpanStacktrace = { group = "io.opentelemetry.contrib", name = "opentelemetry-span-stacktrace", version.ref = "opentelemetryContribAlpha" }
 contribInferredSpans = { group = "io.opentelemetry.contrib", name = "opentelemetry-inferred-spans", version.ref = "opentelemetryContribAlpha" }
 contribRuntimeAttach = { group = "io.opentelemetry.contrib", name = "opentelemetry-runtime-attach-core", version.ref = "opentelemetryContribAlpha" }
+opentelemetry-opamp = { module = "io.opentelemetry.contrib:opentelemetry-opamp-client", version.ref = "opentelemetryContribAlpha" }
 
 opentelemetrySemconv = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv", version.ref = "opentelemetrySemconv" }
 opentelemetrySemconvIncubating = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv-incubating", version.ref = "opentelemetrySemconvAlpha" }
@@ -58,6 +59,7 @@ mockserver-client = "org.mock-server:mockserver-client-java:5.15.0"
 junitBom = { group = "org.junit", name = "junit-bom", version.ref = "junit" }
 
 okhttp = "com.squareup.okhttp3:okhttp:5.1.0"
+dslJson = "com.dslplatform:dsl-json-java8:1.10.0"
 
 hdrhistogram = "org.hdrhistogram:HdrHistogram:2.2.2"
 lmax-disruptor = "com.lmax:disruptor:3.4.4"
@@ -78,8 +80,8 @@ ant = "org.apache.ant:ant:1.10.15"
 asm = "org.ow2.asm:asm:9.8"
 
 slf4j-api = "org.slf4j:slf4j-api:2.0.17"
-log4j2-slf4j = { group= "org.apache.logging.log4j", name="log4j-slf4j2-impl", version.ref="log4j2"}
-log4j2-core = { group= "org.apache.logging.log4j", name="log4j-core", version.ref="log4j2"}
+log4j2-slf4j = { group = "org.apache.logging.log4j", name = "log4j-slf4j2-impl", version.ref = "log4j2" }
+log4j2-core = { group = "org.apache.logging.log4j", name = "log4j-core", version.ref = "log4j2" }
 
 # Instrumented libraries
 openaiClient = "com.openai:openai-java:2.20.1"
