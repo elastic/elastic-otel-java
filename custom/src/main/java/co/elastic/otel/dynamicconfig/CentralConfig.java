@@ -129,7 +129,7 @@ public class CentralConfig {
                   new DeactivateAllInstrumentations(),
                   new DeactivateInstrumentations(),
                   new LoggingLevel(),
-                  new SamplingRate();
+                  new SamplingRate(),
                   new PollingInterval())
               .collect(Collectors.toMap(ConfigOption::getConfigName, option -> option));
     }
