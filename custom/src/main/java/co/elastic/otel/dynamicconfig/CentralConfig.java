@@ -129,6 +129,7 @@ public class CentralConfig {
                   new DeactivateAllInstrumentations(),
                   new DeactivateInstrumentations(),
                   new LoggingLevel(),
+                  new SamplingRate();
                   new PollingInterval())
               .collect(Collectors.toMap(ConfigOption::getConfigName, option -> option));
     }
@@ -301,7 +302,7 @@ public class CentralConfig {
   }
 
   public static final class SamplingRate extends ConfigOption {
-    LoggingLevel() {
+    SamplingRate() {
       super("sampling_rate", "1.0");
     }
 
