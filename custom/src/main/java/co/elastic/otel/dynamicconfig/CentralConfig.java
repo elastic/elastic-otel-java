@@ -310,7 +310,7 @@ public class CentralConfig {
     void update(String configurationValue, OpampManager opampManager)
         throws IllegalArgumentException {
       DynamicCompositeParentBasedTraceIdRatioBasedSampler.setRatio(
-        Double.parseDouble(configurationValue));
+          Double.parseDouble(configurationValue));
     }
   }
 
