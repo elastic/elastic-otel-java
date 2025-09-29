@@ -19,6 +19,7 @@
 package co.elastic.otel.dynamicconfig;
 
 import co.elastic.otel.dynamicconfig.internal.OpampManager;
+import co.elastic.otel.compositesampling.DynamicCompositeParentBasedTraceIdRatioBasedSampler;
 import co.elastic.otel.logging.AgentLog;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
@@ -296,6 +297,19 @@ public class CentralConfig {
     void update(String configurationValue, OpampManager opampManager)
         throws IllegalArgumentException {
       AgentLog.setLevel(configurationValue);
+    }
+  }
+
+  public static final class SamplingRate extends ConfigOption {
+    LoggingLevel() {
+      super("sampling_rate", "1.0");
+    }
+
+    @Override
+    void update(String configurationValue, OpampManager opampManager)
+        throws IllegalArgumentException {
+      DynamicCompositeParentBasedTraceIdRatioBasedSampler.setRatio(
+        Double.parseDouble(configurationValue));
     }
   }
 
