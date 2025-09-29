@@ -18,8 +18,8 @@
  */
 package co.elastic.otel.dynamicconfig;
 
-import co.elastic.otel.dynamicconfig.internal.OpampManager;
 import co.elastic.otel.compositesampling.DynamicCompositeParentBasedTraceIdRatioBasedSampler;
+import co.elastic.otel.dynamicconfig.internal.OpampManager;
 import co.elastic.otel.logging.AgentLog;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
