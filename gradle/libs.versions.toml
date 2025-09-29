@@ -31,6 +31,7 @@ opentelemetryInstrumentationAlphaBom = { group = "io.opentelemetry.instrumentati
 
 opentelemetryProto = { group = "io.opentelemetry.proto", name = "opentelemetry-proto", version.ref = "opentelemetryProto" }
 
+contribConsistentSampling = { group = "io.opentelemetry.contrib", name = "opentelemetry-consistent-sampling", version.ref = "opentelemetryContribAlpha" }
 contribResources = { group = "io.opentelemetry.contrib", name = "opentelemetry-resource-providers", version.ref = "opentelemetryContribAlpha" }
 contribSpanStacktrace = { group = "io.opentelemetry.contrib", name = "opentelemetry-span-stacktrace", version.ref = "opentelemetryContribAlpha" }
 contribInferredSpans = { group = "io.opentelemetry.contrib", name = "opentelemetry-inferred-spans", version.ref = "opentelemetryContribAlpha" }
