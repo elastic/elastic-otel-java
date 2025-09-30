@@ -18,6 +18,7 @@
  */
 package co.elastic.otel;
 
+import co.elastic.otel.compositesampling.DynamicCompositeParentBasedTraceIdRatioBasedSampler;
 import co.elastic.otel.dynamicconfig.BlockableLogRecordExporter;
 import co.elastic.otel.dynamicconfig.BlockableMetricExporter;
 import co.elastic.otel.dynamicconfig.BlockableSpanExporter;
@@ -91,6 +92,7 @@ public class ElasticAutoConfigurationCustomizerProvider
         (providerBuilder, properties) -> {
           CentralConfig.init(providerBuilder, properties);
           AgentLog.addSpanLoggingIfRequired(providerBuilder, properties);
+          providerBuilder.setSampler(DynamicCompositeParentBasedTraceIdRatioBasedSampler.INSTANCE);
           return providerBuilder;
         });
   }
