@@ -210,15 +210,14 @@ tasks {
 
     archiveClassifier.set("")
 
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    failOnDuplicateEntries = true
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     mergeServiceFiles{
       include("inst/META-INF/services/**")
       path = "inst/META-INF/services"
     }
-    filesNotMatching("inst/META-INF/services/**") {
-      duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    filesMatching("inst/META-INF/services/**") {
+      duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
     relocatePackages(this)
     transform(injectSpanValueFieldTransformer)
