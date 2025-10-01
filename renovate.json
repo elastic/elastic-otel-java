@@ -12,6 +12,16 @@
         "io.opentelemetry.contrib:**"
       ],
       "enabled": false
+    },
+    {
+      "description": "junit 6+ requires Java 17+",
+      "matchPackageNames": [
+        "org.junit:**"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
     }
   ],
   "ignorePaths": [
