@@ -119,10 +119,10 @@ You can modify the following settings for EDOT Java through APM Agent Central Co
 | Turn off all instrumentations | `deactivate_all_instrumentations` | Dynamic |
 | Send traces | `send_traces` | Dynamic |
 | Send metrics | `send_metrics` | Dynamic |
-| Send logs | `send_logs` | Dynamic {applies_to}`edot_java: preview 1.6.0` |
+| Send logs | `send_logs` | Dynamic  |
 | OpAMP polling interval | `opamp_polling_interval` | Dynamic {applies_to}`edot_java: preview 1.6.0`|
-| Sampling rate | `sampling_rate` | Dynamic {applies_to}`edot_java: preview 1.6.1`|
-| Turn on/off inferred spans | `infer_spans` | Dynamic |
+| Sampling rate | `sampling_rate` | Dynamic {applies_to}`edot_java: preview 1.6.0`|
+| Turn on/off inferred spans | `infer_spans` | Dynamic {applies_to}`edot_java: preview 1.6.1`|
 
 Dynamic settings can be changed without having to restart the application.
 
