@@ -64,7 +64,7 @@ public class ReleaseChangelog {
     Lines allReleaseNotes = new Lines(Files.readAllLines(releaseNotesFile, StandardCharsets.UTF_8));
     int insertBeforeLine = findHeadingOfPreviousVersion(allReleaseNotes, version);
     if(insertBeforeLine < 0){
-      insertBeforeLine = allReleaseNotes.lineCount() + 1;
+      insertBeforeLine = allReleaseNotes.lineCount();
     }
     allReleaseNotes.insert(generateReleaseNotes(version, releaseDateLine, enhancements, fixes),
         insertBeforeLine);
@@ -75,7 +75,7 @@ public class ReleaseChangelog {
       int insertDepsBeforeLine = findHeadingOfPreviousVersion(allDeprecations, version);
       if(insertDepsBeforeLine < 0){
         // in case no previous version was listed
-        insertDepsBeforeLine = allDeprecations.lineCount() + 1;
+        insertDepsBeforeLine = allDeprecations.lineCount();
       }
       allDeprecations.insert(generateDeprecations(version, releaseDateLine, deprecations),
           insertDepsBeforeLine);
@@ -87,7 +87,7 @@ public class ReleaseChangelog {
       int insertBcBeforeLine = findHeadingOfPreviousVersion(allBreakingChanges, version);
       if (insertBcBeforeLine < 0) {
         // in case no previous version was listed
-        insertBcBeforeLine = allBreakingChanges.lineCount() - 1;
+        insertBcBeforeLine = allBreakingChanges.lineCount();
       }
       allBreakingChanges.insert(generateBreakingChanges(version, releaseDateLine, breakingChanges),
           insertBcBeforeLine);
