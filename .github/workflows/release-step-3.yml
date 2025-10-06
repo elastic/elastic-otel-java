@@ -218,6 +218,8 @@ jobs:
           command: ""
       - name: Print Release Notes
         id: print_release_notes
+        # note: release notes here will be copied as-is from 'CHANGELOG.next-release.md'
+        # the 'pre-post-release' workflow executed after this will reset contents of 'CHANGELOG.next-release.md'
         run: |
           echo 'notes<<RELNOTESEOF' >> $GITHUB_OUTPUT
           cat CHANGELOG.next-release.md >> $GITHUB_OUTPUT

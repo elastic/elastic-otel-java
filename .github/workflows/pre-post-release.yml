@@ -26,11 +26,6 @@ on:
         description: 'pull-request body'
         type: string
         required: true
-      changelog:
-        description: 'The changelog to prepend to CHANGELOG.md without heading'
-        type: string
-        required: false
-        default: ''
 
 env:
   RELEASE_VERSION: ${{ inputs.version }}
@@ -100,21 +95,14 @@ jobs:
         with:
           command: ./gradlew -q setNextVersion
 
-      - name: Insert notes into cumulative changelog (post release)
+      - name: Generate documentation changelog (post release)
         if: inputs.phase == 'post'
         run: |
-          echo "# ${VERSION} - $(date +'%d/%m/%Y')" > tmpchangelog
-          echo "${CHANGELOG}" >> tmpchangelog
-          cat CHANGELOG.md >> tmpchangelog
-          mv tmpchangelog CHANGELOG.md
-        env:
-          VERSION: ${{ inputs.version }}
-          CHANGELOG: ${{ inputs.changelog }}
-
-      - name: Clear next release changelog (post release)
-        if: inputs.phase == 'post'
-        run: |
-          echo '' > CHANGELOG.next-release.md
+          echo '<!--DEPENDENCIES-NOTES-START-->' >> CHANGELOG.next-release.md
+          echo -e "This release is based on the following upstream versions:\n\n" >> CHANGELOG.next-release.md
+          ./gradlew -q printUpstreamDependenciesMarkdown >> CHANGELOG.next-release.md
+          echo '<!--DEPENDENCIES-NOTES-END-->' >> CHANGELOG.next-release.md
+          java .ci/ReleaseChangelog.java CHANGELOG.next-release.md docs/release-notes ${{ env.RELEASE_VERSION }}
   
       - name: Push the ${{ inputs.phase }} release branch
         run: |
