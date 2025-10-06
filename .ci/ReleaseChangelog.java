@@ -58,6 +58,9 @@ public class ReleaseChangelog {
     Lines breakingChanges = nextChangelogLines.cutLinesBetween("<!--BREAKING-CHANGES-START-->",
         "<!--BREAKING-CHANGES-END-->");
 
+    Lines dependenciesNotes = nextChangelogLines.cutLinesBetween("<!--DEPENDENCIES-NOTES-START-->",
+        "<!--DEPENDENCIES-NOTES-END-->");
+
     var formatter = DateTimeFormatter.ofPattern("LLLL d, yyyy", Locale.ENGLISH);
     String releaseDateLine = "**Release date:** " + formatter.format(LocalDate.now());
 
@@ -66,7 +69,9 @@ public class ReleaseChangelog {
     if (insertBeforeLine < 0) {
       insertBeforeLine = allReleaseNotes.lineCount();
     }
-    allReleaseNotes.insert(generateReleaseNotes(version, releaseDateLine, enhancements, fixes, breakingChanges),
+    allReleaseNotes.insert(
+        generateReleaseNotes(version, releaseDateLine, enhancements, fixes, breakingChanges,
+            dependenciesNotes),
         insertBeforeLine);
 
     if (!deprecations.isEmpty()) {
@@ -98,7 +103,7 @@ public class ReleaseChangelog {
   }
 
   private static Lines generateReleaseNotes(VersionNumber version, String releaseDateLine,
-      Lines enhancements, Lines fixes, Lines breaking) {
+      Lines enhancements, Lines fixes, Lines breaking, Lines dependenciesNotes) {
     Lines result = new Lines()
         .append("## " + version.dotStr() + " [edot-java-" + version.dashStr() + "-release-notes]")
         .append(releaseDateLine);
@@ -120,6 +125,11 @@ public class ReleaseChangelog {
           .append("")
           .append("### Breaking changes [edot-java-" + version.dashStr() + "-fixes]")
           .append(breaking);
+    }
+    if (!dependenciesNotes.isEmpty()) {
+      result
+          .append("")
+          .append(dependenciesNotes);
     }
     result.append("");
     return result;
