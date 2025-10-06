@@ -63,7 +63,7 @@ public class ReleaseChangelog {
 
     Lines allReleaseNotes = new Lines(Files.readAllLines(releaseNotesFile, StandardCharsets.UTF_8));
     int insertBeforeLine = findHeadingOfPreviousVersion(allReleaseNotes, version);
-    if(insertBeforeLine < 0){
+    if (insertBeforeLine < 0) {
       insertBeforeLine = allReleaseNotes.lineCount();
     }
     allReleaseNotes.insert(generateReleaseNotes(version, releaseDateLine, enhancements, fixes, breakingChanges),
@@ -73,7 +73,7 @@ public class ReleaseChangelog {
       Lines allDeprecations = new Lines(
           Files.readAllLines(deprecationsFile, StandardCharsets.UTF_8));
       int insertDepsBeforeLine = findHeadingOfPreviousVersion(allDeprecations, version);
-      if(insertDepsBeforeLine < 0){
+      if (insertDepsBeforeLine < 0) {
         // in case no previous version was listed
         insertDepsBeforeLine = allDeprecations.lineCount();
       }
@@ -115,7 +115,7 @@ public class ReleaseChangelog {
           .append("### Fixes [edot-java-" + version.dashStr() + "-fixes]")
           .append(fixes);
     }
-    if(!breaking.isEmpty()){
+    if (!breaking.isEmpty()) {
       result
           .append("")
           .append("### Breaking changes [edot-java-" + version.dashStr() + "-fixes]")
