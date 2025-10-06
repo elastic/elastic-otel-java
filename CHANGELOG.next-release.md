@@ -13,8 +13,6 @@ This file contains all changes which are not released yet.
 <!--FIXES-END-->
 # Features and enhancements
 <!--ENHANCEMENTS-START-->
-* Add support for dynamic configuration options for 9.2 #818
-* Switch upstream Opamp client #789
 
 <!--ENHANCEMENTS-END-->
 # Deprecations
@@ -24,6 +22,8 @@ This file contains all changes which are not released yet.
 
 # Breaking Changes
 <!--BREAKING-CHANGES-START-->
-* Switch to upstream instrumentation of openai by default #763
 
 <!--BREAKING-CHANGES-END-->
+<!--DEPENDENCIES-NOTES-START-->
+
+<!--DEPENDENCIES-NOTES-END-->
