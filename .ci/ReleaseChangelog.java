@@ -66,7 +66,7 @@ public class ReleaseChangelog {
     if(insertBeforeLine < 0){
       insertBeforeLine = allReleaseNotes.lineCount();
     }
-    allReleaseNotes.insert(generateReleaseNotes(version, releaseDateLine, enhancements, fixes),
+    allReleaseNotes.insert(generateReleaseNotes(version, releaseDateLine, enhancements, fixes, breakingChanges),
         insertBeforeLine);
 
     if (!deprecations.isEmpty()) {
@@ -98,7 +98,7 @@ public class ReleaseChangelog {
   }
 
   private static Lines generateReleaseNotes(VersionNumber version, String releaseDateLine,
-      Lines enhancements, Lines fixes) {
+      Lines enhancements, Lines fixes, Lines breaking) {
     Lines result = new Lines()
         .append("## " + version.dotStr() + " [edot-java-" + version.dashStr() + "-release-notes]")
         .append(releaseDateLine);
@@ -114,6 +114,12 @@ public class ReleaseChangelog {
           .append("")
           .append("### Fixes [edot-java-" + version.dashStr() + "-fixes]")
           .append(fixes);
+    }
+    if(!breaking.isEmpty()){
+      result
+          .append("")
+          .append("### Breaking changes [edot-java-" + version.dashStr() + "-fixes]")
+          .append(breaking);
     }
     result.append("");
     return result;
