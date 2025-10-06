@@ -24,6 +24,3 @@ This file contains all changes which are not released yet.
 <!--BREAKING-CHANGES-START-->
 
 <!--BREAKING-CHANGES-END-->
-<!--DEPENDENCIES-NOTES-START-->
-
-<!--DEPENDENCIES-NOTES-END-->
