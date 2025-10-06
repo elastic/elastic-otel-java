@@ -26,11 +26,6 @@ on:
         description: 'pull-request body'
         type: string
         required: true
-      changelog:
-        description: 'The changelog to prepend to CHANGELOG.md without heading'
-        type: string
-        required: false
-        default: ''
 
 env:
   RELEASE_VERSION: ${{ inputs.version }}
