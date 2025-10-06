@@ -100,21 +100,10 @@ jobs:
         with:
           command: ./gradlew -q setNextVersion
 
-      - name: Insert notes into cumulative changelog (post release)
+      - name: Generate documentation changelog (post release)
         if: inputs.phase == 'post'
         run: |
-          echo "# ${VERSION} - $(date +'%d/%m/%Y')" > tmpchangelog
-          echo "${CHANGELOG}" >> tmpchangelog
-          cat CHANGELOG.md >> tmpchangelog
-          mv tmpchangelog CHANGELOG.md
-        env:
-          VERSION: ${{ inputs.version }}
-          CHANGELOG: ${{ inputs.changelog }}
-
-      - name: Clear next release changelog (post release)
-        if: inputs.phase == 'post'
-        run: |
-          echo '' > CHANGELOG.next-release.md
+          java .ci/ReleaseChangelog.java CHANGELOG.next-release.md docs/release-notes ${{ env.RELEASE_VERSION }}
   
       - name: Push the ${{ inputs.phase }} release branch
         run: |
