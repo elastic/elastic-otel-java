@@ -27,7 +27,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [edot-java-X.X.X-fixes]
 % *
 
-# 1.5.0 [edot-java-1.5.0-release-notes]
+## 1.5.0 [edot-java-1.5.0-release-notes]
 
 ### Features and enhancements [edot-java-1.5.0-features-enhancements]
 
