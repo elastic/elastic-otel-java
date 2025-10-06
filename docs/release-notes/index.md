@@ -27,6 +27,24 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [edot-java-X.X.X-fixes]
 % *
 
+## 1.6.0 [edot-java-1-6-0-release-notes]
+**Release date:** October 6, 2025
+
+### Features and enhancements [edot-java-1-6-0-features-enhancements]
+* Add support for dynamic configuration options for 9.2 #818
+* Switch upstream Opamp client #789
+
+### Breaking changes [edot-java-1-6-0-fixes]
+* Switch to upstream instrumentation of openai by default #763
+
+This release is based on the following upstream versions:
+
+
+* opentelemetry-javaagent: [2.20.1](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.20.1)
+* opentelemetry-sdk: [1.54.1](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.54.1)
+* opentelemetry-semconv: [1.37.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.37.0)
+* opentelemetry-java-contrib: [1.49.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.49.0)
+
 ## 1.5.0 [edot-java-1.5.0-release-notes]
 
 ### Features and enhancements [edot-java-1.5.0-features-enhancements]
