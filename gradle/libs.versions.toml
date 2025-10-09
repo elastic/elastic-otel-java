@@ -59,7 +59,7 @@ mockserver-client = "org.mock-server:mockserver-client-java:5.15.0"
 
 junitBom = { group = "org.junit", name = "junit-bom", version.ref = "junit" }
 
-okhttp = "com.squareup.okhttp3:okhttp:5.1.0"
+okhttp = "com.squareup.okhttp3:okhttp:5.2.0"
 dslJson = "com.dslplatform:dsl-json-java8:1.10.0"
 
 hdrhistogram = "org.hdrhistogram:HdrHistogram:2.2.2"
