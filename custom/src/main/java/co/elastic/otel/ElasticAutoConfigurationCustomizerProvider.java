@@ -18,6 +18,7 @@
  */
 package co.elastic.otel;
 
+import co.elastic.otel.compositesampling.DynamicCompositeParentBasedTraceIdRatioBasedSampler;
 import co.elastic.otel.dynamicconfig.BlockableLogRecordExporter;
 import co.elastic.otel.dynamicconfig.BlockableMetricExporter;
 import co.elastic.otel.dynamicconfig.BlockableSpanExporter;
@@ -63,9 +64,26 @@ public class ElasticAutoConfigurationCustomizerProvider
 
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
-    // Order is important: configureExporterUserAgentHeaders needs access to the unwrapped exporters
-    configureExporterUserAgentHeaders(autoConfiguration);
-    configureBlockableExporters(autoConfiguration);
+    // Order is important: headers and server certificate bypass need access to the unwrapped
+    // exporters and must execute first
+    autoConfiguration.addSpanExporterCustomizer(
+        (exporter, config) -> {
+          exporter = ElasticUserAgentHeader.configureIfPossible(exporter);
+          exporter = ElasticVerifyServerCert.configureIfPossible(exporter, config);
+          return BlockableSpanExporter.createCustomInstance(exporter);
+        });
+    autoConfiguration.addMetricExporterCustomizer(
+        (exporter, config) -> {
+          exporter = ElasticUserAgentHeader.configureIfPossible(exporter);
+          exporter = ElasticVerifyServerCert.configureIfPossible(exporter, config);
+          return BlockableMetricExporter.createCustomInstance(exporter);
+        });
+    autoConfiguration.addLogRecordExporterCustomizer(
+        (exporter, config) -> {
+          exporter = ElasticUserAgentHeader.configureIfPossible(exporter);
+          exporter = ElasticVerifyServerCert.configureIfPossible(exporter, config);
+          return BlockableLogRecordExporter.createCustomInstance(exporter);
+        });
 
     autoConfiguration.addPropertiesCustomizer(
         ElasticAutoConfigurationCustomizerProvider::propertiesCustomizer);
@@ -75,32 +93,10 @@ public class ElasticAutoConfigurationCustomizerProvider
         (providerBuilder, properties) -> {
           CentralConfig.init(providerBuilder, properties);
           AgentLog.addSpanLoggingIfRequired(providerBuilder, properties);
+          providerBuilder.setSampler(DynamicCompositeParentBasedTraceIdRatioBasedSampler.INSTANCE);
           return providerBuilder;
         });
     ConfigLogger.triggerInitialLogConfig();
-  }
-
-  private void configureExporterUserAgentHeaders(AutoConfigurationCustomizer autoConfiguration) {
-    autoConfiguration.addSpanExporterCustomizer(
-        (spanExporter, configProperties) ->
-            ElasticUserAgentHeader.configureIfPossible(spanExporter));
-    autoConfiguration.addMetricExporterCustomizer(
-        (metricExporter, configProperties) ->
-            ElasticUserAgentHeader.configureIfPossible(metricExporter));
-    autoConfiguration.addLogRecordExporterCustomizer(
-        (logExporter, configProperties) -> ElasticUserAgentHeader.configureIfPossible(logExporter));
-  }
-
-  private static void configureBlockableExporters(AutoConfigurationCustomizer autoConfiguration) {
-    autoConfiguration.addMetricExporterCustomizer(
-        (metricexporter, configProperties) ->
-            BlockableMetricExporter.createCustomInstance(metricexporter));
-    autoConfiguration.addSpanExporterCustomizer(
-        (spanExporter, configProperties) ->
-            BlockableSpanExporter.createCustomInstance(spanExporter));
-    autoConfiguration.addLogRecordExporterCustomizer(
-        (logExporter, configProperties) ->
-            BlockableLogRecordExporter.createCustomInstance(logExporter));
   }
 
   static Map<String, String> propertiesCustomizer(ConfigProperties configProperties) {
@@ -150,7 +146,7 @@ public class ElasticAutoConfigurationCustomizerProvider
 
     // disable upstream distro name & version provider
     disabledResourceProviders.add(
-        "io.opentelemetry.javaagent.tooling.DistroVersionResourceProvider");
+        "io.opentelemetry.javaagent.tooling.resources.DistroResourceProvider");
     config.put(DISABLED_RESOURCE_PROVIDERS, String.join(",", disabledResourceProviders));
   }
 

@@ -18,16 +18,19 @@
  */
 package co.elastic.otel.dynamicconfig;
 
-import co.elastic.opamp.client.CentralConfigurationManager;
-import co.elastic.opamp.client.CentralConfigurationProcessor;
+import co.elastic.otel.compositesampling.DynamicCompositeParentBasedTraceIdRatioBasedSampler;
+import co.elastic.otel.dynamicconfig.internal.OpampManager;
 import co.elastic.otel.logging.AgentLog;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.time.Duration;
+import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -58,28 +61,32 @@ public class CentralConfig {
     logger.info("Starting OpAmp client for: " + serviceName + " on endpoint " + endpoint);
     DynamicInstrumentation.setTracerConfigurator(
         providerBuilder, DynamicConfiguration.UpdatableConfigurator.INSTANCE);
-    CentralConfigurationManager centralConfigurationManager =
-        CentralConfigurationManager.builder()
+    OpampManager opampManager =
+        OpampManager.builder()
             .setServiceName(serviceName)
             .setPollingInterval(Duration.ofSeconds(30))
             .setConfigurationEndpoint(endpoint)
             .setServiceEnvironment(environment)
             .build();
 
-    centralConfigurationManager.start(
+    opampManager.start(
         configuration -> {
           logger.fine("Received configuration: " + configuration);
-          Configs.applyConfigurations(configuration);
+          Configs.applyConfigurations(configuration, opampManager);
           ConfigLogger.logConfig();
-          return CentralConfigurationProcessor.Result.SUCCESS;
+          return OpampManager.CentralConfigurationProcessor.Result.SUCCESS;
         });
 
     Runtime.getRuntime()
         .addShutdownHook(
             new Thread(
                 () -> {
-                  logger.info("=========== Shutting down OpAmp client for: " + serviceName);
-                  centralConfigurationManager.stop();
+                  logger.info("=========== Shutting down OpAMP client for: " + serviceName);
+                  try {
+                    opampManager.close();
+                  } catch (IOException e) {
+                    logger.log(Level.SEVERE, "Error during OpAMP shutdown", e);
+                  }
                 }));
   }
 
@@ -122,17 +129,20 @@ public class CentralConfig {
                   new SendTraces(),
                   new DeactivateAllInstrumentations(),
                   new DeactivateInstrumentations(),
-                  new LoggingLevel())
+                  new LoggingLevel(),
+                  new SamplingRate(),
+                  new PollingInterval())
               .collect(Collectors.toMap(ConfigOption::getConfigName, option -> option));
     }
 
-    public static synchronized void applyConfigurations(Map<String, String> configuration) {
+    public static synchronized void applyConfigurations(
+        Map<String, String> configuration, OpampManager opampManager) {
       Set<String> copyOfCurrentNonDefaultConfigsApplied =
           new HashSet<>(currentNonDefaultConfigsApplied);
       configuration.forEach(
           (configurationName, configurationValue) -> {
             copyOfCurrentNonDefaultConfigsApplied.remove(configurationName);
-            applyConfiguration(configurationName, configurationValue);
+            applyConfiguration(configurationName, configurationValue, opampManager);
             currentNonDefaultConfigsApplied.add(configurationName);
           });
       if (!copyOfCurrentNonDefaultConfigsApplied.isEmpty()) {
@@ -140,19 +150,21 @@ public class CentralConfig {
         // have been removed from the configs being sent - so for all of these we need to set the
         // config back to default
         for (String configurationName : copyOfCurrentNonDefaultConfigsApplied) {
-          applyDefaultConfiguration(configurationName);
+          applyDefaultConfiguration(configurationName, opampManager);
           currentNonDefaultConfigsApplied.remove(configurationName);
         }
       }
     }
 
-    public static void applyDefaultConfiguration(String configurationName) {
-      configNameToConfig.get(configurationName).updateToDefault();
+    public static void applyDefaultConfiguration(
+        String configurationName, OpampManager opampManager) {
+      configNameToConfig.get(configurationName).updateToDefault(opampManager);
     }
 
-    public static void applyConfiguration(String configurationName, String configurationValue) {
+    public static void applyConfiguration(
+        String configurationName, String configurationValue, OpampManager opampManager) {
       if (configNameToConfig.containsKey(configurationName)) {
-        configNameToConfig.get(configurationName).updateOrLog(configurationValue);
+        configNameToConfig.get(configurationName).updateOrLog(configurationValue, opampManager);
       } else {
         logger.warning(
             "Ignoring unknown confguration option: '"
@@ -194,18 +206,19 @@ public class CentralConfig {
       }
     }
 
-    public void updateOrLog(String configurationValue) {
+    public void updateOrLog(String configurationValue, OpampManager opampManager) {
       try {
-        update(configurationValue);
+        update(configurationValue, opampManager);
       } catch (IllegalArgumentException e) {
         logger.warning(e.getMessage());
       }
     }
 
-    abstract void update(String configurationValue) throws IllegalArgumentException;
+    abstract void update(String configurationValue, OpampManager opampManager)
+        throws IllegalArgumentException;
 
-    public void updateToDefault() {
-      update(defaultConfigStringValue);
+    public void updateToDefault(OpampManager opampManager) {
+      update(defaultConfigStringValue, opampManager);
     }
 
     protected DynamicConfiguration config() {
@@ -219,7 +232,8 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue) throws IllegalArgumentException {
+    void update(String configurationValue, OpampManager opampManager)
+        throws IllegalArgumentException {
       config().setSendingLogs(getBoolean(configurationValue));
     }
   }
@@ -230,7 +244,8 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue) throws IllegalArgumentException {
+    void update(String configurationValue, OpampManager opampManager)
+        throws IllegalArgumentException {
       config().setSendingMetrics(getBoolean(configurationValue));
     }
   }
@@ -241,7 +256,8 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue) throws IllegalArgumentException {
+    void update(String configurationValue, OpampManager opampManager)
+        throws IllegalArgumentException {
       config().setSendingSpans(getBoolean(configurationValue));
     }
   }
@@ -252,7 +268,8 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue) throws IllegalArgumentException {
+    void update(String configurationValue, OpampManager opampManager)
+        throws IllegalArgumentException {
       if (getBoolean(configurationValue)) {
         config().deactivateAllInstrumentations();
       } else {
@@ -267,7 +284,8 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue) throws IllegalArgumentException {
+    void update(String configurationValue, OpampManager opampManager)
+        throws IllegalArgumentException {
       config().deactivateInstrumentations(configurationValue);
     }
   }
@@ -278,8 +296,40 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue) throws IllegalArgumentException {
+    void update(String configurationValue, OpampManager opampManager)
+        throws IllegalArgumentException {
       AgentLog.setLevel(configurationValue);
+    }
+  }
+
+  public static final class SamplingRate extends ConfigOption {
+    SamplingRate() {
+      super("sampling_rate", "1.0");
+    }
+
+    @Override
+    void update(String configurationValue, OpampManager opampManager)
+        throws IllegalArgumentException {
+      DynamicCompositeParentBasedTraceIdRatioBasedSampler.setRatio(
+          Double.parseDouble(configurationValue));
+    }
+  }
+
+  public static final class PollingInterval extends ConfigOption {
+    PollingInterval() {
+      super("opamp_polling_interval", "30s");
+    }
+
+    @Override
+    void update(String configurationValue, OpampManager opampManager)
+        throws IllegalArgumentException {
+      try {
+        Duration duration = Duration.parse("PT" + configurationValue);
+        opampManager.setPollingDelay(duration);
+      } catch (DateTimeParseException e) {
+        logger.warning(
+            "Failed to update the polling interval, value passed was invalid: " + e.getMessage());
+      }
     }
   }
 }

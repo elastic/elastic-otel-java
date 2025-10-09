@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowCopyAction
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.github.jengelman.gradle.plugins.shadow.transformers.TransformerContext
 import org.apache.tools.zip.ZipEntry
@@ -20,12 +21,30 @@ plugins {
 // this configuration collects libs that will be placed in the bootstrap classloader
 val bootstrapLibs: Configuration by configurations.creating {
   isCanBeConsumed = false
+  isCanBeResolved = false
 }
 val javaagentLibs: Configuration by configurations.creating {
   isCanBeConsumed = false
+  isCanBeResolved = false
 }
 val upstreamAgent: Configuration by configurations.creating {
   isCanBeConsumed = false
+  isCanBeResolved = false
+}
+val bootstrapLibsClasspath: Configuration by configurations.creating {
+  extendsFrom(bootstrapLibs)
+  isCanBeConsumed = false
+  isCanBeResolved = true
+}
+val javaagentLibsClasspath: Configuration by configurations.creating {
+  extendsFrom(javaagentLibs)
+  isCanBeConsumed = false
+  isCanBeResolved = true
+}
+val upstreamAgentClasspath: Configuration by configurations.creating {
+  extendsFrom(upstreamAgent)
+  isCanBeConsumed = false
+  isCanBeResolved = true
 }
 
 dependencies {
@@ -70,14 +89,15 @@ tasks {
 
   // 1. all distro specific javaagent libs are relocated
   val relocateJavaagentLibs = register<ShadowJar>("relocateJavaagentLibs") {
-    configurations = listOf(javaagentLibs)
+    configurations = listOf(javaagentLibsClasspath)
 
-    duplicatesStrategy = DuplicatesStrategy.FAIL
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    failOnDuplicateEntries = true
 
     archiveFileName.set("javaagentLibs-relocated.jar")
 
     mergeServiceFiles()
-    exclude("**/module-info.class")
+    exclude("**/module-info.class", "META-INF/LICENSE*", "META-INF/NOTICE*")
     relocatePackages(this)
 
     // exclude known bootstrap dependencies - they can't appear in the inst/ directory
@@ -116,7 +136,7 @@ tasks {
   // This transformer injects a new Field into the Opentelemetry SdkSpan class to be used
   // as efficient storage for co.elastic.otel.common.SpanValues
   // Check the FieldBackedSpanValueStorageProvider for details
-  val injectSpanValueFieldTransformer = object: com.github.jengelman.gradle.plugins.shadow.transformers.Transformer {
+  val injectSpanValueFieldTransformer = object: com.github.jengelman.gradle.plugins.shadow.transformers.ResourceTransformer {
 
     @Internal
     val SDK_SPAN_CLASS_FILE = "inst/io/opentelemetry/sdk/trace/SdkSpan.classdata"
@@ -131,7 +151,7 @@ tasks {
     }
 
     override fun canTransformResource(element: FileTreeElement): Boolean {
-      return element.name.equals(SDK_SPAN_CLASS_FILE)
+      return element.path == SDK_SPAN_CLASS_FILE
     }
 
     override fun transform(context: TransformerContext) {
@@ -139,7 +159,7 @@ tasks {
         throw IllegalStateException("Multiple SdkSpan classes detected")
       }
 
-      val inputStream = context.getIs()
+      val inputStream = context.inputStream
       val reader = ClassReader(inputStream)
       val writer = ClassWriter(reader, 0)
       val visitor = object : ClassVisitor(Opcodes.ASM9, writer) {
@@ -168,33 +188,37 @@ tasks {
       }
 
       val entry = ZipEntry(SDK_SPAN_CLASS_FILE)
-      entry.time = TransformerContext.getEntryTimestamp(preserveFileTimestamps, entry.time)
+      entry.time = getEntryTimestamp(preserveFileTimestamps, entry.time)
       os.putNextEntry(entry)
       os.write(bytecode)
     }
 
+    private fun getEntryTimestamp(preserveFileTimestamps: Boolean, entryTime: Long): Long {
+      return if (preserveFileTimestamps) entryTime else ShadowCopyAction.CONSTANT_TIME_FOR_ZIP_ENTRIES
+    }
   }
 
   // 3. the relocated and isolated javaagent libs are merged together with the bootstrap libs (which undergo relocation
   // in this task) and the upstream javaagent jar; duplicates are removed
   shadowJar {
-
-    dependsOn(isolateJavaagentLibs)
-    configurations = listOf(bootstrapLibs, upstreamAgent)
+    configurations = listOf(bootstrapLibsClasspath, upstreamAgentClasspath)
 
     // exclude slf4j-simple from the shadow jar as we use log4j2-slf4j with internal-logging instead
     exclude("inst/io/opentelemetry/javaagent/slf4j/simple/**")
 
-    from(isolateJavaagentLibs.get().outputs)
+    from(isolateJavaagentLibs)
 
     archiveClassifier.set("")
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-    mergeServiceFiles {
-      include("inst/META-INF/services/*")
+    mergeServiceFiles{
+      include("inst/META-INF/services/**")
+      path = "inst/META-INF/services"
     }
-    exclude("**/module-info.class")
+    filesMatching("inst/META-INF/services/**") {
+      duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
     relocatePackages(this)
     transform(injectSpanValueFieldTransformer)
 

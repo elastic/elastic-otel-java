@@ -16,3 +16,4 @@ out/
 # OS X
 **/.DS_Store
 docs/.artifacts
+.artifacts

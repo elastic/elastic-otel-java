@@ -46,7 +46,7 @@ class ElasticAutoConfigurationCustomizerProviderTest {
         .describedAs("upstream distro version resource provider must be disabled")
         .containsEntry(
             "otel.java.disabled.resource.providers",
-            "io.opentelemetry.javaagent.tooling.DistroVersionResourceProvider");
+            "io.opentelemetry.javaagent.tooling.resources.DistroResourceProvider");
 
     assertThat(config)
         .describedAs("runtime experimental metrics must be enabled")
@@ -58,14 +58,15 @@ class ElasticAutoConfigurationCustomizerProviderTest {
   void disableCustomResourceProvider() {
     Map<String, String> userConfig = new HashMap<>();
     userConfig.put("otel.java.disabled.resource.providers", "my.disabled.provider.Provider");
-    Map<String, String> config = propertiesCustomizer(DefaultConfigProperties.create(userConfig));
+    Map<String, String> config =
+        propertiesCustomizer(DefaultConfigProperties.createFromMap(userConfig));
     String value = config.get("otel.java.disabled.resource.providers");
     assertThat(value)
         .satisfies(
             v ->
                 assertThat(v.split(","))
                     .containsExactly(
-                        "io.opentelemetry.javaagent.tooling.DistroVersionResourceProvider",
+                        "io.opentelemetry.javaagent.tooling.resources.DistroResourceProvider",
                         "my.disabled.provider.Provider"));
   }
 
@@ -73,7 +74,8 @@ class ElasticAutoConfigurationCustomizerProviderTest {
   void disableExperimentalRuntimeMetrics() {
     Map<String, String> userConfig = new HashMap<>();
     userConfig.put("otel.instrumentation.runtime-telemetry.emit-experimental-telemetry", "false");
-    Map<String, String> config = propertiesCustomizer(DefaultConfigProperties.create(userConfig));
+    Map<String, String> config =
+        propertiesCustomizer(DefaultConfigProperties.createFromMap(userConfig));
     String value = config.get("otel.instrumentation.runtime-telemetry.emit-experimental-telemetry");
     assertThat(value).isEqualTo("false");
   }
@@ -81,7 +83,7 @@ class ElasticAutoConfigurationCustomizerProviderTest {
   @Test
   void ensureDefaultMetricTemporalityIsDelta() {
     Map<String, String> config =
-        propertiesCustomizer(DefaultConfigProperties.create(new HashMap<>()));
+        propertiesCustomizer(DefaultConfigProperties.createFromMap(new HashMap<>()));
     String value = config.get("otel.exporter.otlp.metrics.temporality.preference");
     assertThat(value).isEqualTo("DELTA");
   }
@@ -90,7 +92,8 @@ class ElasticAutoConfigurationCustomizerProviderTest {
   void customizeMetricTemporalityPreference() {
     Map<String, String> userConfig = new HashMap<>();
     userConfig.put("otel.exporter.otlp.metrics.temporality.preference", "LOWMEMORY");
-    Map<String, String> config = propertiesCustomizer(DefaultConfigProperties.create(userConfig));
+    Map<String, String> config =
+        propertiesCustomizer(DefaultConfigProperties.createFromMap(userConfig));
     String value = config.get("otel.exporter.otlp.metrics.temporality.preference");
     assertThat(value).isEqualTo("LOWMEMORY");
   }

@@ -26,11 +26,6 @@ on:
         description: 'pull-request body'
         type: string
         required: true
-      changelog:
-        description: 'The changelog to prepend to CHANGELOG.md without heading'
-        type: string
-        required: false
-        default: ''
 
 env:
   RELEASE_VERSION: ${{ inputs.version }}
@@ -44,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Validate release tag does not exist in repo
@@ -61,19 +56,16 @@ jobs:
 
       - name: Get token
         id: get_token
-        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
+        uses: actions/create-github-app-token@v2
         with:
-          app_id: ${{ secrets.OBS_AUTOMATION_APP_ID }}
-          private_key: ${{ secrets.OBS_AUTOMATION_APP_PEM }}
-          permissions: >-
-            {
-              "contents": "write",
-              "pull_requests": "write"
-            }
-          repositories: >-
-            ["elastic-otel-java"]
+          app-id: ${{ secrets.OBS_AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.OBS_AUTOMATION_APP_PEM }}
+          permission-contents: write
+          permission-pull-requests: write
+          repositories: |
+            elastic-otel-java
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ inputs.ref }}
           token: ${{ steps.get_token.outputs.token }}
@@ -103,26 +95,26 @@ jobs:
         with:
           command: ./gradlew -q setNextVersion
 
-      - name: Insert notes into cumulative changelog (post release)
+      - name: Generate documentation changelog (post release)
         if: inputs.phase == 'post'
         run: |
-          echo "# ${{ inputs.version }} - $(date +'%d/%m/%Y')" > tmpchangelog
-          echo '${{ inputs.changelog }}' >> tmpchangelog
-          cat CHANGELOG.md >> tmpchangelog
-          mv tmpchangelog CHANGELOG.md
-
-      - name: Clear next release changelog (post release)
-        if: inputs.phase == 'post'
-        run: |
-          echo '' > CHANGELOG.next-release.md
+          echo '<!--DEPENDENCIES-NOTES-START-->' >> CHANGELOG.next-release.md
+          echo -e "This release is based on the following upstream versions:\n\n" >> CHANGELOG.next-release.md
+          ./gradlew -q printUpstreamDependenciesMarkdown >> CHANGELOG.next-release.md
+          echo '<!--DEPENDENCIES-NOTES-END-->' >> CHANGELOG.next-release.md
+          java .ci/ReleaseChangelog.java CHANGELOG.next-release.md docs/release-notes ${{ env.RELEASE_VERSION }}
   
       - name: Push the ${{ inputs.phase }} release branch
         run: |
           git add --all
-          git commit -m "${{ inputs.phase }} release: elastic-otel-java v${{ env.RELEASE_VERSION }}"
+          git commit -m "${PHASE} release: elastic-otel-java v${{ env.RELEASE_VERSION }}"
           git push origin ${{ env.BRANCH_NAME }}
+        env:
+          PHASE: ${{ inputs.phase }}
 
       - name: Create the ${{ inputs.phase }} release PR
-        run: gh pr create --title="${{ inputs.pr_title }}" --base main --head ${{ env.BRANCH_NAME }} -b "${{ inputs.pr_body }}"
+        run: gh pr create --title="${PR_TITLE}" --base main --head ${{ env.BRANCH_NAME }} -b "${PR_BODY}"
         env:
           GH_TOKEN: ${{ steps.get_token.outputs.token }}
+          PR_TITLE: ${{ inputs.pr_title }}
+          PR_BODY: ${{ inputs.pr_body }}
