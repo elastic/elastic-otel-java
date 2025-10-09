@@ -23,6 +23,7 @@ import co.elastic.otel.dynamicconfig.BlockableLogRecordExporter;
 import co.elastic.otel.dynamicconfig.BlockableMetricExporter;
 import co.elastic.otel.dynamicconfig.BlockableSpanExporter;
 import co.elastic.otel.dynamicconfig.CentralConfig;
+import co.elastic.otel.dynamicconfig.ConfigLogger;
 import co.elastic.otel.logging.AgentLog;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.common.AttributeKey;
@@ -95,6 +96,7 @@ public class ElasticAutoConfigurationCustomizerProvider
           providerBuilder.setSampler(DynamicCompositeParentBasedTraceIdRatioBasedSampler.INSTANCE);
           return providerBuilder;
         });
+    ConfigLogger.triggerInitialLogConfig();
   }
 
   static Map<String, String> propertiesCustomizer(ConfigProperties configProperties) {

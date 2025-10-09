@@ -87,4 +87,14 @@ public class BlockableMetricExporter implements MetricExporter {
   public void close() {
     delegate.close();
   }
+
+  @Override
+  public String toString() {
+    return "BlockableMetricExporter{"
+        + "sendingMetrics="
+        + sendingMetrics
+        + ", delegate="
+        + delegate
+        + '}';
+  }
 }

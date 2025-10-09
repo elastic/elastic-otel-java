@@ -73,6 +73,7 @@ public class CentralConfig {
         configuration -> {
           logger.fine("Received configuration: " + configuration);
           Configs.applyConfigurations(configuration, opampManager);
+          ConfigLogger.logConfig();
           return OpampManager.CentralConfigurationProcessor.Result.SUCCESS;
         });
 
