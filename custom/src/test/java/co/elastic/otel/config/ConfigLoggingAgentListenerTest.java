@@ -104,17 +104,11 @@ public class ConfigLoggingAgentListenerTest {
   }
 
   static String getAgentJarFile() {
-    // note File path with / is valid on Windows too
-    File[] jar =
-        new File("../agent/build/libs")
-            .listFiles(
-                (dir, name) ->
-                    name.matches("elastic-otel-javaagent-\\d\\.\\d\\.\\d-SNAPSHOT\\.jar"));
-    if (jar == null || jar.length != 1) {
-      throw new IllegalStateException(
-          "expecting exactly one agent jar file in ../agent/build/libs");
+    String path = System.getProperty("elastic.otel.agent.jar.path");
+    if (path == null) {
+      throw new IllegalStateException("elastic.otel.agent.jar.path system property is not set");
     }
-    return jar[0].getAbsolutePath();
+    return path;
   }
 
   public static String executeCommand(List<String> command, int timeoutSeconds) throws IOException {
