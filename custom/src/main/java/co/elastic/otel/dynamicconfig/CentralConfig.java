@@ -21,6 +21,7 @@ package co.elastic.otel.dynamicconfig;
 import co.elastic.otel.compositesampling.DynamicCompositeParentBasedTraceIdRatioBasedSampler;
 import co.elastic.otel.dynamicconfig.internal.OpampManager;
 import co.elastic.otel.logging.AgentLog;
+import io.opentelemetry.contrib.inferredspans.InferredSpans;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
 import java.io.IOException;
@@ -311,6 +312,22 @@ public class CentralConfig {
         throws IllegalArgumentException {
       DynamicCompositeParentBasedTraceIdRatioBasedSampler.setRatio(
           Double.parseDouble(configurationValue));
+    }
+  }
+
+  public static final class InferSpans extends ConfigOption {
+    InferSpans() {
+      super("infer_spans", "true");
+    }
+
+    @Override
+    void update(String configurationValue, OpampManager opampManager)
+        throws IllegalArgumentException {
+      // TODO when setProfilerInterval() returns the old value, use that for 'true'
+      InferredSpans.setProfilerInterval(
+          configurationValue.equals("true")
+              ? Duration.ofSeconds(5)
+              : Duration.ofSeconds(Integer.MAX_VALUE));
     }
   }
 

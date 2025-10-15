@@ -37,6 +37,13 @@ dependencies {
     // exclude transitive dependency as it's provided through agent packaging
     exclude(group = "io.opentelemetry", module = "opentelemetry-sdk")
   }
+  implementation(libs.contribInferredSpans) {
+  // exclude transitive dependency as it's provided through agent packaging
+  exclude(group = "io.opentelemetry", module = "opentelemetry-sdk")
+  exclude(group = "io.opentelemetry", module = "opentelemetry-semconv")
+  exclude(group = "io.opentelemetry", module = "opentelemetry-sdk-extension-autoconfigure-spi")
+}
+
   testImplementation(libs.contribSpanStacktrace)
 
   // needs to be added in order to allow access to AgentListener interface
