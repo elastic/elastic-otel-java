@@ -19,6 +19,7 @@
 package co.elastic.otel;
 
 import co.elastic.otel.compositesampling.DynamicCompositeParentBasedTraceIdRatioBasedSampler;
+import co.elastic.otel.config.ConfigLoggingAgentListener;
 import co.elastic.otel.dynamicconfig.BlockableLogRecordExporter;
 import co.elastic.otel.dynamicconfig.BlockableMetricExporter;
 import co.elastic.otel.dynamicconfig.BlockableSpanExporter;
@@ -104,6 +105,8 @@ public class ElasticAutoConfigurationCustomizerProvider
     deltaMetricsTemporality(config, configProperties);
     resourceProviders(config, configProperties);
     spanStackTrace(config, configProperties);
+    ConfigLoggingAgentListener.logTheConfig(
+        configProperties.getBoolean(ConfigLoggingAgentListener.LOG_THE_CONFIG, true));
 
     return config;
   }

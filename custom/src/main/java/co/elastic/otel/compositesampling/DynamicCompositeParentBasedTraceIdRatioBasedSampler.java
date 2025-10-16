@@ -32,7 +32,8 @@ public enum DynamicCompositeParentBasedTraceIdRatioBasedSampler implements Sampl
 
   static final double DEFAULT_TRACEIDRATIO_SAMPLE_RATIO = 1.0d;
 
-  private static Sampler delegate = newSampler(DEFAULT_TRACEIDRATIO_SAMPLE_RATIO);
+  private static volatile double latestRatio;
+  private static volatile Sampler delegate = newSampler(DEFAULT_TRACEIDRATIO_SAMPLE_RATIO);
 
   public static void setRatio(double ratio) {
     delegate = newSampler(ratio);
@@ -55,6 +56,15 @@ public enum DynamicCompositeParentBasedTraceIdRatioBasedSampler implements Sampl
   }
 
   private static Sampler newSampler(double ratio) {
+    latestRatio = ratio;
     return ConsistentSampler.parentBased(ConsistentSampler.probabilityBased(ratio));
+  }
+
+  public String toString() {
+    return "DynamicCompositeParentBasedTraceIdRatioBasedSampler(ratio="
+        + latestRatio
+        + ", "
+        + delegate.toString()
+        + ")";
   }
 }

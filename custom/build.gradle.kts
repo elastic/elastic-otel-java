@@ -75,7 +75,11 @@ tasks {
   }
 }
 
-tasks.withType<Test> {
+tasks.withType<Test>().configureEach {
+  val agentJarTask = project(":agent").tasks.named<Jar>("jar")
+  dependsOn(agentJarTask)
+  systemProperty("elastic.otel.agent.jar.path", agentJarTask.get().archiveFile.get().asFile.absolutePath)
+
   val overrideConfig = project.properties["elastic.otel.overwrite.config.docs"]
   if (overrideConfig != null) {
     systemProperty("elastic.otel.overwrite.config.docs", overrideConfig)
