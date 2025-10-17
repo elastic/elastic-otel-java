@@ -104,6 +104,7 @@ public class ElasticAutoConfigurationCustomizerProvider
     deltaMetricsTemporality(config, configProperties);
     resourceProviders(config, configProperties);
     spanStackTrace(config, configProperties);
+    defaultSampler(config, configProperties);
     ConfigLoggingAgentListener.logTheConfig(
         configProperties.getBoolean(ConfigLoggingAgentListener.LOG_THE_CONFIG, true));
 
