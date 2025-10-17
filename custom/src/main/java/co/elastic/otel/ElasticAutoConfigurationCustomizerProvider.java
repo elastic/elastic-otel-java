@@ -18,7 +18,6 @@
  */
 package co.elastic.otel;
 
-import co.elastic.otel.compositesampling.DynamicCompositeParentBasedTraceIdRatioBasedSampler;
 import co.elastic.otel.config.ConfigLoggingAgentListener;
 import co.elastic.otel.dynamicconfig.BlockableLogRecordExporter;
 import co.elastic.otel.dynamicconfig.BlockableMetricExporter;
@@ -46,6 +45,7 @@ public class ElasticAutoConfigurationCustomizerProvider
       "otel.instrumentation.runtime-telemetry.emit-experimental-telemetry";
   private static final String METRIC_TEMPORALITY_PREFERENCE =
       "otel.exporter.otlp.metrics.temporality.preference";
+  private static final String TRACES_SAMPLER = "otel.traces.sampler";
 
   // must match value in io.opentelemetry.contrib.stacktrace.StackTraceAutoConfig
   private static final String STACKTRACE_OTEL_FILTER =
@@ -93,7 +93,6 @@ public class ElasticAutoConfigurationCustomizerProvider
         (providerBuilder, properties) -> {
           CentralConfig.init(providerBuilder, properties);
           AgentLog.addSpanLoggingIfRequired(providerBuilder, properties);
-          providerBuilder.setSampler(DynamicCompositeParentBasedTraceIdRatioBasedSampler.INSTANCE);
           return providerBuilder;
         });
   }
@@ -149,6 +148,15 @@ public class ElasticAutoConfigurationCustomizerProvider
     disabledResourceProviders.add(
         "io.opentelemetry.javaagent.tooling.resources.DistroResourceProvider");
     config.put(DISABLED_RESOURCE_PROVIDERS, String.join(",", disabledResourceProviders));
+  }
+
+  private static void defaultSampler(
+      Map<String, String> config, ConfigProperties configProperties) {
+    // enable EDOT default sampler by default if not explicitly disabled
+    String sampler =
+        configProperties.getString(
+            TRACES_SAMPLER, "experimental_composite_parentbased_traceidratio");
+    config.put(TRACES_SAMPLER, sampler);
   }
 
   private static void spanStackTrace(
