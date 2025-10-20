@@ -49,3 +49,4 @@ The EDOT Java agent also supports technologies listed here that are not availabl
 
 Refer to the [EDOT Java agent configuration](/reference/edot-java/configuration.md#configuration-options) for defaults that might differ from the OpenTelemetry Java Instrumentation.
 
+$$$openai-client-instrumentation$$$
