@@ -49,9 +49,3 @@ The EDOT Java agent also supports technologies listed here that are not availabl
 
 Refer to the [EDOT Java agent configuration](/reference/edot-java/configuration.md#configuration-options) for defaults that might differ from the OpenTelemetry Java Instrumentation.
 
-## OpenAI Client instrumentation
-
-The minimum supported version of the OpenAI Java Client is 1.1.0. This instrumentation supports:
-
-* Tracing for requests, including GenAI-specific attributes such as token usage.
-* Opt-in logging of OpenAI request and response content payloads.
