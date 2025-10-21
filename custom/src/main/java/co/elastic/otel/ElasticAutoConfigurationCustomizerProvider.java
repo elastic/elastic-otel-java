@@ -57,8 +57,6 @@ public class ElasticAutoConfigurationCustomizerProvider
   static final String STACKTRACE_LEGACY2_DURATION =
       "elastic.otel.java.span.stacktrace.min.duration";
 
-  static final String OPAMP_HEADERS = "elastic.otel.opamp.headers";
-
   private static final AttributeKey<String> DEPLOYMENT_LEGACY =
       AttributeKey.stringKey("deployment.environment");
   private static final AttributeKey<String> DEPLOYMENT =
