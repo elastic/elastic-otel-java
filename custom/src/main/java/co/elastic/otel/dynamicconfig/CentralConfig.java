@@ -54,7 +54,7 @@ public class CentralConfig {
     String serviceName = getServiceName(properties);
     String environment = getServiceEnvironment(properties);
 
-    logger.info("Starting OpAmp client for: " + serviceName + " on endpoint " + endpoint);
+    logger.info("Starting OpAMP client for: " + serviceName + " on endpoint " + endpoint);
     DynamicInstrumentation.setTracerConfigurator(
         providerBuilder, DynamicConfiguration.UpdatableConfigurator.INSTANCE);
     OpampManager opampManager =
@@ -76,7 +76,7 @@ public class CentralConfig {
         .addShutdownHook(
             new Thread(
                 () -> {
-                  logger.info("=========== Shutting down OpAMP client for: " + serviceName);
+                  logger.info("Shutting down OpAMP client for: " + serviceName);
                   try {
                     opampManager.close();
                   } catch (IOException e) {
