@@ -177,7 +177,7 @@ public final class OpampManager implements Closeable, OpampClient.Callbacks {
 
   public static class Builder {
     private String serviceName;
-    private String environment;
+    @Nullable private String environment;
     private String endpointUrl = "http://localhost:4320/v1/opamp";
     private Duration pollingInterval = Duration.ofSeconds(30);
     private Map<String,String> headers = Collections.emptyMap();
@@ -204,7 +204,7 @@ public final class OpampManager implements Closeable, OpampClient.Callbacks {
       return this;
     }
 
-    public Builder setServiceEnvironment(String environment) {
+    public Builder setServiceEnvironment(@Nullable String environment) {
       this.environment = environment;
       return this;
     }
@@ -227,14 +227,14 @@ public final class OpampManager implements Closeable, OpampClient.Callbacks {
 
   private static class Configuration {
     private final String serviceName;
-    private final String environment;
+    @Nullable private final String environment;
     private final String endpointUrl;
     private final Duration pollingInterval;
     private final Map<String,String> headers;
 
     private Configuration(
         String serviceName,
-        String environment,
+        @Nullable String environment,
         String endpointUrl,
         Duration pollingInterval,
         Map<String,String> headers) {

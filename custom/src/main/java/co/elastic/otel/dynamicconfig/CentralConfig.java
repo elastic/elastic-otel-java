@@ -116,6 +116,7 @@ public class CentralConfig {
     return "unknown_service:java"; // Specified default
   }
 
+  @Nullable
   private static String getServiceEnvironment(ConfigProperties properties) {
     Map<String, String> resourceMap = properties.getMap("otel.resource.attributes");
     if (resourceMap != null) {
