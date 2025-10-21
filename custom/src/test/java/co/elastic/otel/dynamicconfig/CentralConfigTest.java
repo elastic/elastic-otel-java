@@ -103,9 +103,11 @@ class CentralConfigTest {
     map = Collections.singletonMap("otel.resource.attributes", "deployment.environment=test2");
     testServiceEnvironment(map, "test2", "environment set through legacy resource attribute");
 
-    map = Collections.singletonMap("otel.resource.attributes", "deployment.environment=test3,deployment.environment.name=test4");
+    map =
+        Collections.singletonMap(
+            "otel.resource.attributes",
+            "deployment.environment=test3,deployment.environment.name=test4");
     testServiceEnvironment(map, "test4", "when both set semconv attribute takes precedence");
-
   }
 
   private static void testServiceEnvironment(
