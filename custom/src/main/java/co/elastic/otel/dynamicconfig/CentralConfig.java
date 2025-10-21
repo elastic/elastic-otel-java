@@ -110,7 +110,8 @@ public class CentralConfig {
     return endpoint;
   }
 
-  private static String getServiceName(ConfigProperties properties) {
+  // package private for testing
+  static String getServiceName(ConfigProperties properties) {
     String serviceName = properties.getString("otel.service.name");
     if (serviceName != null) {
       return serviceName;

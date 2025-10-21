@@ -20,8 +20,10 @@ package co.elastic.otel.dynamicconfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -45,7 +47,8 @@ class CentralConfigTest {
         "opamp suffix should be automatically added");
   }
 
-  private void testEndpoint(String configValue, String expectedEndpoint, String description) {
+  private static void testEndpoint(
+      String configValue, String expectedEndpoint, String description) {
     Map<String, String> map = Collections.emptyMap();
     if (configValue != null) {
       map = Collections.singletonMap("elastic.otel.opamp.endpoint", configValue);
@@ -53,5 +56,31 @@ class CentralConfigTest {
     assertThat(CentralConfig.getEndpoint(DefaultConfigProperties.createFromMap(map)))
         .describedAs(description)
         .isEqualTo(expectedEndpoint);
+  }
+
+  @Test
+  void getServiceName() {
+    Map<String, String> map = Collections.emptyMap();
+    testServiceName(map, "unknown_service:java", "default service name should be provided");
+
+    map = Collections.singletonMap("otel.service.name", "my-service-1");
+    testServiceName(map, "my-service-1", "set through service name config");
+
+    map = Collections.singletonMap("otel.resource.attributes", "service.name=my-service-2");
+    testServiceName(map, "my-service-2", "set through resource attributes config");
+
+    map = new HashMap<>();
+    map.put("otel.service.name", "my-service-3");
+    map.put("otel.resource.attributes", "service.name=my-service-4");
+    testServiceName(map, "my-service-3", "service name takes precedence over resource attributes");
+  }
+
+  private static void testServiceName(
+      Map<String, String> map, String expectedServiceName, String description) {
+    ConfigProperties configProperties = DefaultConfigProperties.createFromMap(map);
+    assertThat(CentralConfig.getServiceName(configProperties))
+        .isNotNull()
+        .describedAs(description)
+        .isEqualTo(expectedServiceName);
   }
 }
