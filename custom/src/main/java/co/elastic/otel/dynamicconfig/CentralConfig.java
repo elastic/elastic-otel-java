@@ -50,7 +50,6 @@ public class CentralConfig {
       logger.fine("OpAMP is disabled");
       return;
     }
-    logger.info("Using OpAMP endpoint: " + endpoint);
 
     String serviceName = getServiceName(properties);
     String environment = getServiceEnvironment(properties);
