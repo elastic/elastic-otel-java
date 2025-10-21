@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -63,7 +64,10 @@ class OpampManagerTest {
   @BeforeEach
   void setUp(WireMockRuntimeInfo wmRuntimeInfo) {
     opampManager =
-        OpampManager.builder().setConfigurationEndpoint(wmRuntimeInfo.getHttpBaseUrl()).build();
+        OpampManager.builder()
+            .setEndpointUrl(wmRuntimeInfo.getHttpBaseUrl())
+            .setEndpointHeaders(Collections.singletonMap("hello", "world"))
+            .build();
   }
 
   @Test
@@ -181,7 +185,7 @@ class OpampManagerTest {
     // Set up manager with initial polling interval of 1 second.
     opampManager =
         OpampManager.builder()
-            .setConfigurationEndpoint(wmRuntimeInfo.getHttpBaseUrl())
+            .setEndpointUrl(wmRuntimeInfo.getHttpBaseUrl())
             .setPollingInterval(Duration.ofSeconds(1))
             .build();
     opampManager.start(processor);
@@ -206,6 +210,41 @@ class OpampManagerTest {
     // The time diff between the third and fourth request must be of at least 4 seconds.
     assertThat(fourthRequest.getLoggedDate().getTime() - thirdRequest.getLoggedDate().getTime())
         .isGreaterThan(TimeUnit.SECONDS.toMillis(4));
+  }
+
+  @Test
+  void verifyClientHttpHeaders() throws IOException {
+    AtomicReference<Map<String, String>> parsedConfig = new AtomicReference<>();
+    OpampManager.CentralConfigurationProcessor processor =
+        (config) -> {
+          parsedConfig.set(config);
+          return OpampManager.CentralConfigurationProcessor.Result.SUCCESS;
+        };
+    String centralConfigValue = "{}";
+    stubFor(
+        any(anyUrl())
+            .inScenario("opamp")
+            .whenScenarioStateIs(STARTED)
+            .willReturn(
+                ok().withBody(
+                        createServerToAgentWithCentralConfig(centralConfigValue, "some_hash")
+                            .encodeByteString()
+                            .toByteArray()))
+            .willSetStateTo("status_update"));
+    stubFor(
+        any(anyUrl()).inScenario("opamp").whenScenarioStateIs("status_update").willReturn(ok()));
+
+    opampManager.start(processor);
+
+    // Await for server requests
+    List<LoggedRequest> requests = awaitAndGetLoggedRequestsInOrder(2);
+
+    // Verify parsed config from server response:
+    assertThat(parsedConfig.get()).isEmpty();
+
+    // Verify opamp client provided header
+    Request request = requests.get(1);
+    assertThat(request.getHeader("hello")).isEqualTo("world");
   }
 
   private ServerToAgent createServerToAgentWithCentralConfig(String centralConfig, String hash) {

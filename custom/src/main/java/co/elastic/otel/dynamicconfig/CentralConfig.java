@@ -35,38 +35,41 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 
 public class CentralConfig {
   private static final Logger logger = Logger.getLogger(CentralConfig.class.getName());
+
+  private static final String OPAMP_HEADERS = "elastic.otel.opamp.headers";
 
   static {
     DynamicConfigurationPropertyChecker.startCheckerThread();
   }
 
   public static void init(SdkTracerProviderBuilder providerBuilder, ConfigProperties properties) {
-    String endpoint = properties.getString("elastic.otel.opamp.endpoint");
+    String endpoint = getEndpoint(properties);
     if (endpoint == null || endpoint.isEmpty()) {
       logger.fine("OpAMP is disabled");
       return;
     }
-    logger.info("Enabling OpAMP as endpoint is defined: " + endpoint);
-    if (!endpoint.endsWith("v1/opamp")) {
-      if (endpoint.endsWith("/")) {
-        endpoint += "v1/opamp";
-      } else {
-        endpoint += "/v1/opamp";
-      }
-    }
+
     String serviceName = getServiceName(properties);
     String environment = getServiceEnvironment(properties);
-    logger.info("Starting OpAmp client for: " + serviceName + " on endpoint " + endpoint);
+    Map<String, String> headers = properties.getMap(OPAMP_HEADERS);
+    if (logger.isLoggable(Level.FINE)) {
+      // only log header names, not the values to prevent potential leaks
+      headers.forEach((k, v) -> logger.fine("OpAMP header: " + k));
+    }
+
+    logger.info("Starting OpAMP client for: " + serviceName + " on endpoint " + endpoint);
     DynamicInstrumentation.setTracerConfigurator(
         providerBuilder, DynamicConfiguration.UpdatableConfigurator.INSTANCE);
     OpampManager opampManager =
         OpampManager.builder()
             .setServiceName(serviceName)
             .setPollingInterval(Duration.ofSeconds(30))
-            .setConfigurationEndpoint(endpoint)
+            .setEndpointUrl(endpoint)
+            .setEndpointHeaders(headers)
             .setServiceEnvironment(environment)
             .build();
 
@@ -81,7 +84,7 @@ public class CentralConfig {
         .addShutdownHook(
             new Thread(
                 () -> {
-                  logger.info("=========== Shutting down OpAMP client for: " + serviceName);
+                  logger.info("Shutting down OpAMP client for: " + serviceName);
                   try {
                     opampManager.close();
                   } catch (IOException e) {
@@ -90,31 +93,46 @@ public class CentralConfig {
                 }));
   }
 
-  private static String getServiceName(ConfigProperties properties) {
+  // package private for testing
+  @Nullable
+  static String getEndpoint(ConfigProperties properties) {
+    String endpoint = properties.getString("elastic.otel.opamp.endpoint");
+    if (endpoint == null || endpoint.isEmpty()) {
+      return null;
+    }
+    if (!endpoint.endsWith("v1/opamp")) {
+      if (endpoint.endsWith("/")) {
+        endpoint += "v1/opamp";
+      } else {
+        endpoint += "/v1/opamp";
+      }
+    }
+    return endpoint;
+  }
+
+  // package private for testing
+  static String getServiceName(ConfigProperties properties) {
     String serviceName = properties.getString("otel.service.name");
     if (serviceName != null) {
       return serviceName;
     }
     Map<String, String> resourceMap = properties.getMap("otel.resource.attributes");
-    if (resourceMap != null) {
-      serviceName = resourceMap.get("service.name");
-      if (serviceName != null) {
-        return serviceName;
-      }
+    serviceName = resourceMap.get("service.name");
+    if (serviceName != null) {
+      return serviceName;
     }
     return "unknown_service:java"; // Specified default
   }
 
-  private static String getServiceEnvironment(ConfigProperties properties) {
+  // package private for testing
+  @Nullable
+  static String getServiceEnvironment(ConfigProperties properties) {
     Map<String, String> resourceMap = properties.getMap("otel.resource.attributes");
-    if (resourceMap != null) {
-      String environment = resourceMap.get("deployment.environment.name"); // semconv
-      if (environment != null) {
-        return environment;
-      }
-      return resourceMap.get("deployment.environment"); // backward compatible, can be null
+    String environment = resourceMap.get("deployment.environment.name"); // semconv
+    if (environment != null) {
+      return environment;
     }
-    return null;
+    return resourceMap.get("deployment.environment"); // backward compatible, can be null
   }
 
   public static class Configs {

@@ -38,6 +38,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okio.ByteString;
 import opamp.proto.AgentConfigFile;
 import opamp.proto.AgentRemoteConfig;
@@ -63,7 +65,20 @@ public final class OpampManager implements Closeable, OpampClient.Callbacks {
 
     OpampClientBuilder builder = OpampClient.builder();
     builder.enableRemoteConfig();
-    OkHttpSender httpSender = OkHttpSender.create(configuration.configurationEndpoint);
+
+    OkHttpClient.Builder okHttpClient = new OkHttpClient().newBuilder();
+
+    // TODO: revisit this later once the upstream opamp client provides a simpler way to add headers
+    okHttpClient
+        .interceptors()
+        .add(
+            chain -> {
+              Request.Builder modifiedRequest = chain.request().newBuilder();
+              configuration.headers.forEach(modifiedRequest::addHeader);
+              return chain.proceed(modifiedRequest.build());
+            });
+
+    OkHttpSender httpSender = OkHttpSender.create(configuration.endpointUrl, okHttpClient.build());
     if (configuration.serviceName != null) {
       builder.putIdentifyingAttribute("service.name", configuration.serviceName);
     }
@@ -164,9 +179,10 @@ public final class OpampManager implements Closeable, OpampClient.Callbacks {
 
   public static class Builder {
     private String serviceName;
-    private String environment;
-    private String configurationEndpoint = "http://localhost:4320/v1/opamp";
+    @Nullable private String environment;
+    private String endpointUrl = "http://localhost:4320/v1/opamp";
     private Duration pollingInterval = Duration.ofSeconds(30);
+    private Map<String, String> headers = Collections.emptyMap();
 
     private Builder() {}
 
@@ -175,8 +191,13 @@ public final class OpampManager implements Closeable, OpampClient.Callbacks {
       return this;
     }
 
-    public Builder setConfigurationEndpoint(String configurationEndpoint) {
-      this.configurationEndpoint = configurationEndpoint;
+    public Builder setEndpointHeaders(Map<String, String> headers) {
+      this.headers = headers;
+      return this;
+    }
+
+    public Builder setEndpointUrl(String endpointUrl) {
+      this.endpointUrl = endpointUrl;
       return this;
     }
 
@@ -185,14 +206,14 @@ public final class OpampManager implements Closeable, OpampClient.Callbacks {
       return this;
     }
 
-    public Builder setServiceEnvironment(String environment) {
+    public Builder setServiceEnvironment(@Nullable String environment) {
       this.environment = environment;
       return this;
     }
 
     public OpampManager build() {
       return new OpampManager(
-          new Configuration(serviceName, environment, configurationEndpoint, pollingInterval));
+          new Configuration(serviceName, environment, endpointUrl, pollingInterval, headers));
     }
   }
 
@@ -208,19 +229,22 @@ public final class OpampManager implements Closeable, OpampClient.Callbacks {
 
   private static class Configuration {
     private final String serviceName;
-    private final String environment;
-    private final String configurationEndpoint;
+    @Nullable private final String environment;
+    private final String endpointUrl;
     private final Duration pollingInterval;
+    private final Map<String, String> headers;
 
     private Configuration(
         String serviceName,
-        String environment,
-        String configurationEndpoint,
-        Duration pollingInterval) {
+        @Nullable String environment,
+        String endpointUrl,
+        Duration pollingInterval,
+        Map<String, String> headers) {
       this.serviceName = serviceName;
       this.environment = environment;
-      this.configurationEndpoint = configurationEndpoint;
+      this.endpointUrl = endpointUrl;
       this.pollingInterval = pollingInterval;
+      this.headers = headers;
     }
   }
 
