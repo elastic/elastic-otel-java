@@ -24,6 +24,7 @@ import co.elastic.otel.logging.AgentLog;
 import io.opentelemetry.contrib.inferredspans.InferredSpans;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.time.Duration;
@@ -44,21 +45,16 @@ public class CentralConfig {
   }
 
   public static void init(SdkTracerProviderBuilder providerBuilder, ConfigProperties properties) {
-    String endpoint = properties.getString("elastic.otel.opamp.endpoint");
+    String endpoint = getEndpoint(properties);
     if (endpoint == null || endpoint.isEmpty()) {
       logger.fine("OpAMP is disabled");
       return;
     }
-    logger.info("Enabling OpAMP as endpoint is defined: " + endpoint);
-    if (!endpoint.endsWith("v1/opamp")) {
-      if (endpoint.endsWith("/")) {
-        endpoint += "v1/opamp";
-      } else {
-        endpoint += "/v1/opamp";
-      }
-    }
+    logger.info("Using OpAMP endpoint: " + endpoint);
+
     String serviceName = getServiceName(properties);
     String environment = getServiceEnvironment(properties);
+
     logger.info("Starting OpAmp client for: " + serviceName + " on endpoint " + endpoint);
     DynamicInstrumentation.setTracerConfigurator(
         providerBuilder, DynamicConfiguration.UpdatableConfigurator.INSTANCE);
@@ -88,6 +84,22 @@ public class CentralConfig {
                     logger.log(Level.SEVERE, "Error during OpAMP shutdown", e);
                   }
                 }));
+  }
+
+  @Nullable
+  private static String getEndpoint(ConfigProperties properties) {
+    String endpoint = properties.getString("elastic.otel.opamp.endpoint");
+    if (endpoint == null || endpoint.isEmpty()) {
+      return null;
+    }
+    if (!endpoint.endsWith("v1/opamp")) {
+      if (endpoint.endsWith("/")) {
+        endpoint += "v1/opamp";
+      } else {
+        endpoint += "/v1/opamp";
+      }
+    }
+    return endpoint;
   }
 
   private static String getServiceName(ConfigProperties properties) {
