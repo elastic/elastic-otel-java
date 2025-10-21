@@ -73,6 +73,14 @@ class CentralConfigTest {
     map.put("otel.service.name", "my-service-3");
     map.put("otel.resource.attributes", "service.name=my-service-4");
     testServiceName(map, "my-service-3", "service name takes precedence over resource attributes");
+
+    map.clear();
+    map.put("otel.resource.attributes", "");
+    testServiceName(map, "unknown_service:java", "default service name should be provided");
+
+    map.clear();
+    map.put("otel.resource.attributes", "service.name=");
+    testServiceName(map, "unknown_service:java", "default service name should be provided");
   }
 
   private static void testServiceName(
@@ -82,5 +90,29 @@ class CentralConfigTest {
         .isNotNull()
         .describedAs(description)
         .isEqualTo(expectedServiceName);
+  }
+
+  @Test
+  void getServiceEnvironment() {
+    Map<String, String> map = Collections.emptyMap();
+    testServiceEnvironment(map, null, "no environment by default");
+
+    map = Collections.singletonMap("otel.resource.attributes", "deployment.environment.name=test1");
+    testServiceEnvironment(map, "test1", "environment set through resource attribute");
+
+    map = Collections.singletonMap("otel.resource.attributes", "deployment.environment=test2");
+    testServiceEnvironment(map, "test2", "environment set through legacy resource attribute");
+
+    map = Collections.singletonMap("otel.resource.attributes", "deployment.environment=test3,deployment.environment.name=test4");
+    testServiceEnvironment(map, "test4", "when both set semconv attribute takes precedence");
+
+  }
+
+  private static void testServiceEnvironment(
+      Map<String, String> map, String expectedEnvironment, String description) {
+    ConfigProperties configProperties = DefaultConfigProperties.createFromMap(map);
+    assertThat(CentralConfig.getServiceEnvironment(configProperties))
+        .describedAs(description)
+        .isEqualTo(expectedEnvironment);
   }
 }

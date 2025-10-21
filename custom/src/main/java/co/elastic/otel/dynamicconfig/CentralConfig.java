@@ -117,26 +117,22 @@ public class CentralConfig {
       return serviceName;
     }
     Map<String, String> resourceMap = properties.getMap("otel.resource.attributes");
-    if (resourceMap != null) {
-      serviceName = resourceMap.get("service.name");
-      if (serviceName != null) {
-        return serviceName;
-      }
+    serviceName = resourceMap.get("service.name");
+    if (serviceName != null) {
+      return serviceName;
     }
     return "unknown_service:java"; // Specified default
   }
 
+  // package private for testing
   @Nullable
-  private static String getServiceEnvironment(ConfigProperties properties) {
+  static String getServiceEnvironment(ConfigProperties properties) {
     Map<String, String> resourceMap = properties.getMap("otel.resource.attributes");
-    if (resourceMap != null) {
-      String environment = resourceMap.get("deployment.environment.name"); // semconv
-      if (environment != null) {
-        return environment;
-      }
-      return resourceMap.get("deployment.environment"); // backward compatible, can be null
+    String environment = resourceMap.get("deployment.environment.name"); // semconv
+    if (environment != null) {
+      return environment;
     }
-    return null;
+    return resourceMap.get("deployment.environment"); // backward compatible, can be null
   }
 
   public static class Configs {
