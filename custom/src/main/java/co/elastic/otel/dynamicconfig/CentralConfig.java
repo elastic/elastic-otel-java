@@ -93,8 +93,9 @@ public class CentralConfig {
                 }));
   }
 
+  // package private for testing
   @Nullable
-  private static String getEndpoint(ConfigProperties properties) {
+  static String getEndpoint(ConfigProperties properties) {
     String endpoint = properties.getString("elastic.otel.opamp.endpoint");
     if (endpoint == null || endpoint.isEmpty()) {
       return null;
