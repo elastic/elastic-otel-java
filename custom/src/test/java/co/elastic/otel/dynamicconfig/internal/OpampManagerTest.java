@@ -63,7 +63,7 @@ class OpampManagerTest {
   @BeforeEach
   void setUp(WireMockRuntimeInfo wmRuntimeInfo) {
     opampManager =
-        OpampManager.builder().setConfigurationEndpoint(wmRuntimeInfo.getHttpBaseUrl()).build();
+        OpampManager.builder().setEndpointUrl(wmRuntimeInfo.getHttpBaseUrl()).build();
   }
 
   @Test
@@ -181,7 +181,7 @@ class OpampManagerTest {
     // Set up manager with initial polling interval of 1 second.
     opampManager =
         OpampManager.builder()
-            .setConfigurationEndpoint(wmRuntimeInfo.getHttpBaseUrl())
+            .setEndpointUrl(wmRuntimeInfo.getHttpBaseUrl())
             .setPollingInterval(Duration.ofSeconds(1))
             .build();
     opampManager.start(processor);

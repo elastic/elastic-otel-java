@@ -66,7 +66,7 @@ public class CentralConfig {
         OpampManager.builder()
             .setServiceName(serviceName)
             .setPollingInterval(Duration.ofSeconds(30))
-            .setConfigurationEndpoint(endpoint)
+            .setEndpointUrl(endpoint)
             .setServiceEnvironment(environment)
             .build();
 
