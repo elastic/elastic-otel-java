@@ -24,7 +24,6 @@ import co.elastic.otel.logging.AgentLog;
 import io.opentelemetry.contrib.inferredspans.InferredSpans;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.time.Duration;
@@ -36,7 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
+import javax.annotation.Nullable;
 
 public class CentralConfig {
   private static final Logger logger = Logger.getLogger(CentralConfig.class.getName());

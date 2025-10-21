@@ -86,9 +86,9 @@ class OpampManagerTest {
             .whenScenarioStateIs(STARTED)
             .willReturn(
                 ok().withBody(
-                    createServerToAgentWithCentralConfig(centralConfigValue, "some_hash")
-                        .encodeByteString()
-                        .toByteArray()))
+                        createServerToAgentWithCentralConfig(centralConfigValue, "some_hash")
+                            .encodeByteString()
+                            .toByteArray()))
             .willSetStateTo("status_update"));
     stubFor(
         any(anyUrl()).inScenario("opamp").whenScenarioStateIs("status_update").willReturn(ok()));
@@ -109,8 +109,8 @@ class OpampManagerTest {
     assertThat(agentToServer.remote_config_status.status)
         .isEqualTo(RemoteConfigStatuses.RemoteConfigStatuses_APPLIED);
     assertThat(
-        agentToServer.remote_config_status.last_remote_config_hash.string(
-            StandardCharsets.UTF_8))
+            agentToServer.remote_config_status.last_remote_config_hash.string(
+                StandardCharsets.UTF_8))
         .isEqualTo("some_hash");
   }
 
@@ -126,9 +126,9 @@ class OpampManagerTest {
             .whenScenarioStateIs(STARTED)
             .willReturn(
                 ok().withBody(
-                    createServerToAgentWithCentralConfig(centralConfigValue, "some_hash")
-                        .encodeByteString()
-                        .toByteArray()))
+                        createServerToAgentWithCentralConfig(centralConfigValue, "some_hash")
+                            .encodeByteString()
+                            .toByteArray()))
             .willSetStateTo("status_update"));
     stubFor(
         any(anyUrl()).inScenario("opamp").whenScenarioStateIs("status_update").willReturn(ok()));
@@ -156,9 +156,9 @@ class OpampManagerTest {
             .whenScenarioStateIs(STARTED)
             .willReturn(
                 ok().withBody(
-                    createServerToAgentWithCentralConfig(centralConfigValue, "some_hash")
-                        .encodeByteString()
-                        .toByteArray()))
+                        createServerToAgentWithCentralConfig(centralConfigValue, "some_hash")
+                            .encodeByteString()
+                            .toByteArray()))
             .willSetStateTo("status_update"));
     stubFor(
         any(anyUrl()).inScenario("opamp").whenScenarioStateIs("status_update").willReturn(ok()));
@@ -227,9 +227,9 @@ class OpampManagerTest {
             .whenScenarioStateIs(STARTED)
             .willReturn(
                 ok().withBody(
-                    createServerToAgentWithCentralConfig(centralConfigValue, "some_hash")
-                        .encodeByteString()
-                        .toByteArray()))
+                        createServerToAgentWithCentralConfig(centralConfigValue, "some_hash")
+                            .encodeByteString()
+                            .toByteArray()))
             .willSetStateTo("status_update"));
     stubFor(
         any(anyUrl()).inScenario("opamp").whenScenarioStateIs("status_update").willReturn(ok()));

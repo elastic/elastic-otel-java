@@ -69,14 +69,16 @@ public final class OpampManager implements Closeable, OpampClient.Callbacks {
     OkHttpClient.Builder okHttpClient = new OkHttpClient().newBuilder();
 
     // TODO: revisit this later once the upstream opamp client provides a simpler way to add headers
-    okHttpClient.interceptors().add(chain -> {
-      Request.Builder modifiedRequest = chain.request().newBuilder();
-      configuration.headers.forEach(modifiedRequest::addHeader);
-      return chain.proceed(modifiedRequest.build());
-    });
+    okHttpClient
+        .interceptors()
+        .add(
+            chain -> {
+              Request.Builder modifiedRequest = chain.request().newBuilder();
+              configuration.headers.forEach(modifiedRequest::addHeader);
+              return chain.proceed(modifiedRequest.build());
+            });
 
-    OkHttpSender httpSender = OkHttpSender.create(configuration.endpointUrl,
-        okHttpClient.build());
+    OkHttpSender httpSender = OkHttpSender.create(configuration.endpointUrl, okHttpClient.build());
     if (configuration.serviceName != null) {
       builder.putIdentifyingAttribute("service.name", configuration.serviceName);
     }
@@ -180,7 +182,7 @@ public final class OpampManager implements Closeable, OpampClient.Callbacks {
     @Nullable private String environment;
     private String endpointUrl = "http://localhost:4320/v1/opamp";
     private Duration pollingInterval = Duration.ofSeconds(30);
-    private Map<String,String> headers = Collections.emptyMap();
+    private Map<String, String> headers = Collections.emptyMap();
 
     private Builder() {}
 
@@ -230,14 +232,14 @@ public final class OpampManager implements Closeable, OpampClient.Callbacks {
     @Nullable private final String environment;
     private final String endpointUrl;
     private final Duration pollingInterval;
-    private final Map<String,String> headers;
+    private final Map<String, String> headers;
 
     private Configuration(
         String serviceName,
         @Nullable String environment,
         String endpointUrl,
         Duration pollingInterval,
-        Map<String,String> headers) {
+        Map<String, String> headers) {
       this.serviceName = serviceName;
       this.environment = environment;
       this.endpointUrl = endpointUrl;
