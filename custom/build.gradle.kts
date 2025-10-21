@@ -13,6 +13,7 @@ dependencies {
     exclude(group = "io.opentelemetry", module = "opentelemetry-api")
   }
   implementation(libs.dslJson)
+  implementation(libs.okhttp)
   implementation(project(":inferred-spans"))
   implementation(project(":universal-profiling-integration"))
   implementation(project(":resources"))
