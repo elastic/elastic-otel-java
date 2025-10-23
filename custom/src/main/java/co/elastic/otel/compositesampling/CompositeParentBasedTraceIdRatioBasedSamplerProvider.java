@@ -33,6 +33,11 @@ public class CompositeParentBasedTraceIdRatioBasedSamplerProvider
         config.getDouble(
             "otel.traces.sampler.arg",
             DynamicCompositeParentBasedTraceIdRatioBasedSampler.DEFAULT_TRACEIDRATIO_SAMPLE_RATIO));
+
+    // The sampler was created meaning it is what the agent is using. We use this information
+    // when applying central config.
+    DynamicCompositeParentBasedTraceIdRatioBasedSampler.INITIALIZED = true;
+
     return DynamicCompositeParentBasedTraceIdRatioBasedSampler.INSTANCE;
   }
 

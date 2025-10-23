@@ -311,6 +311,10 @@ public class CentralConfig {
     @Override
     void update(String configurationValue, OpampManager opampManager)
         throws IllegalArgumentException {
+      if (!DynamicCompositeParentBasedTraceIdRatioBasedSampler.INITIALIZED) {
+        logger.warning("ignoring \"sampling_rate\" because non-default sampler in use");
+        return;
+      }
       DynamicCompositeParentBasedTraceIdRatioBasedSampler.setRatio(
           Double.parseDouble(configurationValue));
     }
