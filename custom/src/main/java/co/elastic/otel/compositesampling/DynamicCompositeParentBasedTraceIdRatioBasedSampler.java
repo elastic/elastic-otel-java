@@ -30,8 +30,6 @@ import java.util.List;
 public enum DynamicCompositeParentBasedTraceIdRatioBasedSampler implements Sampler {
   INSTANCE;
 
-  public static volatile boolean INITIALIZED = false;
-
   static final double DEFAULT_TRACEIDRATIO_SAMPLE_RATIO = 1.0d;
 
   private static volatile double latestRatio;
