@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.config;
 
-import co.elastic.otel.compositesampling.CompositeParentBasedTraceIdRatioBasedSamplerProvider;
+import co.elastic.otel.compositesampling.DynamicCompositeParentBasedTraceIdRatioBasedSampler;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.javaagent.extension.AgentListener;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
@@ -45,7 +45,7 @@ public class ConfigLoggingAgentListener implements AgentListener {
       logger.info(autoConfiguredOpenTelemetrySdk.toString());
     }
     if (autoConfiguredOpenTelemetrySdk.getOpenTelemetrySdk().getSdkTracerProvider().getSampler()
-        instanceof CompositeParentBasedTraceIdRatioBasedSamplerProvider) {
+        instanceof DynamicCompositeParentBasedTraceIdRatioBasedSampler) {
       enableDynamicSamplingRate = true;
     }
   }
