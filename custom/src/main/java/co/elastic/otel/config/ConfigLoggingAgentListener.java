@@ -29,7 +29,7 @@ public class ConfigLoggingAgentListener implements AgentListener {
   public static final String LOG_THE_CONFIG =
       "elastic.otel.java.experimental.configuration.logging.enabled";
 
-  public static volatile boolean enableDynamicSamplingRate = false;
+  private static volatile boolean enableDynamicSamplingRate = false;
 
   private static final Logger logger = Logger.getLogger(ConfigLoggingAgentListener.class.getName());
 
@@ -37,6 +37,10 @@ public class ConfigLoggingAgentListener implements AgentListener {
 
   public static synchronized void logTheConfig(boolean logTheConfig) {
     ConfigLoggingAgentListener.logTheConfig = logTheConfig;
+  }
+
+  public static boolean getEnableDynamicSamplingRate() {
+    return enableDynamicSamplingRate;
   }
 
   @Override

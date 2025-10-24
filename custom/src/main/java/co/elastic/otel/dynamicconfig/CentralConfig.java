@@ -312,7 +312,7 @@ public class CentralConfig {
     @Override
     void update(String configurationValue, OpampManager opampManager)
         throws IllegalArgumentException {
-      if (!ConfigLoggingAgentListener.enableDynamicSamplingRate) {
+      if (!ConfigLoggingAgentListener.getEnableDynamicSamplingRate()) {
         logger.warning("ignoring \"sampling_rate\" because non-default sampler in use");
         return;
       }
