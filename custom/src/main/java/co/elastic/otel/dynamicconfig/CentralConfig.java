@@ -19,6 +19,7 @@
 package co.elastic.otel.dynamicconfig;
 
 import co.elastic.otel.compositesampling.DynamicCompositeParentBasedTraceIdRatioBasedSampler;
+import co.elastic.otel.config.ConfigLoggingAgentListener;
 import co.elastic.otel.dynamicconfig.internal.OpampManager;
 import co.elastic.otel.logging.AgentLog;
 import io.opentelemetry.contrib.inferredspans.InferredSpans;
@@ -329,6 +330,10 @@ public class CentralConfig {
     @Override
     void update(String configurationValue, OpampManager opampManager)
         throws IllegalArgumentException {
+      if (!ConfigLoggingAgentListener.getEnableDynamicSamplingRate()) {
+        logger.warning("ignoring \"sampling_rate\" because non-default sampler in use");
+        return;
+      }
       DynamicCompositeParentBasedTraceIdRatioBasedSampler.setRatio(
           Double.parseDouble(configurationValue));
     }

@@ -52,6 +52,10 @@ class ElasticAutoConfigurationCustomizerProviderTest {
         .describedAs("runtime experimental metrics must be enabled")
         .containsEntry(
             "otel.instrumentation.runtime-telemetry.emit-experimental-telemetry", "true");
+
+    assertThat(config)
+        .describedAs("edot default sampler when not set by user")
+        .containsEntry("otel.traces.sampler", "experimental_composite_parentbased_traceidratio");
   }
 
   @Test
@@ -96,6 +100,16 @@ class ElasticAutoConfigurationCustomizerProviderTest {
         propertiesCustomizer(DefaultConfigProperties.createFromMap(userConfig));
     String value = config.get("otel.exporter.otlp.metrics.temporality.preference");
     assertThat(value).isEqualTo("LOWMEMORY");
+  }
+
+  @Test
+  void customizeSampler() {
+    Map<String, String> userConfig = new HashMap<>();
+    userConfig.put("otel.traces.sampler", "always_off");
+    Map<String, String> config =
+        propertiesCustomizer(DefaultConfigProperties.createFromMap(userConfig));
+    String value = config.get("otel.traces.sampler");
+    assertThat(value).isEqualTo("always_off");
   }
 
   @Test
