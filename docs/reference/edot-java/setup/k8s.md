@@ -97,7 +97,7 @@ In this example, the application you're instrumenting is a deployment named `jav
         Init Containers:
         opentelemetry-auto-instrumentation-java:
             Container ID:  containerd://cbf67d7ca1bd62c25614b905a11e81405bed6fd215f2df21f84b90fd0279230b
-            Image:         docker.elastic.co/observability/elastic-otel-javaagent:1.6.0
+            Image:         docker.elastic.co/observability/elastic-otel-javaagent:1.7.0
             Image ID:      docker.elastic.co/observability/elastic-otel-javaagent@sha256:28d65d04a329c8d5545ed579d6c17f0d74800b7b1c5875e75e0efd29e210566a
             Port:          <none>
             Host Port:     <none>
