@@ -1,6 +1,6 @@
 [versions]
 shadow = "9.2.2"
-jib = "3.4.5"
+jib = "3.5.0"
 spotless = "8.0.0"
 junit = "5.14.1"
 autoservice = "1.1.1"
