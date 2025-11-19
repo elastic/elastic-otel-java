@@ -84,11 +84,11 @@ stack: ga 9.0, ga 8.0
 
 When using the {{es}} Java API client, spans for {{es}} operations are generated directly by the client’s built-in OpenTelemetry instrumentation.
 
-Because the client owns the instrumentation, certain fields, such as the search request body reported as `span.db.statement`, are only captured when the {{es}} client’s OpenTelemetry options are enabled.
+Because the client owns the instrumentation, certain fields, such as the search request body reported as `span.db.statement`, are only captured when the {{es}} client’s OpenTelemetry options are turned on.
 
 ### When this applies
 
-You may need this configuration if you notice that `span.db.statement` is missing for {{es}} search operations and you use:
+You might need this configuration if you notice that `span.db.statement` is missing for {{es}} search operations and you use:
 
 * {{es}} Java API client 8.x or 9.x
 
@@ -96,25 +96,25 @@ You may need this configuration if you notice that `span.db.statement` is missin
 
 * The {{product.apm-agent-java}}
 
-### Enable search query capture
+### Turn on search query capture
 
 Set either one of the following {{es}} client instrumentation options:
 
-* JVM system property
+#### JVM system property
 
 ```bash
 -Dotel.instrumentation.elasticsearch.capture-search-query=true
 ```
 
-* Environment variable
+#### Environment variable
 
 ```bash
 OTEL_INSTRUMENTATION_ELASTICSEARCH_CAPTURE_SEARCH_QUERY=true
 ```
 
-The flag `otel.instrumentation.elasticsearch.enabled` is enabled by default, so you typically only need to enable `capture-search-query`.
+The flag `otel.instrumentation.elasticsearch.enabled` is turned on by default, so you typically only need to activate `capture-search-query`.
 
-When enabled, the {{es}} client includes the search request body in the generated spans, and EDOT or OTel will export this value as `span.db.statement`.
+When activated, the {{es}} client includes the search request body in the generated spans, and EDOT or OTel exports this value as `span.db.statement`.
 
 
 ## Central configuration
