@@ -5,6 +5,7 @@ cross_links:
   - elastic-agent
   - apm-agent-java
   - elastic-otel-java
+  - elasticsearch-java
 toc:
   - toc: release-notes
   - toc: reference/edot-java
