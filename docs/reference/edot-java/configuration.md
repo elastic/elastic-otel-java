@@ -86,7 +86,7 @@ When using the {{es}} Java API client, spans for {{es}} operations are generated
 
 Because the client owns the instrumentation, certain fields, such as the search request body reported as `span.db.statement`, are only captured when the {{es}} client’s OpenTelemetry options are turned on.
 
-For more details on OpenTelemetry instrumentation settings in the {{es}} Java API client, refer to the [{{es}} Java client documentation](elasticsearch-java://reference/index.md).
+For more details on instrumentation settings in the {{es}} Java API client, refer to the [{{es}} Java client documentation](elasticsearch-java://reference/index.md).
 
 ### When this applies
 
