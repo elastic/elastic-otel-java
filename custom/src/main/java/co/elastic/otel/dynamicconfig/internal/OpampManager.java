@@ -47,20 +47,16 @@ import opamp.proto.RemoteConfigStatus;
 import opamp.proto.RemoteConfigStatuses;
 import opamp.proto.ServerErrorResponse;
 
-public final class OpampManager implements Closeable, OpampClient.Callbacks {
+public final class OpampManager implements Closeable {
   private final Configuration configuration;
-  private final DslJson<Object> dslJson = new DslJson<>(new DslJson.Settings<>());
-  private final Logger logger = Logger.getLogger(OpampManager.class.getName());
   private volatile OpampClient client;
   private volatile MutablePeriodicDelay pollingDelay;
-  private volatile CentralConfigurationProcessor processor;
 
   private OpampManager(Configuration configuration) {
     this.configuration = configuration;
   }
 
   public void start(CentralConfigurationProcessor processor) {
-    this.processor = processor;
     pollingDelay = new MutablePeriodicDelay(configuration.pollingInterval);
 
     OpampClientBuilder builder = OpampClient.builder();
@@ -87,7 +83,7 @@ public final class OpampManager implements Closeable, OpampClient.Callbacks {
     }
     PeriodicDelay retryDelay = RetryPeriodicDelay.create(configuration.pollingInterval);
     builder.setRequestService(HttpRequestService.create(httpSender, pollingDelay, retryDelay));
-    client = builder.build(this);
+    client = builder.build(new OpampCallbacks(processor));
   }
 
   @Override
@@ -95,78 +91,92 @@ public final class OpampManager implements Closeable, OpampClient.Callbacks {
     client.close();
   }
 
-  @Override
-  public void onMessage(MessageData messageData) {
-    logger.log(Level.FINE, "onMessage({0}, {1})", new Object[] {client, messageData});
-    AgentRemoteConfig remoteConfig = messageData.getRemoteConfig();
-    if (remoteConfig != null) {
-      processRemoteConfig(client, remoteConfig);
+  private static class OpampCallbacks implements OpampClient.Callbacks {
+    private final Logger logger = Logger.getLogger(OpampCallbacks.class.getName());
+    private final CentralConfigurationProcessor processor;
+    private final DslJson<Object> dslJson;
+
+    private OpampCallbacks(CentralConfigurationProcessor processor) {
+      this.processor = processor;
+      this.dslJson = new DslJson<>(new DslJson.Settings<>());
     }
-  }
 
-  private void processRemoteConfig(OpampClient client, AgentRemoteConfig remoteConfig) {
-    Map<String, AgentConfigFile> configMapMap = remoteConfig.config.config_map;
-    AgentConfigFile centralConfig = configMapMap.get("elastic");
-    if (centralConfig != null) {
-      Map<String, String> configuration = parseCentralConfiguration(centralConfig.body);
-      RemoteConfigStatuses status;
-
-      if (configuration != null) {
-        CentralConfigurationProcessor.Result result = processor.process(configuration);
-        status =
-            (result == CentralConfigurationProcessor.Result.SUCCESS)
-                ? RemoteConfigStatuses.RemoteConfigStatuses_APPLIED
-                : RemoteConfigStatuses.RemoteConfigStatuses_FAILED;
-      } else {
-        status = RemoteConfigStatuses.RemoteConfigStatuses_FAILED;
+    @Override
+    public void onMessage(OpampClient client, MessageData messageData) {
+      logger.log(Level.FINE, "onMessage({0}, {1})", new Object[] {client, messageData});
+      AgentRemoteConfig remoteConfig = messageData.getRemoteConfig();
+      if (remoteConfig != null) {
+        processRemoteConfig(client, remoteConfig);
       }
-
-      // Note if FAILED is sent, the config change is effectively dropped as the server will not
-      // re-send it
-      client.setRemoteConfigStatus(getRemoteConfigStatus(status, remoteConfig.config_hash));
     }
-  }
 
-  private static RemoteConfigStatus getRemoteConfigStatus(
-      RemoteConfigStatuses status, ByteString hash) {
-    if (hash != null && status == RemoteConfigStatuses.RemoteConfigStatuses_APPLIED) {
-      return new RemoteConfigStatus.Builder().status(status).last_remote_config_hash(hash).build();
-    } else {
-      return new RemoteConfigStatus.Builder().status(status).build();
+    private void processRemoteConfig(OpampClient client, AgentRemoteConfig remoteConfig) {
+      Map<String, AgentConfigFile> configMapMap = remoteConfig.config.config_map;
+      AgentConfigFile centralConfig = configMapMap.get("elastic");
+      if (centralConfig != null) {
+        Map<String, String> configuration = parseCentralConfiguration(centralConfig.body);
+        RemoteConfigStatuses status;
+
+        if (configuration != null) {
+          CentralConfigurationProcessor.Result result = processor.process(configuration);
+          status =
+              (result == CentralConfigurationProcessor.Result.SUCCESS)
+                  ? RemoteConfigStatuses.RemoteConfigStatuses_APPLIED
+                  : RemoteConfigStatuses.RemoteConfigStatuses_FAILED;
+        } else {
+          status = RemoteConfigStatuses.RemoteConfigStatuses_FAILED;
+        }
+
+        // Note if FAILED is sent, the config change is effectively dropped as the server will not
+        // re-send it
+        client.setRemoteConfigStatus(getRemoteConfigStatus(status, remoteConfig.config_hash));
+      }
     }
-  }
 
-  private Map<String, String> parseCentralConfiguration(ByteString centralConfig) {
-    try {
-      byte[] centralConfigBytes = centralConfig.toByteArray();
-      if (centralConfigBytes.length == 0) {
-        logger.log(
-            Level.WARNING,
-            "No central configuration returned - is this connected to an EDOT collector above 18.8?");
+    private static RemoteConfigStatus getRemoteConfigStatus(
+        RemoteConfigStatuses status, ByteString hash) {
+      if (hash != null && status == RemoteConfigStatuses.RemoteConfigStatuses_APPLIED) {
+        return new RemoteConfigStatus.Builder()
+            .status(status)
+            .last_remote_config_hash(hash)
+            .build();
+      } else {
+        return new RemoteConfigStatus.Builder().status(status).build();
+      }
+    }
+
+    private Map<String, String> parseCentralConfiguration(ByteString centralConfig) {
+      try {
+        byte[] centralConfigBytes = centralConfig.toByteArray();
+        if (centralConfigBytes.length == 0) {
+          logger.log(
+              Level.WARNING,
+              "No central configuration returned - is this connected to an EDOT collector above 18.8?");
+          return null;
+        }
+        JsonReader<Object> reader = dslJson.newReader(centralConfig.toByteArray());
+        reader.startObject();
+        return Collections.unmodifiableMap(MapConverter.deserialize(reader));
+      } catch (IOException e) {
+        logger.log(Level.WARNING, "Could not parse central configuration.", e);
         return null;
       }
-      JsonReader<Object> reader = dslJson.newReader(centralConfig.toByteArray());
-      reader.startObject();
-      return Collections.unmodifiableMap(MapConverter.deserialize(reader));
-    } catch (IOException e) {
-      logger.log(Level.WARNING, "Could not parse central configuration.", e);
-      return null;
     }
-  }
 
-  @Override
-  public void onConnect() {
-    logger.log(Level.INFO, "onConnect({0})", client);
-  }
+    @Override
+    public void onConnect(OpampClient client) {
+      logger.log(Level.INFO, "onConnect({0})", client);
+    }
 
-  @Override
-  public void onConnectFailed(@Nullable Throwable throwable) {
-    logger.log(Level.INFO, "onConnect({0}, {1})", new Object[] {client, throwable});
-  }
+    @Override
+    public void onConnectFailed(OpampClient client, @Nullable Throwable throwable) {
+      logger.log(Level.INFO, "onConnect({0}, {1})", new Object[] {client, throwable});
+    }
 
-  @Override
-  public void onErrorResponse(@Nonnull ServerErrorResponse errorResponse) {
-    logger.log(Level.INFO, "onErrorResponse({0}, {1})", new Object[] {client, errorResponse});
+    @Override
+    public void onErrorResponse(OpampClient client, @Nonnull ServerErrorResponse errorResponse) {
+      logger.log(Level.INFO, "onErrorResponse({0}, {1})", new Object[] {client, errorResponse});
+    }
   }
 
   public void setPollingDelay(@Nonnull Duration duration) {
