@@ -11,7 +11,7 @@ opentelemetryProto = "1.3.2-alpha"
 
 # otel agent, we rely on the '*-alpha' and get the non-alpha dependencies transitively
 # updated from upstream agent with gradle/update-upstream.sh
-opentelemetryJavaagentAlpha = "2.21.0-alpha"
+opentelemetryJavaagentAlpha = "2.22.0-alpha"
 
 # otel contrib
 # updated from upstream agent with gradle/update-upstream.sh
