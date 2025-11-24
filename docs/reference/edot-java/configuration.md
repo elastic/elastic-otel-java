@@ -76,6 +76,49 @@ This table only contains minimal configuration, see each respective feature for 
 | `ELASTIC_OTEL_JAVAAGENT_LOG_LEVEL`                     | `INFO`  | [Agent logging](#agent-logging)                                                                                          | 1.5.0+            |
 | `ELASTIC_OTEL_VERIFY_SERVER_CERT`                      | `true`  | [Exporter certificate verification](#exporter-certificate-verification)                                                  | 1.5.0+            |
 
+
+## Elasticsearch Java client: Capturing search request bodies
+```{applies_to}
+stack: ga 9.0, ga 8.0
+```
+
+When using the {{es}} Java API client, spans for {{es}} operations are generated directly by the client’s built-in OpenTelemetry instrumentation.
+
+Because the client owns the instrumentation, certain fields, such as the search request body reported as `span.db.statement`, are only captured when the {{es}} client’s OpenTelemetry options are turned on.
+
+For more details on instrumentation settings in the {{es}} Java API client, refer to the [{{es}} Java client documentation](elasticsearch-java://reference/index.md).
+
+### When this applies
+
+You might need this configuration if you notice that `span.db.statement` is missing for {{es}} search operations and you use:
+
+* {{es}} Java API client 8.x or 9.x
+
+* EDOT Java SDK or another OpenTelemetry Java SDK
+
+* The {{product.apm-agent-java}}
+
+### Turn on search query capture
+
+Set either one of the following {{es}} client instrumentation options:
+
+#### JVM system property
+
+```bash
+-Dotel.instrumentation.elasticsearch.capture-search-query=true
+```
+
+#### Environment variable
+
+```bash
+OTEL_INSTRUMENTATION_ELASTICSEARCH_CAPTURE_SEARCH_QUERY=true
+```
+
+The flag `otel.instrumentation.elasticsearch.enabled` is turned on by default, so you typically only need to activate `capture-search-query`.
+
+When activated, the {{es}} client includes the search request body in the generated spans, and EDOT or OTel exports this value as `span.db.statement`.
+
+
 ## Central configuration
 
 ```{applies_to}
