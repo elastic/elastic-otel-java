@@ -22,7 +22,7 @@ jobs:
       is-snapshot: ${{ steps.validate-step.outputs.is-snapshot }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Warmup gradle wrapper
         uses: ./.github/workflows/gradle-goal
         with:
