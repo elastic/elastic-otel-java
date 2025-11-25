@@ -56,9 +56,7 @@ public class ConfigLoggingAgentListenerTest {
   @Test
   public void checkLogConfigPresent() throws IOException {
     String output = executeCommand(createTestTargetCommand(true), 20);
-    System.out.println("------------ checkLogConfigPresent: 1 " + output);
     for (String identifyingString : identifyingStrings) {
-      System.out.println("------------ checkLogConfigPresent: 2 " + identifyingStrings);
       assertThat(output).contains(identifyingString);
     }
   }
@@ -75,6 +73,7 @@ public class ConfigLoggingAgentListenerTest {
     List<String> command = new ArrayList<>();
     command.add("java");
     command.add("-Xmx32m");
+    command.add("-Xshare:off");
     command.add("-javaagent:" + agentJarFile);
     // Only on false, ie test the 'true' default with no option
     if (!logConfig) {
