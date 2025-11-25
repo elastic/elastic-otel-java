@@ -74,6 +74,7 @@ public class ConfigLoggingAgentListenerTest {
     command.add("java");
     command.add("-Xmx32m");
     command.add("-Xshare:off");
+    command.add("-XX:SharedArchiveFile=none");
     command.add("-javaagent:" + agentJarFile);
     // Only on false, ie test the 'true' default with no option
     if (!logConfig) {
