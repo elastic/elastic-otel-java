@@ -15,7 +15,7 @@ opentelemetryJavaagentAlpha = "2.22.0-alpha"
 
 # otel contrib
 # updated from upstream agent with gradle/update-upstream.sh
-opentelemetryContribAlpha = "1.51.0-alpha"
+opentelemetryContribAlpha = "1.52.0-alpha"
 
 # otel semconv
 # updated from upstream agent with gradle/update-upstream.sh
