@@ -28,15 +28,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class ConfigLoggingAgentListenerTest {
   static final String TARGET_CLASS_NAME = "TempTest321";
-  static final String LOGGING_PROPERTIES_FILE_NAME = "test_logging.properties";
   static String[] identifyingStrings = {
     "ConfigLoggingAgentListener - AutoConfiguredOpenTelemetrySdk{",
     "tracerProvider=SdkTracerProvider"
@@ -49,47 +46,16 @@ public class ConfigLoggingAgentListenerTest {
   public static void setup() throws IOException {
     agentJarFile = getAgentJarFile();
     testTargetClass = createTestTarget();
-    compileTestTarget(testTargetClass);
-    createLoggingPropertiesFile();
-  }
-
-  private static void createLoggingPropertiesFile() throws IOException {
-    File loggingPropertiesFile =
-        new File(System.getProperty("java.io.tmpdir"), LOGGING_PROPERTIES_FILE_NAME);
-    loggingPropertiesFile.deleteOnExit();
-    try (BufferedWriter writer = new BufferedWriter(new FileWriter(loggingPropertiesFile))) {
-      writer.write("handlers=java.util.logging.ConsoleHandler\n");
-      writer.write(".level=INFO\n");
-      writer.write("java.util.logging.ConsoleHandler.level=INFO\n");
-      writer.write(
-          "java.util.logging.ConsoleHandler.formatter=java.util.logging.SimpleFormatter\n");
-      // Avoid date/time in format to prevent ClassCircularityError with CLDR/Locale
-      writer.write(
-          "java.util.logging.SimpleFormatter.format=%4$s: %5$s%6$s%n\n");
-    }
-  }
-
-  private static void compileTestTarget(File sourceFile) {
-    JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-    if (compiler == null) {
-      throw new IllegalStateException("No Java compiler available");
-    }
-    int result = compiler.run(null, null, null, sourceFile.getAbsolutePath());
-    if (result != 0) {
-      throw new IllegalStateException("Compilation failed");
-    }
   }
 
   @AfterAll
   public static void teardown() throws IOException {
     testTargetClass.delete();
-    new File(testTargetClass.getParent(), TARGET_CLASS_NAME + ".class").delete();
-    new File(System.getProperty("java.io.tmpdir"), LOGGING_PROPERTIES_FILE_NAME).delete();
   }
 
   @Test
   public void checkLogConfigPresent() throws IOException {
-    String output = executeCommand(createTestTargetCommand(true), 60);
+    String output = executeCommand(createTestTargetCommand(true), 20);
     for (String identifyingString : identifyingStrings) {
       assertThat(output).contains(identifyingString);
     }
@@ -97,7 +63,7 @@ public class ConfigLoggingAgentListenerTest {
 
   @Test
   public void checkLogConfigAbsent() throws IOException {
-    String output = executeCommand(createTestTargetCommand(false), 60);
+    String output = executeCommand(createTestTargetCommand(false), 20);
     for (String identifyingString : identifyingStrings) {
       assertThat(output).doesNotContain(identifyingString);
     }
@@ -106,17 +72,15 @@ public class ConfigLoggingAgentListenerTest {
   static List<String> createTestTargetCommand(boolean logConfig) throws IOException {
     List<String> command = new ArrayList<>();
     command.add("java");
-            command.add("-Xmx32m");
-            command.add("-Djava.util.logging.config.file="
-                + new File(System.getProperty("java.io.tmpdir"), LOGGING_PROPERTIES_FILE_NAME).getAbsolutePath());
-            command.add("-Dotel.javaagent.logging=application");
-            command.add("-javaagent:" + agentJarFile);    // Only on false, ie test the 'true' default with no option
+    command.add("-Xmx32m");
+    command.add("-Dotel.javaagent.logging=application");
+    command.add("-Dotel.javaagent.debug=false");
+    command.add("-javaagent:" + agentJarFile);
+    // Only on false, ie test the 'true' default with no option
     if (!logConfig) {
       command.add("-D" + ConfigLoggingAgentListener.LOG_THE_CONFIG + "=false");
     }
-    command.add("-cp");
-    command.add(testTargetClass.getParent());
-    command.add(TARGET_CLASS_NAME);
+    command.add(testTargetClass.getAbsolutePath());
     return command;
   }
 
