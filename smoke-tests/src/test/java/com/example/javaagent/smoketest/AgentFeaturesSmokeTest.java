@@ -21,10 +21,7 @@ package com.example.javaagent.smoketest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-import com.google.protobuf.Any;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
-import io.opentelemetry.proto.common.v1.AnyValue;
-import io.opentelemetry.proto.common.v1.ArrayValue;
 import io.opentelemetry.proto.trace.v1.Span;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +33,7 @@ import org.junit.jupiter.api.Test;
 class AgentFeaturesSmokeTest extends TestAppSmokeTest {
 
   @BeforeAll
-  public static void start() {
+  static void start() {
     startTestApp(
         (container) -> {
           // capture span stacktrace for any duration
@@ -54,15 +51,13 @@ class AgentFeaturesSmokeTest extends TestAppSmokeTest {
     );
   }
 
-  // TODO remove useless public modifiers ?
-
   @AfterAll
-  public static void end() {
+  static void end() {
     stopApp();
   }
 
   @Test
-  public void spanCodeStackTrace() {
+  void spanCodeStackTrace() {
     doRequest(getUrl("/health"), okResponseBody("Alive!"));
 
     List<ExportTraceServiceRequest> traces = waitForTraces();
@@ -78,7 +73,7 @@ class AgentFeaturesSmokeTest extends TestAppSmokeTest {
   }
 
   @Test
-  public void httpHeaderCapture() {
+  void httpHeaderCapture() {
     Map<String, String> headers = new HashMap<>();
     headers.put("Hello", "World!");
     doRequest(getUrl("/health"), headers, okResponseBody("Alive!"));
@@ -97,7 +92,7 @@ class AgentFeaturesSmokeTest extends TestAppSmokeTest {
   }
 
   @Test
-  public void messagingHeaderCapture() {
+  void messagingHeaderCapture() {
     doRequest(getUrl("/messages/send?headerName=My_Header&headerValue=my-header-value"),
         okResponse());
     doRequest(getUrl("/messages/receive"), okResponse());
