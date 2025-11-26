@@ -28,7 +28,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-class AgentFeaturesSmokeTest extends TestAppSmokeTest {
+class SpanStackTraceTest extends TestAppSmokeTest {
 
   @BeforeAll
   public static void start() {
