@@ -78,9 +78,7 @@ public class JavaExecutable {
       Process process =
           new ProcessBuilder()
               .command(
-                  JavaExecutable.getBinaryPath(),
-                  jvmDebugArgument("localhost", port),
-                  "-version")
+                  JavaExecutable.getBinaryPath(), jvmDebugArgument("localhost", port), "-version")
               .start();
       boolean processExit = process.waitFor(5, TimeUnit.SECONDS);
       return processExit && process.exitValue() == 0;

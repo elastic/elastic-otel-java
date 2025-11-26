@@ -357,7 +357,7 @@ abstract class SmokeTest {
     return AnyValue.newBuilder().setStringValue(value).build();
   }
 
-  protected static AnyValue attributeArrayValue(String... values){
+  protected static AnyValue attributeArrayValue(String... values) {
     ArrayValue.Builder valueBuilder = ArrayValue.newBuilder();
     for (String value : values) {
       valueBuilder.addValues(AnyValue.newBuilder().setStringValue(value).build());
@@ -391,37 +391,39 @@ abstract class SmokeTest {
     }
     return sb.toString();
   }
+
   protected void doRequest(String url, IOConsumer<Response> responseHandler) {
     doRequest(url, Collections.emptyMap(), responseHandler);
   }
 
-  protected void doRequest(String url, Map<String,String> headers, IOConsumer<Response> responseHandler) {
+  protected void doRequest(
+      String url, Map<String, String> headers, IOConsumer<Response> responseHandler) {
     Request.Builder request = new Request.Builder().url(url).get();
     headers.forEach(request::addHeader);
 
-      try (Response response = client.newCall(request.build()).execute()) {
-        responseHandler.accept(response);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    @FunctionalInterface
-    protected interface IOConsumer<T> {
-      void accept(T t) throws IOException;
-    }
-
-    protected static IOConsumer<Response> okResponse() {
-      return r -> {
-        assertThat(r.code()).isEqualTo(200);
-      };
-    }
-
-    protected static IOConsumer<Response> okResponseBody(String body) {
-      return r -> {
-        assertThat(r.code()).isEqualTo(200);
-        assertThat(r.body()).isNotNull();
-        assertThat(r.body().string()).isEqualTo(body);
-      };
+    try (Response response = client.newCall(request.build()).execute()) {
+      responseHandler.accept(response);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
+
+  @FunctionalInterface
+  protected interface IOConsumer<T> {
+    void accept(T t) throws IOException;
+  }
+
+  protected static IOConsumer<Response> okResponse() {
+    return r -> {
+      assertThat(r.code()).isEqualTo(200);
+    };
+  }
+
+  protected static IOConsumer<Response> okResponseBody(String body) {
+    return r -> {
+      assertThat(r.code()).isEqualTo(200);
+      assertThat(r.body()).isNotNull();
+      assertThat(r.body().string()).isEqualTo(body);
+    };
+  }
+}
