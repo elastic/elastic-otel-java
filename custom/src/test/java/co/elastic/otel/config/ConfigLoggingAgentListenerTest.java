@@ -90,6 +90,7 @@ public class ConfigLoggingAgentListenerTest {
     command.add("-Xmx32m");
     command.add("-Djava.lang.invoke.MethodHandle.CUSTOMIZE_THRESHOLD=-1");
     command.add("-Djava.lang.invoke.stringConcat=BC_SB");
+    command.add("-Dotel.javaagent.logging=application");
     command.add("-javaagent:" + agentJarFile);
     // Only on false, ie test the 'true' default with no option
     if (!logConfig) {
