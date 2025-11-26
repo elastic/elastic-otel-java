@@ -41,10 +41,15 @@ class AgentFeaturesSmokeTest extends TestAppSmokeTest {
         (container) -> {
           // capture span stacktrace for any duration
           container.addEnv("ELASTIC_OTEL_JAVA_SPAN_STACKTRACE_MIN_DURATION", "0ms");
-          // capture HTTP request/response headers on server side
+          // Capture HTTP request/response headers on server side
           // header key should not be case-sensitive in config
           container.addEnv("OTEL_INSTRUMENTATION_HTTP_SERVER_CAPTURE_REQUEST_HEADERS", "hello");
-          container.addEnv("OTEL_INSTRUMENTATION_HTTP_SERVER_CAPTURE_RESPONSE_HEADERS", "Content-length,Date");
+          container.addEnv("OTEL_INSTRUMENTATION_HTTP_SERVER_CAPTURE_RESPONSE_HEADERS",
+              "Content-length,Date");
+          // Capture messaging headers
+          // Header name IS case-sensitive, syntax may be limited by implementation, for example JMS
+          // requires it to be a valid java identifier.
+          container.addEnv("OTEL_INSTRUMENTATION_MESSAGING_EXPERIMENTAL_CAPTURE_HEADERS", "My_Header");
         }
     );
   }
@@ -89,6 +94,28 @@ class AgentFeaturesSmokeTest extends TestAppSmokeTest {
         .containsEntry("http.request.header.hello", attributeArrayValue("World!"))
         .containsEntry("http.response.header.content-length", attributeArrayValue("6"))
         .containsKey("http.response.header.date"));
+  }
+
+  @Test
+  public void messagingHeaderCapture() {
+    doRequest(getUrl("/messages/send?headerName=My_Header&headerValue=my-header-value"),
+        okResponse());
+    doRequest(getUrl("/messages/receive"), okResponse());
+
+    List<ExportTraceServiceRequest> traces = waitForTraces();
+    List<Span> spans = getSpans(traces).toList();
+    assertThat(spans).hasSize(3)
+        .extracting("name", "kind")
+        .containsOnly(
+            tuple("GET /messages/send", Span.SpanKind.SPAN_KIND_SERVER),
+            tuple("messages-destination publish", Span.SpanKind.SPAN_KIND_PRODUCER),
+            tuple("GET /messages/receive", Span.SpanKind.SPAN_KIND_SERVER));
+
+    spans.stream().filter(span -> span.getKind() == Span.SpanKind.SPAN_KIND_PRODUCER)
+        .forEach(span -> assertThat(getAttributes(span.getAttributesList()))
+            .containsEntry("messaging.destination.name", attributeValue("messages-destination"))
+            .containsEntry("messaging.header.My_Header", attributeArrayValue("my-header-value")));
+
 
   }
 }
