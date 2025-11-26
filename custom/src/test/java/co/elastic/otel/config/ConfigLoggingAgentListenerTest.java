@@ -28,6 +28,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -46,11 +48,24 @@ public class ConfigLoggingAgentListenerTest {
   public static void setup() throws IOException {
     agentJarFile = getAgentJarFile();
     testTargetClass = createTestTarget();
+    compileTestTarget(testTargetClass);
+  }
+
+  private static void compileTestTarget(File sourceFile) {
+    JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+    if (compiler == null) {
+      throw new IllegalStateException("No Java compiler available");
+    }
+    int result = compiler.run(null, null, null, sourceFile.getAbsolutePath());
+    if (result != 0) {
+      throw new IllegalStateException("Compilation failed");
+    }
   }
 
   @AfterAll
   public static void teardown() throws IOException {
     testTargetClass.delete();
+    new File(testTargetClass.getParent(), TARGET_CLASS_NAME + ".class").delete();
   }
 
   @Test
@@ -73,15 +88,14 @@ public class ConfigLoggingAgentListenerTest {
     List<String> command = new ArrayList<>();
     command.add("java");
     command.add("-Xmx32m");
-    command.add("-Xshare:off");
-    command.add("-XX:SharedArchiveFile=none");
-    command.add("-XX:-UseSharedSpaces");
     command.add("-javaagent:" + agentJarFile);
     // Only on false, ie test the 'true' default with no option
     if (!logConfig) {
       command.add("-D" + ConfigLoggingAgentListener.LOG_THE_CONFIG + "=false");
     }
-    command.add(testTargetClass.getAbsolutePath());
+    command.add("-cp");
+    command.add(testTargetClass.getParent());
+    command.add(TARGET_CLASS_NAME);
     return command;
   }
 
