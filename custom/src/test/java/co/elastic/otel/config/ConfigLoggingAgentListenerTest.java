@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Test;
 
 public class ConfigLoggingAgentListenerTest {
   static final String TARGET_CLASS_NAME = "TempTest321";
+  static final String LOGGING_PROPERTIES_FILE_NAME = "test_logging.properties";
   static String[] identifyingStrings = {
     "ConfigLoggingAgentListener - AutoConfiguredOpenTelemetrySdk{",
     "tracerProvider=SdkTracerProvider"
@@ -49,6 +50,23 @@ public class ConfigLoggingAgentListenerTest {
     agentJarFile = getAgentJarFile();
     testTargetClass = createTestTarget();
     compileTestTarget(testTargetClass);
+    createLoggingPropertiesFile();
+  }
+
+  private static void createLoggingPropertiesFile() throws IOException {
+    File loggingPropertiesFile =
+        new File(System.getProperty("java.io.tmpdir"), LOGGING_PROPERTIES_FILE_NAME);
+    loggingPropertiesFile.deleteOnExit();
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(loggingPropertiesFile))) {
+      writer.write("handlers=java.util.logging.ConsoleHandler\n");
+      writer.write(".level=INFO\n");
+      writer.write("java.util.logging.ConsoleHandler.level=INFO\n");
+      writer.write(
+          "java.util.logging.ConsoleHandler.formatter=java.util.logging.SimpleFormatter\n");
+      // Avoid date/time in format to prevent ClassCircularityError with CLDR/Locale
+      writer.write(
+          "java.util.logging.SimpleFormatter.format=%4$s: %5$s%6$s%n\n");
+    }
   }
 
   private static void compileTestTarget(File sourceFile) {
@@ -66,6 +84,7 @@ public class ConfigLoggingAgentListenerTest {
   public static void teardown() throws IOException {
     testTargetClass.delete();
     new File(testTargetClass.getParent(), TARGET_CLASS_NAME + ".class").delete();
+    new File(System.getProperty("java.io.tmpdir"), LOGGING_PROPERTIES_FILE_NAME).delete();
   }
 
   @Test
@@ -87,10 +106,11 @@ public class ConfigLoggingAgentListenerTest {
   static List<String> createTestTargetCommand(boolean logConfig) throws IOException {
     List<String> command = new ArrayList<>();
     command.add("java");
-    command.add("-Xmx32m");
-    command.add("-Dotel.javaagent.logging=none");
-    command.add("-javaagent:" + agentJarFile);
-    // Only on false, ie test the 'true' default with no option
+            command.add("-Xmx32m");
+            command.add("-Djava.util.logging.config.file="
+                + new File(System.getProperty("java.io.tmpdir"), LOGGING_PROPERTIES_FILE_NAME).getAbsolutePath());
+            command.add("-Dotel.javaagent.logging=application");
+            command.add("-javaagent:" + agentJarFile);    // Only on false, ie test the 'true' default with no option
     if (!logConfig) {
       command.add("-D" + ConfigLoggingAgentListener.LOG_THE_CONFIG + "=false");
     }
