@@ -78,12 +78,12 @@ public class JavaExecutable {
       Process process =
           new ProcessBuilder()
               .command(
-                  JavaExecutable.getBinaryPath().toString(),
+                  JavaExecutable.getBinaryPath(),
                   jvmDebugArgument("localhost", port),
                   "-version")
               .start();
-      process.waitFor(5, TimeUnit.SECONDS);
-      return process.exitValue() == 0;
+      boolean processExit = process.waitFor(5, TimeUnit.SECONDS);
+      return processExit && process.exitValue() == 0;
     } catch (InterruptedException | IOException e) {
       return false;
     }
