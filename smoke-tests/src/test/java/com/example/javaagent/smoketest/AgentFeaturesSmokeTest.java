@@ -23,7 +23,9 @@ import static org.assertj.core.api.Assertions.tuple;
 
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.trace.v1.Span;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -31,18 +33,31 @@ import org.junit.jupiter.api.Test;
 class AgentFeaturesSmokeTest extends TestAppSmokeTest {
 
   @BeforeAll
-  public static void start() {
+  static void start() {
     startTestApp(
-        (container) -> container.addEnv("ELASTIC_OTEL_JAVA_SPAN_STACKTRACE_MIN_DURATION", "0ms"));
+        (container) -> {
+          // capture span stacktrace for any duration
+          container.addEnv("ELASTIC_OTEL_JAVA_SPAN_STACKTRACE_MIN_DURATION", "0ms");
+          // Capture HTTP request/response headers on server side
+          // header key should not be case-sensitive in config
+          container.addEnv("OTEL_INSTRUMENTATION_HTTP_SERVER_CAPTURE_REQUEST_HEADERS", "hello");
+          container.addEnv(
+              "OTEL_INSTRUMENTATION_HTTP_SERVER_CAPTURE_RESPONSE_HEADERS", "Content-length,Date");
+          // Capture messaging headers
+          // Header name IS case-sensitive, syntax may be limited by implementation, for example JMS
+          // requires it to be a valid java identifier.
+          container.addEnv(
+              "OTEL_INSTRUMENTATION_MESSAGING_EXPERIMENTAL_CAPTURE_HEADERS", "My_Header");
+        });
   }
 
   @AfterAll
-  public static void end() {
+  static void end() {
     stopApp();
   }
 
   @Test
-  public void healthcheck() throws InterruptedException {
+  void spanCodeStackTrace() {
     doRequest(getUrl("/health"), okResponseBody("Alive!"));
 
     List<ExportTraceServiceRequest> traces = waitForTraces();
@@ -53,14 +68,55 @@ class AgentFeaturesSmokeTest extends TestAppSmokeTest {
         .containsOnly(tuple("GET /health", Span.SpanKind.SPAN_KIND_SERVER));
 
     spans.forEach(
-        span -> {
-          assertThat(getAttributes(span.getAttributesList()))
-              // span breakdown feature disabled
-              .doesNotContainKeys(
-                  "elastic.span.self_time",
-                  "elastic.span.is_local_root",
-                  "elastic.span.local_root.id")
-              .containsKeys("code.stacktrace");
-        });
+        span ->
+            assertThat(getAttributes(span.getAttributesList())).containsKeys("code.stacktrace"));
+  }
+
+  @Test
+  void httpHeaderCapture() {
+    Map<String, String> headers = new HashMap<>();
+    headers.put("Hello", "World!");
+    doRequest(getUrl("/health"), headers, okResponseBody("Alive!"));
+
+    List<ExportTraceServiceRequest> traces = waitForTraces();
+    List<Span> spans = getSpans(traces).toList();
+    assertThat(spans)
+        .hasSize(1)
+        .extracting("name", "kind")
+        .containsOnly(tuple("GET /health", Span.SpanKind.SPAN_KIND_SERVER));
+
+    spans.forEach(
+        span ->
+            assertThat(getAttributes(span.getAttributesList()))
+                .containsEntry("http.request.header.hello", attributeArrayValue("World!"))
+                .containsEntry("http.response.header.content-length", attributeArrayValue("6"))
+                .containsKey("http.response.header.date"));
+  }
+
+  @Test
+  void messagingHeaderCapture() {
+    doRequest(
+        getUrl("/messages/send?headerName=My_Header&headerValue=my-header-value"), okResponse());
+    doRequest(getUrl("/messages/receive"), okResponse());
+
+    List<ExportTraceServiceRequest> traces = waitForTraces();
+    List<Span> spans = getSpans(traces).toList();
+    assertThat(spans)
+        .hasSize(3)
+        .extracting("name", "kind")
+        .containsOnly(
+            tuple("GET /messages/send", Span.SpanKind.SPAN_KIND_SERVER),
+            tuple("messages-destination publish", Span.SpanKind.SPAN_KIND_PRODUCER),
+            tuple("GET /messages/receive", Span.SpanKind.SPAN_KIND_SERVER));
+
+    spans.stream()
+        .filter(span -> span.getKind() == Span.SpanKind.SPAN_KIND_PRODUCER)
+        .forEach(
+            span ->
+                assertThat(getAttributes(span.getAttributesList()))
+                    .containsEntry(
+                        "messaging.destination.name", attributeValue("messages-destination"))
+                    .containsEntry(
+                        "messaging.header.My_Header", attributeArrayValue("my-header-value")));
   }
 }
