@@ -88,7 +88,7 @@ public class ConfigLoggingAgentListenerTest {
     List<String> command = new ArrayList<>();
     command.add("java");
     command.add("-Xmx32m");
-    command.add("-Djava.lang.invoke.MethodHandle.CUSTOMIZE_THRESHOLD=10000");
+    command.add("-Djava.lang.invoke.MethodHandle.CUSTOMIZE_THRESHOLD=-1");
     command.add("-javaagent:" + agentJarFile);
     // Only on false, ie test the 'true' default with no option
     if (!logConfig) {
