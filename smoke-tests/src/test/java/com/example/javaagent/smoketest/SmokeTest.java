@@ -26,6 +26,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import io.opentelemetry.proto.collector.trace.v1.ExportTraceServiceRequest;
 import io.opentelemetry.proto.common.v1.AnyValue;
+import io.opentelemetry.proto.common.v1.ArrayValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.resource.v1.Resource;
 import io.opentelemetry.proto.trace.v1.ResourceSpans;
@@ -34,6 +35,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -355,6 +357,14 @@ abstract class SmokeTest {
     return AnyValue.newBuilder().setStringValue(value).build();
   }
 
+  protected static AnyValue attributeArrayValue(String... values){
+    ArrayValue.Builder valueBuilder = ArrayValue.newBuilder();
+    for (String value : values) {
+      valueBuilder.addValues(AnyValue.newBuilder().setStringValue(value).build());
+    }
+    return AnyValue.newBuilder().setArrayValue(valueBuilder.build()).build();
+  }
+
   protected static Map<String, AnyValue> getAttributes(List<KeyValue> list) {
     Map<String, AnyValue> attributes = new HashMap<>();
     for (KeyValue kv : list) {
@@ -381,33 +391,37 @@ abstract class SmokeTest {
     }
     return sb.toString();
   }
-
   protected void doRequest(String url, IOConsumer<Response> responseHandler) {
-    Request request = new Request.Builder().url(url).get().build();
+    doRequest(url, Collections.emptyMap(), responseHandler);
+  }
 
-    try (Response response = client.newCall(request).execute()) {
-      responseHandler.accept(response);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+  protected void doRequest(String url, Map<String,String> headers, IOConsumer<Response> responseHandler) {
+    Request.Builder request = new Request.Builder().url(url).get();
+    headers.forEach(request::addHeader);
+
+      try (Response response = client.newCall(request.build()).execute()) {
+        responseHandler.accept(response);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    @FunctionalInterface
+    protected interface IOConsumer<T> {
+      void accept(T t) throws IOException;
+    }
+
+    protected static IOConsumer<Response> okResponse() {
+      return r -> {
+        assertThat(r.code()).isEqualTo(200);
+      };
+    }
+
+    protected static IOConsumer<Response> okResponseBody(String body) {
+      return r -> {
+        assertThat(r.code()).isEqualTo(200);
+        assertThat(r.body()).isNotNull();
+        assertThat(r.body().string()).isEqualTo(body);
+      };
     }
   }
-
-  @FunctionalInterface
-  protected interface IOConsumer<T> {
-    void accept(T t) throws IOException;
-  }
-
-  protected static IOConsumer<Response> okResponse() {
-    return r -> {
-      assertThat(r.code()).isEqualTo(200);
-    };
-  }
-
-  protected static IOConsumer<Response> okResponseBody(String body) {
-    return r -> {
-      assertThat(r.code()).isEqualTo(200);
-      assertThat(r.body()).isNotNull();
-      assertThat(r.body().string()).isEqualTo(body);
-    };
-  }
-}
