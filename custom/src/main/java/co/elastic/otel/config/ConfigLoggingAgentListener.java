@@ -19,12 +19,12 @@
 package co.elastic.otel.config;
 
 import co.elastic.otel.compositesampling.DynamicCompositeParentBasedTraceIdRatioBasedSampler;
-// import com.google.auto.service.AutoService;
+import com.google.auto.service.AutoService;
 import io.opentelemetry.javaagent.extension.AgentListener;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
 import java.util.logging.Logger;
 
-// @AutoService(AgentListener.class)
+@AutoService(AgentListener.class)
 public class ConfigLoggingAgentListener implements AgentListener {
   public static final String LOG_THE_CONFIG =
       "elastic.otel.java.experimental.configuration.logging.enabled";
