@@ -19,7 +19,6 @@
 package co.elastic.otel.logging;
 
 import com.google.auto.service.AutoService;
-import io.opentelemetry.javaagent.bootstrap.InternalLogger;
 import io.opentelemetry.javaagent.tooling.LoggingCustomizer;
 import io.opentelemetry.javaagent.tooling.config.EarlyInitAgentConfig;
 import java.util.Optional;
