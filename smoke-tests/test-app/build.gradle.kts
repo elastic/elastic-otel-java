@@ -16,12 +16,14 @@ dependencies {
   testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
   implementation("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
 
-
   implementation("io.opentelemetry:opentelemetry-api")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations")
 
   implementation(project(":runtime-attach"))
 
+  implementation("org.springframework.boot:spring-boot-starter-artemis:${springBootVersion}")
+  // using a rather old version to keep java 8 compatibility
+  implementation("org.apache.activemq:artemis-jms-server:2.27.0")
 }
 
 java {

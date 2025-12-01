@@ -70,22 +70,18 @@ public class JavaExecutable {
 
   private static boolean probeListeningDebugger(int port) {
     // the most straightforward way to probe for an active debugger listening on port is to start
-    // another JVM
-    // with the debug options and check the process exit status. Trying to probe for open network
-    // port messes with
-    // the debugger and makes IDEA stop it. The only downside of this is that the debugger will
-    // first attach to this
-    // probe JVM, then the one running in a docker container we are aiming to debug.
+    // another JVM with the debug options and check the process exit status. Trying to probe for
+    // open network port messes with the debugger and makes IDEA stop it. The only downside of this
+    // is that the debugger will first attach to this probe JVM, then the one running in a docker
+    // container we are aiming to debug.
     try {
       Process process =
           new ProcessBuilder()
               .command(
-                  JavaExecutable.getBinaryPath().toString(),
-                  jvmDebugArgument("localhost", port),
-                  "-version")
+                  JavaExecutable.getBinaryPath(), jvmDebugArgument("localhost", port), "-version")
               .start();
-      process.waitFor(5, TimeUnit.SECONDS);
-      return process.exitValue() == 0;
+      boolean processExit = process.waitFor(5, TimeUnit.SECONDS);
+      return processExit && process.exitValue() == 0;
     } catch (InterruptedException | IOException e) {
       return false;
     }
