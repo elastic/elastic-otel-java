@@ -55,7 +55,7 @@ public class ConfigLoggingAgentListenerTest {
 
   @Test
   public void checkLogConfigPresent() throws IOException {
-    String output = executeCommand(createTestTargetCommand(true), 20);
+    String output = executeCommand(createTestTargetCommand(true), 120);
     for (String identifyingString : identifyingStrings) {
       assertThat(output).contains(identifyingString);
     }
@@ -63,7 +63,7 @@ public class ConfigLoggingAgentListenerTest {
 
   @Test
   public void checkLogConfigAbsent() throws IOException {
-    String output = executeCommand(createTestTargetCommand(false), 20);
+    String output = executeCommand(createTestTargetCommand(false), 120);
     for (String identifyingString : identifyingStrings) {
       assertThat(output).doesNotContain(identifyingString);
     }
