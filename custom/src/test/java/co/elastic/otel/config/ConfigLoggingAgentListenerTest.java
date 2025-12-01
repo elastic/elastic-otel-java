@@ -28,6 +28,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -41,21 +43,26 @@ public class ConfigLoggingAgentListenerTest {
 
   private static String agentJarFile;
   private static File testTargetClass;
+  private static File testTargetCompiledClass;
 
   @BeforeAll
   public static void setup() throws IOException {
     agentJarFile = getAgentJarFile();
     testTargetClass = createTestTarget();
+    compileTestTarget(testTargetClass);
+    testTargetCompiledClass = new File(testTargetClass.getParent(), TARGET_CLASS_NAME + ".class");
   }
 
   @AfterAll
   public static void teardown() throws IOException {
     testTargetClass.delete();
+    testTargetCompiledClass.delete();
   }
 
   @Test
   public void checkLogConfigPresent() throws IOException {
-    String output = executeCommand(createTestTargetCommand(true), 120);
+    String output =
+        filterOutUpstreamDebugConfigLine(executeCommand(createTestTargetCommand(true), 120));
     for (String identifyingString : identifyingStrings) {
       assertThat(output).contains(identifyingString);
     }
@@ -63,23 +70,52 @@ public class ConfigLoggingAgentListenerTest {
 
   @Test
   public void checkLogConfigAbsent() throws IOException {
-    String output = executeCommand(createTestTargetCommand(false), 120);
+    String output =
+        filterOutUpstreamDebugConfigLine(executeCommand(createTestTargetCommand(false), 120));
     for (String identifyingString : identifyingStrings) {
       assertThat(output).doesNotContain(identifyingString);
     }
+  }
+
+  static String filterOutUpstreamDebugConfigLine(String line) {
+    // remove the debug level AutoConfiguredOpenTelemetrySdkBuilder output as this has the same
+    // content apart from being from AutoConfiguredOpenTelemetrySdkBuilder
+    if (line.contains(
+        "AutoConfiguredOpenTelemetrySdkBuilder - Global OpenTelemetry set to OpenTelemetrySdk")) {
+      return line.replaceFirst(
+          "[\r\n].*?AutoConfiguredOpenTelemetrySdkBuilder - Global OpenTelemetry set to OpenTelemetrySdk.*?[\r\n]",
+          "");
+    }
+    return line;
   }
 
   static List<String> createTestTargetCommand(boolean logConfig) throws IOException {
     List<String> command = new ArrayList<>();
     command.add("java");
     command.add("-Xmx32m");
+    command.add("-Dotel.javaagent.logging=application");
+    command.add("-Dotel.javaagent.debug=false");
+    command.add("-Dotel.service.name=ConfigLoggingAgentListenerTest:" + logConfig);
+    command.add("-Dotel.traces.exporter=none");
+    command.add("-Dotel.resource.providers.aws.enabled=false");
+    command.add("-Dotel.resource.providers.gcp.enabled=false");
+    command.add("-Dotel.resource.providers.azure.enabled=false");
     command.add("-javaagent:" + agentJarFile);
     // Only on false, ie test the 'true' default with no option
     if (!logConfig) {
       command.add("-D" + ConfigLoggingAgentListener.LOG_THE_CONFIG + "=false");
     }
-    command.add(testTargetClass.getAbsolutePath());
+    command.add("-cp");
+    command.add(testTargetCompiledClass.getParentFile().getAbsolutePath());
+    command.add(TARGET_CLASS_NAME);
     return command;
+  }
+
+  static void compileTestTarget(File sourceFile) throws IOException {
+    JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+    if (compiler.run(null, null, null, sourceFile.getAbsolutePath()) != 0) {
+      throw new IOException("Failed to compile test target");
+    }
   }
 
   static File createTestTarget() throws IOException {
