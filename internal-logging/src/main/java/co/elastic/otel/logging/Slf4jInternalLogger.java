@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 public class Slf4jInternalLogger implements InternalLogger {
   private final String name;
   private volatile Logger logger;
+  static volatile boolean initializationComplete = false;
 
   private Slf4jInternalLogger(String name) {
     this.name = name;
@@ -49,6 +50,10 @@ public class Slf4jInternalLogger implements InternalLogger {
 
   @Override
   public boolean isLoggable(Level level) {
+    if (!initializationComplete) {
+      // During startup, only log INFO and above to avoid noise and match typical default behavior
+      return level != Level.TRACE && level != Level.DEBUG;
+    }
     switch (level) {
       case TRACE:
         return getLogger().isTraceEnabled();
@@ -67,6 +72,17 @@ public class Slf4jInternalLogger implements InternalLogger {
 
   @Override
   public void log(Level level, String s, @Nullable Throwable throwable) {
+    if (!initializationComplete) {
+      if (isLoggable(level)) {
+        // Fallback logging to System.out during startup to avoid ClassCircularityError
+        // Mimic a simple log format: [Thread] LEVEL LoggerName - Message
+        System.out.printf("[%s] %s %s - %s%n", Thread.currentThread().getName(), level, name, s);
+        if (throwable != null) {
+          throwable.printStackTrace(System.out);
+        }
+      }
+      return;
+    }
     getLogger().atLevel(toSlf4jLevel(level)).setCause(throwable).log(s);
   }
 
