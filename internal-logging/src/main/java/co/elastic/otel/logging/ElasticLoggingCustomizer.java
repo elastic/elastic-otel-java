@@ -60,9 +60,7 @@ public class ElasticLoggingCustomizer implements LoggingCustomizer {
   }
 
   @Override
-  public void onStartupSuccess() {
-    Slf4jInternalLogger.initializationComplete = true;
-  }
+  public void onStartupSuccess() {}
 
   @SuppressWarnings("CallToPrintStackTrace")
   @Override
