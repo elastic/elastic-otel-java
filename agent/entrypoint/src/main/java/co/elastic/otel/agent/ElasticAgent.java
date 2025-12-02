@@ -20,7 +20,9 @@ package co.elastic.otel.agent;
 
 import io.opentelemetry.javaagent.OpenTelemetryAgent;
 import java.lang.instrument.Instrumentation;
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 
 /** Elastic agent entry point, delegates to OpenTelemetry agent */
 public class ElasticAgent {
@@ -69,8 +71,10 @@ public class ElasticAgent {
     // loaded yet, the first use might trigger a class load that eventually triggers the logging
     // subsystem again (e.g. through instrumentation).
     try {
-      MethodHandles.lookup();
-      Class.forName("java.lang.invoke.MethodHandle");
+      MethodHandles.Lookup lookup = MethodHandles.lookup();
+      MethodHandle mh =
+          lookup.findVirtual(String.class, "length", MethodType.methodType(int.class));
+      mh.invokeExact("string");
     } catch (Throwable e) {
       // ignore
     }
