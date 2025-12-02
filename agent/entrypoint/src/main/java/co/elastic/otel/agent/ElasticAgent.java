@@ -20,9 +20,6 @@ package co.elastic.otel.agent;
 
 import io.opentelemetry.javaagent.OpenTelemetryAgent;
 import java.lang.instrument.Instrumentation;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 
 /** Elastic agent entry point, delegates to OpenTelemetry agent */
 public class ElasticAgent {
@@ -38,7 +35,6 @@ public class ElasticAgent {
    * @param inst instrumentation
    */
   public static void premain(String agentArgs, Instrumentation inst) {
-    ensureAccessToMethodHandles();
     initLogging();
     OpenTelemetryAgent.premain(agentArgs, inst);
   }
@@ -50,7 +46,6 @@ public class ElasticAgent {
    * @param inst instrumentation
    */
   public static void agentmain(String agentArgs, Instrumentation inst) {
-    ensureAccessToMethodHandles();
     initLogging();
     OpenTelemetryAgent.agentmain(agentArgs, inst);
   }
@@ -62,22 +57,6 @@ public class ElasticAgent {
    */
   public static void main(String[] args) {
     OpenTelemetryAgent.main(args);
-  }
-
-  private static void ensureAccessToMethodHandles() {
-    // This is required to prevent a ClassCircularityError on Java 17+ when loading the logging
-    // subsystem.
-    // The issue is that the logging subsystem uses MethodHandles, and if MethodHandles are not
-    // loaded yet, the first use might trigger a class load that eventually triggers the logging
-    // subsystem again (e.g. through instrumentation).
-    try {
-      MethodHandles.Lookup lookup = MethodHandles.lookup();
-      MethodHandle mh =
-          lookup.findVirtual(String.class, "length", MethodType.methodType(int.class));
-      mh.invokeExact("string");
-    } catch (Throwable e) {
-      // ignore
-    }
   }
 
   private static void initLogging() {
