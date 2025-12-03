@@ -25,29 +25,50 @@ import org.slf4j.LoggerFactory;
 
 /** Internal logger implementation that delegates to SLF4J */
 public class Slf4jInternalLogger implements InternalLogger {
-  private final Logger logger;
+  private final String name;
+  private volatile Logger logger;
+  private static volatile boolean initializationComplete = false;
+
+  static void setInitializationComplete() {
+    initializationComplete = true;
+  }
 
   private Slf4jInternalLogger(String name) {
-    this.logger = LoggerFactory.getLogger(name);
+    this.name = name;
   }
 
   public static InternalLogger create(String name) {
     return new Slf4jInternalLogger(name);
   }
 
+  private Logger getLogger() {
+    if (logger == null) {
+      synchronized (this) {
+        if (logger == null) {
+          logger = LoggerFactory.getLogger(name);
+        }
+      }
+    }
+    return logger;
+  }
+
   @Override
   public boolean isLoggable(Level level) {
+    if (!initializationComplete) {
+      // During startup, only log INFO and above to avoid noise and match typical default behavior
+      return level != Level.TRACE && level != Level.DEBUG;
+    }
     switch (level) {
       case TRACE:
-        return logger.isTraceEnabled();
+        return getLogger().isTraceEnabled();
       case DEBUG:
-        return logger.isDebugEnabled();
+        return getLogger().isDebugEnabled();
       case INFO:
-        return logger.isInfoEnabled();
+        return getLogger().isInfoEnabled();
       case WARN:
-        return logger.isWarnEnabled();
+        return getLogger().isWarnEnabled();
       case ERROR:
-        return logger.isErrorEnabled();
+        return getLogger().isErrorEnabled();
       default:
         throw new IllegalArgumentException("Unsupported level: " + level);
     }
@@ -55,7 +76,18 @@ public class Slf4jInternalLogger implements InternalLogger {
 
   @Override
   public void log(Level level, String s, @Nullable Throwable throwable) {
-    logger.atLevel(toSlf4jLevel(level)).setCause(throwable).log(s);
+    if (!initializationComplete) {
+      if (isLoggable(level)) {
+        // Fallback logging to System.out during startup to avoid ClassCircularityError
+        // Mimic a simple log format: [Thread] LEVEL LoggerName - Message
+        System.out.printf("[%s] %s %s - %s%n", Thread.currentThread().getName(), level, name, s);
+        if (throwable != null) {
+          throwable.printStackTrace(System.out);
+        }
+      }
+      return;
+    }
+    getLogger().atLevel(toSlf4jLevel(level)).setCause(throwable).log(s);
   }
 
   private static org.slf4j.event.Level toSlf4jLevel(Level level) {
@@ -77,6 +109,6 @@ public class Slf4jInternalLogger implements InternalLogger {
 
   @Override
   public String name() {
-    return logger.getName();
+    return name;
   }
 }
