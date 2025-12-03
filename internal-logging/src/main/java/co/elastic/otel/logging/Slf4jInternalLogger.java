@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 public class Slf4jInternalLogger implements InternalLogger {
   private final String name;
   private volatile Logger logger;
-  private volatile boolean initializationComplete = false;
+  private static volatile boolean initializationComplete = false;
 
   static void setInitializationComplete() {
     initializationComplete = true;
