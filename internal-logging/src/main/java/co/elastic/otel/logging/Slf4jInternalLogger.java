@@ -29,7 +29,7 @@ public class Slf4jInternalLogger implements InternalLogger {
   private volatile Logger logger;
   private volatile boolean initializationComplete = false;
 
-  void setInitializationComplete() {
+  static void setInitializationComplete() {
     initializationComplete = true;
   }
 
