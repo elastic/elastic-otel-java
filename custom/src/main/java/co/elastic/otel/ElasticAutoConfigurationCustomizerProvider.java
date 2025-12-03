@@ -61,6 +61,7 @@ public class ElasticAutoConfigurationCustomizerProvider
       AttributeKey.stringKey("deployment.environment");
   private static final AttributeKey<String> DEPLOYMENT =
       AttributeKey.stringKey("deployment.environment.name");
+  private static final String OTEL_JAVAAGENT_EXPERIMENTAL_INDY = "otel.javaagent.experimental.indy";
 
   @Override
   public void customize(AutoConfigurationCustomizer autoConfiguration) {
@@ -107,6 +108,7 @@ public class ElasticAutoConfigurationCustomizerProvider
     defaultSampler(config, configProperties);
     ConfigLoggingAgentListener.logTheConfig(
         configProperties.getBoolean(ConfigLoggingAgentListener.LOG_THE_CONFIG, true));
+    indyInstrumentation(config, configProperties);
 
     return config;
   }
@@ -173,5 +175,11 @@ public class ElasticAutoConfigurationCustomizerProvider
     }
 
     config.put(STACKTRACE_OTEL_FILTER, SpanStackTraceFilter.class.getName());
+  }
+
+  private static void indyInstrumentation(
+      Map<String, String> config, ConfigProperties configProperties) {
+    boolean enabled = configProperties.getBoolean(OTEL_JAVAAGENT_EXPERIMENTAL_INDY, true);
+    config.put(OTEL_JAVAAGENT_EXPERIMENTAL_INDY, Boolean.toString(enabled));
   }
 }
