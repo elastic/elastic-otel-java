@@ -18,7 +18,7 @@
  */
 package co.elastic.otel.config;
 
-import co.elastic.otel.compositesampling.DynamicCompositeParentBasedTraceIdRatioBasedSampler;
+import co.elastic.otel.sampling.DynamicCompositeParentBasedTraceIdRatioBasedSampler;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.javaagent.extension.AgentListener;
 import io.opentelemetry.sdk.autoconfigure.AutoConfiguredOpenTelemetrySdk;
