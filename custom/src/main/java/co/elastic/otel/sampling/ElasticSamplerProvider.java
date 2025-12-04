@@ -24,20 +24,25 @@ import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSamplerProvider
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 
 @AutoService(ConfigurableSamplerProvider.class)
-public class CompositeParentBasedTraceIdRatioBasedSamplerProvider
-    implements ConfigurableSamplerProvider {
+public class ElasticSamplerProvider implements ConfigurableSamplerProvider {
+
+  private static final String ELASTIC_OTEL_IGNORE_URLS =
+      "elastic.otel.experimental.http.ignore.urls";
+  private static final String ELASTIC_OTEL_IGNORE_USER_AGENTS =
+      "elastic.otel.experimental.http.ignore.user-agents";
 
   @Override
   public Sampler createSampler(ConfigProperties config) {
-    DynamicCompositeParentBasedTraceIdRatioBasedSampler.setRatio(
+    ElasticSampler.setRatio(
         config.getDouble(
-            "otel.traces.sampler.arg",
-            DynamicCompositeParentBasedTraceIdRatioBasedSampler.DEFAULT_TRACEIDRATIO_SAMPLE_RATIO));
-    return DynamicCompositeParentBasedTraceIdRatioBasedSampler.INSTANCE;
+            "otel.traces.sampler.arg", ElasticSampler.DEFAULT_TRACEIDRATIO_SAMPLE_RATIO));
+    ElasticSampler.setFilterHttp(
+        config.getList(ELASTIC_OTEL_IGNORE_URLS), config.getList(ELASTIC_OTEL_IGNORE_USER_AGENTS));
+    return ElasticSampler.INSTANCE;
   }
 
   @Override
   public String getName() {
-    return "experimental_composite_parentbased_traceidratio";
+    return "elastic";
   }
 }

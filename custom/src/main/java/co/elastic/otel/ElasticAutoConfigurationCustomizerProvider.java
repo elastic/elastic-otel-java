@@ -156,9 +156,7 @@ public class ElasticAutoConfigurationCustomizerProvider
   private static void defaultSampler(
       Map<String, String> config, ConfigProperties configProperties) {
     // enable EDOT default sampler by default if not explicitly disabled
-    String sampler =
-        configProperties.getString(
-            TRACES_SAMPLER, "experimental_composite_parentbased_traceidratio");
+    String sampler = configProperties.getString(TRACES_SAMPLER, "elastic");
     config.put(TRACES_SAMPLER, sampler);
   }
 

@@ -18,10 +18,10 @@
  */
 package co.elastic.otel.dynamicconfig;
 
-import co.elastic.otel.sampling.DynamicCompositeParentBasedTraceIdRatioBasedSampler;
 import co.elastic.otel.config.ConfigLoggingAgentListener;
 import co.elastic.otel.dynamicconfig.internal.OpampManager;
 import co.elastic.otel.logging.AgentLog;
+import co.elastic.otel.sampling.ElasticSampler;
 import io.opentelemetry.contrib.inferredspans.InferredSpans;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
@@ -334,8 +334,8 @@ public class CentralConfig {
         logger.warning("ignoring \"sampling_rate\" because non-default sampler in use");
         return;
       }
-      DynamicCompositeParentBasedTraceIdRatioBasedSampler.setRatio(
-          Double.parseDouble(configurationValue));
+      ElasticSampler.setRatio(Double.parseDouble(configurationValue));
+      // TODO: refresh ignore HTTP urls and user agents
     }
   }
 

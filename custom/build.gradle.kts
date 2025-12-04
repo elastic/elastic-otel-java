@@ -45,6 +45,9 @@ dependencies {
   exclude(group = "io.opentelemetry", module = "opentelemetry-sdk-extension-autoconfigure-spi")
 }
 
+  // samplers, included in upstream agent
+  compileOnly(libs.contribSamplers)
+
   testImplementation(libs.contribSpanStacktrace)
 
   // needs to be added in order to allow access to AgentListener interface
