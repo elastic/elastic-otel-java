@@ -18,7 +18,6 @@
  */
 package co.elastic.otel.sampling;
 
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
@@ -27,8 +26,8 @@ import io.opentelemetry.contrib.sampler.RuleBasedRoutingSamplerBuilder;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
-import io.opentelemetry.semconv.HttpAttributes;
 import io.opentelemetry.semconv.UrlAttributes;
+import io.opentelemetry.semconv.UserAgentAttributes;
 import java.util.List;
 
 public class HttpFilteringSampler implements Sampler {
@@ -59,11 +58,8 @@ public class HttpFilteringSampler implements Sampler {
       List<String> urlPatterns, List<String> userAgentPatterns) {
     RuleBasedRoutingSamplerBuilder builder =
         RuleBasedRoutingSampler.builder(SpanKind.SERVER, Sampler.alwaysOn());
-    AttributeKey<String> userAgentKey =
-        AttributeKey.stringKey(
-            HttpAttributes.HTTP_REQUEST_HEADER.getAttributeKey("user-agent").getKey());
     for (String pattern : userAgentPatterns) {
-      builder.drop(userAgentKey, pattern);
+      builder.drop(UserAgentAttributes.USER_AGENT_ORIGINAL, pattern);
     }
     for (String pattern : urlPatterns) {
       builder.drop(UrlAttributes.URL_PATH, pattern);
