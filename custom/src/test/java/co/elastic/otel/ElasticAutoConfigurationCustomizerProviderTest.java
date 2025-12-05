@@ -55,7 +55,7 @@ class ElasticAutoConfigurationCustomizerProviderTest {
 
     assertThat(config)
         .describedAs("edot default sampler when not set by user")
-        .containsEntry("otel.traces.sampler", "experimental_composite_parentbased_traceidratio");
+        .containsEntry("otel.traces.sampler", "elastic");
   }
 
   @Test
