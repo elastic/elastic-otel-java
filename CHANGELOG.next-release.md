@@ -13,7 +13,7 @@ This file contains all changes which are not released yet.
 <!--FIXES-END-->
 # Features and enhancements
 <!--ENHANCEMENTS-START-->
-
+* Enable indy delegation by default - [#899](https://github.com/elastic/apm-agent-java/pull/899)
 <!--ENHANCEMENTS-END-->
 # Deprecations
 <!--DEPRECATIONS-START-->
