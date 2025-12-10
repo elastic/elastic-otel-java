@@ -27,6 +27,12 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [edot-java-X.X.X-fixes]
 % *
 
+## 1.8.0 [edot-java-1-8-0-release-notes]
+**Release date:** December 9, 2025
+
+### Features and enhancements [edot-java-1-8-0-features-enhancements]
+* Enable indy delegation by default - [#899](https://github.com/elastic/apm-agent-java/pull/899)
+
 ## 1.7.0 [edot-java-1-7-0-release-notes]
 **Release date:** November 5, 2025
 
