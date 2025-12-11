@@ -58,7 +58,8 @@ public class MessagingController {
   }
 
   @RequestMapping("/receive/{destination}")
-  public String receive(@PathVariable(name = "destination") String destination) throws JMSException {
+  public String receive(@PathVariable(name = "destination") String destination)
+      throws JMSException {
     Message received = jmsTemplate.receive(destination);
     if (received instanceof TextMessage) {
       TextMessage textMessage = (TextMessage) received;

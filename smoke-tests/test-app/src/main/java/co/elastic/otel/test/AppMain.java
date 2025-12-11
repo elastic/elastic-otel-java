@@ -19,12 +19,11 @@
 package co.elastic.otel.test;
 
 import co.elastic.otel.agent.attach.RuntimeAttach;
+import javax.jms.Message;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.annotation.JmsListener;
-import javax.jms.Message;
-import javax.jms.MessageListener;
 
 @SpringBootApplication
 @EnableJms
