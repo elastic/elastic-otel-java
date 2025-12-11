@@ -13,7 +13,7 @@ This file contains all changes which are not released yet.
 <!--FIXES-END-->
 # Features and enhancements
 <!--ENHANCEMENTS-START-->
-* Enable indy delegation by default - [#899](https://github.com/elastic/apm-agent-java/pull/899)
+
 <!--ENHANCEMENTS-END-->
 # Deprecations
 <!--DEPRECATIONS-START-->
@@ -26,4 +26,13 @@ This file contains all changes which are not released yet.
 <!--BREAKING-CHANGES-END-->
 <!--DEPENDENCIES-NOTES-START-->
 
+<!--DEPENDENCIES-NOTES-END-->
+<!--DEPENDENCIES-NOTES-START-->
+This release is based on the following upstream versions:
+
+
+* opentelemetry-javaagent: [2.22.0](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.22.0)
+* opentelemetry-sdk: [1.56.0](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.56.0)
+* opentelemetry-semconv: [1.37.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.37.0)
+* opentelemetry-java-contrib: [1.52.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.52.0)
 <!--DEPENDENCIES-NOTES-END-->
