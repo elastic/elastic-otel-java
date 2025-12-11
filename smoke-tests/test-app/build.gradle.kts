@@ -5,6 +5,8 @@ plugins {
   alias(catalog.plugins.taskinfo)
 }
 
+val mainClass = "co.elastic.otel.test.AppMain"
+
 dependencies {
 
   // Using a spring boot app is simpler for a general-purpose test app
@@ -40,7 +42,7 @@ jib {
   from.image = "gcr.io/distroless/java17-debian11:debug"
   to.image = "docker.elastic.co/open-telemetry/elastic-otel-java/smoke-test/test-app:$tag"
   container.ports = listOf("8080")
-  container.mainClass = "co.elastic.otel.test.AppMain"
+  container.mainClass = mainClass
 }
 
 tasks {
@@ -50,6 +52,12 @@ tasks {
   // javadoc not required
   javadoc {
     isEnabled = false
+  }
+
+  jar {
+    manifest {
+      attributes("Main-Class" to mainClass)
+    }
   }
 
   // build docker image with 'assemble'

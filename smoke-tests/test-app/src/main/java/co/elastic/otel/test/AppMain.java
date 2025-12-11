@@ -22,6 +22,9 @@ import co.elastic.otel.agent.attach.RuntimeAttach;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.jms.annotation.EnableJms;
+import org.springframework.jms.annotation.JmsListener;
+import javax.jms.Message;
+import javax.jms.MessageListener;
 
 @SpringBootApplication
 @EnableJms
@@ -32,5 +35,10 @@ public class AppMain {
       RuntimeAttach.attachJavaagentToCurrentJvm();
     }
     SpringApplication.run(AppMain.class, args);
+  }
+
+  @JmsListener(destination = "async-queue")
+  public static void onMessage(Message message) {
+    System.out.println("message received");
   }
 }
