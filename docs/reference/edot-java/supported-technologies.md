@@ -30,7 +30,9 @@ If your application uses technologies not covered by auto-instrumentation, you h
 
 1. **Native OpenTelemetry support** — Some frameworks and libraries include built-in OpenTelemetry instrumentation provided by the vendor.
 2. **Manual instrumentation** — Use the [OpenTelemetry API](https://opentelemetry.io/docs/languages/java/instrumentation/) to add custom spans, metrics, and logs for unsupported components.
+3. **Configuration-based instrumentation** — Use the [`otel.instrumentation.methods.include`](https://opentelemetry.io/docs/zero-code/java/agent/annotations/#creating-spans-around-methods-with-otelinstrumentationmethodsinclude) option to create spans around specific methods without modifying application code or dependencies.
 :::
+
 
 ## EDOT Collector and Elastic Stack versions
 
