@@ -254,7 +254,7 @@ To secure the connection to the OTLP endpoint using TLS, you can configure the f
 | `OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE` | Path to a PEM-encoded file containing the client certificate for mTLS. |
 | `OTEL_EXPORTER_OTLP_CLIENT_KEY` | Path to a PEM-encoded file containing the client's private key for mTLS. |
 
-Signal-specific variants are also supported: `OTEL_EXPORTER_OTLP_{TRACES,METRICS,LOGS}_CERTIFICATE`, `OTEL_EXPORTER_OTLP_{TRACES,METRICS,LOGS}_CLIENT_CERTIFICATE`, and `OTEL_EXPORTER_OTLP_{TRACES,METRICS,LOGS}_CLIENT_KEY`.
+Signal-specific variants are also supported: `OTEL_EXPORTER_OTLP_{signal}_CERTIFICATE`, `OTEL_EXPORTER_OTLP_{signal}_CLIENT_CERTIFICATE`, and `OTEL_EXPORTER_OTLP_{signal}_CLIENT_KEY` where `{signal}` is one of `TRACES`, `METRICS` or `LOGS`.
 
 :::{note}
 TLS configuration for OpAMP endpoint (central configuration) is not yet supported in EDOT Java.
