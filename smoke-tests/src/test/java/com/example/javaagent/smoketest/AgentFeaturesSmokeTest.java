@@ -96,8 +96,9 @@ class AgentFeaturesSmokeTest extends TestAppSmokeTest {
   @Test
   void messagingHeaderCapture() {
     doRequest(
-        getUrl("/messages/send?headerName=My_Header&headerValue=my-header-value"), okResponse());
-    doRequest(getUrl("/messages/receive"), okResponse());
+        getUrl("/messages/send/sync-queue?headerName=My_Header&headerValue=my-header-value"),
+        okResponse());
+    doRequest(getUrl("/messages/receive/sync-queue"), okResponse());
 
     List<ExportTraceServiceRequest> traces = waitForTraces();
     List<Span> spans = getSpans(traces).toList();
@@ -105,17 +106,16 @@ class AgentFeaturesSmokeTest extends TestAppSmokeTest {
         .hasSize(3)
         .extracting("name", "kind")
         .containsOnly(
-            tuple("GET /messages/send", Span.SpanKind.SPAN_KIND_SERVER),
-            tuple("messages-destination publish", Span.SpanKind.SPAN_KIND_PRODUCER),
-            tuple("GET /messages/receive", Span.SpanKind.SPAN_KIND_SERVER));
+            tuple("GET /messages/send/{destination}", Span.SpanKind.SPAN_KIND_SERVER),
+            tuple("sync-queue publish", Span.SpanKind.SPAN_KIND_PRODUCER),
+            tuple("GET /messages/receive/{destination}", Span.SpanKind.SPAN_KIND_SERVER));
 
     spans.stream()
         .filter(span -> span.getKind() == Span.SpanKind.SPAN_KIND_PRODUCER)
         .forEach(
             span ->
                 assertThat(getAttributes(span.getAttributesList()))
-                    .containsEntry(
-                        "messaging.destination.name", attributeValue("messages-destination"))
+                    .containsEntry("messaging.destination.name", attributeValue("sync-queue"))
                     .containsEntry(
                         "messaging.header.My_Header", attributeArrayValue("my-header-value")));
   }

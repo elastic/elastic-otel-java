@@ -24,6 +24,7 @@ import javax.jms.Message;
 import javax.jms.TextMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,8 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/messages")
 public class MessagingController {
 
-  private static final String DESTINATION = "messages-destination";
-
   @Autowired
   public MessagingController(JmsTemplate jmsTemplate) {
     this.jmsTemplate = jmsTemplate;
@@ -41,12 +40,13 @@ public class MessagingController {
 
   private final JmsTemplate jmsTemplate;
 
-  @RequestMapping("/send")
+  @RequestMapping("/send/{destination}")
   public String send(
+      @PathVariable(name = "destination") String destination,
       @RequestParam(name = "headerName", required = false) String headerName,
       @RequestParam(name = "headerValue", required = false) String headerValue) {
     jmsTemplate.send(
-        DESTINATION,
+        destination,
         session -> {
           TextMessage message = session.createTextMessage("Hello World");
           if (headerName != null && headerValue != null) {
@@ -57,9 +57,10 @@ public class MessagingController {
     return null;
   }
 
-  @RequestMapping("/receive")
-  public String receive() throws JMSException {
-    Message received = jmsTemplate.receive(DESTINATION);
+  @RequestMapping("/receive/{destination}")
+  public String receive(@PathVariable(name = "destination") String destination)
+      throws JMSException {
+    Message received = jmsTemplate.receive(destination);
     if (received instanceof TextMessage) {
       TextMessage textMessage = (TextMessage) received;
       StringBuilder sb = new StringBuilder();
