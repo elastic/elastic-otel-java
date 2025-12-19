@@ -17,6 +17,23 @@ products:
 
 The EDOT Java agent is a [distribution](https://opentelemetry.io/docs/concepts/distributions/) of [OpenTelemetry Java Instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation) agent. It inherits all the [supported](opentelemetry://reference/compatibility/nomenclature.md) technologies of the OpenTelemetry Java Instrumentation.
 
+:::{note}
+**Understanding auto-instrumentation scope**
+
+Auto-instrumentation automatically captures telemetry for the frameworks and libraries listed on this page. However, it cannot instrument:
+
+- Custom or proprietary frameworks and libraries
+- Closed-source components without instrumentation support
+- Application-specific business logic
+
+If your application uses technologies not covered by auto-instrumentation, you have two options:
+
+1. **Native OpenTelemetry support** — Some frameworks and libraries include built-in OpenTelemetry instrumentation provided by the vendor.
+2. **Manual instrumentation** — Use the [OpenTelemetry API](https://opentelemetry.io/docs/languages/java/instrumentation/) to add custom spans, metrics, and logs for unsupported components.
+3. **Configuration-based instrumentation** — Use the [`otel.instrumentation.methods.include`](https://opentelemetry.io/docs/zero-code/java/agent/annotations/#creating-spans-around-methods-with-otelinstrumentationmethodsinclude) option to create spans around specific methods without modifying application code or dependencies.
+:::
+
+
 ## EDOT Collector and Elastic Stack versions
 
 The EDOT Java agent sends data through the OpenTelemetry protocol (OTLP). While OTLP ingest works with later 8.16+ versions of the EDOT Collector, for full support use either [EDOT Collector](elastic-agent://reference/edot-collector/index.md) versions 9.x or [{{serverless-full}}](docs-content://deploy-manage/deploy/elastic-cloud/serverless.md) for OTLP ingest.

@@ -244,6 +244,22 @@ One solution is to add the certificate or certificate authority to the JVM trust
 
 If trust store modification is not possible or not practical, for example when troubleshooting or working with a local deployment, certificate verification can be disabled by setting `ELASTIC_OTEL_VERIFY_SERVER_CERT` to `false`. This however need to be evaluated carefully as it lowers the communication security and could allow for man-in-the-middle attacks where the data could be intercepted between the agent and the collector endpoint.
 
+### TLS configuration for OTLP endpoint
+
+To secure the connection to the OTLP endpoint using TLS, you can configure the following environment variables as documented in the [OpenTelemetry OTLP Exporter specification](https://opentelemetry.io/docs/specs/otel/protocol/exporter/):
+
+| Option | Description |
+|---|---|
+| `OTEL_EXPORTER_OTLP_CERTIFICATE` | Path to a PEM-encoded file containing the trusted certificate(s) to verify the server's TLS credentials. |
+| `OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE` | Path to a PEM-encoded file containing the client certificate for mTLS. |
+| `OTEL_EXPORTER_OTLP_CLIENT_KEY` | Path to a PEM-encoded file containing the client's private key for mTLS. |
+
+Signal-specific variants are also supported: `OTEL_EXPORTER_OTLP_{signal}_CERTIFICATE`, `OTEL_EXPORTER_OTLP_{signal}_CLIENT_CERTIFICATE`, and `OTEL_EXPORTER_OTLP_{signal}_CLIENT_KEY` where `{signal}` is one of `TRACES`, `METRICS` or `LOGS`.
+
+:::{note}
+TLS configuration for OpAMP endpoint (central configuration) is not yet supported in EDOT Java.
+:::
+
 ## Prevent logs export
 
 To prevent logs from being exported, set `OTEL_LOGS_EXPORTER` to `none`. However, application logs might still be gathered and exported by the Collector through the `filelog` receiver.
