@@ -16,27 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.compositesampling;
+package co.elastic.otel.sampling;
 
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.contrib.sampler.consistent56.ConsistentSampler;
+import io.opentelemetry.contrib.sampler.RuleBasedRoutingSampler;
+import io.opentelemetry.contrib.sampler.RuleBasedRoutingSamplerBuilder;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
+import io.opentelemetry.semconv.UrlAttributes;
+import io.opentelemetry.semconv.UserAgentAttributes;
 import java.util.List;
 
-public enum DynamicCompositeParentBasedTraceIdRatioBasedSampler implements Sampler {
-  INSTANCE;
+public class HttpFilteringSampler implements Sampler {
 
-  static final double DEFAULT_TRACEIDRATIO_SAMPLE_RATIO = 1.0d;
+  private final Sampler delegate;
 
-  private static volatile double latestRatio;
-  private static volatile Sampler delegate = newSampler(DEFAULT_TRACEIDRATIO_SAMPLE_RATIO);
-
-  public static void setRatio(double ratio) {
-    delegate = newSampler(ratio);
+  private HttpFilteringSampler(Sampler delegate) {
+    this.delegate = delegate;
   }
 
   @Override
@@ -52,19 +51,24 @@ public enum DynamicCompositeParentBasedTraceIdRatioBasedSampler implements Sampl
 
   @Override
   public String getDescription() {
-    return INSTANCE.getDescription();
+    return delegate.getDescription();
   }
 
-  private static Sampler newSampler(double ratio) {
-    latestRatio = ratio;
-    return ConsistentSampler.parentBased(ConsistentSampler.probabilityBased(ratio));
+  public static HttpFilteringSampler create(
+      List<String> urlPatterns, List<String> userAgentPatterns) {
+    RuleBasedRoutingSamplerBuilder builder =
+        RuleBasedRoutingSampler.builder(SpanKind.SERVER, Sampler.alwaysOn());
+    for (String pattern : userAgentPatterns) {
+      builder.drop(UserAgentAttributes.USER_AGENT_ORIGINAL, pattern);
+    }
+    for (String pattern : urlPatterns) {
+      builder.drop(UrlAttributes.URL_PATH, pattern);
+    }
+    return new HttpFilteringSampler(builder.build());
   }
 
+  @Override
   public String toString() {
-    return "DynamicCompositeParentBasedTraceIdRatioBasedSampler(ratio="
-        + latestRatio
-        + ", "
-        + delegate.toString()
-        + ")";
+    return "HttpFilteringSampler(delegate=" + delegate + ')';
   }
 }
