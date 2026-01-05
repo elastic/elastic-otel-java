@@ -35,7 +35,7 @@ tasks {
   }
 
   shadowJar {
-    archiveFileName.set("baggage-example-all.jar")
+    archiveFileName.set("baggage-app.jar")
   }
 
   assemble {

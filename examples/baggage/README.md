@@ -33,7 +33,7 @@ export OTEL_SERVICE_NAME='backend'
 java \
 -Dotel.java.experimental.span-attributes.copy-from-baggage.include=example.customer.id,example.customer.name \
 -Dotel.java.experimental.log-attributes.copy-from-baggage.include=example.customer.id,example.customer.name \
--jar ./build/libs/baggage-example-all.jar backend
+-jar ./build/libs/baggage-app.jar backend
 ```
 
 ### Gateway (Baggage API)
@@ -46,7 +46,7 @@ export OTEL_SERVICE_NAME='gateway'
 java \
 -Dotel.java.experimental.span-attributes.copy-from-baggage.include=example.customer.id,example.customer.name \
 -Dotel.java.experimental.log-attributes.copy-from-baggage.include=example.customer.id,example.customer.name \
--jar ./build/libs/baggage-example-all.jar gateway
+-jar ./build/libs/baggage-app.jar gateway
 ```
 
 ### Gateway (extension)
@@ -59,7 +59,7 @@ export OTEL_SERVICE_NAME='gateway'
 java \
 -Dotel.java.experimental.span-attributes.copy-from-baggage.include=example.customer.id,example.customer.name \
 -Dotel.java.experimental.log-attributes.copy-from-baggage.include=example.customer.id,example.customer.name \
--jar ./build/libs/baggage-example-all.jar gateway no-baggage-api
+-jar ./build/libs/baggage-app.jar gateway no-baggage-api
 ```
 
 ## Execute requests
