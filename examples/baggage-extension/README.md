@@ -1,4 +1,4 @@
-# Baggage examples
+# Baggage examples with agent extension
 
 This is an elementary application providing an end-to-end example usage of [OpenTelemetry baggage](https://opentelemetry.io/docs/concepts/signals/baggage/).
 
@@ -7,6 +7,8 @@ It is split in two services: a gateway and a backend
 - an HTTP gateway service running on http://localhost:8000/gateway/
 
 The gateway is in charge of authentication and delegates to the backend by providing a technical ID for the backend to use for authentication.
+
+Unlike [the basic example](../baggage/README.md), this example does not require to modify the application code and uses an agent extension to capture baggage.
 
 ## Build
 
