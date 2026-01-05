@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-  implementation("co.elastic.otel:elastic-otel-runtime-attach:1.4.1")
+  implementation("co.elastic.otel:elastic-otel-runtime-attach:1.8.0")
   implementation(platform("org.slf4j:slf4j-bom:2.0.16"))
 
   // using a "real" logger backend as slf4j-simple just uses stdout/stderr

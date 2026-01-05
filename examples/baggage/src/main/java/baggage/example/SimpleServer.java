@@ -60,7 +60,7 @@ public class SimpleServer {
     });
   }
 
-  public static SimpleServer createGateway() throws IOException {
+  public static SimpleServer createGateway(boolean useBaggageApi) throws IOException {
 
     HttpClient client = HttpClient.newHttpClient();
     return create(8000, "/gateway/", exchange -> {
@@ -68,10 +68,9 @@ public class SimpleServer {
       // emulate authentication from header, don't do this in production
       String secretPrefix = "secret=";
       String customerAuth = exchange.getRequestHeaders().getFirst("Authorization");
-      String customerId = null;
-      if (customerAuth.startsWith(secretPrefix)) {
-        customerId = customerAuth.substring(secretPrefix.length());
-      }
+      final String customerId = customerAuth.startsWith(secretPrefix) ?
+          customerAuth.substring(secretPrefix.length()) : null;
+
       if (customerId == null) {
         stringResponse(exchange, 401, "auth error");
         return;
@@ -82,48 +81,66 @@ public class SimpleServer {
           .header("customer_id", customerId)
           .build();
 
-      // add new entries to current baggage
-      Baggage baggage = Baggage.current().toBuilder()
-          .put("example.customer.id", customerId)
-          .put("example.customer.name", String.format("my-awesome-customer-%s", customerId))
-          .build();
-      // create a new context with the updated baggage and make it current for the backend HTTP call
-      Context contextWithBaggage = baggage.storeInContext(Context.current());
-      try (Scope scope = contextWithBaggage.makeCurrent()) {
-
-        // All the log statements and spans created with the baggage-enabled context
-        // will have the baggage entries added as span/log attributes when configured to do so.
-        //
-        // Doing so allows to "annotate" everything that relatest to the given customer in the monitoring
-        // backend with minor code modifications.
-        //
-        // To enable this, configure the gateway with the following JVM arguments:
-        // -Dotel.java.experimental.span-attributes.copy-from-baggage.include=example.customer.id,example.customer.name
-        // -Dotel.java.experimental.log-attributes.copy-from-baggage.include=example.customer.id,example.customer.name
+      Runnable executeRequest = () -> {
         log.atInfo().setMessage("gateway request for customer ID = " + customerId).log();
 
         // call backend and forward its response
         HttpResponse<String> response;
         try {
           response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | IOException e) {
           stringResponse(exchange, 500, "internal error");
           return;
         }
         stringResponse(exchange, 200, response.body());
+      };
+
+      if(useBaggageApi){
+        wrapCallWithBaggageApi(customerId, executeRequest);
+      } else {
+        // do not explicitly call baggage API, the instrumentation extension will handle this
+        executeRequest.run();
       }
     });
   }
 
-  private static void stringResponse(HttpExchange exchange, int statusCode, String response)
-      throws IOException {
-    exchange.sendResponseHeaders(statusCode, response.length());
-    OutputStream os = exchange.getResponseBody();
-    os.write(response.getBytes());
-    os.close();
+  private static void wrapCallWithBaggageApi(String customerId, Runnable task) {
+    // add new entries to current baggage
+    Baggage baggage = Baggage.current().toBuilder()
+        .put("example.customer.id", customerId)
+        .put("example.customer.name", String.format("my-awesome-customer-%s", customerId))
+        .build();
+    // create a new context with the updated baggage and make it current for the backend HTTP call
+    Context contextWithBaggage = baggage.storeInContext(Context.current());
+    try (Scope scope = contextWithBaggage.makeCurrent()) {
+
+      // All the log statements and spans created with the baggage-enabled context
+      // will have the baggage entries added as span/log attributes when configured to do so.
+      //
+      // Doing so allows to "annotate" everything that relatest to the given customer in the monitoring
+      // backend with minor code modifications.
+      //
+      // To enable this, configure the gateway with the following JVM arguments:
+      // -Dotel.java.experimental.span-attributes.copy-from-baggage.include=example.customer.id,example.customer.name
+      // -Dotel.java.experimental.log-attributes.copy-from-baggage.include=example.customer.id,example.customer.name
+      task.run();
+    }
   }
 
-  public String getUrl() {return this.url;}
+  private static void stringResponse(HttpExchange exchange, int statusCode, String response) {
+    try {
+      exchange.sendResponseHeaders(statusCode, response.length());
+      OutputStream os = exchange.getResponseBody();
+      os.write(response.getBytes());
+      os.close();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public String getUrl() {
+    return this.url;
+  }
 
   public void start() {
     server.start();

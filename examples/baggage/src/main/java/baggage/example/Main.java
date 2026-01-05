@@ -18,7 +18,9 @@ public class Main {
         server = SimpleServer.createBackend();
         break;
       case "gateway":
-        server = SimpleServer.createGateway();
+        boolean useBaggageApi = !(args.length > 1 && args[1].equals("no-baggage-api"));
+        System.out.printf("gateway server %s baggage API%n", useBaggageApi ? "using" : "not using");
+        server = SimpleServer.createGateway(useBaggageApi);
         break;
       default:
         throw new RuntimeException("unsupported argument value: " + arg);
