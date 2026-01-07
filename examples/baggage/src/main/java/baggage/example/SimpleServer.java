@@ -16,6 +16,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 public class SimpleServer {
 
@@ -81,8 +82,8 @@ public class SimpleServer {
           .header("customer_id", customerId)
           .build();
 
-      Runnable executeRequest = () -> {
-        log.atInfo().setMessage("gateway request for customer ID = " + customerId).log();
+      Consumer<String> customerTask = id -> {
+        log.atInfo().setMessage("gateway request for customer ID = " + id).log();
 
         // call backend and forward its response
         HttpResponse<String> response;
@@ -95,24 +96,27 @@ public class SimpleServer {
         stringResponse(exchange, 200, response.body());
       };
 
-      if(useBaggageApi){
-        wrapCallWithBaggageApi(customerId, executeRequest);
+      if (useBaggageApi) {
+        wrapCallWithBaggageApi(customerId, customerTask);
       } else {
-        // do not explicitly call baggage API, the instrumentation extension will handle this
-        executeRequest.run();
+        callWithoutBaggageApi(customerId, customerTask);
       }
     });
   }
 
-  private static void wrapCallWithBaggageApi(String customerId, Runnable task) {
+  private static void callWithoutBaggageApi(String customerId, Consumer<String> customerTask) {
+    // do not explicitly call baggage API, the instrumentation extension will handle this
+    customerTask.accept(customerId);
+  }
+
+  private static void wrapCallWithBaggageApi(String customerId, Consumer<String> customerTask) {
     // add new entries to current baggage
     Baggage baggage = Baggage.current().toBuilder()
         .put("example.customer.id", customerId)
         .put("example.customer.name", String.format("my-awesome-customer-%s", customerId))
         .build();
     // create a new context with the updated baggage and make it current for the backend HTTP call
-    Context contextWithBaggage = baggage.storeInContext(Context.current());
-    try (Scope scope = contextWithBaggage.makeCurrent()) {
+    try (Scope scope = baggage.makeCurrent()) {
 
       // All the log statements and spans created with the baggage-enabled context
       // will have the baggage entries added as span/log attributes when configured to do so.
@@ -123,7 +127,7 @@ public class SimpleServer {
       // To enable this, configure the gateway with the following JVM arguments:
       // -Dotel.java.experimental.span-attributes.copy-from-baggage.include=example.customer.id,example.customer.name
       // -Dotel.java.experimental.log-attributes.copy-from-baggage.include=example.customer.id,example.customer.name
-      task.run();
+      customerTask.accept(customerId);
     }
   }
 
