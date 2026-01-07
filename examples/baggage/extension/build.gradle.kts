@@ -7,7 +7,7 @@ plugins {
 group = "baggage.extension"
 version = "1.0-SNAPSHOT"
 
-val instrumentationVersion = "2.23.0-alpha"
+val instrumentationVersion = "2.22.0-alpha"
 
 repositories {
   mavenCentral()

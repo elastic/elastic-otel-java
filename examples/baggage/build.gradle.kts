@@ -2,7 +2,7 @@ plugins {
   application
   java
 
-  id("com.gradleup.shadow") version "8.3.5"
+  id("com.gradleup.shadow")
 }
 
 group = "baggage.example"
