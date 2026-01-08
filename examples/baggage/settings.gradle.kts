@@ -9,5 +9,4 @@ pluginManagement {
     id("io.opentelemetry.instrumentation.muzzle-generation").version("2.22.0-alpha")
     id("io.opentelemetry.instrumentation.muzzle-check").version("2.22.0-alpha")
   }
-
 }
