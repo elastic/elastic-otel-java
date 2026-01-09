@@ -10,6 +10,15 @@ The gateway is in charge of authentication and delegates to the backend by provi
 
 In this example, we use the OpenTelemetry Baggage to add the customer ID and name to the captured spans and logs.
 
+The baggage entries are copied to the span and log attributes by using the following configuration options:
+- `otel.java.experimental.span-attributes.copy-from-baggage.include` for spans
+- `otel.java.experimental.log-attributes.copy-from-baggage.include` for logs
+
+The following baggate entries are used in this example:
+- `example.customer.id`: the "technical" customer ID, set by the gateway
+- `example.customer.name`: the "friendly" customer name, set by the gateway. This value is not available in the backend without using baggage.
+- `example.gateway.http.route`: Only available when using [extension](#gateway-extension). This entry provides a copy of the `http.route` attribute from the gateway span.
+
 ## Build
 
 ```bash
@@ -31,8 +40,8 @@ The backend application does not use any OpenTelemetry API, thus on a real-world
 ```shell
 export OTEL_SERVICE_NAME='backend'
 java \
--Dotel.java.experimental.span-attributes.copy-from-baggage.include=example.customer.id,example.customer.name \
--Dotel.java.experimental.log-attributes.copy-from-baggage.include=example.customer.id,example.customer.name \
+-Dotel.java.experimental.span-attributes.copy-from-baggage.include=example.customer.id,example.customer.name,example.gateway.http.route \
+-Dotel.java.experimental.log-attributes.copy-from-baggage.include=example.customer.id,example.customer.name,example.gateway.http.route \
 -jar ./build/libs/baggage-app.jar backend
 ```
 
@@ -44,8 +53,8 @@ would need minor code changes to implement this. See [example below for an alter
 ```shell
 export OTEL_SERVICE_NAME='gateway'
 java \
--Dotel.java.experimental.span-attributes.copy-from-baggage.include=example.customer.id,example.customer.name \
--Dotel.java.experimental.log-attributes.copy-from-baggage.include=example.customer.id,example.customer.name \
+-Dotel.java.experimental.span-attributes.copy-from-baggage.include=example.customer.id,example.customer.name,example.gateway.http.route \
+-Dotel.java.experimental.log-attributes.copy-from-baggage.include=example.customer.id,example.customer.name,example.gateway.http.route \
 -jar ./build/libs/baggage-app.jar gateway
 ```
 
@@ -57,8 +66,8 @@ As an alternative, we can use a dedicated agent extension to implement the same 
 ```shell
 export OTEL_SERVICE_NAME='gateway'
 java \
--Dotel.java.experimental.span-attributes.copy-from-baggage.include=example.customer.id,example.customer.name \
--Dotel.java.experimental.log-attributes.copy-from-baggage.include=example.customer.id,example.customer.name \
+-Dotel.java.experimental.span-attributes.copy-from-baggage.include=example.customer.id,example.customer.name,example.gateway.http.route \
+-Dotel.java.experimental.log-attributes.copy-from-baggage.include=example.customer.id,example.customer.name,example.gateway.http.route \
 -jar ./build/libs/baggage-app.jar gateway no-baggage-api
 ```
 
