@@ -68,6 +68,7 @@ export OTEL_SERVICE_NAME='gateway'
 java \
 -Dotel.java.experimental.span-attributes.copy-from-baggage.include=example.customer.id,example.customer.name,example.gateway.http.route \
 -Dotel.java.experimental.log-attributes.copy-from-baggage.include=example.customer.id,example.customer.name,example.gateway.http.route \
+-Dotel.javaagent.extensions=./extension/build/libs/baggage-extension.jar \
 -jar ./build/libs/baggage-app.jar gateway no-baggage-api
 ```
 
@@ -95,3 +96,26 @@ consistently to all spans and logs within the gateway request trace.
 As a result, it is now possible to use those custom attributes to filter data and create
 dedicated dashboards. The only code modification required is in the gateway code.
 
+## Limit baggage propagation
+
+By default, all baggage entities are propagated to downstream services like the context propagation IDs (trace ID, span ID, etc).
+
+This behavior might not be desirable as it could lead to leaking information to downstream services which are not 
+trusted or outside your control.
+
+It is however possible to implement a custom baggage propagator to filter out which services should receive which baggage entries.
+An example implementation `FilteringBaggagePropagator` is provided in the [extension](./extension), it requires to be enabled
+by replacing `baggage` propagator with `filtering-baggage` in the `otel.propagators` configuration.
+
+For example, running the gateway with the following configuration DOES NOT progagate any baggage to the backend
+because only `localhost` is allowed, and not `127.0.0.1`. This will however still capture the baggage as span
+attributes in the outgoing HTTP request span on the gateway.
+
+```shell
+java \
+-Dotel.java.experimental.span-attributes.copy-from-baggage.include=example.customer.id,example.customer.name,example.gateway.http.route \
+-Dotel.java.experimental.log-attributes.copy-from-baggage.include=example.customer.id,example.customer.name,example.gateway.http.route \
+-Dotel.javaagent.extensions=./extension/build/libs/baggage-extension.jar \
+-Dotel.propagators="tracecontext,baggage-filtering" \
+-jar ${folder}/build/libs/baggage-app.jar gateway no-baggage-api http://127.0.0.1:9000/backend/
+```

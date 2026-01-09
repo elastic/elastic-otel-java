@@ -4,7 +4,6 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import io.opentelemetry.api.baggage.Baggage;
-import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +36,8 @@ public class SimpleServer {
     return new SimpleServer(server, String.format("http://localhost:%d%s", port, path));
   }
 
-  public static SimpleServer createBackend() throws IOException {
-    return create(9000, "/backend/", exchange -> {
+  public static SimpleServer createBackend(int port) throws IOException {
+    return create(port, "/backend/", exchange -> {
 
       // Authentication is assumed to be implemented by the gateway and backend trusts its HTTP header
       // the backend only needs to have a technical ID for customer.
@@ -61,10 +60,10 @@ public class SimpleServer {
     });
   }
 
-  public static SimpleServer createGateway(boolean useBaggageApi) throws IOException {
+  public static SimpleServer createGateway(int port, boolean useBaggageApi, String backendUrl) throws IOException {
 
     HttpClient client = HttpClient.newHttpClient();
-    return create(8000, "/gateway/", exchange -> {
+    return create(port, "/gateway/", exchange -> {
 
       // emulate authentication from header, don't do this in production
       String secretPrefix = "secret=";
@@ -78,7 +77,7 @@ public class SimpleServer {
       }
 
       HttpRequest request = HttpRequest.newBuilder()
-          .uri(URI.create("http://localhost:9000/backend/"))
+          .uri(URI.create(backendUrl))
           .header("customer_id", customerId)
           .build();
 
