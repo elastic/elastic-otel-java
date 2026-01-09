@@ -15,10 +15,14 @@ public class Main {
     SimpleServer server;
     switch (arg) {
       case "backend":
-        server = SimpleServer.createBackend();
+        server = SimpleServer.createBackend(9000);
         break;
       case "gateway":
-        server = SimpleServer.createGateway();
+        boolean useBaggageApi = !(args.length > 1 && args[1].equals("no-baggage-api"));
+        String backendUrl = args.length > 2 ? args[2] : "http://localhost:9000/backend/";
+        System.out.printf("gateway server %s baggage API for backend %s%n",
+            useBaggageApi ? "using" : "not using", backendUrl);
+        server = SimpleServer.createGateway(8000, useBaggageApi, backendUrl);
         break;
       default:
         throw new RuntimeException("unsupported argument value: " + arg);
