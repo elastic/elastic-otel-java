@@ -2,7 +2,6 @@ package baggage.example.extension;
 
 import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.baggage.BaggageBuilder;
-import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.javaagent.extension.instrumentation.TypeInstrumentation;
 import io.opentelemetry.javaagent.extension.instrumentation.TypeTransformer;
@@ -46,18 +45,12 @@ public class CustomBaggageInstrumentation implements TypeInstrumentation {
         return Scope.noop();
       }
 
-      // create new baggage with customer information
+      // Add customer information into baggage
       // this information is provided directly from the instrumented method argument, so we just
-      // have to copy it into baggage
-      BaggageBuilder baggage = Baggage.builder()
+      // have to copy it into baggage.
+      BaggageBuilder baggage = Baggage.current().toBuilder()
           .put("example.customer.id", customerId)
           .put("example.customer.name", String.format("my-awesome-customer-%s", customerId));
-
-      // add gateway route that has been copied from HTTP server span into current context by instrumenter customizer
-      String contextHttpRoute = Context.current().get(CustomBaggageSingletons.httpRouteContextKey());
-      if (contextHttpRoute != null) {
-        baggage.put("example.gateway.http.route", contextHttpRoute);
-      }
 
       // make it current for the scope of the instrumented method
       return baggage.build().makeCurrent();

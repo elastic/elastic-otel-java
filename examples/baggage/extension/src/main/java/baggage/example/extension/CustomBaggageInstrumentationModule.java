@@ -18,8 +18,4 @@ public class CustomBaggageInstrumentationModule extends InstrumentationModule im
     return Collections.singletonList(new CustomBaggageInstrumentation());
   }
 
-  @Override
-  public boolean isIndyReady() {
-    return true;
-  }
 }

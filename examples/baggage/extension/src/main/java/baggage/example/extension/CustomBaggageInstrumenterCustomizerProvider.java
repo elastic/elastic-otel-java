@@ -1,5 +1,6 @@
 package baggage.example.extension;
 
+import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.instrumentation.api.incubator.instrumenter.InstrumenterCustomizer;
 import io.opentelemetry.instrumentation.api.incubator.instrumenter.InstrumenterCustomizerProvider;
 import io.opentelemetry.semconv.HttpAttributes;
@@ -13,9 +14,17 @@ public class CustomBaggageInstrumenterCustomizerProvider implements Instrumenter
     if (customizer.hasType(HTTP_SERVER)) {
       customizer.addContextCustomizer((context, o, startAttributes) -> {
         // retrieve HTTP route semantic convention attribute value when span is started,
-        // then copy value into current context so it can be looked up later
+        // then copy value in baggage
         String httpRoute = startAttributes.get(HttpAttributes.HTTP_ROUTE);
-        return httpRoute == null ? context : context.with(CustomBaggageSingletons.httpRouteContextKey(), httpRoute);
+
+        if(httpRoute == null) {
+          return context;
+        }
+        return Baggage.current()
+            .toBuilder()
+            .put("example.gateway.http.route", httpRoute)
+            .build()
+            .storeInContext(context);
       });
     }
   }
