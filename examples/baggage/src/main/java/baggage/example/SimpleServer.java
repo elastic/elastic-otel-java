@@ -4,7 +4,6 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import io.opentelemetry.api.baggage.Baggage;
-import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +15,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 public class SimpleServer {
 
@@ -36,8 +36,8 @@ public class SimpleServer {
     return new SimpleServer(server, String.format("http://localhost:%d%s", port, path));
   }
 
-  public static SimpleServer createBackend() throws IOException {
-    return create(9000, "/backend/", exchange -> {
+  public static SimpleServer createBackend(int port) throws IOException {
+    return create(port, "/backend/", exchange -> {
 
       // Authentication is assumed to be implemented by the gateway and backend trusts its HTTP header
       // the backend only needs to have a technical ID for customer.
@@ -60,70 +60,90 @@ public class SimpleServer {
     });
   }
 
-  public static SimpleServer createGateway() throws IOException {
+  public static SimpleServer createGateway(int port, boolean useBaggageApi, String backendUrl) throws IOException {
 
     HttpClient client = HttpClient.newHttpClient();
-    return create(8000, "/gateway/", exchange -> {
+    return create(port, "/gateway/", exchange -> {
 
       // emulate authentication from header, don't do this in production
       String secretPrefix = "secret=";
       String customerAuth = exchange.getRequestHeaders().getFirst("Authorization");
-      String customerId = null;
-      if (customerAuth.startsWith(secretPrefix)) {
-        customerId = customerAuth.substring(secretPrefix.length());
-      }
+      final String customerId = customerAuth.startsWith(secretPrefix) ?
+          customerAuth.substring(secretPrefix.length()) : null;
+
       if (customerId == null) {
         stringResponse(exchange, 401, "auth error");
         return;
       }
 
       HttpRequest request = HttpRequest.newBuilder()
-          .uri(URI.create("http://localhost:9000/backend/"))
+          .uri(URI.create(backendUrl))
           .header("customer_id", customerId)
           .build();
 
-      // add new entries to current baggage
-      Baggage baggage = Baggage.current().toBuilder()
-          .put("example.customer.id", customerId)
-          .put("example.customer.name", String.format("my-awesome-customer-%s", customerId))
-          .build();
-      // create a new context with the updated baggage and make it current for the backend HTTP call
-      Context contextWithBaggage = baggage.storeInContext(Context.current());
-      try (Scope scope = contextWithBaggage.makeCurrent()) {
-
-        // All the log statements and spans created with the baggage-enabled context
-        // will have the baggage entries added as span/log attributes when configured to do so.
-        //
-        // Doing so allows to "annotate" everything that relatest to the given customer in the monitoring
-        // backend with minor code modifications.
-        //
-        // To enable this, configure the gateway with the following JVM arguments:
-        // -Dotel.java.experimental.span-attributes.copy-from-baggage.include=example.customer.id,example.customer.name
-        // -Dotel.java.experimental.log-attributes.copy-from-baggage.include=example.customer.id,example.customer.name
-        log.atInfo().setMessage("gateway request for customer ID = " + customerId).log();
+      Consumer<String> customerTask = id -> {
+        log.atInfo().setMessage("gateway request for customer ID = " + id).log();
 
         // call backend and forward its response
         HttpResponse<String> response;
         try {
           response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | IOException e) {
           stringResponse(exchange, 500, "internal error");
           return;
         }
         stringResponse(exchange, 200, response.body());
+      };
+
+      if (useBaggageApi) {
+        wrapCallWithBaggageApi(customerId, customerTask);
+      } else {
+        callWithoutBaggageApi(customerId, customerTask);
       }
     });
   }
 
-  private static void stringResponse(HttpExchange exchange, int statusCode, String response)
-      throws IOException {
-    exchange.sendResponseHeaders(statusCode, response.length());
-    OutputStream os = exchange.getResponseBody();
-    os.write(response.getBytes());
-    os.close();
+  private static void callWithoutBaggageApi(String customerId, Consumer<String> customerTask) {
+    // do not explicitly call baggage API, the instrumentation extension will handle this
+    customerTask.accept(customerId);
   }
 
-  public String getUrl() {return this.url;}
+  private static void wrapCallWithBaggageApi(String customerId, Consumer<String> customerTask) {
+    // add new entries to current baggage
+    Baggage baggage = Baggage.current().toBuilder()
+        .put("example.customer.id", customerId)
+        .put("example.customer.name", String.format("my-awesome-customer-%s", customerId))
+        .build();
+    // create a new context with the updated baggage and make it current for the backend HTTP call
+    try (Scope scope = baggage.makeCurrent()) {
+
+      // All the log statements and spans created with the baggage-enabled context
+      // will have the baggage entries added as span/log attributes when configured to do so.
+      //
+      // Doing so allows to "annotate" everything that relates to the given customer in the monitoring
+      // backend with minor code modifications.
+      //
+      // To enable this, configure the gateway with the following JVM arguments:
+      // -Dotel.java.experimental.span-attributes.copy-from-baggage.include=example.customer.id,example.customer.name
+      // -Dotel.java.experimental.log-attributes.copy-from-baggage.include=example.customer.id,example.customer.name
+      customerTask.accept(customerId);
+    }
+  }
+
+  private static void stringResponse(HttpExchange exchange, int statusCode, String response) {
+    try {
+      exchange.sendResponseHeaders(statusCode, response.length());
+      OutputStream os = exchange.getResponseBody();
+      os.write(response.getBytes());
+      os.close();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public String getUrl() {
+    return this.url;
+  }
 
   public void start() {
     server.start();
