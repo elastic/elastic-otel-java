@@ -120,7 +120,7 @@ public class SimpleServer {
       // All the log statements and spans created with the baggage-enabled context
       // will have the baggage entries added as span/log attributes when configured to do so.
       //
-      // Doing so allows to "annotate" everything that relatest to the given customer in the monitoring
+      // Doing so allows to "annotate" everything that relates to the given customer in the monitoring
       // backend with minor code modifications.
       //
       // To enable this, configure the gateway with the following JVM arguments:

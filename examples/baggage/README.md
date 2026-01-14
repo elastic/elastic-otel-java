@@ -14,7 +14,7 @@ The baggage entries are copied to the span and log attributes by using the follo
 - `otel.java.experimental.span-attributes.copy-from-baggage.include` for spans
 - `otel.java.experimental.log-attributes.copy-from-baggage.include` for logs
 
-The following baggate entries are used in this example:
+The following baggage entries are used in this example:
 - `example.customer.id`: the "technical" customer ID, set by the gateway
 - `example.customer.name`: the "friendly" customer name, set by the gateway. This value is not available in the backend without using baggage.
 - `example.gateway.http.route`: Only available when using [extension](#gateway-extension). This entry provides a copy of the `http.route` attribute from the gateway span.
@@ -107,7 +107,7 @@ It is however possible to implement a custom baggage propagator to filter out wh
 An example implementation `FilteringBaggagePropagator` is provided in the [extension](./extension), it requires to be enabled
 by replacing `baggage` propagator with `filtering-baggage` in the `otel.propagators` configuration.
 
-For example, running the gateway with the following configuration DOES NOT progagate any baggage to the backend
+For example, running the gateway with the following configuration DOES NOT propagate any baggage to the backend
 because only `localhost` is allowed, and not `127.0.0.1`. This will however still capture the baggage as span
 attributes in the outgoing HTTP request span on the gateway.
 
