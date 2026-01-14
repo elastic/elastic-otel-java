@@ -78,8 +78,9 @@ This table only contains minimal configuration, see each respective feature for 
 
 
 ## Elasticsearch Java client: Capturing search request bodies
+
 ```{applies_to}
-stack: ga 9.0, ga 8.0
+stack: ga 9.0+
 ```
 
 When using the {{es}} Java API client, spans for {{es}} operations are generated directly by the client’s built-in OpenTelemetry instrumentation.
