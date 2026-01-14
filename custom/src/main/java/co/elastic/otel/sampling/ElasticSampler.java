@@ -18,25 +18,38 @@
  */
 package co.elastic.otel.sampling;
 
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.contrib.sampler.consistent56.ConsistentSampler;
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.ComposableRuleBasedSamplerBuilder;
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.ComposableSampler;
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.CompositeSampler;
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.SamplingPredicate;
+import io.opentelemetry.sdk.internal.IncludeExcludePredicate;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
-import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
+import io.opentelemetry.semconv.UrlAttributes;
+import io.opentelemetry.semconv.UserAgentAttributes;
+import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.logging.Logger;
 
-public enum ElasticSampler implements Sampler {
-  INSTANCE;
 
-  static final double DEFAULT_TRACEIDRATIO_SAMPLE_RATIO = 1.0d;
+public class ElasticSampler implements Sampler {
 
-  private static volatile double latestRatio;
-  private static volatile Sampler probabilitySampler =
-      newProbabilitySampler(DEFAULT_TRACEIDRATIO_SAMPLE_RATIO);
-  private static volatile Sampler filteringSampler = Sampler.alwaysOn();
+  private static final Logger logger = Logger.getLogger(ElasticSampler.class.getName());
+
+  static final double DEFAULT_SAMPLE_RATIO = 1.0d;
+
+  private static volatile Sampler delegate;
+  private static final Builder builder = new Builder();
+
+  public static Builder globalBuilder() {
+    return builder;
+  }
 
   /**
    * Set the ratio of the probability sampler
@@ -44,7 +57,7 @@ public enum ElasticSampler implements Sampler {
    * @param ratio sampling probability
    */
   public static void setRatio(double ratio) {
-    probabilitySampler = newProbabilitySampler(ratio);
+    globalBuilder().withProbability(ratio).buildAndSetGlobal();
   }
 
   @Override
@@ -55,16 +68,8 @@ public enum ElasticSampler implements Sampler {
       SpanKind spanKind,
       Attributes attributes,
       List<LinkData> parentLinks) {
-    SamplingResult filterResult =
-        filteringSampler.shouldSample(
-            parentContext, traceId, name, spanKind, attributes, parentLinks);
 
-    if (filterResult.getDecision() == SamplingDecision.DROP) {
-      return filterResult;
-    }
-
-    return probabilitySampler.shouldSample(
-        parentContext, traceId, name, spanKind, attributes, parentLinks);
+    return delegate.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
   }
 
   /**
@@ -74,7 +79,10 @@ public enum ElasticSampler implements Sampler {
    * @param userAgentPatterns user-agent regex patterns to drop
    */
   public static void setFilterHttp(List<String> urlPatterns, List<String> userAgentPatterns) {
-    filteringSampler = HttpFilteringSampler.create(urlPatterns, userAgentPatterns);
+    globalBuilder()
+        .withIgnoredUrlPatterns(urlPatterns)
+        .withIgnoredUserAgentPatterns(userAgentPatterns)
+        .buildAndSetGlobal();
   }
 
   @Override
@@ -82,12 +90,82 @@ public enum ElasticSampler implements Sampler {
     return toString();
   }
 
-  private static Sampler newProbabilitySampler(double ratio) {
-    latestRatio = ratio;
-    return ConsistentSampler.parentBased(ConsistentSampler.probabilityBased(ratio));
+  public String toString() {
+    return delegate.getDescription();
   }
 
-  public String toString() {
-    return "ElasticSampler(ratio=" + latestRatio + ", " + probabilitySampler.toString() + ")";
+  public static class Builder {
+
+    private List<String> ignoredUrlPatterns;
+    private List<String> ignoredUserAgentPatterns;
+    private double ratio;
+
+    // package-private for testing
+    Builder() {
+      this.ignoredUrlPatterns = Collections.emptyList();
+      this.ignoredUserAgentPatterns = Collections.emptyList();
+      this.ratio = DEFAULT_SAMPLE_RATIO;
+    }
+
+    public Builder withProbability(double ratio) {
+      this.ratio = ratio;
+      return this;
+    }
+
+    public Builder withIgnoredUrlPatterns(List<String> patterns) {
+      this.ignoredUrlPatterns = patterns;
+      return this;
+    }
+
+    public Builder withIgnoredUserAgentPatterns(List<String> patterns) {
+      this.ignoredUserAgentPatterns = patterns;
+      return this;
+    }
+
+    // package-private for testing
+    Sampler build() {
+      if (ignoredUrlPatterns.isEmpty() && ignoredUrlPatterns.isEmpty()) {
+        return CompositeSampler.wrap(ComposableSampler.probability(ratio));
+      }
+      ComposableRuleBasedSamplerBuilder ruleBuilder = ComposableSampler.ruleBasedBuilder();
+
+      ruleBuilder.add(
+          valueMatching(UrlAttributes.URL_PATH, ignoredUrlPatterns),
+          ComposableSampler.alwaysOff());
+
+      ruleBuilder.add(
+          valueMatching(UserAgentAttributes.USER_AGENT_ORIGINAL, ignoredUserAgentPatterns),
+          ComposableSampler.alwaysOff());
+
+      // probability sampler applied last without any attribute filtering
+      ruleBuilder.add(any(), ComposableSampler.probability(ratio));
+      return CompositeSampler.wrap(ruleBuilder.build());
+    }
+
+    public Sampler buildAndSetGlobal() {
+      Sampler sampler = build();
+      logger.fine("set global sampler to " + sampler.getDescription());
+      delegate = sampler;
+      return sampler;
+    }
+
+    private static SamplingPredicate any() {
+      return (parentContext, traceId, name, spanKind, attributes, parentLinks) -> true;
+    }
+
+    private static SamplingPredicate valueMatching(AttributeKey<String> attributeKey, List<String> patterns) {
+      Predicate<String> predicate = IncludeExcludePredicate.createPatternMatching(patterns, null);
+      return new SamplingPredicate() {
+        @Override
+        public boolean matches(Context parentContext, String traceId, String name,
+            SpanKind spanKind, Attributes attributes, List<LinkData> parentLinks) {
+          String value = attributes.get(attributeKey);
+          return predicate.test(value);
+        }
+      };
+    }
+
   }
+
+
 }

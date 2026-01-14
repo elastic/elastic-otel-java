@@ -33,12 +33,12 @@ public class ElasticSamplerProvider implements ConfigurableSamplerProvider {
 
   @Override
   public Sampler createSampler(ConfigProperties config) {
-    ElasticSampler.setRatio(
-        config.getDouble(
-            "otel.traces.sampler.arg", ElasticSampler.DEFAULT_TRACEIDRATIO_SAMPLE_RATIO));
-    ElasticSampler.setFilterHttp(
-        config.getList(ELASTIC_OTEL_IGNORE_URLS), config.getList(ELASTIC_OTEL_IGNORE_USER_AGENTS));
-    return ElasticSampler.INSTANCE;
+    return ElasticSampler.globalBuilder()
+        .withProbability(config.getDouble(
+            "otel.traces.sampler.arg", ElasticSampler.DEFAULT_SAMPLE_RATIO))
+        .withIgnoredUrlPatterns(config.getList(ELASTIC_OTEL_IGNORE_URLS))
+        .withIgnoredUserAgentPatterns(config.getList(ELASTIC_OTEL_IGNORE_USER_AGENTS))
+        .buildAndSetGlobal();
   }
 
   @Override

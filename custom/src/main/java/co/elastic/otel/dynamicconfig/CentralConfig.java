@@ -334,8 +334,9 @@ public class CentralConfig {
         logger.warning("ignoring \"sampling_rate\" because non-default sampler in use");
         return;
       }
-      ElasticSampler.setRatio(Double.parseDouble(configurationValue));
-      // TODO: refresh ignore HTTP urls and user agents
+      ElasticSampler.globalBuilder()
+          .withProbability(Double.parseDouble(configurationValue))
+          .buildAndSetGlobal();
     }
   }
 

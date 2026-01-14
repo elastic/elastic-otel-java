@@ -46,7 +46,7 @@ dependencies {
 }
 
   // samplers, included in upstream agent
-  compileOnly(libs.contribSamplers)
+  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-incubator")
 
   testImplementation(libs.contribSpanStacktrace)
 
