@@ -35,6 +35,7 @@ import io.opentelemetry.semconv.UserAgentAttributes;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ElasticSampler implements Sampler {
@@ -170,7 +171,14 @@ public class ElasticSampler implements Sampler {
         if (value == null) {
           return false;
         }
-        return predicate.test(value);
+        boolean result = predicate.test(value);
+        if (logger.isLoggable(Level.FINE)) {
+          // note: matching on a key means that the sampling intent will be applied,
+          logger.log(Level.FINE,
+              "matching on '" + attributeKey + "' with value '" + value + "' result: " + result);
+        }
+
+        return result;
       }
 
       @Override
