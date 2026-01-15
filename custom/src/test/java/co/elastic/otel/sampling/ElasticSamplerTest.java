@@ -24,15 +24,22 @@ import static io.opentelemetry.semconv.UrlAttributes.URL_PATH;
 import static io.opentelemetry.semconv.UserAgentAttributes.USER_AGENT_ORIGINAL;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.TraceId;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingDecision;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
+import io.opentelemetry.semconv.UrlAttributes;
+import io.opentelemetry.semconv.incubating.UserAgentIncubatingAttributes;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class ElasticSamplerTest {
 
@@ -68,28 +75,44 @@ class ElasticSamplerTest {
         .isEqualTo("ComposableTraceIdRatioBasedSampler{threshold=max, ratio=0.0}");
   }
 
-  @Test
-  void ignoreUrlPath() {
+  @ParameterizedTest
+  @MethodSource("urlPathKeys")
+  void ignoreUrlPath(AttributeKey<String> key) {
     Sampler sampler =
         new ElasticSampler.Builder()
             .withIgnoredUrlPatterns(Collections.singletonList("/health/*"))
             .build();
     checkSampling(sampler, Attributes.empty(), RECORD_AND_SAMPLE);
-    checkSampling(sampler, Attributes.of(URL_PATH, "/health/"), DROP);
-    checkSampling(sampler, Attributes.of(URL_PATH, "/health/test"), DROP);
-    checkSampling(sampler, Attributes.of(URL_PATH, "/healthcheck"), RECORD_AND_SAMPLE);
+    checkSampling(sampler, Attributes.of(key, "/health/"), DROP);
+    checkSampling(sampler, Attributes.of(key, "/health/test"), DROP);
+    checkSampling(sampler, Attributes.of(key, "/healthcheck"), RECORD_AND_SAMPLE);
   }
 
-  @Test
-  void ignoreUserAgent() {
+  public static Stream<Arguments> urlPathKeys() {
+    return Stream.of(
+        Arguments.of(URL_PATH),
+        Arguments.of(UrlAttributes.URL_FULL),
+        Arguments.of(AttributeKey.stringKey("http.url")));
+  }
+
+  @ParameterizedTest
+  @MethodSource("userAgentKeys")
+  void ignoreUserAgent(AttributeKey<String> key) {
     Sampler sampler =
         new ElasticSampler.Builder()
             .withIgnoredUserAgentPatterns(Arrays.asList("curl*", "*Curly"))
             .build();
     checkSampling(sampler, Attributes.empty(), RECORD_AND_SAMPLE);
-    checkSampling(sampler, Attributes.of(USER_AGENT_ORIGINAL, "curl"), DROP);
-    checkSampling(sampler, Attributes.of(USER_AGENT_ORIGINAL, "HappyCurly"), DROP);
-    checkSampling(sampler, Attributes.of(USER_AGENT_ORIGINAL, "CURL"), RECORD_AND_SAMPLE);
+    checkSampling(sampler, Attributes.of(key, "curl"), DROP);
+    checkSampling(sampler, Attributes.of(key, "HappyCurly"), DROP);
+    checkSampling(sampler, Attributes.of(key, "CURL"), RECORD_AND_SAMPLE);
+  }
+
+  public static Stream<Arguments> userAgentKeys() {
+    return Stream.of(
+        Arguments.of(USER_AGENT_ORIGINAL),
+        Arguments.of(UserAgentIncubatingAttributes.USER_AGENT_NAME),
+        Arguments.of(AttributeKey.stringKey("http.user_agent")));
   }
 
   private static void checkSampling(
@@ -102,7 +125,9 @@ class ElasticSamplerTest {
             null,
             attributes,
             Collections.emptyList());
-    assertThat(samplingResult.getDecision()).isEqualTo(expectedDecision);
+    assertThat(samplingResult.getDecision())
+        .describedAs("sampling decision for attributes " + attributes)
+        .isEqualTo(expectedDecision);
   }
 
   @Test

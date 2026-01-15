@@ -32,6 +32,8 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import io.opentelemetry.semconv.UrlAttributes;
 import io.opentelemetry.semconv.UserAgentAttributes;
+import io.opentelemetry.semconv.incubating.UserAgentIncubatingAttributes;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
@@ -109,16 +111,29 @@ public class ElasticSampler implements Sampler {
       ComposableRuleBasedSamplerBuilder ruleBuilder = ComposableSampler.ruleBasedBuilder();
 
       if (!ignoredUrlPatterns.isEmpty()) {
-        ruleBuilder.add(
-            valueMatching(UrlAttributes.URL_PATH, ignoredUrlPatterns),
-            ComposableSampler.alwaysOff());
+        Arrays.asList(
+                UrlAttributes.URL_PATH, // stable
+                UrlAttributes.URL_FULL, // stable
+                AttributeKey.stringKey("http.url") // legacy (deprecated)
+                )
+            .forEach(
+                key ->
+                    ruleBuilder.add(
+                        valueMatching(key, ignoredUrlPatterns), ComposableSampler.alwaysOff()));
         rulesCount++;
       }
 
       if (!ignoredUserAgentPatterns.isEmpty()) {
-        ruleBuilder.add(
-            valueMatching(UserAgentAttributes.USER_AGENT_ORIGINAL, ignoredUserAgentPatterns),
-            ComposableSampler.alwaysOff());
+        Arrays.asList(
+                UserAgentAttributes.USER_AGENT_ORIGINAL, // stable
+                UserAgentIncubatingAttributes.USER_AGENT_NAME, // incubating
+                AttributeKey.stringKey("http.user_agent") // legacy (deprecated)
+                )
+            .forEach(
+                key ->
+                    ruleBuilder.add(
+                        valueMatching(key, ignoredUserAgentPatterns),
+                        ComposableSampler.alwaysOff()));
         rulesCount++;
       }
 
