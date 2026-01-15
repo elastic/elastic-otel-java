@@ -334,7 +334,7 @@ public class CentralConfig {
         logger.warning("ignoring \"sampling_rate\" because non-default sampler in use");
         return;
       }
-      ElasticSampler.globalBuilder()
+      ElasticSampler.INSTANCE.toBuilder()
           .withProbability(Double.parseDouble(configurationValue))
           .buildAndSetGlobal();
     }

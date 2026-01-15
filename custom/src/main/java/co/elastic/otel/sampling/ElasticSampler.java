@@ -42,22 +42,13 @@ public class ElasticSampler implements Sampler {
 
   private static final Logger logger = Logger.getLogger(ElasticSampler.class.getName());
 
+  public static ElasticSampler INSTANCE = new ElasticSampler();
+  private static final Builder builder = new Builder();
+  private static volatile Sampler delegate = builder.build();
+
   static final double DEFAULT_SAMPLE_RATIO = 1.0d;
 
-  private static volatile Sampler delegate;
-  private static final Builder builder = new Builder();
-
-  public static Builder globalBuilder() {
-    return builder;
-  }
-
-  /**
-   * Set the ratio of the probability sampler
-   *
-   * @param ratio sampling probability
-   */
-  public static void setRatio(double ratio) {
-    globalBuilder().withProbability(ratio).buildAndSetGlobal();
+  private ElasticSampler() {
   }
 
   @Override
@@ -72,17 +63,8 @@ public class ElasticSampler implements Sampler {
     return delegate.shouldSample(parentContext, traceId, name, spanKind, attributes, parentLinks);
   }
 
-  /**
-   * Configures the filtering of HTTP spans
-   *
-   * @param urlPatterns url regex patterns to drop
-   * @param userAgentPatterns user-agent regex patterns to drop
-   */
-  public static void setFilterHttp(List<String> urlPatterns, List<String> userAgentPatterns) {
-    globalBuilder()
-        .withIgnoredUrlPatterns(urlPatterns)
-        .withIgnoredUserAgentPatterns(userAgentPatterns)
-        .buildAndSetGlobal();
+  public Builder toBuilder() {
+    return builder;
   }
 
   @Override
@@ -124,29 +106,38 @@ public class ElasticSampler implements Sampler {
 
     // package-private for testing
     Sampler build() {
-      if (ignoredUrlPatterns.isEmpty() && ignoredUrlPatterns.isEmpty()) {
-        return CompositeSampler.wrap(ComposableSampler.probability(ratio));
-      }
+      int rulesCount = 0;
       ComposableRuleBasedSamplerBuilder ruleBuilder = ComposableSampler.ruleBasedBuilder();
 
-      ruleBuilder.add(
-          valueMatching(UrlAttributes.URL_PATH, ignoredUrlPatterns),
-          ComposableSampler.alwaysOff());
+      if (!ignoredUrlPatterns.isEmpty()) {
+        ruleBuilder.add(
+            valueMatching(UrlAttributes.URL_PATH, ignoredUrlPatterns),
+            ComposableSampler.alwaysOff());
+        rulesCount++;
+      }
 
-      ruleBuilder.add(
-          valueMatching(UserAgentAttributes.USER_AGENT_ORIGINAL, ignoredUserAgentPatterns),
-          ComposableSampler.alwaysOff());
+      if (!ignoredUserAgentPatterns.isEmpty()) {
+        ruleBuilder.add(
+            valueMatching(UserAgentAttributes.USER_AGENT_ORIGINAL, ignoredUserAgentPatterns),
+            ComposableSampler.alwaysOff());
+        rulesCount++;
+      }
+
+      if (rulesCount == 0) {
+        // no rules, just return the probability sampler directly
+        return CompositeSampler.wrap(ComposableSampler.probability(ratio));
+      }
 
       // probability sampler applied last without any attribute filtering
       ruleBuilder.add(any(), ComposableSampler.probability(ratio));
       return CompositeSampler.wrap(ruleBuilder.build());
     }
 
-    public Sampler buildAndSetGlobal() {
+    public ElasticSampler buildAndSetGlobal() {
       Sampler sampler = build();
       logger.fine("set global sampler to " + sampler.getDescription());
       delegate = sampler;
-      return sampler;
+      return INSTANCE;
     }
 
     private static SamplingPredicate any() {
@@ -155,16 +146,37 @@ public class ElasticSampler implements Sampler {
 
     private static SamplingPredicate valueMatching(AttributeKey<String> attributeKey, List<String> patterns) {
       Predicate<String> predicate = IncludeExcludePredicate.createPatternMatching(patterns, null);
-      return new SamplingPredicate() {
-        @Override
-        public boolean matches(Context parentContext, String traceId, String name,
-            SpanKind spanKind, Attributes attributes, List<LinkData> parentLinks) {
-          String value = attributes.get(attributeKey);
-          return predicate.test(value);
-        }
-      };
+      return new ValueMatchingSamplingPredicate(attributeKey, predicate);
     }
 
+    private static class ValueMatchingSamplingPredicate implements SamplingPredicate {
+      private final AttributeKey<String> attributeKey;
+      private final Predicate<String> predicate;
+
+      public ValueMatchingSamplingPredicate(AttributeKey<String> attributeKey,
+          Predicate<String> predicate) {
+        this.attributeKey = attributeKey;
+        this.predicate = predicate;
+      }
+
+      @Override
+      public boolean matches(Context parentContext, String traceId, String name,
+          SpanKind spanKind, Attributes attributes, List<LinkData> parentLinks) {
+        String value = attributes.get(attributeKey);
+        if (value == null) {
+          return false;
+        }
+        return predicate.test(value);
+      }
+
+      @Override
+      public String toString() {
+        return "ValueMatchingSamplingPredicate{" +
+            "attributeKey=" + attributeKey +
+            ", predicate=" + predicate +
+            '}';
+      }
+    }
   }
 
 
