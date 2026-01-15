@@ -174,7 +174,8 @@ public class ElasticSampler implements Sampler {
         boolean result = predicate.test(value);
         if (logger.isLoggable(Level.FINE)) {
           // note: matching on a key means that the sampling intent will be applied,
-          logger.log(Level.FINE,
+          logger.log(
+              Level.FINE,
               "matching on '" + attributeKey + "' with value '" + value + "' result: " + result);
         }
 

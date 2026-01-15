@@ -402,7 +402,9 @@ public class CentralConfig {
         throws IllegalArgumentException {
 
       List<String> patterns = Arrays.asList(configurationValue.split(","));
-      ElasticSampler.INSTANCE.toBuilder().withIgnoredUserAgentPatterns(patterns).buildAndSetGlobal();
+      ElasticSampler.INSTANCE.toBuilder()
+          .withIgnoredUserAgentPatterns(patterns)
+          .buildAndSetGlobal();
     }
   }
 }
