@@ -33,8 +33,7 @@ public class ElasticSamplerProvider implements ConfigurableSamplerProvider {
 
   @Override
   public Sampler createSampler(ConfigProperties config) {
-    double ratio = config.getDouble(
-        "otel.traces.sampler.arg", ElasticSampler.DEFAULT_SAMPLE_RATIO);
+    double ratio = config.getDouble("otel.traces.sampler.arg", ElasticSampler.DEFAULT_SAMPLE_RATIO);
 
     return ElasticSampler.INSTANCE.toBuilder()
         .withProbability(ratio)

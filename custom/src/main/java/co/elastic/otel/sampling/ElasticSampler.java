@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
-
 public class ElasticSampler implements Sampler {
 
   private static final Logger logger = Logger.getLogger(ElasticSampler.class.getName());
@@ -48,8 +47,7 @@ public class ElasticSampler implements Sampler {
 
   static final double DEFAULT_SAMPLE_RATIO = 1.0d;
 
-  private ElasticSampler() {
-  }
+  private ElasticSampler() {}
 
   @Override
   public SamplingResult shouldSample(
@@ -144,7 +142,8 @@ public class ElasticSampler implements Sampler {
       return (parentContext, traceId, name, spanKind, attributes, parentLinks) -> true;
     }
 
-    private static SamplingPredicate valueMatching(AttributeKey<String> attributeKey, List<String> patterns) {
+    private static SamplingPredicate valueMatching(
+        AttributeKey<String> attributeKey, List<String> patterns) {
       Predicate<String> predicate = IncludeExcludePredicate.createPatternMatching(patterns, null);
       return new ValueMatchingSamplingPredicate(attributeKey, predicate);
     }
@@ -153,15 +152,20 @@ public class ElasticSampler implements Sampler {
       private final AttributeKey<String> attributeKey;
       private final Predicate<String> predicate;
 
-      public ValueMatchingSamplingPredicate(AttributeKey<String> attributeKey,
-          Predicate<String> predicate) {
+      public ValueMatchingSamplingPredicate(
+          AttributeKey<String> attributeKey, Predicate<String> predicate) {
         this.attributeKey = attributeKey;
         this.predicate = predicate;
       }
 
       @Override
-      public boolean matches(Context parentContext, String traceId, String name,
-          SpanKind spanKind, Attributes attributes, List<LinkData> parentLinks) {
+      public boolean matches(
+          Context parentContext,
+          String traceId,
+          String name,
+          SpanKind spanKind,
+          Attributes attributes,
+          List<LinkData> parentLinks) {
         String value = attributes.get(attributeKey);
         if (value == null) {
           return false;
@@ -171,13 +175,13 @@ public class ElasticSampler implements Sampler {
 
       @Override
       public String toString() {
-        return "ValueMatchingSamplingPredicate{" +
-            "attributeKey=" + attributeKey +
-            ", predicate=" + predicate +
-            '}';
+        return "ValueMatchingSamplingPredicate{"
+            + "attributeKey="
+            + attributeKey
+            + ", predicate="
+            + predicate
+            + '}';
       }
     }
   }
-
-
 }
