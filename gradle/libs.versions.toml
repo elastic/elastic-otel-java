@@ -50,7 +50,7 @@ findbugs-jsr305 = "com.google.code.findbugs:jsr305:3.0.2"
 wiremockjre8 = "com.github.tomakehurst:wiremock-jre8:2.35.2"
 wiremock = "org.wiremock:wiremock:3.13.2"
 testcontainers = "org.testcontainers:testcontainers:2.0.2"
-logback = "ch.qos.logback:logback-classic:1.5.21"
+logback = "ch.qos.logback:logback-classic:1.5.25"
 jackson = "com.fasterxml.jackson.core:jackson-databind:2.20.1"
 protobuf-util = "com.google.protobuf:protobuf-java-util:3.25.8"
 # last version supporting Java 8
