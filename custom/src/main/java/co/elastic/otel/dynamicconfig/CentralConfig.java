@@ -335,6 +335,7 @@ public class CentralConfig {
     void update(String configurationValue, OpampManager opampManager)
         throws IllegalArgumentException {
       if (!ConfigLoggingAgentListener.getEnableDynamicSamplingRate()) {
+        // TODO: why do we see this log message on startup ?
         logger.warning("ignoring \"sampling_rate\" because non-default sampler in use");
         return;
       }

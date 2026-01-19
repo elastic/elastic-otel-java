@@ -31,13 +31,11 @@ opentelemetryInstrumentationAlphaBom = { group = "io.opentelemetry.instrumentati
 
 opentelemetryProto = { group = "io.opentelemetry.proto", name = "opentelemetry-proto", version.ref = "opentelemetryProto" }
 
-contribConsistentSampling = { group = "io.opentelemetry.contrib", name = "opentelemetry-consistent-sampling", version.ref = "opentelemetryContribAlpha" }
 contribResources = { group = "io.opentelemetry.contrib", name = "opentelemetry-resource-providers", version.ref = "opentelemetryContribAlpha" }
 contribSpanStacktrace = { group = "io.opentelemetry.contrib", name = "opentelemetry-span-stacktrace", version.ref = "opentelemetryContribAlpha" }
 contribInferredSpans = { group = "io.opentelemetry.contrib", name = "opentelemetry-inferred-spans", version.ref = "opentelemetryContribAlpha" }
 contribRuntimeAttach = { group = "io.opentelemetry.contrib", name = "opentelemetry-runtime-attach-core", version.ref = "opentelemetryContribAlpha" }
 opentelemetry-opamp = { module = "io.opentelemetry.contrib:opentelemetry-opamp-client", version.ref = "opentelemetryContribAlpha" }
-contribSamplers = { module = "io.opentelemetry.contrib:opentelemetry-samplers", version.ref = "opentelemetryContribAlpha" }
 
 opentelemetrySemconv = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv", version.ref = "opentelemetrySemconv" }
 opentelemetrySemconvIncubating = { group = "io.opentelemetry.semconv", name = "opentelemetry-semconv-incubating", version.ref = "opentelemetrySemconvAlpha" }
