@@ -54,7 +54,7 @@ public class ElasticLoggingCustomizer implements LoggingCustomizer {
     } else {
       level =
           // TODO the getString() became private but might become public again, at which time revert
-          //Optional.ofNullable(earlyConfig.getString("elastic.otel.javaagent.log.level"))
+          // Optional.ofNullable(earlyConfig.getString("elastic.otel.javaagent.log.level"))
           Optional.ofNullable(getEarlyConfigString("elastic.otel.javaagent.log.level"))
               .map(Level::getLevel)
               .orElse(Level.INFO);
