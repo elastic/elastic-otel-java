@@ -106,7 +106,7 @@ nativeTargets.forEach {
     inputDir.set(file("jni-build"))
   }
 
-  val artifactCompileTask = task("compileJni$taskSuffix", DockerRun::class) {
+   val artifactCompileTask = tasks.register<DockerRun>("compileJni$taskSuffix") {
     dependsOn(createImageTask)
     //compileJava generates the JNI-headers from native methods
     dependsOn(tasks.compileJava)
