@@ -25,7 +25,7 @@ dependencies {
 
   implementation("org.springframework.boot:spring-boot-starter-artemis:${springBootVersion}")
   // using a rather old version to keep java 8 compatibility
-  implementation("org.apache.activemq:artemis-jms-server:2.27.0")
+  implementation("org.apache.activemq:artemis-jms-server:2.44.0")
 }
 
 java {
