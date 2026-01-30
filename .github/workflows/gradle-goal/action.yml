@@ -28,7 +28,8 @@ runs:
       with:
         java-version-file: ${{ inputs.java-version-file }}
         distribution: ${{ inputs.distribution }}
-        cache: 'gradle'
+        # NOTE: disable the cache poisoning vector attack
+        # cache: 'gradle'
     - run: "${COMMAND}"
       shell: ${{ inputs.shell }}
       env:
