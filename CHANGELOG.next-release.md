@@ -22,7 +22,7 @@ This file contains all changes which are not released yet.
 
 # Breaking Changes
 <!--BREAKING-CHANGES-START-->
-
+- univeral profiling is disabled by default #958
 <!--BREAKING-CHANGES-END-->
 <!--DEPENDENCIES-NOTES-START-->
 
