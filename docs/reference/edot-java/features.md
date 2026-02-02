@@ -64,7 +64,7 @@ Refer to [Central configuration](opentelemetry://reference/central-configuration
 
 ## Elastic Universal Profiling integration
 
-[Universal Profiling](https://www.elastic.co/observability/universal-profiling) integration provides the ability to correlate traces with profiling data from the Elastic universal profiler. This feature is disabled by default.
+[Universal Profiling](https://www.elastic.co/observability/universal-profiling) integration provides the ability to correlate traces with profiling data from the Elastic universal profiler. This feature is off by default.
 
 Refer to [universal-profiling-integration](https://github.com/elastic/elastic-otel-java/tree/main/universal-profiling-integration) for details and configuration options.
 
