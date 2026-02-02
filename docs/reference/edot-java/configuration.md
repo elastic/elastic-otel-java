@@ -68,13 +68,13 @@ EDOT Java uses different defaults than the OpenTelemetry Java instrumentation fo
 The EDOT Java instrumentation agent also provides configuration options for each of the [supported features](/reference/edot-java/features.md).
 This table only contains minimal configuration, see each respective feature for exhaustive configuration options documentation.
 
-| Option                                                 | Default | Feature                                                                                                                  | EDOT Java version |
-|--------------------------------------------------------|---------|--------------------------------------------------------------------------------------------------------------------------|-------------------|
+| Option                                                 | Default | Feature                                                                                                             | EDOT Java version |
+|--------------------------------------------------------|---------|---------------------------------------------------------------------------------------------------------------------|-------------------|
 | `OTEL_INFERRED_SPANS_ENABLED`                          | `false` | [Inferred spans](/reference/edot-java/features.md#inferred-spans)                                                   | 1.0.0+            |
 | `OTEL_JAVA_EXPERIMENTAL_SPAN_STACKTRACE_MIN_DURATION`  | `5ms`   | [Span stacktrace](/reference/edot-java/features.md#span-stacktrace)                                                 | 1.0.0+            |
-| `ELASTIC_OTEL_UNIVERSAL_PROFILING_INTEGRATION_ENABLED` | `auto`  | [Elastic Universal profiling integration](/reference/edot-java/features.md#elastic-universal-profiling-integration) | 1.0.0+            |
-| `ELASTIC_OTEL_JAVAAGENT_LOG_LEVEL`                     | `INFO`  | [Agent logging](#agent-logging)                                                                                          | 1.5.0+            |
-| `ELASTIC_OTEL_VERIFY_SERVER_CERT`                      | `true`  | [Exporter certificate verification](#exporter-certificate-verification)                                                  | 1.5.0+            |
+| `ELASTIC_OTEL_UNIVERSAL_PROFILING_INTEGRATION_ENABLED` | `false` | [Elastic Universal profiling integration](/reference/edot-java/features.md#elastic-universal-profiling-integration) | 1.0.0+            |
+| `ELASTIC_OTEL_JAVAAGENT_LOG_LEVEL`                     | `INFO`  | [Agent logging](#agent-logging)                                                                                     | 1.5.0+            |
+| `ELASTIC_OTEL_VERIFY_SERVER_CERT`                      | `true`  | [Exporter certificate verification](#exporter-certificate-verification)                                             | 1.5.0+            |
 
 
 ## Elasticsearch Java client: Capturing search request bodies
