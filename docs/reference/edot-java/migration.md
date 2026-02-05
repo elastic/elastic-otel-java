@@ -14,9 +14,9 @@ products:
   - id: apm-agent
 ---
 
-# Migrate to EDOT Java from the Elastic APM Java agent
+# Migrate to EDOT Java from the Elastic {{product.apm}} Java agent
 
-Compared to the Elastic APM Java agent, the {{edot}} Java presents a number of advantages:
+Compared to the Elastic {{product.apm}} Java agent, the {{edot}} Java presents a number of advantages:
 
 - Fully automatic instrumentation with zero code changes. No need to modify application code.
 - Capture, send, transform, and store data in an OpenTelemetry native way. This includes for example the ability to use all features of the OpenTelemetry SDK for manual tracing, data following semantic conventions, or ability to use intermediate collectors and processors.
@@ -25,13 +25,13 @@ Compared to the Elastic APM Java agent, the {{edot}} Java presents a number of a
 
 ## Migration steps
 
-Follow these steps to migrate from the legacy Elastic APM Java agent to the {{edot}} Java.
+Follow these steps to migrate from the legacy Elastic {{product.apm}} Java agent to the {{edot}} Java.
 
 ::::::{stepper}
 
 ::::{step} (Optional) Migrate manual instrumentation API
 
-Migrate usages of the [Elastic APM Agent API](apm-agent-java://reference/public-api.md) to OpenTelemetry API:
+Migrate usages of the [Elastic {{product.apm-agent}} API](apm-agent-java://reference/public-api.md) to OpenTelemetry API:
 
 - For [Annotation API](apm-agent-java://reference/public-api.md#api-annotation), refer to [OpenTelemetry Annotations](https://opentelemetry.io/docs/zero-code/java/agent/annotations/).
 - For [Transaction API](apm-agent-java://reference/public-api.md#api-transaction), refer to [OpenTelemetry API](https://opentelemetry.io/docs/zero-code/java/agent/api/).
@@ -47,14 +47,27 @@ Refer to the [Configuration mapping](#configuration-mapping). Refer to [Configur
 
 ::::{step} Replace the agent binary
 
-Remove the `-javaagent:` argument that contains the Elastic APM Java agent from the JVM arguments. Then add the `-javaagent:` argument to the JVM arguments to use EDOT Java, and restart the application or follow [Kubernetes instructions](/reference/edot-java/setup/k8s.md) or [Runtime attach instructions](/reference/edot-java/setup/runtime-attach.md) if applicable. Refer to [Setup](/reference/edot-java/setup/index.md).
+Remove the `-javaagent:` argument that contains the Elastic {{product.apm}} Java agent from the JVM arguments. Then add the `-javaagent:` argument to the JVM arguments to use EDOT Java, and restart the application or follow [Kubernetes instructions](/reference/edot-java/setup/k8s.md) or [Runtime attach instructions](/reference/edot-java/setup/runtime-attach.md) if applicable. Refer to [Setup](/reference/edot-java/setup/index.md).
 ::::
 
 ::::::
 
 ## Configuration mapping
 
-The following are Elastic APM Java agent settings that you can migrate to EDOT Java.
+The following describes how Elastic {{product.apm}} Java agent configuration maps to EDOT Java. It includes how resource attributes are handled when using the EDOT Collector, followed by each agent setting and its EDOT equivalent.
+
+### Resource attributes when using the EDOT Collector
+
+When ingesting telemetry data through the {{edot}} (EDOT) Collector or Managed OTLP (mOTLP), resource attributes:
+
+- Are preserved as OpenTelemetry resource attributes.
+- Are not automatically mapped to `labels.*` fields.
+
+:::{note}
+When ingesting OpenTelemetry data through the Elastic {{product.apm-server}}, unmapped resource attributes were historically added under `labels.*`. This behavior does not apply when using the EDOT Collector and is not recommended for new deployments.
+:::
+
+If you rely on specific attribute mappings for querying or filtering in {{product.observability}}, configure explicit attribute processors in the EDOT Collector pipeline.
 
 ### `server_url`
 
@@ -106,7 +119,7 @@ For example: `OTEL_RESOURCE_ATTRIBUTES=deployment.environment.name=testing`.
 
 The Elastic [`global_labels`](apm-agent-java://reference/config-core.md#config-global-labels) option corresponds to adding `key=value` comma separated pairs in [OTEL_RESOURCE_ATTRIBUTES](https://opentelemetry.io/docs/concepts/sdk-configuration/general-sdk-configuration/#otel_resource_attributes).
 
-For example: `OTEL_RESOURCE_ATTRIBUTES=alice=first,bob=second`. Such labels will result in labels.key=value attributes on the server, e.g. labels.alice=first
+For example: `OTEL_RESOURCE_ATTRIBUTES=alice=first,bob=second`
 
 ### `trace_methods`
 
@@ -140,15 +153,15 @@ Replace the Elastic `span_stack_trace_min_duration` option with [`OTEL_JAVA_EXPE
 
 ### `disable_instrumentations`
 
-Replace the `disable_instrumentations` option, which allows to selectively disable instrumentation (opt-out), with `OTEL_INSTRUMENTATION_<name>_ENABLED` where `<name>` is the instrumentation name.
+Replace the `disable_instrumentations` option, which allows to selectively turn off instrumentation (opt-out), with `OTEL_INSTRUMENTATION_<name>_ENABLED` where `<name>` is the instrumentation name.
 
 See [OpenTelemetry documentation](https://opentelemetry.io/docs/zero-code/java/agent/disable/) for reference and values.
 
 ### `enable_instrumentations`
 
-The `enable_instrumentations` option allows to disable all instrumentation enabled by default and selectively enable instrumentation (opt-in) can be replaced with:
+The `enable_instrumentations` option allows to turn off all instrumentation enabled by default and selectively enable instrumentation (opt-in) can be replaced with:
 
-- `OTEL_INSTRUMENTATION_COMMON_DEFAULT_ENABLED` = `false` to disable instrumentations enabled by default.
+- `OTEL_INSTRUMENTATION_COMMON_DEFAULT_ENABLED` = `false` to turn off instrumentations enabled by default.
 - `OTEL_INSTRUMENTATION_<name>_ENABLED` = `true` where `<name>` is the name of the instrumentation to enable. See [OpenTelemetry documentation](https://opentelemetry.io/docs/zero-code/java/agent/disable/) for reference and values.
 
 ### `hostname`
@@ -167,14 +180,14 @@ For example: `OTEL_RESOURCE_ATTRIBUTES=service.instance.id=myserviceinstance001`
 
 The Elastic [`cloud_provider`](apm-agent-java://reference/config-core.md#config-cloud-provider) option corresponds to the per-provider `otel.resource.providers.{provider}.enabled` configuration options.
 
-By default, with EDOT `otel.resource.providers.{provider}.enabled` is set to `true`, this is equivalent to the `cloud_provider` default valuem which is `auto`, or automatically detect cloud providers. Notice that this behavior differs from the contrib OpenTelemetry distribution.
+By default, with EDOT `otel.resource.providers.{provider}.enabled` is set to `true`, this is equivalent to the `cloud_provider` default value which is `auto`, or automatically detect cloud providers. Notice that this behavior differs from the contrib OpenTelemetry distribution.
 
 When the cloud provider is known, or there is none, turning off the non-relevant providers with `otel.resource.providers.{provider}.enabled = false` allows to [minimize the application startup overhead](/reference/edot-java/overhead.md#optimizing-application-startup).
 
 ### `log_sending`
 
 The Elastic [`log_sending`](apm-agent-java://reference/config-logging.md#config-log-sending) option allows capturing and
-sending application logs directly to APM Server without storing them on disk and ingesting them with a separate tool.
+sending application logs directly to {{product.apm-server}} without storing them on disk and ingesting them with a separate tool.
 
 With EDOT, application logs are automatically captured and sent by default.
 
@@ -182,9 +195,18 @@ This feature is controlled by `otel.logs.exporter`, which is set to `otlp` by de
 
 ### `verify_server_cert`
 
-The Elastic [`verify_server_cert`](apm-agent-java://reference/config-reporter.md#config-verify-server-cert) option allows you to disable server certificate validation.
+The Elastic [`verify_server_cert`](apm-agent-java://reference/config-reporter.md#config-verify-server-cert) option allows you to turn off server certificate validation.
 
 With EDOT, the equivalent configuration option is `ELASTIC_OTEL_VERIFY_SERVER_CERT` (default `true`), see [configuration](./configuration.md#exporter-certificate-verification) for details.
+
+### No equivalent for `application_packages`
+
+The Elastic {{product.apm}} Java agent provided an `application_packages` setting with multiple purposes, including startup optimization and stack trace filtering. EDOT Java doesn't provide an equivalent configuration for the following reasons:
+
+- EDOT Java does not support package-based scoping to reduce instrumentation overhead at startup. To reduce startup overhead, turn off unneeded instrumentations instead.
+- Package-based stack trace filtering (as provided by `application_packages`) is not currently supported in {{kib}} for EDOT data because EDOT stack traces are captured as flat strings rather than structured frames.
+
+The `OTEL_JAVA_EXPERIMENTAL_SPAN_STACKTRACE_MIN_DURATION` setting controls when stack traces are captured, but it does not provide package-based filtering.
 
 ## Limitations
 
