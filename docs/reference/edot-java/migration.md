@@ -162,7 +162,7 @@ See [OpenTelemetry documentation](https://opentelemetry.io/docs/zero-code/java/a
 The `enable_instrumentations` option allows to turn off all instrumentation enabled by default and selectively enable instrumentation (opt-in) can be replaced with:
 
 - `OTEL_INSTRUMENTATION_COMMON_DEFAULT_ENABLED` = `false` to turn off instrumentations enabled by default.
-- `OTEL_INSTRUMENTATION_<name>_ENABLED` = `true` where `<name>` is the name of the instrumentation to enable. See [OpenTelemetry documentation](https://opentelemetry.io/docs/zero-code/java/agent/disable/) for reference and values.
+- `OTEL_INSTRUMENTATION_<name>_ENABLED` = `true` where `<name>` is the name of the instrumentation to enable. Refer to [OpenTelemetry documentation](https://opentelemetry.io/docs/zero-code/java/agent/disable/) for reference and values.
 
 ### `hostname`
 
