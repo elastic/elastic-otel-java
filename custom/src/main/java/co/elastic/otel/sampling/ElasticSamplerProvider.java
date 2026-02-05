@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel.compositesampling;
+package co.elastic.otel.sampling;
 
 import com.google.auto.service.AutoService;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
@@ -24,20 +24,26 @@ import io.opentelemetry.sdk.autoconfigure.spi.traces.ConfigurableSamplerProvider
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 
 @AutoService(ConfigurableSamplerProvider.class)
-public class CompositeParentBasedTraceIdRatioBasedSamplerProvider
-    implements ConfigurableSamplerProvider {
+public class ElasticSamplerProvider implements ConfigurableSamplerProvider {
+
+  private static final String ELASTIC_OTEL_IGNORE_URLS =
+      "elastic.otel.experimental.http.ignore.urls";
+  private static final String ELASTIC_OTEL_IGNORE_USER_AGENTS =
+      "elastic.otel.experimental.http.ignore.user-agents";
 
   @Override
   public Sampler createSampler(ConfigProperties config) {
-    DynamicCompositeParentBasedTraceIdRatioBasedSampler.setRatio(
-        config.getDouble(
-            "otel.traces.sampler.arg",
-            DynamicCompositeParentBasedTraceIdRatioBasedSampler.DEFAULT_TRACEIDRATIO_SAMPLE_RATIO));
-    return DynamicCompositeParentBasedTraceIdRatioBasedSampler.INSTANCE;
+    double ratio = config.getDouble("otel.traces.sampler.arg", ElasticSampler.DEFAULT_SAMPLE_RATIO);
+
+    return ElasticSampler.INSTANCE.toBuilder()
+        .withProbability(ratio)
+        .withIgnoredUrlPatterns(config.getList(ELASTIC_OTEL_IGNORE_URLS))
+        .withIgnoredUserAgentPatterns(config.getList(ELASTIC_OTEL_IGNORE_USER_AGENTS))
+        .buildAndSetGlobal();
   }
 
   @Override
   public String getName() {
-    return "experimental_composite_parentbased_traceidratio";
+    return "elastic";
   }
 }
