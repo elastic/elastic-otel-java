@@ -58,7 +58,7 @@ The following describes how Elastic {{product.apm}} Java agent configuration map
 
 ### Resource attributes when using the EDOT Collector
 
-Ingesting OpenTelemetry data directly through {{product.apm-server}} is [no longer supported](opentelemetry://reference/architecture.md#limitations). Historically, when ingesting OpenTelemetry data through the Elastic {{product.apm-server}}, unmapped resource attributes were added under `labels.*`. This behavior does not apply when using the EDOT Collector and is not recommended for new deployments. Use the EDOT Collector or Managed OTLP for supported ingestion.
+Ingesting OpenTelemetry data directly through {{product.apm-server}} is [no longer supported](opentelemetry://reference/architecture/index.md#limitations). Historically, when ingesting OpenTelemetry data through the Elastic {{product.apm-server}}, unmapped resource attributes were added under `labels.*`. This behavior does not apply when using the EDOT Collector and is not recommended for new deployments. Use the EDOT Collector or Managed OTLP for supported ingestion.
 
 If you rely on specific attribute mappings for querying or filtering in {{product.observability}}, configure explicit attribute processors in the EDOT Collector pipeline.
 
