@@ -27,6 +27,12 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [edot-java-X.X.X-fixes]
 % *
 
+## 1.9.0 [edot-java-1-9-0-release-notes]
+**Release date:** February 9, 2026
+
+### Breaking changes [edot-java-1-9-0-fixes]
+- univeral profiling is disabled by default #958
+
 ## 1.8.0 [edot-java-1-8-0-release-notes]
 **Release date:** December 9, 2025
 

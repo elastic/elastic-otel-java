@@ -34,6 +34,12 @@ In OpenTelemetry Java agent version 2.18.0, an `openai` instrumentation module w
 **Action**<br> The equivalent of `ELASTIC_OTEL_JAVA_INSTRUMENTATION_GENAI_EMIT_EVENTS` is `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT`. If you want to revert entirely to the previous setup, turn off the upstream implementation and turn on the EDOT one. For example: `OTEL_INSTRUMENTATION_OPENAI=false` and `OTEL_INSTRUMENTATION_OPENAI_CLIENT=true`
 View [PR #763](https://github.com/elastic/elastic-otel-java/pull/763).
 ::::
+## 1.9.0 [1.9.0]
+
+**Release date:** February 9, 2026
+
+- univeral profiling is disabled by default #958
+
 ## 1.6.0 [1.6.0]
 
 **Release date:** October 6, 2025
