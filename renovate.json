@@ -22,6 +22,13 @@
         "major"
       ],
       "enabled": false
+    },
+    {
+      "description": "keep old artemis version to preserve java8 compatibility in tests",
+      "matchPackageNames": [
+        "org.apache.activemq:artemis-jms-server"
+      ],
+      "enabled": false
     }
   ],
   "ignorePaths": [
