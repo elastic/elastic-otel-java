@@ -20,7 +20,7 @@ package co.elastic.otel.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.opentelemetry.sdk.internal.ScopeConfigurator;
+import io.opentelemetry.sdk.common.internal.ScopeConfigurator;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
 import java.lang.reflect.Method;
