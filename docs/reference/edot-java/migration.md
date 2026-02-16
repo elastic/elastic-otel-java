@@ -231,7 +231,9 @@ and adhere to the [JVM runtime semantic conventions](https://opentelemetry.io/do
 - `jvm.memory.non_heap.pool.max` with `name` attribute providing the pool name is replaced by [`jvm.memory.limit`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmmemorylimit) when filtered and aggregated on metric attributes :
   - [`jvm.memory.type`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = `non_heap`
   - [`jvm.memory.pool.name`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = name of memory pool (previously in `name` attribute)
-- `jvm.gc.count` does not have a direct equivalent, however the GC execution count can be derived from [`jvm.gc.duration`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmgcduration) metric histogram.
+- `jvm.gc.count` does not have a direct equivalent 
+  - workaround: however the GC execution count can be derived from [`jvm.gc.duration`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmgcduration) metric histogram.
+  - workaround: using custom JMX metric to capture the value of `GarbageCollectorMXBean.getCollectionCount`
 - `jvm.gc.time` is replaced by [`jvm.gc.duration`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmgcduration), stored as a histogram with the following optional extra attributes:
    - [`jvm.gc.action`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/)
    - [`jvm.gc.name`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/)
@@ -240,10 +242,9 @@ and adhere to the [JVM runtime semantic conventions](https://opentelemetry.io/do
 
 ### JVM Process metrics
 
-TODO
-
-- `system.process.cpu.total.norm.pct`
-- `system.process.memory.size`
+- `system.process.cpu.total.norm.pct` is replaced by [`jvm.cpu.recent_utilization`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmcpurecent_utilization)
+- `system.process.memory.size` does not have a direct equivalent
+  - workaround: using custom JMX metric to capture the value of [`OperatingSystemMXBean.getCommittedVirtualMemorySize`](https://docs.oracle.com/en/java/javase/11/docs/api/jdk.management/com/sun/management/OperatingSystemMXBean.html#getCommittedVirtualMemorySize())
 
 ### System metrics
 
