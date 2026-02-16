@@ -248,11 +248,18 @@ and adhere to the [JVM runtime semantic conventions](https://opentelemetry.io/do
 
 ### System metrics
 
-TODO
+With EDOT Java, the system-wide metrics are not captured through the JVM
+but can be captured by using the collector with `hostmetricsreceiver` or by using custom JMX metrics.
 
-- `system.cpu.total.norm.pct`
-- `system.memory.actual.free`
-- `system.memory.total`
+- `system.cpu.total.norm.pct` does not have a direct equivalent
+  - workaround: using custom JMX metric to capture the value of [`OperatingSystemMXBean.getSystemCpuLoad`](https://docs.oracle.com/en/java/javase/11/docs/api/java.management/java/lang/management/OperatingSystemMXBean.html#getSystemCpuLoad())
+  - workaround: using the collector with `hostmetricsreceiver` to capture `system.cpu.utilization`
+- `system.memory.actual.free` does not have a direct equivalent
+  - workaround: using custom JMX metric to capture the value of [`OperatingSystemMXBean.getFreePhysicalMemorySize`](https://docs.oracle.com/en/java/javase/11/docs/api/com/sun/management/OperatingSystemMXBean.html#getFreePhysicalMemorySize())
+  - workaround: using the collector with `hostmetricsreceiver` to capture `system.memory.usage` and `system.memory.limit` and calculate the difference.
+- `system.memory.total` does not have a direct equivalent
+  - workaround: using custom JMX metric to capture the value of [`OperatingSystemMXBean.getTotalPhysicalMemorySize`](https://docs.oracle.com/en/java/javase/11/docs/api/com/sun/management/OperatingSystemMXBean.html#getTotalPhysicalMemorySize())
+  - workaround: using the collector with `hostmetricsreceiver` to capture `system.memory.limit`
 
 ### Agent health and overhead metrics
 
