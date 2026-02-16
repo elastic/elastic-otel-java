@@ -201,6 +201,122 @@ The Elastic {{product.apm}} Java agent provided an `application_packages` settin
 
 The `OTEL_JAVA_EXPERIMENTAL_SPAN_STACKTRACE_MIN_DURATION` setting controls when stack traces are captured, but it does not provide package-based filtering.
 
+## Metrics
+
+Metrics in this section are described as they are reported to the backend by EDOT or Elastic APM agent.
+Unless an ECS-mapping is being used, the otel-native storage means that the metric names and attributes will be preserved.
+
+### JVM runtime metrics
+
+With EDOT Java, the JVM runtime metrics are provided by the upstream OpenTelemetry Java instrumentation
+and adhere to the [JVM runtime semantic conventions](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/).
+
+- `jvm.fd.used` is replaced by [`jvm.file_descriptor.count`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmfile_descriptorcount)
+- `jvm.fd.max` does not have a direct equivalent
+- `jvm.thread.count` is replaced by [`jvm.thread.count`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmthreadcount) with two extra optional attributes
+  - [`jvm.thread.daemon`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/)
+  - [`jvm.thread.state`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/)
+- `jvm.memory.heap.used` is replaced by [`jvm.memory.used`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmmemoryused) when filtered and aggregated on metric attribute :
+  - [`jvm.memory.type`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = `heap` 
+- `jvm.memory.heap.committed` is replaced by [`jvm.memory.committed`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmmemorycommitted) when filtered and aggregated on metric attribute : 
+  - [`jvm.memory.type`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = `heap` 
+- `jvm.memory.heap.max` is replaced by [`jvm.memory.limit`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmmemorylimit) when filtered and aggregated on metric attribute :
+  - [`jvm.memory.type`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = `heap` 
+- `jvm.memory.non_heap.used` is replaced by [`jvm.memory.used`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmmemoryused) when filtered and aggregated on metric attribute : 
+  - [`jvm.memory.type`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = `non_heap`
+- `jvm.memory.non_heap.committed` is replaced by [`jvm.memory.committed`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmmemorycommitted) when filtered and aggregated on metric attribute :
+  - [`jvm.memory.type`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = `non_heap`
+- `jvm.memory.non_heap.max` is replaced by [`jvm.memory.limit`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmmemorylimit) when filtered and aggregated on metric attribute :
+  - [`jvm.memory.type`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = `non_heap`
+- `jvm.memory.heap.pool.used` with `name` attribute providing the pool name is replaced by [`jvm.memory.used`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmmemoryused) when filtered and aggregated on metric attributes :
+  - [`jvm.memory.type`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = `heap`
+  - [`jvm.memory.pool.name`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = name of memory pool (previously in `name` attribute)
+- `jvm.memory.heap.pool.committed` with `name` attribute providing the pool name is replaced by [`jvm.memory.committed`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmmemorycommitted) when filtered and aggregated on metric attributes :
+  - [`jvm.memory.type`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = `heap`
+  - [`jvm.memory.pool.name`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = name of memory pool (previously in `name` attribute)
+- `jvm.memory.heap.pool.max` with `name` attribute providing the pool name is replaced by [`jvm.memory.limit`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmmemorylimit) when filtered and aggregated on metric attributes :
+  - [`jvm.memory.type`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = `heap`
+  - [`jvm.memory.pool.name`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = name of memory pool (previously in `name` attribute)
+- `jvm.memory.non_heap.pool.used` with `name` attribute providing the pool name is replaced by [`jvm.memory.used`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmmemoryused) when filtered and aggregated on metric attributes :
+  - [`jvm.memory.type`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = `non_heap`
+  - [`jvm.memory.pool.name`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = name of memory pool (previously in `name` attribute)
+- `jvm.memory.non_heap.pool.committed` with `name` attribute providing the pool name is replaced by [`jvm.memory.committed`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmmemorycommitted) when filtered and aggregated on metric attributes :
+  - [`jvm.memory.type`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = `non_heap`
+  - [`jvm.memory.pool.name`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = name of memory pool (previously in `name` attribute)
+- `jvm.memory.non_heap.pool.max` with `name` attribute providing the pool name is replaced by [`jvm.memory.limit`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmmemorylimit) when filtered and aggregated on metric attributes :
+  - [`jvm.memory.type`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = `non_heap`
+  - [`jvm.memory.pool.name`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/) = name of memory pool (previously in `name` attribute)
+- `jvm.gc.count` does not have a direct equivalent 
+  - workaround: however the GC execution count can be derived from [`jvm.gc.duration`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmgcduration) metric histogram.
+  - workaround: using custom JMX metric to capture the value of `GarbageCollectorMXBean.getCollectionCount`
+- `jvm.gc.time` is replaced by [`jvm.gc.duration`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmgcduration), stored as a histogram with the following optional extra attributes:
+   - [`jvm.gc.action`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/)
+   - [`jvm.gc.name`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/)
+   - [`jvm.gc.cause`](https://opentelemetry.io/docs/specs/semconv/registry/attributes/jvm/)
+- `jvm.gc.alloc` does not have a direct equivalent.
+
+### JVM Process metrics
+
+- `system.process.cpu.total.norm.pct` is replaced by [`jvm.cpu.recent_utilization`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmcpurecent_utilization)
+- `system.process.memory.size` does not have a direct equivalent
+  - workaround: using custom JMX metric to capture the value of [`OperatingSystemMXBean.getCommittedVirtualMemorySize`](https://docs.oracle.com/en/java/javase/11/docs/api/jdk.management/com/sun/management/OperatingSystemMXBean.html#getCommittedVirtualMemorySize())
+
+### System metrics
+
+With EDOT Java, the system-wide metrics are not captured through the JVM
+but can be captured by using the collector with `hostmetricsreceiver` or by using custom JMX metrics.
+
+- `system.cpu.total.norm.pct` does not have a direct equivalent
+  - workaround: using custom JMX metric to capture the value of [`OperatingSystemMXBean.getSystemCpuLoad`](https://docs.oracle.com/en/java/javase/11/docs/api/java.management/java/lang/management/OperatingSystemMXBean.html#getSystemCpuLoad())
+  - workaround: using the collector with `hostmetricsreceiver` to capture `system.cpu.utilization`
+- `system.memory.actual.free` does not have a direct equivalent
+  - workaround: using custom JMX metric to capture the value of [`OperatingSystemMXBean.getFreePhysicalMemorySize`](https://docs.oracle.com/en/java/javase/11/docs/api/com/sun/management/OperatingSystemMXBean.html#getFreePhysicalMemorySize())
+  - workaround: using the collector with `hostmetricsreceiver` to capture `system.memory.usage` and `system.memory.limit` and calculate the difference.
+- `system.memory.total` does not have a direct equivalent
+  - workaround: using custom JMX metric to capture the value of [`OperatingSystemMXBean.getTotalPhysicalMemorySize`](https://docs.oracle.com/en/java/javase/11/docs/api/com/sun/management/OperatingSystemMXBean.html#getTotalPhysicalMemorySize())
+  - workaround: using the collector with `hostmetricsreceiver` to capture `system.memory.limit`
+
+### Agent health and overhead metrics
+
+Health metrics are not supported with EDOT Java and do not have a direct equivalent:
+- `agent.events.total`
+- `agent.events.total`
+- `agent.events.dropped`
+- `agent.events.queue.max_size.pct`
+- `agent.events.queue.min_size.pct`
+- `agent.events.requests.count`
+- `agent.events.requests.bytes`
+
+Overhead metrics are not supported with EDOT Java and do not have a direct equivalent:
+- `agent.background.cpu.overhead.pct`
+- `agent.background.cpu.total.pct`
+- `agent.background.memory.allocation.bytes`
+- `agent.background.threads.count`
+
+### CGroup metrics
+
+CGroup metrics are not supported with EDOT Java and do not have a direct equivalent:
+- `system.process.cgroup.memory.mem.usage.bytes`
+- `system.process.cgroup.memory.mem.limit.bytes`
+
+As an alternative, you can use:
+- collector with [`hostmetricsreceiver`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver/README.md) from within the container to capture the following metrics:
+  - `system.memory.usage`
+  - `system.memory.limit`
+- using the collector with [`kubeletstatsreceiver`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/README.md) to capture
+  - `container.memory.usage`
+  - `container.memory.limit`
+
+### OpenTelemetry metrics (bridge)
+
+With Elastic APM Java agent, metrics that are captured through the OpenTelemetry Java API are ["bridged"](https://www.elastic.co/docs/reference/apm/agents/java/opentelemetry-bridge)
+and sent as metrics. With EDOT Java, those metrics are captured and sent in an OpenTelemetry native way.
+
+With EDOT Java, the metric scope is stored in `scope.name` attribute. With the Elastic APM Java agent, the metric scope is stored in `otel_instrumentation_scope_name` attribute.
+
+With EDOT Java, the metric name and attributes are preserved and sent as-is.
+With the Elastic APM Java agent, the metric name is preserved but the attributes names have dots `.` replaced by underscores `_` and are prefixed with `labels.` or `numeric_labels`.
+
 ## Limitations
 
 The following limitations apply to EDOT Java.
