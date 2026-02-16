@@ -294,11 +294,13 @@ As an alternative, you can use:
 
 ### OpenTelemetry metrics (bridge)
 
-TODO
+With Elastic APM Java agent, metrics that are captured through the OpenTelemetry Java API are ["bridged"](https://www.elastic.co/docs/reference/apm/agents/java/opentelemetry-bridge)
+and sent as metrics. With EDOT Java, those metrics are captured and sent in an OpenTelemetry native way.
 
-### Micrometer metrics (bridge)
+With EDOT Java, the metric scope is stored in `scope.name` attribute. With the Elastic APM Java agent, the metric scope is stored in `otel_instrumentation_scope_name` attribute.
 
-TODO
+With EDOT Java, the metric name and attributes are preserved and sent as-is.
+With the Elastic APM Java agent, the metric name is preserved but the attributes names have dots `.` replaced by underscores `_` and are prefixed with `labels.` or `numeric_labels`.
 
 ## Limitations
 
