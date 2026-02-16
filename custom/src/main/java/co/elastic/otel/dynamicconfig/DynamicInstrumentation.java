@@ -19,7 +19,7 @@
 package co.elastic.otel.dynamicconfig;
 
 import io.opentelemetry.api.trace.TracerProvider;
-import io.opentelemetry.sdk.internal.ScopeConfigurator;
+import io.opentelemetry.sdk.common.internal.ScopeConfigurator;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
 import io.opentelemetry.sdk.trace.internal.TracerConfig;

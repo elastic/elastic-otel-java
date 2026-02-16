@@ -22,7 +22,7 @@ import static co.elastic.otel.dynamicconfig.DynamicInstrumentation.setProviderTr
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
-import io.opentelemetry.sdk.internal.ScopeConfigurator;
+import io.opentelemetry.sdk.common.internal.ScopeConfigurator;
 import io.opentelemetry.sdk.trace.internal.TracerConfig;
 import java.util.HashSet;
 import java.util.Objects;
