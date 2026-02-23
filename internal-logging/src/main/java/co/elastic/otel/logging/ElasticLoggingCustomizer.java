@@ -53,21 +53,11 @@ public class ElasticLoggingCustomizer implements LoggingCustomizer {
       level = Level.DEBUG;
     } else {
       level =
-          // TODO the getString() became private but might become public again, at which time revert
-          // Optional.ofNullable(earlyConfig.getString("elastic.otel.javaagent.log.level"))
-          Optional.ofNullable(getEarlyConfigString("elastic.otel.javaagent.log.level"))
+          Optional.ofNullable(earlyConfig.getString("elastic.otel.javaagent.log.level"))
               .map(Level::getLevel)
               .orElse(Level.INFO);
     }
     AgentLog.init(upstreamDebugEnabled, level);
-  }
-
-  private static String getEarlyConfigString(String key) {
-    String value = System.getProperty(key);
-    if (value == null) {
-      value = System.getenv(key.replace('.', '_').toUpperCase());
-    }
-    return value;
   }
 
   @Override
