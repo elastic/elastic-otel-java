@@ -18,10 +18,10 @@
  */
 package co.elastic.otel.dynamicconfig;
 
-import co.elastic.otel.compositesampling.DynamicCompositeParentBasedTraceIdRatioBasedSampler;
 import co.elastic.otel.config.ConfigLoggingAgentListener;
 import co.elastic.otel.dynamicconfig.internal.OpampManager;
 import co.elastic.otel.logging.AgentLog;
+import co.elastic.otel.sampling.ElasticSampler;
 import io.opentelemetry.contrib.inferredspans.InferredSpans;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
@@ -29,7 +29,9 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -151,7 +153,9 @@ public class CentralConfig {
                   new LoggingLevel(),
                   new SamplingRate(),
                   new InferSpans(),
-                  new PollingInterval())
+                  new PollingInterval(),
+                  new HttpExcludeUrls(),
+                  new HttpExcludeUserAgents())
               .collect(Collectors.toMap(ConfigOption::getConfigName, option -> option));
     }
 
@@ -199,9 +203,9 @@ public class CentralConfig {
     protected final String configName;
     protected final String defaultConfigStringValue;
 
-    protected ConfigOption(String configName1, String defaultConfigStringValue1) {
-      configName = configName1;
-      defaultConfigStringValue = defaultConfigStringValue1;
+    protected ConfigOption(String configName, String defaultConfigValue) {
+      this.configName = configName;
+      this.defaultConfigStringValue = defaultConfigValue;
     }
 
     public String getConfigName() {
@@ -331,11 +335,13 @@ public class CentralConfig {
     void update(String configurationValue, OpampManager opampManager)
         throws IllegalArgumentException {
       if (!ConfigLoggingAgentListener.getEnableDynamicSamplingRate()) {
+        // TODO: why do we see this log message on startup ?
         logger.warning("ignoring \"sampling_rate\" because non-default sampler in use");
         return;
       }
-      DynamicCompositeParentBasedTraceIdRatioBasedSampler.setRatio(
-          Double.parseDouble(configurationValue));
+      ElasticSampler.INSTANCE.toBuilder()
+          .withProbability(Double.parseDouble(configurationValue))
+          .buildAndSetGlobal();
     }
   }
 
@@ -370,6 +376,36 @@ public class CentralConfig {
         logger.warning(
             "Failed to update the polling interval, value passed was invalid: " + e.getMessage());
       }
+    }
+  }
+
+  public static final class HttpExcludeUrls extends ConfigOption {
+    HttpExcludeUrls() {
+      super("http_ignore_urls", "");
+    }
+
+    @Override
+    void update(String configurationValue, OpampManager opampManager)
+        throws IllegalArgumentException {
+
+      List<String> patterns = Arrays.asList(configurationValue.split(","));
+      ElasticSampler.INSTANCE.toBuilder().withIgnoredUrlPatterns(patterns).buildAndSetGlobal();
+    }
+  }
+
+  public static final class HttpExcludeUserAgents extends ConfigOption {
+    HttpExcludeUserAgents() {
+      super("http_ignore_user_agents", "");
+    }
+
+    @Override
+    void update(String configurationValue, OpampManager opampManager)
+        throws IllegalArgumentException {
+
+      List<String> patterns = Arrays.asList(configurationValue.split(","));
+      ElasticSampler.INSTANCE.toBuilder()
+          .withIgnoredUserAgentPatterns(patterns)
+          .buildAndSetGlobal();
     }
   }
 }
