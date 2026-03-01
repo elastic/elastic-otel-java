@@ -37,21 +37,21 @@ jobs:
       - name: Create working dir archive
         run: "mkdir ./wdarch && tar --exclude='./wdarch' -czf ./wdarch/working-dir-build-cache.tar.gz ."
       - name: Cache working directory with build results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: working-dir-build-cache
           path: ./wdarch/working-dir-build-cache.tar.gz
           retention-days: 1 # No need to waste space when this artifact is only used as part of the build process
 
       - name: Agent artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: elastic-otel-javaagent
           path: |
             ./agent/build/libs/elastic-otel-javaagent-*.jar
 
       - name: Agent extension artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: elastic-otel-agentextension
           path: |
@@ -89,7 +89,7 @@ jobs:
     steps:
       # We use the cached working directory so that we don't have to recompile everything
       - name: Download cached build working directory
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: working-dir-build-cache
           path: ./
@@ -105,7 +105,7 @@ jobs:
           command: "./gradlew test -x compileJni -PtestJavaVersion=${{ matrix.version }} -PtestJavaVM=${{ matrix.vm }}"
       - name: Store test results
         if: success() || failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: test-results-${{ matrix.version }}-${{ matrix.vm }}
           path: '**/build/test-results/test/TEST-*.xml'
