@@ -95,6 +95,15 @@ jobs:
           path: ./
       - name: Untar cached build working directory
         run: "tar -xvf working-dir-build-cache.tar.gz"
+      # Workaround for https://github.com/foojayio/discoapi/issues/143
+      # The foojay disco API has a broken redirect for Semeru JDK 25, so we pre-install it
+      # for Gradle's toolchain auto-detection to find locally.
+      - name: Pre-install Semeru JDK
+        if: matrix.vm == 'openj9'
+        uses: actions/setup-java@v4
+        with:
+          distribution: semeru
+          java-version: ${{ matrix.version }}
       - name: Run tests
         uses: ./.github/workflows/gradle-goal
         with:
