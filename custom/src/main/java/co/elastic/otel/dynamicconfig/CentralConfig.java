@@ -42,6 +42,9 @@ public class CentralConfig {
   private static final Logger logger = Logger.getLogger(CentralConfig.class.getName());
 
   private static final String OPAMP_HEADERS = "elastic.otel.opamp.headers";
+  private static final String OPAMP_CERTIFICATE = "elastic.otel.opamp.certificate";
+  private static final String OPAMP_CLIENT_KEY = "elastic.otel.opamp.client.key";
+  private static final String OPAMP_CLIENT_CERTIFICATE = "elastic.otel.opamp.client.certificate";
 
   static {
     DynamicConfigurationPropertyChecker.startCheckerThread();
@@ -57,6 +60,9 @@ public class CentralConfig {
     String serviceName = getServiceName(properties);
     String environment = getServiceEnvironment(properties);
     Map<String, String> headers = properties.getMap(OPAMP_HEADERS);
+    String certificate = properties.getString(OPAMP_CERTIFICATE);
+    String clientKey = properties.getString(OPAMP_CLIENT_KEY);
+    String clientCertificate = properties.getString(OPAMP_CLIENT_CERTIFICATE);
     if (logger.isLoggable(Level.FINE)) {
       // only log header names, not the values to prevent potential leaks
       headers.forEach((k, v) -> logger.fine("OpAMP header: " + k));
@@ -72,6 +78,9 @@ public class CentralConfig {
             .setEndpointUrl(endpoint)
             .setEndpointHeaders(headers)
             .setServiceEnvironment(environment)
+            .setCertificatePath(certificate)
+            .setClientKeyPath(clientKey)
+            .setClientCertificatePath(clientCertificate)
             .build();
 
     opampManager.start(

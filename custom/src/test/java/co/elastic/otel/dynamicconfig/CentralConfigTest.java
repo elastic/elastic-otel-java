@@ -19,9 +19,11 @@
 package co.elastic.otel.dynamicconfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -116,5 +118,19 @@ class CentralConfigTest {
     assertThat(CentralConfig.getServiceEnvironment(configProperties))
         .describedAs(description)
         .isEqualTo(expectedEnvironment);
+  }
+
+  @Test
+  void init_failsWhenTlsConfigIsUsedWithHttpEndpoint() {
+    Map<String, String> map = new HashMap<>();
+    map.put("elastic.otel.opamp.endpoint", "http://localhost:4320/v1/opamp");
+    map.put("elastic.otel.opamp.certificate", "dummy-ca-path.pem");
+
+    assertThatThrownBy(
+            () ->
+                CentralConfig.init(
+                    SdkTracerProvider.builder(), DefaultConfigProperties.createFromMap(map)))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("https endpoints");
   }
 }
