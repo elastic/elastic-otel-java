@@ -165,17 +165,17 @@ public final class OpampManager implements Closeable {
 
     @Override
     public void onConnect(OpampClient client) {
-      logger.log(Level.INFO, "onConnect({0})", client);
+      logger.log(Level.FINE, "onConnect({0})", client);
     }
 
     @Override
     public void onConnectFailed(OpampClient client, @Nullable Throwable throwable) {
-      logger.log(Level.INFO, "onConnect({0}, {1})", new Object[] {client, throwable});
+      logger.log(Level.FINE, "onConnect({0}, {1})", new Object[] {client, throwable});
     }
 
     @Override
     public void onErrorResponse(OpampClient client, @Nonnull ServerErrorResponse errorResponse) {
-      logger.log(Level.INFO, "onErrorResponse({0}, {1})", new Object[] {client, errorResponse});
+      logger.log(Level.FINE, "onErrorResponse({0}, {1})", new Object[] {client, errorResponse});
     }
   }
 
