@@ -63,6 +63,12 @@ public final class OpampManager implements Closeable {
     builder.enableRemoteConfig();
 
     OkHttpClient.Builder okHttpClient = new OkHttpClient().newBuilder();
+    OpampTlsConfigurer.configure(
+        okHttpClient,
+        configuration.endpointUrl,
+        configuration.certificatePath,
+        configuration.clientKeyPath,
+        configuration.clientCertificatePath);
 
     // TODO: revisit this later once the upstream opamp client provides a simpler way to add headers
     okHttpClient
@@ -193,6 +199,9 @@ public final class OpampManager implements Closeable {
     private String endpointUrl = "http://localhost:4320/v1/opamp";
     private Duration pollingInterval = Duration.ofSeconds(30);
     private Map<String, String> headers = Collections.emptyMap();
+    @Nullable private String certificatePath;
+    @Nullable private String clientKeyPath;
+    @Nullable private String clientCertificatePath;
 
     private Builder() {}
 
@@ -221,9 +230,32 @@ public final class OpampManager implements Closeable {
       return this;
     }
 
+    public Builder setCertificatePath(@Nullable String certificatePath) {
+      this.certificatePath = certificatePath;
+      return this;
+    }
+
+    public Builder setClientKeyPath(@Nullable String clientKeyPath) {
+      this.clientKeyPath = clientKeyPath;
+      return this;
+    }
+
+    public Builder setClientCertificatePath(@Nullable String clientCertificatePath) {
+      this.clientCertificatePath = clientCertificatePath;
+      return this;
+    }
+
     public OpampManager build() {
       return new OpampManager(
-          new Configuration(serviceName, environment, endpointUrl, pollingInterval, headers));
+          new Configuration(
+              serviceName,
+              environment,
+              endpointUrl,
+              pollingInterval,
+              headers,
+              certificatePath,
+              clientKeyPath,
+              clientCertificatePath));
     }
   }
 
@@ -243,18 +275,27 @@ public final class OpampManager implements Closeable {
     private final String endpointUrl;
     private final Duration pollingInterval;
     private final Map<String, String> headers;
+    @Nullable private final String certificatePath;
+    @Nullable private final String clientKeyPath;
+    @Nullable private final String clientCertificatePath;
 
     private Configuration(
         String serviceName,
         @Nullable String environment,
         String endpointUrl,
         Duration pollingInterval,
-        Map<String, String> headers) {
+        Map<String, String> headers,
+        @Nullable String certificatePath,
+        @Nullable String clientKeyPath,
+        @Nullable String clientCertificatePath) {
       this.serviceName = serviceName;
       this.environment = environment;
       this.endpointUrl = endpointUrl;
       this.pollingInterval = pollingInterval;
       this.headers = headers;
+      this.certificatePath = certificatePath;
+      this.clientKeyPath = clientKeyPath;
+      this.clientCertificatePath = clientCertificatePath;
     }
   }
 

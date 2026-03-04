@@ -27,6 +27,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
 import static java.lang.Thread.sleep;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.entry;
 import static org.awaitility.Awaitility.await;
 
@@ -245,6 +246,39 @@ class OpampManagerTest {
     // Verify opamp client provided header
     Request request = requests.get(1);
     assertThat(request.getHeader("hello")).isEqualTo("world");
+  }
+
+  @Test
+  void start_failsWhenTlsConfigIsUsedWithHttpEndpoint() {
+    opampManager =
+        OpampManager.builder()
+            .setEndpointUrl("http://localhost:4320/v1/opamp")
+            .setCertificatePath("dummy-ca-path.pem")
+            .build();
+
+    assertThatThrownBy(
+            () ->
+                opampManager.start(
+                    (config) -> OpampManager.CentralConfigurationProcessor.Result.SUCCESS))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("https endpoints");
+  }
+
+  @Test
+  void start_failsWhenClientKeyOrCertificateIsMissing() {
+    opampManager =
+        OpampManager.builder()
+            .setEndpointUrl("https://localhost:4320/v1/opamp")
+            .setClientKeyPath("dummy-client-key.pem")
+            .build();
+
+    assertThatThrownBy(
+            () ->
+                opampManager.start(
+                    (config) -> OpampManager.CentralConfigurationProcessor.Result.SUCCESS))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("client.key")
+        .hasMessageContaining("client.certificate");
   }
 
   private ServerToAgent createServerToAgentWithCentralConfig(String centralConfig, String hash) {
