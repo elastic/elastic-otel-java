@@ -50,7 +50,7 @@ Set the `service.name` resource attribute explicitly with `OTEL_SERVICE_NAME` as
 The following is an example that sets the `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS`, and `OTEL_SERVICE_NAME` environment variables:
 
 ```sh
-export OTEL_EXPORTER_OTLP_ENDPOINT=https://my-deployment.apm.us-west1.gcp.cloud.es.io
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://my-deployment.ingest.us-west1.gcp.cloud.es.io
 export OTEL_EXPORTER_OTLP_HEADERS="Authorization=ApiKey P....l"
 export OTEL_SERVICE_NAME="my-awesome-service"
 ```
