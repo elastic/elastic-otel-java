@@ -64,7 +64,7 @@ If you rely on specific attribute mappings for querying or filtering in {{produc
 
 ### `server_url`
 
-The Elastic [`server_url`](apm-agent-java://reference/config-reporter.md#config-server-url) option corresponds to the OpenTelemetry [`OTEL_EXPORTER_OTLP_ENDPOINT`](https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_endpoint) option.
+The Elastic [`server_url`](apm-agent-java://reference/config-reporter.md#config-server-url) option is replaced by the OpenTelemetry [`OTEL_EXPORTER_OTLP_ENDPOINT`](https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_endpoint) option. Refer to [Setup](/reference/edot-java/setup/index.md) for endpoint configuration details.
 
 ### `server_urls`
 
