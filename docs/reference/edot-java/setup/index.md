@@ -17,10 +17,6 @@ products:
 
 Learn how to set up the {{edot}} (EDOT) Java in various environments, including Kubernetes and others.
 
-:::{agent-skill}
-:url: https://github.com/elastic/agent-skills/tree/main/skills/observability/edot-java-instrument
-:::
-
 :::{warning}
 Avoid using the Java SDK alongside any other APM agent, including Elastic APM agents. Running multiple agents in the same application process may lead to conflicting instrumentation, duplicate telemetry, or other unexpected behavior.
 :::
@@ -36,6 +32,10 @@ For environments where modifying the JVM arguments or configuration is not possi
 ## All other environments
 
 Follow the following Java setup guide for all other environments.
+
+:::{agent-skill}
+:url: https://github.com/elastic/agent-skills/tree/main/skills/observability/edot-java-instrument
+:::
 
 ## Download the agent
 
