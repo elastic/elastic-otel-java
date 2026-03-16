@@ -18,6 +18,10 @@ products:
 
 Compared to the Elastic {{product.apm}} Java agent, the {{edot}} Java presents a number of advantages:
 
+:::{agent-skill}
+:url: https://github.com/elastic/agent-skills/tree/main/skills/observability/edot-java-migrate
+:::
+
 - Fully automatic instrumentation with zero code changes. No need to modify application code.
 - Capture, send, transform, and store data in an OpenTelemetry native way. This includes for example the ability to use all features of the OpenTelemetry SDK for manual tracing, data following semantic conventions, or ability to use intermediate collectors and processors.
 - OpenTelemetry Java Instrumentation provides a [broad coverage of libraries, frameworks, and applications](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/supported-libraries.md).
