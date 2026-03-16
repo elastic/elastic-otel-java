@@ -21,7 +21,8 @@ package co.elastic.otel.compositesampling;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
-import io.opentelemetry.contrib.sampler.consistent56.ConsistentSampler;
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.ComposableSampler;
+import io.opentelemetry.sdk.extension.incubator.trace.samplers.CompositeSampler;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
@@ -57,7 +58,8 @@ public enum DynamicCompositeParentBasedTraceIdRatioBasedSampler implements Sampl
 
   private static Sampler newSampler(double ratio) {
     latestRatio = ratio;
-    return ConsistentSampler.parentBased(ConsistentSampler.probabilityBased(ratio));
+    ComposableSampler rootSampler = ComposableSampler.probability(ratio);
+    return CompositeSampler.wrap(ComposableSampler.parentThreshold(rootSampler));
   }
 
   public String toString() {

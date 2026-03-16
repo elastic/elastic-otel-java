@@ -29,11 +29,10 @@ dependencies {
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
   compileOnly(libs.bundles.semconv)
 
-  implementation(libs.contribConsistentSampling) {
-    // exclude transitive dependency as it's provided through agent packaging
-    exclude(group = "io.opentelemetry", module = "opentelemetry-sdk-trace")
-    exclude(group = "io.opentelemetry", module = "opentelemetry-sdk-extension-autoconfigure-spi")
-  }
+  // consistent sampler is currently in SDK incubator.
+  implementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
+
   implementation(libs.contribSpanStacktrace) {
     // exclude transitive dependency as it's provided through agent packaging
     exclude(group = "io.opentelemetry", module = "opentelemetry-sdk")
