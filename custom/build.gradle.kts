@@ -15,6 +15,7 @@ dependencies {
   implementation(libs.dslJson)
   implementation(libs.okhttp)
   implementation(project(":inferred-spans"))
+  implementation(project(":sca-extension"))
   implementation(project(":universal-profiling-integration"))
   implementation(project(":resources"))
   implementation(project(":internal-logging", configuration = "shadow"))
