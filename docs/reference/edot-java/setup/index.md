@@ -33,6 +33,12 @@ For environments where modifying the JVM arguments or configuration is not possi
 
 Follow the following Java setup guide for all other environments.
 
+:::{agent-skill}
+:url: https://github.com/elastic/agent-skills/tree/main/skills/observability/edot-java-instrument
+
+Use this skill to instrument Java services with EDOT for tracing, metrics, and logs.
+:::
+
 ## Download the agent
 
 You can download the latest release version of the EDOT Java agent from [![Maven Central](https://img.shields.io/maven-central/v/co.elastic.otel/elastic-otel-javaagent?label=elastic-otel-javaagent&style=for-the-badge)](https://mvnrepository.com/artifact/co.elastic.otel/elastic-otel-javaagent/latest)
