@@ -27,6 +27,16 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [edot-java-X.X.X-fixes]
 % *
 
+## 1.10.0 [edot-java-1-10-0-release-notes]
+**Release date:** March 24, 2026
+
+This release is based on the following upstream versions:
+
+* opentelemetry-javaagent: [2.26.1](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.26.1)
+* opentelemetry-sdk: [1.60.1](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.60.1)
+* opentelemetry-semconv: [1.40.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.40.0)
+* opentelemetry-java-contrib: [1.54.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.54.0)
+
 ## 1.9.0 [edot-java-1-9-0-release-notes]
 **Release date:** February 9, 2026
 
