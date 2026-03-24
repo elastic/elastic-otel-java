@@ -141,6 +141,27 @@ export ELASTIC_OTEL_OPAMP_ENDPOINT=http://localhost:4320/v1/opamp
 
 To deactivate central configuration, remove the `ELASTIC_OTEL_OPAMP_ENDPOINT` environment variable and restart the instrumented application.
 
+### Secure connections (TLS and mTLS)
+
+To use a custom or self-signed server certificate, set `ELASTIC_OTEL_OPAMP_CERTIFICATE` to the path of a trusted certificate in Privacy Enhanced Mail (PEM) format:
+
+```sh
+export ELASTIC_OTEL_OPAMP_CERTIFICATE=/path/to/server-cert.pem
+```
+
+For mutual TLS (mTLS), also set the client private key and certificate:
+
+```sh
+export ELASTIC_OTEL_OPAMP_CLIENT_KEY=/path/to/client-key.pem
+export ELASTIC_OTEL_OPAMP_CLIENT_CERTIFICATE=/path/to/client-cert.pem
+```
+
+| Environment variable | Description |
+|----------------------|-------------|
+| `ELASTIC_OTEL_OPAMP_CERTIFICATE` | Path to the trusted certificate used to verify the server's TLS credentials. Required when the server uses a self-signed certificate or for mTLS. |
+| `ELASTIC_OTEL_OPAMP_CLIENT_KEY` | Path to the client's private key in PEM format, used for mTLS. Accepts `PRIVATE KEY` (PKCS#8) and `RSA PRIVATE KEY` formats. |
+| `ELASTIC_OTEL_OPAMP_CLIENT_CERTIFICATE` | Path to the client certificate or certificate chain in PEM format, used together with `ELASTIC_OTEL_OPAMP_CLIENT_KEY` for mTLS. |
+
 ### Central configuration settings
 
 You can modify the following settings for EDOT Java through APM Agent Central Configuration:
