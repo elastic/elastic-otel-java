@@ -30,7 +30,7 @@ pivot:
 
 rules:
   create:
-    exclude: "release_notes:skip"
+    exclude: "chore"
 
 bundle:
   # TODO: evaluate if there any benefits to using nested folders here, for example
