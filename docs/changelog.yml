@@ -1,0 +1,40 @@
+# use PR ID as changelog filename
+filename: pr
+
+products:
+  default:
+    - product: edot-java
+      lifecycle: ga
+
+# extract context from PR (title, description, linked issues, ...)
+extract:
+  # there are no 'release notes' section in PR descriptions, so we can skip it
+  release_notes: false
+  # extract linked issues from PR descriptions
+  issues: true
+
+# mapping from PR labels to changelog type
+pivot:
+  types:
+    breaking-change: "breaking-change"
+    bug-fix: "bug"
+    deprecation: "deprecation"
+    feature: "feature"
+    enhancement: "enhancement"
+    docs: "docs, documentation"
+    # those types should be used after the release is published, they allow to amend existing bundles
+    # TODO: investigate what is the expected workflow for those and how to amend existing bundles
+    known-issue:
+    regression:
+    security:
+
+rules:
+  create:
+    exclude: "release_notes:skip"
+
+bundle:
+  directory: docs/changelog
+  output_directory: docs/releases
+  resolve: true
+  repo: elastic-otel-java
+  owner: elastic
