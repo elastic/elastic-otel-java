@@ -26,11 +26,14 @@ This file contains all changes which are not released yet.
 <!--BREAKING-CHANGES-END-->
 
 <!--DEPENDENCIES-NOTES-START-->
+
+<!--DEPENDENCIES-NOTES-END-->
+<!--DEPENDENCIES-NOTES-START-->
 This release is based on the following upstream versions:
 
 
-* opentelemetry-javaagent: [2.24.0](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.24.0)
-* opentelemetry-sdk: [1.58.0](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.58.0)
-* opentelemetry-semconv: [1.37.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.37.0)
-* opentelemetry-java-contrib: [1.52.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.52.0)
+* opentelemetry-javaagent: [2.26.1](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.26.1)
+* opentelemetry-sdk: [1.60.1](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.60.1)
+* opentelemetry-semconv: [1.40.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.40.0)
+* opentelemetry-java-contrib: [1.54.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.54.0)
 <!--DEPENDENCIES-NOTES-END-->
