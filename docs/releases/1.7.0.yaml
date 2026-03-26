@@ -1,0 +1,57 @@
+﻿products:
+- product: edot-java
+  target: 1.7.0
+  lifecycle: ga
+  repo: elastic-otel-java
+  owner: elastic
+entries:
+- file:
+    name: 835.yaml
+    checksum: a8b3a5b5e2136ceb9d0fd67e0018227ad3b93134
+  type: enhancement
+  title: add config logging on agent startup
+  products:
+  - product: edot-java
+    target: 1.7.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/835
+  issues:
+  - https://github.com/elastic/elastic-otel-java/issues/730
+- file:
+    name: 848.yaml
+    checksum: 65b0561962cf07cff3b1f1f0168cb13bfef4b923
+  type: enhancement
+  title: add support for elastic.otel.opamp.headers config
+  products:
+  - product: edot-java
+    target: 1.7.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/848
+  issues:
+  - https://github.com/elastic/elastic-otel-java/issues/833
+- file:
+    name: 844.yaml
+    checksum: db263b3a162de735a6e33a2d6886a2c57480bc56
+  type: enhancement
+  title: Update upstream OpenTelemetry agent dependencies to 2.21.0
+  products:
+  - product: edot-java
+    target: 1.7.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/844
+- file:
+    name: 838.yaml
+    checksum: 2d67dce53e0a537f26a5b4c4d7679ec856958a5d
+  type: enhancement
+  title: add infer-spans dynamoic central config handling
+  products:
+  - product: edot-java
+    target: 1.7.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/838
+  issues:
+  - https://github.com/elastic/elastic-otel-java/issues/301

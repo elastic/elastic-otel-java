@@ -1,0 +1,29 @@
+﻿products:
+- product: edot-java
+  target: 1.8.0
+  lifecycle: ga
+  repo: elastic-otel-java
+  owner: elastic
+entries:
+- file:
+    name: 899.yaml
+    checksum: 8917a0bb587d53bc958b71f1a6e52546176e64f9
+  type: enhancement
+  title: enable indy by default
+  products:
+  - product: edot-java
+    target: 1.8.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/899
+- file:
+    name: 898.yaml
+    checksum: 0ebb827244c0ca0b1d2a67248cb544fbfba68ed6
+  type: enhancement
+  title: Update upstream OpenTelemetry agent dependencies to 2.22.0
+  products:
+  - product: edot-java
+    target: 1.8.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/898

@@ -1,0 +1,53 @@
+﻿products:
+- product: edot-java
+  target: 1.6.0
+  lifecycle: ga
+  repo: elastic-otel-java
+  owner: elastic
+entries:
+- file:
+    name: 803.yaml
+    checksum: 5a4268ebe44333701ec9d0f4f840fc0a50f5b182
+  type: enhancement
+  title: Update upstream OpenTelemetry agent dependencies to 2.20.1
+  products:
+  - product: edot-java
+    target: 1.6.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/803
+- file:
+    name: 818.yaml
+    checksum: a358d474350bcdb51e86fcdca0b687806e3820a3
+  type: enhancement
+  title: Add 9.2 supported dynamic config options
+  products:
+  - product: edot-java
+    target: 1.6.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/818
+- file:
+    name: 789.yaml
+    checksum: cae5da96cc54fc21a23265e0ebbba2cdf5ad8bb7
+  type: enhancement
+  title: Opamp migration
+  products:
+  - product: edot-java
+    target: 1.6.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/789
+  issues:
+  - https://github.com/elastic/elastic-otel-java/issues/788
+- file:
+    name: 763.yaml
+    checksum: 948f1b512463fe42ca6dbc68561752de2ad43c70
+  type: breaking-change
+  title: switch to 2.18.1, and switch openai to upstream
+  products:
+  - product: edot-java
+    target: 1.6.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/763

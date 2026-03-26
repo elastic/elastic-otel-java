@@ -1,0 +1,77 @@
+﻿products:
+- product: edot-java
+  target: 1.4.0
+  lifecycle: ga
+  repo: elastic-otel-java
+  owner: elastic
+entries:
+- file:
+    name: 583.yaml
+    checksum: 3791a3e9b5ac7184acc152cd52ffcf76eb8e7795
+  type: enhancement
+  title: Change default metric temporality to delta
+  products:
+  - product: edot-java
+    target: 1.4.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/583
+  issues:
+  - https://github.com/elastic/elastic-otel-java/issues/446
+- file:
+    name: 607.yaml
+    checksum: af888f56344f4717c13dbb1e84d181ee59d0bef5
+  type: enhancement
+  title: Add support for openAI client 1.1+, drop support for older versions
+  products:
+  - product: edot-java
+    target: 1.4.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/607
+- file:
+    name: 593.yaml
+    checksum: 9a9ee121a7fbfbb4dfa75ec2262b0c10ed3220c1
+  type: enhancement
+  title: Override user agent header for otlp exporters
+  products:
+  - product: edot-java
+    target: 1.4.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/593
+  issues:
+  - https://github.com/elastic/elastic-otel-java/issues/448
+- file:
+    name: 603.yaml
+    checksum: 33aa7c1cef9a3dee247d51714c89f07406fa06f7
+  type: enhancement
+  title: Update upstream OpenTelemetry agent dependencies to 2.15.0
+  products:
+  - product: edot-java
+    target: 1.4.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/603
+- file:
+    name: 580.yaml
+    checksum: bc87fb1e3086b936ebea6ba2815ed485260c2f8c
+  type: enhancement
+  title: Update upstream OpenTelemetry agent dependencies to 2.14.0
+  products:
+  - product: edot-java
+    target: 1.4.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/580
+- file:
+    name: 596.yaml
+    checksum: 602477f37ba4b76a1d0e8942fdc4eb5d6ad054b1
+  type: enhancement
+  title: enable azure provider by default when available
+  products:
+  - product: edot-java
+    target: 1.4.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/596

@@ -1,0 +1,16 @@
+﻿products:
+- product: edot-java
+  target: 1.0.0
+  lifecycle: ga
+  repo: elastic-otel-java
+  owner: elastic
+entries:
+- file:
+    name: 1774534599-first-ga-release.yaml
+    checksum: 302ab54915fc331db323023dea3d8d2ed3fb3917
+  type: enhancement
+  title: first GA release
+  products:
+  - product: edot-java
+    target: 1.0.0
+    lifecycle: ga
