@@ -66,5 +66,7 @@ actions:
       automerge: false
       labels:
         - dependencies
+        # use 'enhancement' changelog automation
+        - enhancement
       description: |
         @elastic/apm-agent-java, can you please check and merge this PR?
