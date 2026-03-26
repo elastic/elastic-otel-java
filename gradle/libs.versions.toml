@@ -52,7 +52,7 @@ wiremock = "org.wiremock:wiremock:3.13.2"
 testcontainers = "org.testcontainers:testcontainers:2.0.4"
 logback = "ch.qos.logback:logback-classic:1.5.32"
 jackson = "com.fasterxml.jackson.core:jackson-databind:2.21.2"
-protobuf-util = "com.google.protobuf:protobuf-java-util:3.25.8"
+protobuf-util = "com.google.protobuf:protobuf-java-util:3.25.9"
 # last version supporting Java 8
 mockito = "org.mockito:mockito-core:4.11.0"
 mockserver-client = "org.mock-server:mockserver-client-java:5.15.0"
