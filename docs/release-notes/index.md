@@ -31,7 +31,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 **Release date:** March 24, 2026
 
 The 1.10.0 release contains fixes for potential security vulnerabilities.
-Please see our [security advisory](https://discuss.elastic.co/t/elastic-otel-java-1-10-0-security-update-esa-2026-22-ghsa-xw7x-h9fj-p2c7/385700) for more details.
+Refer to our [security advisory](https://discuss.elastic.co/t/elastic-otel-java-1-10-0-security-update-esa-2026-22-ghsa-xw7x-h9fj-p2c7/385700) for more details.
 
 This release is based on the following upstream versions:
 
