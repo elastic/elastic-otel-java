@@ -16,7 +16,7 @@ products:
 Over time, certain Elastic functionality becomes outdated and is replaced or removed. To help with the transition, Elastic deprecates functionality for a period before removal, giving you time to update your applications.
 
 Review the deprecated functionality for Elastic Distribution of OpenTelemetry Java. While deprecations have no immediate impact, we strongly encourage you update your implementation after you upgrade. To learn how to upgrade, check out [Upgrade](docs-content://deploy-manage/upgrade.md).
-
+<!-- 
 % ## Next version [edot-java-X.X.X-deprecations]
 
 % Use the following template to add entries to this document.
@@ -30,4 +30,8 @@ Review the deprecated functionality for Elastic Distribution of OpenTelemetry Ja
 % ::::
 % TEMPLATE END
 
-No deprecations.
+No deprecations. -->
+
+:::{changelog} /releases/
+:type: deprecation
+:::

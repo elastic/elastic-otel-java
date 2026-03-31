@@ -17,7 +17,11 @@ Review the changes, fixes, and more in each version of Elastic Distribution of O
 
 To check for security updates, go to [Security announcements for the Elastic stack](https://discuss.elastic.co/c/announcements/security-announcements/31).
 
-% Release notes include only features, enhancements, and fixes. Add breaking changes, deprecations, and known issues to the applicable release notes sections.
+:::{changelog} /releases/
+:type: all
+:::
+
+<!-- % Release notes include only features, enhancements, and fixes. Add breaking changes, deprecations, and known issues to the applicable release notes sections.
 
 % ## version.next [edot-java-X.X.X-release-notes]
 
@@ -184,4 +188,4 @@ This release is based on the following upstream versions:
 
 ## 1.0.0 [edot-java-1.0.0-release-notes]
 
-General Availability release.
+General Availability release. -->
