@@ -8,12 +8,10 @@ add_pr(){
 
     # TODO: do we have to add complete PR URLs here or could we just use the numeric ID ?
     # having the complete URL in the generated changelog entry is however convenient for humans to open the link
-    docs-builder changelog add --prs https://github.com/elastic/elastic-otel-java/pull/${pr} --products "edot-java ${version} ga"
-
-    # remove comments and empty lines from generated changelog to reduce noise
-    # TODO: might be better to move doc to the bottom or allow to not include comments
-    sed -i 's/#.*//g' "./docs/changelog/${pr}.yaml"
-    sed -i '/^[[:space:]]*$/d' "./docs/changelog/${pr}.yaml"
+    docs-builder changelog add \
+      --concise \
+      --prs https://github.com/elastic/elastic-otel-java/pull/${pr} \
+      --products "edot-java ${version} ga"
 
     # TODO: to filter duplicate upstream dependency updates, we could maybe just remove any changelog entry
     # for such update, the challenge might be to define a reliable heuristic, relying on PR title seems quite brittle.
