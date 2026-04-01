@@ -7,7 +7,7 @@
 entries:
 - file:
     name: 455.yaml
-    checksum: 2290d77fc788da87d4744a41ad3379b28da4878a
+    checksum: 2ed25ec4208bd4f01090072823c3c03735deb43f
   type: enhancement
   title: update upstream 2.10.0
   products:
@@ -18,7 +18,7 @@ entries:
   - https://github.com/elastic/elastic-otel-java/pull/455
 - file:
     name: 423.yaml
-    checksum: 44a63f0af2dc9f29e1622632a3988440d917c26d
+    checksum: 568cf15908db42bab8cbd9f7f0f8f0bfe773c9d6
   type: bug-fix
   title: Fix missing transitive dependencies when using universal profiling integration
   products:

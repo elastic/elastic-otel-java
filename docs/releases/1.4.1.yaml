@@ -7,7 +7,7 @@
 entries:
 - file:
     name: 610.yaml
-    checksum: 18a256e988d018719a559aac7326948f9e9f6ed2
+    checksum: 35032a5e911047a819859e1304c3e5447267111a
   type: bug-fix
   title: Workaround for temporality configuration not being possible
   products:

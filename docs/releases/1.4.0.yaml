@@ -7,7 +7,7 @@
 entries:
 - file:
     name: 583.yaml
-    checksum: 3791a3e9b5ac7184acc152cd52ffcf76eb8e7795
+    checksum: 020bf6ab1dfc9fa1c5335ac62017ca4e943002a0
   type: enhancement
   title: Change default metric temporality to delta
   products:
@@ -20,7 +20,7 @@ entries:
   - https://github.com/elastic/elastic-otel-java/issues/446
 - file:
     name: 607.yaml
-    checksum: af888f56344f4717c13dbb1e84d181ee59d0bef5
+    checksum: 661657aa8b13d5fd34f9f50739b7a02c544e0dd0
   type: enhancement
   title: Add support for openAI client 1.1+, drop support for older versions
   products:
@@ -31,7 +31,7 @@ entries:
   - https://github.com/elastic/elastic-otel-java/pull/607
 - file:
     name: 593.yaml
-    checksum: 9a9ee121a7fbfbb4dfa75ec2262b0c10ed3220c1
+    checksum: f187d99aad78afa7200e57099ee3f68864062a9d
   type: enhancement
   title: Override user agent header for otlp exporters
   products:
@@ -43,30 +43,8 @@ entries:
   issues:
   - https://github.com/elastic/elastic-otel-java/issues/448
 - file:
-    name: 603.yaml
-    checksum: 33aa7c1cef9a3dee247d51714c89f07406fa06f7
-  type: enhancement
-  title: Update upstream OpenTelemetry agent dependencies to 2.15.0
-  products:
-  - product: edot-java
-    target: 1.4.0
-    lifecycle: ga
-  prs:
-  - https://github.com/elastic/elastic-otel-java/pull/603
-- file:
-    name: 580.yaml
-    checksum: bc87fb1e3086b936ebea6ba2815ed485260c2f8c
-  type: enhancement
-  title: Update upstream OpenTelemetry agent dependencies to 2.14.0
-  products:
-  - product: edot-java
-    target: 1.4.0
-    lifecycle: ga
-  prs:
-  - https://github.com/elastic/elastic-otel-java/pull/580
-- file:
     name: 596.yaml
-    checksum: 602477f37ba4b76a1d0e8942fdc4eb5d6ad054b1
+    checksum: 9872b81d2689ff00a365b7fba66f3b5bfc9b4bc5
   type: enhancement
   title: enable azure provider by default when available
   products:
@@ -75,3 +53,15 @@ entries:
     lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/596
+- file:
+    name: upstream-update.yaml
+    checksum: 2a1a157849699e9ae5cf8c90a0bd24b932664b36
+  type: enhancement
+  title: Update upstream OpenTelemetry agent dependencies to 2.15.0
+  products:
+  - product: edot-java
+    target: 1.4.0
+    lifecycle: ga
+  description: '- javaagent:[2.15.0](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.15.0) sdk:[1.49.0](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.49.0) semconv:[1.32.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.32.0) contrib:[1.45.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.45.0)'
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/603

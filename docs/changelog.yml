@@ -33,9 +33,6 @@ rules:
     exclude: "chore"
 
 bundle:
-  # TODO: evaluate if there any benefits to using nested folders here, for example
-  # docs/changelog for changelog entries
-  # docs/changelog/bundles for bundles
   directory: docs/changelog
   output_directory: docs/releases
   resolve: true
