@@ -1,0 +1,67 @@
+﻿products:
+- product: edot-java
+  target: 1.4.0
+  lifecycle: ga
+  repo: elastic-otel-java
+  owner: elastic
+entries:
+- file:
+    name: 583.yaml
+    checksum: 020bf6ab1dfc9fa1c5335ac62017ca4e943002a0
+  type: enhancement
+  title: Change default metric temporality to delta
+  products:
+  - product: edot-java
+    target: 1.4.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/583
+  issues:
+  - https://github.com/elastic/elastic-otel-java/issues/446
+- file:
+    name: 607.yaml
+    checksum: 661657aa8b13d5fd34f9f50739b7a02c544e0dd0
+  type: enhancement
+  title: Add support for openAI client 1.1+, drop support for older versions
+  products:
+  - product: edot-java
+    target: 1.4.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/607
+- file:
+    name: 593.yaml
+    checksum: f187d99aad78afa7200e57099ee3f68864062a9d
+  type: enhancement
+  title: Override user agent header for otlp exporters
+  products:
+  - product: edot-java
+    target: 1.4.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/593
+  issues:
+  - https://github.com/elastic/elastic-otel-java/issues/448
+- file:
+    name: 596.yaml
+    checksum: 9872b81d2689ff00a365b7fba66f3b5bfc9b4bc5
+  type: enhancement
+  title: enable azure provider by default when available
+  products:
+  - product: edot-java
+    target: 1.4.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/596
+- file:
+    name: upstream-update.yaml
+    checksum: 2a1a157849699e9ae5cf8c90a0bd24b932664b36
+  type: enhancement
+  title: Update upstream OpenTelemetry agent dependencies to 2.15.0
+  products:
+  - product: edot-java
+    target: 1.4.0
+    lifecycle: ga
+  description: '- javaagent:[2.15.0](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.15.0) sdk:[1.49.0](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.49.0) semconv:[1.32.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.32.0) contrib:[1.45.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.45.0)'
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/603

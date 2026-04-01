@@ -1,0 +1,30 @@
+﻿products:
+- product: edot-java
+  target: 1.9.0
+  lifecycle: ga
+  repo: elastic-otel-java
+  owner: elastic
+entries:
+- file:
+    name: 958.yaml
+    checksum: f78080964c0271b24ad8e66b0cf57b9344a92b9c
+  type: breaking-change
+  title: document universal profiling as opt-in
+  products:
+  - product: edot-java
+    target: 1.9.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/958
+- file:
+    name: upstream-update.yaml
+    checksum: a466bbd5a70c27da4781396df8cd695e8f5f5ec3
+  type: enhancement
+  title: Update upstream OpenTelemetry agent dependencies to 2.24.0
+  products:
+  - product: edot-java
+    target: 1.9.0
+    lifecycle: ga
+  description: '- javaagent:[2.24.0](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.24.0) sdk:[1.58.0](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.58.0) semconv:[1.37.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.37.0) contrib:[1.52.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.52.0)'
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/932

@@ -1,0 +1,41 @@
+﻿products:
+- product: edot-java
+  target: 1.5.0
+  lifecycle: ga
+  repo: elastic-otel-java
+  owner: elastic
+entries:
+- file:
+    name: 1774965825-tech-preview-release-of-central-configuration-supp.yaml
+    checksum: 51f9d0593a1636e9ff8c6839163e602728b21a68
+  type: enhancement
+  title: tech preview release of central configuration support for dynamically changing instrumentation and sending, using OpAMP protocol
+  products:
+  - product: edot-java
+    target: 1.5.0
+    lifecycle: ga
+- file:
+    name: 726.yaml
+    checksum: 79e5d8d4d78f2a1c030441ed0c306d6c7758fbc8
+  type: enhancement
+  title: add option to bypass certificate validation
+  products:
+  - product: edot-java
+    target: 1.5.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/726
+  issues:
+  - https://github.com/elastic/elastic-otel-java/issues/493
+- file:
+    name: upstream-update.yaml
+    checksum: 968912fb957278ddfb905633ee647c8b445de325
+  type: enhancement
+  title: Update upstream OpenTelemetry agent dependencies to 2.17.1
+  products:
+  - product: edot-java
+    target: 1.5.0
+    lifecycle: ga
+  description: '- javaagent:[2.17.1](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.17.1) sdk:[1.51.0](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.51.0) semconv:[1.34.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.34.0) contrib:[1.46.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.46.0)'
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/729

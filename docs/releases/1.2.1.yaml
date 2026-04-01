@@ -1,0 +1,18 @@
+﻿products:
+- product: edot-java
+  target: 1.2.1
+  lifecycle: ga
+  repo: elastic-otel-java
+  owner: elastic
+entries:
+- file:
+    name: 514.yaml
+    checksum: bacac3ea32027b613bdede584106bbc476052826
+  type: enhancement
+  title: Add support for OpenAI client 0.13.0
+  products:
+  - product: edot-java
+    target: 1.2.1
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/514

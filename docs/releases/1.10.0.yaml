@@ -1,0 +1,19 @@
+﻿products:
+- product: edot-java
+  target: 1.10.0
+  lifecycle: ga
+  repo: elastic-otel-java
+  owner: elastic
+entries:
+- file:
+    name: upstream-update.yaml
+    checksum: d71dbd28df5b9fad9ad8ab6a703070092ac76172
+  type: enhancement
+  title: Update upstream OpenTelemetry agent dependencies to 2.26.1
+  products:
+  - product: edot-java
+    target: 1.10.0
+    lifecycle: ga
+  description: '- javaagent:[2.26.1](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.26.1) sdk:[1.60.1](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.60.1) semconv:[1.40.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.40.0) contrib:[1.54.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.54.0)'
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/1017

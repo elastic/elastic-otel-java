@@ -1,0 +1,54 @@
+﻿products:
+- product: edot-java
+  target: 1.6.0
+  lifecycle: ga
+  repo: elastic-otel-java
+  owner: elastic
+entries:
+- file:
+    name: 818.yaml
+    checksum: 44e62e674176c6f0bb83671b3c418293165d9c3a
+  type: enhancement
+  title: Add 9.2 supported dynamic config options
+  products:
+  - product: edot-java
+    target: 1.6.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/818
+- file:
+    name: 789.yaml
+    checksum: 17eecc0c9b0dc3bb78d5e32cfd657241b375f27a
+  type: enhancement
+  title: Opamp migration
+  products:
+  - product: edot-java
+    target: 1.6.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/789
+  issues:
+  - https://github.com/elastic/elastic-otel-java/issues/788
+- file:
+    name: 763.yaml
+    checksum: 70db96dff34ee6593fd1e06d008fcc9b93517d7d
+  type: breaking-change
+  title: switch to 2.18.1, and switch openai to upstream
+  products:
+  - product: edot-java
+    target: 1.6.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/763
+- file:
+    name: upstream-update.yaml
+    checksum: 7295b0ff57a171423e470117cc0c2ae551bb3d7e
+  type: enhancement
+  title: Update upstream OpenTelemetry agent dependencies to 2.20.1
+  products:
+  - product: edot-java
+    target: 1.6.0
+    lifecycle: ga
+  description: '- javaagent:[2.20.1](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.20.1) sdk:[1.54.1](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.54.1) semconv:[1.37.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.37.0) contrib:[1.49.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.49.0)'
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/803

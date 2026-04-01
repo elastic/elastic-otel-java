@@ -1,0 +1,53 @@
+﻿products:
+- product: edot-java
+  target: 1.3.0
+  lifecycle: ga
+  repo: elastic-otel-java
+  owner: elastic
+entries:
+- file:
+    name: 564.yaml
+    checksum: d227a4491edbe1fbb82c718d9d7b9caeefde4c66
+  type: enhancement
+  title: Add support for OpenAI client 0.22 to 0.31
+  products:
+  - product: edot-java
+    target: 1.3.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/564
+- file:
+    name: 561.yaml
+    checksum: ef38522ab77256d90f874ffa57e1b2a6d8eab869
+  type: enhancement
+  title: fix upstream otel update for 2.13.3
+  products:
+  - product: edot-java
+    target: 1.3.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/561
+- file:
+    name: 539.yaml
+    checksum: 948354d7c40f7acffed3ac21bd72e2f6591a7c62
+  type: enhancement
+  title: Fix support for OpenAI developer messages
+  products:
+  - product: edot-java
+    target: 1.3.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/539
+  issues:
+  - https://github.com/elastic/elastic-otel-java/issues/532
+- file:
+    name: 531.yaml
+    checksum: 5534514eb260aa6ccfea87e8fd078e035462dfe3
+  type: enhancement
+  title: Fix instrumentation support for OpenAI client 0.14+
+  products:
+  - product: edot-java
+    target: 1.3.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/531
