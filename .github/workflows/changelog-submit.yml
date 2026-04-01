@@ -7,9 +7,11 @@ on:
       - completed
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   submit:
+    permissions:
+      contents: write
+      pull-requests: write
     uses: elastic/docs-actions/.github/workflows/changelog-submit.yml@v1
