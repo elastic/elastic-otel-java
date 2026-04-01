@@ -1,0 +1,63 @@
+products:
+- product: edot-java
+  target: 1.2.0
+  lifecycle: ga
+  repo: elastic-otel-java
+  owner: elastic
+entries:
+- file:
+    name: 497.yaml
+    checksum: e3dbd57033df12ab7d302a2245bb5077481060e7
+  type: enhancement
+  title: Add experimental instrumentation for OpenAI client
+  products:
+  - product: edot-java
+    target: 1.2.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/497
+- file:
+    name: 474.yaml
+    checksum: 135abef4bc8216eaea11bc736b663eb4735f0119
+  type: enhancement
+  title: add stop-sending option
+  products:
+  - product: edot-java
+    target: 1.2.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/474
+- file:
+    name: 471.yaml
+    checksum: ec607a2eaa35edc69d079f5382f8537a88fa8366
+  type: enhancement
+  title: add disable all instrumentations option
+  products:
+  - product: edot-java
+    target: 1.2.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/471
+- file:
+    name: 422.yaml
+    checksum: d981e4a6d649d31a15d89687bcd95bc9babff8f3
+  type: enhancement
+  title: add dynamically disabled instrumentation capability
+  products:
+  - product: edot-java
+    target: 1.2.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/422
+- file:
+    name: upstream-update.yaml
+    checksum: 0f454f651c96799004071cfbe6e10715f178a4d5
+  type: enhancement
+  title: Update upstream OpenTelemetry agent dependencies to 2.12.0
+  products:
+  - product: edot-java
+    target: 1.2.0
+    lifecycle: ga
+  description: '- javaagent:[2.12.0](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.12.0) sdk:[1.46.0](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.46.0) semconv:[1.29.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.29.0) contrib:[1.42.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.42.0)'
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/500

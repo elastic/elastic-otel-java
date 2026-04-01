@@ -1,0 +1,29 @@
+products:
+- product: edot-java
+  target: 1.1.0
+  lifecycle: ga
+  repo: elastic-otel-java
+  owner: elastic
+entries:
+- file:
+    name: 455.yaml
+    checksum: 2ed25ec4208bd4f01090072823c3c03735deb43f
+  type: enhancement
+  title: update upstream 2.10.0
+  products:
+  - product: edot-java
+    target: 1.1.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/455
+- file:
+    name: 423.yaml
+    checksum: 568cf15908db42bab8cbd9f7f0f8f0bfe773c9d6
+  type: bug-fix
+  title: Fix missing transitive dependencies when using universal profiling integration
+  products:
+  - product: edot-java
+    target: 1.1.0
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/423

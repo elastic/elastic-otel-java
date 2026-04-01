@@ -1,0 +1,18 @@
+products:
+- product: edot-java
+  target: 1.4.1
+  lifecycle: ga
+  repo: elastic-otel-java
+  owner: elastic
+entries:
+- file:
+    name: 610.yaml
+    checksum: 35032a5e911047a819859e1304c3e5447267111a
+  type: bug-fix
+  title: Workaround for temporality configuration not being possible
+  products:
+  - product: edot-java
+    target: 1.4.1
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/610
