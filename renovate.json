@@ -37,5 +37,9 @@
     "examples/**",
     "jvmti-access/jni-build/*.Dockerfile",
     "instrumentation/openai-client-instrumentation/instrumentation-0.8/build.gradle.kts"
+  ],
+  "addLabels": [
+    "dependencies",
+    "changelog:skip"
   ]
 }

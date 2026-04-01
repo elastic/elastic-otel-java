@@ -66,5 +66,7 @@ actions:
       automerge: false
       labels:
         - dependencies
+        # the 'changelog:upstream-update' label is used for changelog automation
+        - changelog:upstream-update
       description: |
         @elastic/apm-agent-java, can you please check and merge this PR?
