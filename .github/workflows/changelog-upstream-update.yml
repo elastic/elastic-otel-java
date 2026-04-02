@@ -58,7 +58,7 @@ jobs:
           PR_URL: ${{ github.event.pull_request.html_url }}
           BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
         run: |
-          temp_dir="$(mktemp -d)"
+          description="- $("./gradlew" -q changelogUpstreamDependenciesOneLiner)"
           docs-builder changelog add \
             --concise \
             --title "${PR_TITLE}" \
@@ -66,9 +66,9 @@ jobs:
             --prs "${PR_URL}" \
             --products "edot-java NEXT ga" \
             --output "${temp_dir}" \
-            --description "- $("./gradlew" -q changelogUpstreamDependenciesOneLiner)"
+            --description "${description}"
           # will overwrite any prior update, if there is any
-          mv "${temp_dir}/${PR_NUMBER}.yaml" "./docs/changelog/upstream-update.yaml"
-          git add --all
+          mv "docs/changelog/${PR_NUMBER}.yaml" "./docs/changelog/upstream-update.yaml"
+          git add --all ./docs/changelog/
           git commit -m "Add changelog for upstream update"
           git push origin HEAD:${BRANCH_NAME}
