@@ -10,7 +10,6 @@ permissions:
   contents: read
 
 jobs:
-
   submit:
     permissions:
       contents: write
