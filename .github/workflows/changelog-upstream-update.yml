@@ -59,9 +59,9 @@ jobs:
           BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
         run: |
           temp_dir="$(mktemp -d)"
-          docs-builder changelog add
-            --concise
-            --title "${PR_TITLE}"
+          docs-builder changelog add \
+            --concise \
+            --title "${PR_TITLE}" \
             --type enhancement \
             --prs "${PR_URL}" \
             --products "edot-java NEXT ga" \
