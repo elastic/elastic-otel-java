@@ -11,48 +11,9 @@ permissions:
 
 jobs:
 
-  # in this step, we would execute a shell script that will generate a dedicated changelog entry for the upstream update
-  # and overwrite any prior upstream update to prevent duplicates
-  upstream-update-changelog:
-    # only generate changelog when PR:
-    # - and has proper label for upstream update
-    # - is not from a fork (as we need to commit and push to it)
-    if: >
-      contains(github.event.pull_request.labels.*.name, 'changelog:upstream-update')
-      && github.event.repository.fork == false
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get token
-        id: get_token
-        uses: actions/create-github-app-token@v3
-        with:
-          app-id: ${{ secrets.OBS_AUTOMATION_APP_ID }}
-          private-key: ${{ secrets.OBS_AUTOMATION_APP_PEM }}
-          permission-contents: write
-          permission-pull-requests: write
-          repositories: |
-            elastic-otel-java
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ inputs.ref }}
-          token: ${{ steps.get_token.outputs.token }}
-      - name: Git setup
-        uses: elastic/oblt-actions/git/setup@v1
-        with:
-          github-token: ${{ steps.get_token.outputs.token }}
-      # gradle wrapper is used in the script to generate changelog entry
-      - name: Check gradle wrapper
-        uses: gradle/actions/wrapper-validation@v6
-      - name: Docs builder setup
-        uses: elastic/docs-actions/docs-builder/setup@v1
-      - name: debug
-        run: |
-          ./gradlew -q changelogUpstreamDependenciesOneLiner
-
-
   submit:
     permissions:
       contents: write
       pull-requests: write
+    if: contains(github.event.pull_request.labels.*.name, 'changelog:upstream-update') == false
     uses: elastic/docs-actions/.github/workflows/changelog-submit.yml@v1
