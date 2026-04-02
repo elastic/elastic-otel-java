@@ -1,10 +1,14 @@
-name: changelog-submit-upstream-update
+name: changelog-upstream-update
 
 on:
-  workflow_run:
-    workflows: [changelog-validate]
+  pull_request:
     types:
-      - completed
+      - opened
+      - synchronize
+      - reopened
+      - edited
+      - labeled
+      - unlabeled
 
 permissions:
   contents: read
