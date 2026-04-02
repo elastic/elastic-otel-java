@@ -44,9 +44,6 @@ jobs:
         uses: elastic/oblt-actions/git/setup@v1
         with:
           github-token: ${{ steps.get_token.outputs.token }}
-      # gradle wrapper is used in the script to generate changelog entry
-      - name: Check gradle wrapper
-        uses: gradle/actions/wrapper-validation@v6
       - name: Docs builder setup
         uses: elastic/docs-actions/docs-builder/setup@v1
 
