@@ -55,6 +55,7 @@ jobs:
           PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
           PR_TITLE: ${{ github.event.workflow_run.pull_requests[0].title }}
           PR_URL: ${{ github.event.workflow_run.pull_requests[0].html_url }}
+          BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
         run: |
           temp_dir="$(mktemp -d)"
           docs-builder changelog add
