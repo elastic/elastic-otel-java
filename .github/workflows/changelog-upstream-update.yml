@@ -25,7 +25,7 @@ jobs:
     # - and has proper label for upstream update
     # - is not from a fork (as we need to commit and push to it)
     if: >
-      contains(github.event.workflow_run.pull_requests[0].labels.*.name, 'changelog:upstream-update')
+      contains(github.event.pull_request.labels.*.name, 'changelog:upstream-update')
       && github.event.workflow_run.pull_requests[0].head.repo.fork == false
     runs-on: ubuntu-latest
     steps:
@@ -53,9 +53,9 @@ jobs:
 
       - name: Generate changelog entry
         env:
-          PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
-          PR_TITLE: ${{ github.event.workflow_run.pull_requests[0].title }}
-          PR_URL: ${{ github.event.workflow_run.pull_requests[0].html_url }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
           BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
         run: |
           temp_dir="$(mktemp -d)"
