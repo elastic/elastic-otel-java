@@ -71,4 +71,4 @@ jobs:
           mv "${temp_dir}/${PR_NUMBER}.yaml" "./docs/changelog/upstream-update.yaml"
           git add --all
           git commit -m "Add changelog for upstream update"
-          git push origin HEAD:${{ env.BRANCH_NAME }}
+          git push origin HEAD:${BRANCH_NAME}
