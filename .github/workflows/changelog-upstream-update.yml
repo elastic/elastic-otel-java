@@ -26,7 +26,7 @@ jobs:
     # - is not from a fork (as we need to commit and push to it)
     if: >
       contains(github.event.pull_request.labels.*.name, 'changelog:upstream-update')
-      && github.event.repository.fork == false
+      && github.event.pull_request.head.repo.fork == false
     runs-on: ubuntu-latest
     steps:
       - name: Get token
