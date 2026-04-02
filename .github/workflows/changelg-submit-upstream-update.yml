@@ -67,7 +67,7 @@ jobs:
             --output "${temp_dir}" \
             --description "- $("./gradlew" -q changelogUpstreamDependenciesOneLiner)"
           # will overwrite any prior update, if there is any
-          mv "${temp_dir}/${pr_id}.yaml" "./docs/changelog/upstream-update.yaml"
+          mv "${temp_dir}/${PR_NUMBER}.yaml" "./docs/changelog/upstream-update.yaml"
           git add --all
           git commit -m "Add changelog for upstream update"
           git push origin ${{ env.BRANCH_NAME }}
