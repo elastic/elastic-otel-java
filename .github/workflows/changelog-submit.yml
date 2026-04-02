@@ -46,6 +46,9 @@ jobs:
         uses: gradle/actions/wrapper-validation@v6
       - name: Docs builder setup
         uses: elastic/docs-actions/docs-builder/setup@v1
+      - name: debug
+        run: |
+          ./gradlew -q changelogUpstreamDependenciesOneLiner
 
 
   submit:
