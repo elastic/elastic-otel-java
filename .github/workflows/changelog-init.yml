@@ -24,7 +24,7 @@ jobs:
   # - we do this only for update PRs which are not on a fork and have the expected label
   # - we need to do this before the "validate" job, which should pass and make changelog-submit to be skipped (as the changelog already exists)
   #   this is because changelog-submit is triggered by workflow_run and otherwise we can't control ordering.
-  upstream-update:
+  init-upstream-update:
     permissions:
       contents: write
       pull-requests: write
@@ -80,7 +80,13 @@ jobs:
             git push
           fi
 
-  # changelog validation, is expected to pass for upstream updates PRs because the previous job
-  # should have generated the changelog entry.
-  validate:
+      # changelog validation, is expected to pass for upstream updates PRs because the previous task
+      # should have generated the changelog entry.
+      - name: changelog validate
+        uses: elastic/docs-actions/.github/workflows/changelog-validate.yml@v1
+
+  init:
+    if: >
+      !contains(github.event.pull_request.labels.*.name, 'changelog:upstream-update')
+      || github.event.pull_request.head.repo.fork != false
     uses: elastic/docs-actions/.github/workflows/changelog-validate.yml@v1
