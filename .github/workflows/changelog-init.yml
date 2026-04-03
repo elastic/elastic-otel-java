@@ -69,6 +69,10 @@ jobs:
             --prs "${PR_URL}" \
             --products "edot-java NEXT ga" \
             --description "${description}"
+
+          # for debugging
+          git status
+
           # will overwrite any prior update, if there is any
           mv -v "./docs/changelog/${PR_NUMBER}.yaml" "./docs/changelog/upstream-update.yaml"
           if git diff --quiet; then
