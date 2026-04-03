@@ -2,7 +2,7 @@ name: changelog-submit
 
 on:
   workflow_run:
-    workflows: [changelog-validate]
+    workflows: [changelog-init]
     types:
       - completed
 
@@ -14,6 +14,4 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    # TODO: we want to skip this for upstream update PRs, but we don't have access
-    # to the PR details like labels, how can we do that ?
     uses: elastic/docs-actions/.github/workflows/changelog-submit.yml@v1
