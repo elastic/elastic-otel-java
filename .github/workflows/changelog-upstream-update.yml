@@ -68,7 +68,7 @@ jobs:
             --output "${temp_dir}" \
             --description "${description}"
           # will overwrite any prior update, if there is any
-          mv "docs/changelog/${PR_NUMBER}.yaml" "./docs/changelog/upstream-update.yaml"
+          mv "docs/changelog/${PR_NUMBER}.yaml" "docs/changelog/upstream-update.yaml"
           git diff --quiet
           if [[ 0 == $? ]]
           then
