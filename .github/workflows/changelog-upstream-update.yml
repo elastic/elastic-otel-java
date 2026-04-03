@@ -13,13 +13,16 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: changelog-upstream-update-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
 
   # TODO: this workflow modifies the PR branch directly
   # do we need to split this in two parts like the changelog-validate and changelog-submit workflows ?
   # If so, we might make this triggered on workflow_run event which will require to find a way to
   # access the PR details.
-
   submit:
     permissions:
       contents: write
@@ -71,12 +74,10 @@ jobs:
             --description "${description}"
           # will overwrite any prior update, if there is any
           mv "docs/changelog/${PR_NUMBER}.yaml" "docs/changelog/upstream-update.yaml"
-          git diff --quiet
-          if [[ 0 == $? ]]
-          then
-            echo "nothing to commit"
-          else
+          if git diff --quiet
             git add --all ./docs/changelog/
             git commit -m "Add changelog for upstream update"
             git push
+          else
+            echo "No changes to commit"
           fi
