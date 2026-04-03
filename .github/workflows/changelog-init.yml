@@ -70,19 +70,22 @@ jobs:
             --products "edot-java NEXT ga" \
             --description "${description}"
 
+          # will overwrite any prior update, if there is any
+          mv -v "./docs/changelog/${PR_NUMBER}.yaml" "./docs/changelog/upstream-update.yaml"
+
           # for debugging
           git status
 
-          # will overwrite any prior update, if there is any
-          mv -v "./docs/changelog/${PR_NUMBER}.yaml" "./docs/changelog/upstream-update.yaml"
-          if git diff --quiet; then
-            echo "No changes to commit"
-          else
+          if [[ -z $(git status --porcelain) ]]; then
             git add --all .
             git commit -m "generate changelog entry"
             git push
+          else
+            echo "No changes to commit"
           fi
-          cat "./docs/changelog/upstream-update.yaml"
+
+          # for debugging
+          git status
 
   validate:
     # needs to execute even if init-upstream-update is skipped
