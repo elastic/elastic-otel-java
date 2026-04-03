@@ -73,7 +73,7 @@ jobs:
           # will overwrite any prior update, if there is any
           mv -v "./docs/changelog/${PR_NUMBER}.yaml" "./docs/changelog/upstream-update.yaml"
 
-          if [[ -z $(git status --porcelain) ]]; then
+          if [[ -z "$(git status --porcelain)" ]]; then
             echo "No changes to commit"
           else
             git add --all .
