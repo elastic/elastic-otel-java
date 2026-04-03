@@ -70,7 +70,8 @@ jobs:
           # will overwrite any prior update, if there is any
           mv "docs/changelog/${PR_NUMBER}.yaml" "./docs/changelog/upstream-update.yaml"
           git diff --quiet
-          if [[ 0 == $? ]] then;
+          if [[ 0 == $? ]]
+          then
             echo "nothing to commit"
           else
             git add --all ./docs/changelog/
