@@ -60,7 +60,6 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_URL: ${{ github.event.pull_request.html_url }}
-          BRANCH_NAME: ${{ github.ref_name }}
         run: |
           description="- $("./gradlew" -q changelogUpstreamDependenciesOneLiner)"
           docs-builder changelog add \
