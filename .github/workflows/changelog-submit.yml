@@ -10,9 +10,17 @@ permissions:
   contents: read
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: wip debug
+        run: |
+          echo "GITHUB_USERNAME=${{ github.actor }}"
+          echo "debug >>> ${{ toJSON(github.event) }}"
+
   submit:
     permissions:
       contents: write
       pull-requests: write
-    if: contains(github.event.pull_request.labels.*.name, 'changelog:upstream-update') == false
+    if: contains(github.event.workflow_run.pull_requests[0].labels.*.name, 'changelog:upstream-update') == false
     uses: elastic/docs-actions/.github/workflows/changelog-submit.yml@v1
