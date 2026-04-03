@@ -13,4 +13,6 @@ products:
 
 # Elastic Distribution of OpenTelemetry Java known issues
 
-No known issues.
+:::{changelog} /releases/
+:type: known-issue
+:::
