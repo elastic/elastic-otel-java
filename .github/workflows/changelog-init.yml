@@ -1,0 +1,89 @@
+name: changelog-init
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+      - labeled
+      - unlabeled
+
+permissions:
+  contents: read
+
+concurrency:
+  group: changelog-init-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+
+  # with upstream update PRs:
+  # - we want to automatically generate changelog
+  # - we do this only for update PRs which are not on a fork and have the expected label
+  # - we need to do this before the "validate" job, which should pass and make changelog-submit to be skipped (as the changelog already exists)
+  #   this is because changelog-submit is triggered by workflow_run and otherwise we can't control ordering.
+  upstream-update:
+    permissions:
+      contents: write
+      pull-requests: write
+    if: >
+      contains(github.event.pull_request.labels.*.name, 'changelog:upstream-update')
+      && github.event.pull_request.head.repo.fork == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get token
+        id: get_token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.OBS_AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.OBS_AUTOMATION_APP_PEM }}
+          permission-contents: write
+          permission-pull-requests: write
+          repositories: |
+            elastic-otel-java
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ steps.get_token.outputs.token }}
+      - name: Git setup
+        uses: elastic/oblt-actions/git/setup@v1
+        with:
+          github-token: ${{ steps.get_token.outputs.token }}
+      - name: Docs builder setup
+        uses: elastic/docs-actions/docs-builder/setup@v1
+
+      - name: Generate changelog entry
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          description="- $("./gradlew" -q changelogUpstreamDependenciesOneLiner)"
+          docs-builder changelog add \
+            --concise \
+            --title "${PR_TITLE}" \
+            --type enhancement \
+            --prs "${PR_URL}" \
+            --products "edot-java NEXT ga" \
+            --description "${description}"
+
+          # will overwrite any prior update, if there is any
+          mv -v "./docs/changelog/${PR_NUMBER}.yaml" "./docs/changelog/upstream-update.yaml"
+
+          if [[ -z "$(git status --porcelain)" ]]; then
+            echo "No changes to commit"
+          else
+            git add --all .
+            git commit -m "generate changelog entry"
+            git push
+          fi
+
+  validate:
+    # needs to execute even if init-upstream-update is skipped
+    if: ${{ always() }}
+    # needs to execute after init-upstream-update
+    needs: [ upstream-update ]
+    uses: elastic/docs-actions/.github/workflows/changelog-validate.yml@v1

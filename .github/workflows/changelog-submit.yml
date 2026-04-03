@@ -2,7 +2,7 @@ name: changelog-submit
 
 on:
   workflow_run:
-    workflows: [changelog-validate]
+    workflows: [changelog-init]
     types:
       - completed
 
