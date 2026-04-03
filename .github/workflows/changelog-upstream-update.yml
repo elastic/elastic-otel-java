@@ -63,7 +63,6 @@ jobs:
             --type enhancement \
             --prs "${PR_URL}" \
             --products "edot-java NEXT ga" \
-            --output "${temp_dir}" \
             --description "${description}"
           # will overwrite any prior update, if there is any
           mv "docs/changelog/${PR_NUMBER}.yaml" "docs/changelog/upstream-update.yaml"
