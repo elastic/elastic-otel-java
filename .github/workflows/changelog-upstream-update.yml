@@ -15,8 +15,6 @@ permissions:
 
 jobs:
 
-  # in this step, we would execute a shell script that will generate a dedicated changelog entry for the upstream update
-  # and overwrite any prior upstream update to prevent duplicates
   submit:
     permissions:
       contents: write
