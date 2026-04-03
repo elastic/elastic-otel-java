@@ -58,6 +58,8 @@ jobs:
           PR_URL: ${{ github.event.pull_request.html_url }}
           BRANCH_NAME: ${{ github.ref_name }}
         run: |
+          echo "debug >>> ${{ toJSON(github.event) }}"
+
           description="- $("./gradlew" -q changelogUpstreamDependenciesOneLiner)"
           docs-builder changelog add \
             --concise \
