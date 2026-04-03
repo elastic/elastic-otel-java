@@ -58,11 +58,6 @@ jobs:
           PR_URL: ${{ github.event.pull_request.html_url }}
           BRANCH_NAME: ${{ github.ref_name }}
         run: |
-          
-          echo "debug >>> ${{ toJSON(github.actor) }}"
-          echo "${GITHUB_ACTOR}
-          echo "${GITHUB_ACTOR_ID}
-
           description="- $("./gradlew" -q changelogUpstreamDependenciesOneLiner)"
           docs-builder changelog add \
             --concise \
@@ -76,4 +71,4 @@ jobs:
           mv "docs/changelog/${PR_NUMBER}.yaml" "./docs/changelog/upstream-update.yaml"
           git add --all ./docs/changelog/
           git commit -m "Add changelog for upstream update"
-          git push origin HEAD:${BRANCH_NAME}
+          git push
