@@ -15,6 +15,11 @@ permissions:
 
 jobs:
 
+  # TODO: this workflow modifies the PR branch directly
+  # do we need to split this in two parts like the changelog-validate and changelog-submit workflows ?
+  # If so, we might make this triggered on workflow_run event which will require to find a way to
+  # access the PR details.
+
   submit:
     permissions:
       contents: write
