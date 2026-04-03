@@ -1,10 +1,10 @@
 [versions]
-shadow = "9.4.0"
+shadow = "9.4.1"
 jib = "3.5.3"
 spotless = "8.4.0"
 junit = "5.14.3"
 autoservice = "1.1.1"
-log4j2 = "2.25.3"
+log4j2 = "2.25.4"
 
 # otel protocol (OTLP)
 opentelemetryProto = "1.3.2-alpha"
@@ -72,11 +72,11 @@ freemarker = "org.freemarker:freemarker:2.3.34"
 
 spotlessPlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
 shadowPlugin = { group = "com.gradleup.shadow", name = "shadow-gradle-plugin", version.ref = "shadow" }
-licenseReportPlugin = "com.github.jk1.dependency-license-report:com.github.jk1.dependency-license-report.gradle.plugin:3.1.1"
+licenseReportPlugin = "com.github.jk1.dependency-license-report:com.github.jk1.dependency-license-report.gradle.plugin:3.1.2"
 muzzleCheckPlugin = { group = "io.opentelemetry.instrumentation.muzzle-check", name = "io.opentelemetry.instrumentation.muzzle-check.gradle.plugin", version.ref = "opentelemetryJavaagentAlpha" }
 muzzleGenerationPlugin = { group = "io.opentelemetry.instrumentation.muzzle-generation", name = "io.opentelemetry.instrumentation.muzzle-generation.gradle.plugin", version.ref = "opentelemetryJavaagentAlpha" }
 # Ant should be kept in sync with the version used in the shadow plugin
-ant = "org.apache.ant:ant:1.10.15"
+ant = "org.apache.ant:ant:1.10.16"
 # ASM is currently only used during compile-time, so it is okay to diverge from the version used in ByteBuddy
 asm = "org.ow2.asm:asm:9.9.1"
 

@@ -1,4 +1,4 @@
-﻿products:
+products:
 - product: edot-java
   target: 1.8.0
   lifecycle: ga
