@@ -42,7 +42,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.head_ref }}
           token: ${{ steps.get_token.outputs.token }}
       - name: Git setup
         uses: elastic/oblt-actions/git/setup@v1
