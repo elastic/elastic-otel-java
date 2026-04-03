@@ -75,9 +75,10 @@ jobs:
           # will overwrite any prior update, if there is any
           mv "docs/changelog/${PR_NUMBER}.yaml" "docs/changelog/upstream-update.yaml"
           if git diff --quiet
+          then
+            echo "No changes to commit"
+          else
             git add --all ./docs/changelog/
             git commit -m "Add changelog for upstream update"
             git push
-          else
-            echo "No changes to commit"
           fi
