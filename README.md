@@ -51,4 +51,3 @@ You don't need to have a corresponding JVM installed, gradle automatically will 
 # License
 
 The Elastic Distribution of OpenTelemetry Java is licensed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.html).
-
