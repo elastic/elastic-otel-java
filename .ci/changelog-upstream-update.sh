@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # this script creates and pushes a changelog entry for the upstream otel dependencies.
 # it relies on the following environment variables:
 #   PR_TITLE: pull-request title (used in the changelog title)
