@@ -60,26 +60,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_URL: ${{ github.event.pull_request.html_url }}
-        run: |
-          description="- $("./gradlew" -q changelogUpstreamDependenciesOneLiner)"
-          docs-builder changelog add \
-            --concise \
-            --title "${PR_TITLE}" \
-            --type enhancement \
-            --prs "${PR_URL}" \
-            --products "edot-java NEXT ga" \
-            --description "${description}"
-
-          # will overwrite any prior update, if there is any
-          mv -v "./docs/changelog/${PR_NUMBER}.yaml" "./docs/changelog/upstream-update.yaml"
-
-          if [[ -z "$(git status --porcelain)" ]]; then
-            echo "No changes to commit"
-          else
-            git add --all .
-            git commit -m "generate changelog entry"
-            git push
-          fi
+        run: .ci/scripts/changelog-upstream-update.sh
 
   validate:
     # needs to execute even if init-upstream-update is skipped
