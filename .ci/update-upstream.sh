@@ -5,7 +5,8 @@ set -euo pipefail
 upstreamRef="${1:-main}"
 
 upstream_base_url="https://raw.githubusercontent.com/open-telemetry/opentelemetry-java-instrumentation/${upstreamRef}"
-folder="$(dirname "${0}")"
+# libs.versions.toml lives in gradle/; this script is under .ci/
+folder="$(dirname "${0}")/../gradle"
 
 upstream_version() {
     set +e

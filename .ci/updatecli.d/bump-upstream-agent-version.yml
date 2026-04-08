@@ -55,7 +55,7 @@ targets:
     scmid: githubConfig
     spec:
       # We do the echo add the end to let updatecli know that there have been changes
-      command: gradle/update-upstream.sh v{{ source "upstream-agent-version" }} && echo "Update successful"
+      command: .ci/update-upstream.sh v{{ source "upstream-agent-version" }} && echo "Update successful"
 
 actions:
   open-pr:
