@@ -27,6 +27,11 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [edot-java-X.X.X-fixes]
 % *
 
+:::{changelog} /releases/
+:::
+
+TEST
+
 ## 1.10.0 [edot-java-1-10-0-release-notes]
 **Release date:** March 24, 2026
 

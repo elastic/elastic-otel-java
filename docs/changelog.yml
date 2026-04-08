@@ -27,6 +27,7 @@ pivot:
     known-issue:
     regression:
     security:
+    other:
 
 rules:
   create:

@@ -1,19 +1,25 @@
-products:
+﻿products:
 - product: edot-java
   target: 1.10.0
-  lifecycle: ga
   repo: elastic-otel-java
   owner: elastic
+description: The 1.10.0 release contains fixes for potential security vulnerabilities. Refer to our [security advisory](https://discuss.elastic.co/t/elastic-otel-java-1-10-0-security-update-esa-2026-22-ghsa-xw7x-h9fj-p2c7/385700) for more details.
 entries:
 - file:
-    name: upstream-update.yaml
-    checksum: d71dbd28df5b9fad9ad8ab6a703070092ac76172
+    name: 1017.yaml
+    checksum: 9e2bb4cf3e68d95fd160eb23b35c284036fb75b0
   type: enhancement
-  title: Update upstream OpenTelemetry agent dependencies to 2.26.1
+  title: Update stream OpenTelemetry agent dependencies to 2.26.1
   products:
   - product: edot-java
-    target: 1.10.0
     lifecycle: ga
-  description: '- javaagent:[2.26.1](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.26.1) sdk:[1.60.1](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.60.1) semconv:[1.40.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.40.0) contrib:[1.54.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.54.0)'
+  description: >-
+    * opentelemetry-javaagent: [2.26.1](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.26.1)
+
+    * opentelemetry-sdk: [1.60.1](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.60.1)
+
+    * opentelemetry-semconv: [1.40.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.40.0)
+
+    * opentelemetry-java-contrib: [1.54.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.54.0)
   prs:
-  - https://github.com/elastic/elastic-otel-java/pull/1017
+  - "1017"

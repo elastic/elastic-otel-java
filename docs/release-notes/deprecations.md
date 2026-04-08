@@ -31,3 +31,7 @@ Review the deprecated functionality for Elastic Distribution of OpenTelemetry Ja
 % TEMPLATE END
 
 No deprecations.
+
+:::{changelog} /releases/
+:type: deprecation
+:::
