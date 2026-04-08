@@ -47,7 +47,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_URL: ${{ github.event.pull_request.html_url }}
-        run: .ci/scripts/changelog-upstream-update.sh
+        run: .ci/changelog-upstream-update.sh
 
   validate:
     # needs to execute even if init-upstream-update is skipped
