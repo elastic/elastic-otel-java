@@ -1,0 +1,57 @@
+name: changelog-init
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+      - labeled
+      - unlabeled
+
+permissions:
+  contents: read
+
+concurrency:
+  group: changelog-init-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+
+  # with upstream update PRs:
+  # - we want to automatically generate changelog
+  # - we do this only for update PRs which are not on a fork and have the expected label
+  # - we need to do this before the "validate" job, which should pass and make changelog-submit to be skipped (as the changelog already exists)
+  #   this is because changelog-submit is triggered by workflow_run and otherwise we can't control ordering.
+  upstream-update:
+    permissions:
+      contents: write
+      pull-requests: write
+    if: >
+      contains(github.event.pull_request.labels.*.name, 'changelog:upstream-update')
+      && github.event.pull_request.head.repo.fork == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Git setup
+        uses: elastic/oblt-actions/git/setup@v1
+      - name: Docs builder setup
+        uses: elastic/docs-actions/docs-builder/setup@v1
+
+      - name: Generate changelog entry
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: .ci/changelog-upstream-update.sh
+
+  validate:
+    # needs to execute even if init-upstream-update is skipped
+    if: ${{ always() }}
+    # needs to execute after init-upstream-update
+    needs: [ upstream-update ]
+    uses: elastic/docs-actions/.github/workflows/changelog-validate.yml@v1
