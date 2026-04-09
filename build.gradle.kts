@@ -50,23 +50,6 @@ tasks {
   }
 
   /**
-   * Used from within our release automation as part of the release note generation.
-   */
-  register("printUpstreamDependenciesMarkdown") {
-    dependsOn(printDependencyVersions)
-    doLast {
-      val agentVer = getResolvedDependency("io.opentelemetry.javaagent:opentelemetry-javaagent")!!.version
-      val sdkVer = getResolvedDependency("io.opentelemetry:opentelemetry-sdk")!!.version
-      val semconvVer = libs.versions.opentelemetrySemconv.get()
-      val contribVer = libs.versions.opentelemetryContribAlpha.get().replace("-alpha", "") // -alpha suffix is only on artifact, not release tag
-      println("* opentelemetry-javaagent: [$agentVer](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v$agentVer)")
-      println("* opentelemetry-sdk: [$sdkVer](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v$sdkVer)")
-      println("* opentelemetry-semconv: [$semconvVer](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v$semconvVer)")
-      println("* opentelemetry-java-contrib: [$contribVer](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v$contribVer)")
-    }
-  }
-
-  /**
    * Used from within our release automation as part of the changelog generation.
    */
   register("changelogUpstreamDependenciesOneLiner") {
