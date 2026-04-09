@@ -12,7 +12,7 @@ docs-builder changelog add \
   --title "${PR_TITLE}" \
   --type enhancement \
   --prs "${PR_URL}" \
-  --products "edot-java NEXT ga" \
+  --products "edot-java" \
   --description "${description}"
 
 # will overwrite any prior update, if there is any
