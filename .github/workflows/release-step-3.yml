@@ -221,6 +221,8 @@ jobs:
         uses: ./.github/workflows/gradle-goal
         with:
           command: ""
+      - name: Docs builder setup
+        uses: elastic/docs-actions/docs-builder/setup@v1
       - name: Print Release Notes
         id: print_release_notes
         # FIXME using temporary workaround from https://github.com/elastic/docs-builder/issues/3057
