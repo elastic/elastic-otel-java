@@ -95,7 +95,8 @@ jobs:
         with:
           command: ./gradlew -q setNextVersion
 
-      - name: Generate documentation changelog (post release)
+      # TODO: remove this step after changelog generation is migrated to docs-builder
+      - name: Generate documentation changelog markdown (post release)
         if: inputs.phase == 'post'
         run: |
           echo '<!--DEPENDENCIES-NOTES-START-->' >> CHANGELOG.next-release.md
@@ -103,6 +104,12 @@ jobs:
           ./gradlew -q printUpstreamDependenciesMarkdown >> CHANGELOG.next-release.md
           echo '<!--DEPENDENCIES-NOTES-END-->' >> CHANGELOG.next-release.md
           java .ci/ReleaseChangelog.java CHANGELOG.next-release.md docs/release-notes ${{ env.RELEASE_VERSION }}
+
+      - name: Generate documentation changelog bundle (post release)
+        if: inputs.phase == 'post'
+        run: |
+          docs-builder changelog bundle edot-java-release ${{ env.RELEASE_VERSION }}
+          docs-builder changelog remove edot-java-release
   
       - name: Push the ${{ inputs.phase }} release branch
         run: |
