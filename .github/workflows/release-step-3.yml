@@ -229,11 +229,10 @@ jobs:
         run: |
           echo 'notes<<RELNOTESEOF' >> $GITHUB_OUTPUT
           tmp="$(mktemp -d)"
-          version="${{ inputs.version }}"
-          docs-builder changelog render --input "${tmp}/${version}.yaml" --output "${tmp}"
-          cat "${tmp}/${version}/index.md" \
-            | sed -e "/## ${version} \[elastic-release-notes-${version}/d" \
-            | sed -e "/###/s/ \[elastic-${version}.*$//g" >> $GITHUB_OUTPUT
+          docs-builder changelog render --input "${tmp}/${{ env.RELEASE_VERSION }}" --output "${tmp}"
+          cat "${tmp}/${{ env.RELEASE_VERSION }}/index.md" \
+            | sed -e "/## ${{ env.RELEASE_VERSION }} \[elastic-release-notes-${{ env.RELEASE_VERSION }}/d" \
+            | sed -e "/###/s/ \[elastic-${{ env.RELEASE_VERSION }}.*$//g" >> $GITHUB_OUTPUT
           echo 'RELNOTESEOF' >> $GITHUB_OUTPUT
     
 
