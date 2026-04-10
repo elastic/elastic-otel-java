@@ -4,6 +4,7 @@ products:
   lifecycle: ga
   repo: elastic-otel-java
   owner: elastic
+release-date: '2024-09-02'
 entries:
 - file:
     name: 1774534599-first-ga-release.yaml

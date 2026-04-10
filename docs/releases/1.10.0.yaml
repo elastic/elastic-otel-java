@@ -4,6 +4,7 @@
   repo: elastic-otel-java
   owner: elastic
 description: The 1.10.0 release contains fixes for potential security vulnerabilities. Refer to our [security advisory](https://discuss.elastic.co/t/elastic-otel-java-1-10-0-security-update-esa-2026-22-ghsa-xw7x-h9fj-p2c7/385700) for more details.
+release-date: '2026-03-24'
 entries:
 - file:
     name: 1017.yaml
