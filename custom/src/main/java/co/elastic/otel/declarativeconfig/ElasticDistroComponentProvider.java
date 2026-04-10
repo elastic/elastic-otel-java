@@ -31,6 +31,8 @@ import io.opentelemetry.sdk.resources.Resource;
 @AutoService(ComponentProvider.class)
 public class ElasticDistroComponentProvider implements ComponentProvider {
 
+  static final String NAME = "elastic_distribution";
+
   @Override
   public Class<?> getType() {
     return Resource.class;
@@ -38,7 +40,7 @@ public class ElasticDistroComponentProvider implements ComponentProvider {
 
   @Override
   public String getName() {
-    return "elastic_opentelemetry_javaagent_distribution";
+    return NAME;
   }
 
   @Override
