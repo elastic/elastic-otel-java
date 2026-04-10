@@ -4,6 +4,7 @@ products:
   lifecycle: ga
   repo: elastic-otel-java
   owner: elastic
+release-date: '2025-10-06'
 entries:
 - file:
     name: 818.yaml
