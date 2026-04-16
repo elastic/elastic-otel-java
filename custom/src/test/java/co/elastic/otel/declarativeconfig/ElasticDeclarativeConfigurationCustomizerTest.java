@@ -18,30 +18,38 @@
  */
 package co.elastic.otel.declarativeconfig;
 
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.json;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
+import io.opentelemetry.javaagent.tooling.AgentVersion;
 import io.opentelemetry.javaagent.tooling.resources.ResourceCustomizerProvider;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfigurationCustomizer;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfigurationCustomizerProvider;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.BatchSpanProcessorModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.OpenTelemetryConfigurationModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.OtlpGrpcExporterModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.OtlpHttpExporterModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.SimpleSpanProcessorModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.SpanExporterModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.SpanProcessorModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.TracerProviderModel;
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class ElasticDeclarativeConfigurationCustomizerTest {
-
-  // because declarative config relies on json mapping annotations, we can leverage this for testing
-  // the configuration customization.
-  private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Test
   void defaultConfig() {
@@ -49,14 +57,22 @@ class ElasticDeclarativeConfigurationCustomizerTest {
     model = applyConfigCustomize(model, new ElasticDeclarativeConfigurationCustomizer());
 
     // ensures that we add our resource detector even if the model does not provide any
-    checkJson(
-        model.getResource(),
-        "{\"attributes\":[],\"detection/development\":{\"detectors\":[{\"elastic_distribution\":null}]}}");
+    assertThatJson(json(model.getResource()))
+        .inPath("attributes").isArray().isEmpty();
+    assertThatJson(json(model.getResource()))
+        .inPath("detection/development.detectors")
+        .isArray()
+        .containsExactly(json("{\"elastic_distribution\":null}]}"));
+
+    // no exporter is configured by default for any signal
+    assertThat(model.getTracerProvider()).isNull();
+    assertThat(model.getMeterProvider()).isNull();
+    assertThat(model.getLoggerProvider()).isNull();
   }
 
   @ParameterizedTest
   @ValueSource(booleans = {true, false})
-  void upstreamProvider(boolean elasticFirst) {
+  void distributionResourceProvider(boolean elasticFirst) {
     // upstream provider is always added first in the list, even if we add ours first
     // this ordering behavior is implemented in upstream provider
     OpenTelemetryConfigurationModel model = new OpenTelemetryConfigurationModel();
@@ -72,17 +88,66 @@ class ElasticDeclarativeConfigurationCustomizerTest {
 
     model = applyConfigCustomize(model, first);
     model = applyConfigCustomize(model, second);
-    checkJson(
-        model.getResource(),
-        "{\"attributes\":[],\"detection/development\":{\"detectors\":[{\"opentelemetry_javaagent_distribution\":null},{\"elastic_distribution\":null}]}}");
+
+    assertThatJson(json(model.getResource()))
+        .inPath("detection/development.detectors")
+        .isArray()
+        .containsExactly(
+            json("{\"opentelemetry_javaagent_distribution\":null}]}"),
+            json("{\"elastic_distribution\":null}]}"));
   }
 
-  private void checkJson(Object o, String expected) {
-    try {
-      assertThat(objectMapper.writeValueAsString(o)).isEqualTo(expected);
-    } catch (JsonProcessingException e) {
-      throw new IllegalStateException(e);
+  @ParameterizedTest
+  @ValueSource(strings = {"grpc", "http"})
+  void userAgent(String protocol) {
+    // setup tracer provider with single + batch exporter
+    // check that the user-agent value is set as expected
+    OpenTelemetryConfigurationModel model = new OpenTelemetryConfigurationModel();
+
+    SpanExporterModel spanExporter = new SpanExporterModel();
+    switch (protocol) {
+      case "grpc":
+        spanExporter.withOtlpGrpc(new OtlpGrpcExporterModel());
+        break;
+      case "http":
+        spanExporter.withOtlpHttp(new OtlpHttpExporterModel());
+        break;
+      default:
+        throw new IllegalArgumentException("Unsupported protocol: " + protocol);
     }
+
+    SpanProcessorModel simpleProcessor = new SpanProcessorModel()
+        .withSimple(new SimpleSpanProcessorModel()
+            .withExporter(spanExporter));
+    SpanProcessorModel batchProcessor = new SpanProcessorModel()
+        .withBatch(new BatchSpanProcessorModel()
+            .withExporter(spanExporter));
+
+    model.withTracerProvider(new TracerProviderModel().withProcessors(Arrays.asList(
+        simpleProcessor, batchProcessor)));
+
+    model = applyConfigCustomize(model, new ElasticDeclarativeConfigurationCustomizer());
+
+    assertThat(model.getTracerProvider()).isNotNull();
+    assertThatJson(model.getTracerProvider()).inPath("processors")
+        .isArray().hasSize(2);
+    for (int i = 0; i < 2; i++) {
+      String pathPrefix = i == 0 ? "simple" : "batch";
+      assertThatJson(json(model.getTracerProvider().getProcessors().get(i)))
+          .inPath(pathPrefix + ".exporter.otlp_" + protocol + ".headers")
+          .isArray()
+          .contains(
+              json(userAgentAsMap("elastic-otlp-" + protocol + "-java/" + AgentVersion.VERSION)));
+    }
+
+  }
+
+  @NotNull
+  private static Map<String, String> userAgentAsMap(String value) {
+    Map<String,String> header = new HashMap<>();
+    header.put("name", "user-agent");
+    header.put("value", value);
+    return header;
   }
 
   private OpenTelemetryConfigurationModel applyConfigCustomize(

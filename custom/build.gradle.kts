@@ -71,6 +71,7 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation(libs.freemarker)
   testImplementation(libs.wiremockjre8)
+  testImplementation(libs.jsonunitassertj)
 }
 
 tasks {

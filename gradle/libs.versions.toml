@@ -45,6 +45,8 @@ autoservice-processor = { group = "com.google.auto.service", name = "auto-servic
 autoservice-annotations = { group = "com.google.auto.service", name = "auto-service-annotations", version.ref = "autoservice" }
 
 assertj-core = "org.assertj:assertj-core:3.27.7"
+# json unit assertj compatible with java 8
+jsonunitassertj = "net.javacrumbs.json-unit:json-unit-assertj:2.40.1"
 awaitility = "org.awaitility:awaitility:4.3.0"
 findbugs-jsr305 = "com.google.code.findbugs:jsr305:3.0.2"
 wiremockjre8 = "com.github.tomakehurst:wiremock-jre8:2.35.2"
