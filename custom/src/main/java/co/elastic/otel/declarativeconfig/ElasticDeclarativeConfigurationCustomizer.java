@@ -18,11 +18,11 @@
  */
 package co.elastic.otel.declarativeconfig;
 
+import static co.elastic.otel.ElasticUserAgentHeader.HEADER_NAME;
 import static co.elastic.otel.ElasticUserAgentHeader.OTLP_GRPC;
 import static co.elastic.otel.ElasticUserAgentHeader.OTLP_HTTP;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
-import static jdk.internal.net.http.HttpRequestImpl.USER_AGENT;
 
 import com.google.auto.service.AutoService;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfigurationCustomizer;
@@ -236,7 +236,7 @@ public class ElasticDeclarativeConfigurationCustomizer
     if (headersList != null) {
       for (String part : headersList.split(",")) {
         String[] keyValue = part.split("=", 2);
-        if (keyValue.length == 2 && USER_AGENT.equalsIgnoreCase(keyValue[0].trim())) {
+        if (keyValue.length == 2 && HEADER_NAME.equalsIgnoreCase(keyValue[0].trim())) {
           return headers;
         }
       }
@@ -244,7 +244,7 @@ public class ElasticDeclarativeConfigurationCustomizer
     // skip if user-agent is already present in headers (list)
     if (headers != null && !headers.isEmpty()) {
       for (NameStringValuePairModel header : headers) {
-        if (USER_AGENT.equalsIgnoreCase(header.getName())) {
+        if (HEADER_NAME.equalsIgnoreCase(header.getName())) {
           return headers;
         }
       }
@@ -254,7 +254,7 @@ public class ElasticDeclarativeConfigurationCustomizer
     if (headers != null) {
       result.addAll(headers);
     }
-    result.add(new NameStringValuePairModel().withName(USER_AGENT).withValue(value));
+    result.add(new NameStringValuePairModel().withName(HEADER_NAME).withValue(value));
     return result;
   }
 }

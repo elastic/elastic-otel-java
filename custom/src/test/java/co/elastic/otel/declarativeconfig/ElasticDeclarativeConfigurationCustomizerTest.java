@@ -205,7 +205,7 @@ class ElasticDeclarativeConfigurationCustomizerTest {
         .describedAs("add user agent when none is present in headers list or headers")
         .hasSize(1)
         .flatExtracting("name", "value")
-        .contains("user-agent", "my-user-agent");
+        .contains("User-Agent", "my-user-agent");
 
     assertThat(
             ElasticDeclarativeConfigurationCustomizer.addUserAgent(
@@ -213,11 +213,12 @@ class ElasticDeclarativeConfigurationCustomizerTest {
         .describedAs("add user agent when none is present in headers list or headers")
         .hasSize(1)
         .flatExtracting("name", "value")
-        .contains("user-agent", "my-user-agent");
+        .contains("User-Agent", "my-user-agent");
 
     assertThat(
             ElasticDeclarativeConfigurationCustomizer.addUserAgent(
-                "User-Agent=custom-user-agent", null, "my-user-agent"))
+                // using non-standard case is intentional for testing
+                "User-agent=custom-user-agent", null, "my-user-agent"))
         .describedAs("configured user-agent is preserved")
         .isNull();
 
@@ -226,19 +227,19 @@ class ElasticDeclarativeConfigurationCustomizerTest {
                 null,
                 Collections.singletonList(
                     new NameStringValuePairModel()
-                        .withName("User-Agent")
+                        .withName("user-agent") // using lower-case is intentional for testing
                         .withValue("custom-user-Agent")),
                 "my-user-agent"))
         .describedAs("configured user-agent is preserved")
         .hasSize(1)
         .flatExtracting("name", "value")
-        .contains("User-Agent", "custom-user-Agent");
+        .contains("user-agent", "custom-user-Agent");
   }
 
   @NotNull
   private static Map<String, String> userAgentHeader(String value) {
     Map<String, String> header = new HashMap<>();
-    header.put("name", "user-agent");
+    header.put("name", "User-Agent");
     header.put("value", value);
     return header;
   }
