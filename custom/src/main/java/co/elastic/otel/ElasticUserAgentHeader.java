@@ -29,6 +29,7 @@ import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 
+/** set User-Agent for automatic configuration */
 public class ElasticUserAgentHeader {
 
   private static final String HEADER_NAME = "User-Agent";

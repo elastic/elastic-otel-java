@@ -56,9 +56,9 @@ import javax.annotation.Nullable;
 public class ElasticDeclarativeConfigurationCustomizer
     implements DeclarativeConfigurationCustomizerProvider {
 
-  public static final String USER_AGENT = "user-agent";
-  public static final String OTLP_GRPC = "elastic-otlp-grpc-java/" + AgentVersion.VERSION;
-  public static final String OTLP_HTTP = "elastic-otlp-http-java/" + AgentVersion.VERSION;
+  private static final String USER_AGENT = "User-Agent";
+  private static final String OTLP_GRPC = "elastic-otlp-grpc-java/" + AgentVersion.VERSION;
+  private static final String OTLP_HTTP = "elastic-otlp-http-java/" + AgentVersion.VERSION;
 
   @Override
   public void customize(DeclarativeConfigurationCustomizer customizer) {
