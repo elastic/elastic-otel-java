@@ -45,12 +45,12 @@ import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.Simple
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.SimpleSpanProcessorModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.SpanExporterModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.TracerProviderModel;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 @AutoService(DeclarativeConfigurationCustomizerProvider.class)
 public class ElasticDeclarativeConfigurationCustomizer
@@ -112,51 +112,52 @@ public class ElasticDeclarativeConfigurationCustomizer
     // for 'tracer_provider', 'meter_provider' and 'logger_provider'.
     //
     // tracer_provider:
-    //  processors:
-    //    # or 'simple' for simple span processor
-    //    - batch:
-    //        exporter:
-    //          # or 'otlp_grpc' for grpc
-    //          otlp_http:
-    //            endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/traces
-    //            headers:
-    //              # with 'elastic-otlp-grpc-java' prefix for grpc
-    //              user-agent: "elastic-otlp-http-java/<edot-version>"
+    //   processors:
+    //     # or 'simple' for simple span processor
+    //     - batch:
+    //         exporter:
+    //           # or 'otlp_grpc' for grpc
+    //           otlp_http:
+    //             endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/traces
+    //             headers:
+    //               # with 'elastic-otlp-grpc-java' prefix for grpc
+    //               user-agent: "elastic-otlp-http-java/<edot-version>"
     //
-    //meter_provider:
-    //  readers:
-    //    - periodic:
-    //        exporter:
-    //          # or 'otlp_grpc' for grpc
-    //          otlp_http:
-    //            endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/metrics
-    //            headers:
-    //              # with 'elastic-otlp-grpc-java' prefix for grpc
-    //              user-agent: "elastic-otlp-http-java/<edot-version>"
+    // meter_provider:
+    //   readers:
+    //     - periodic:
+    //         exporter:
+    //           # or 'otlp_grpc' for grpc
+    //           otlp_http:
+    //             endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/metrics
+    //             headers:
+    //               # with 'elastic-otlp-grpc-java' prefix for grpc
+    //               user-agent: "elastic-otlp-http-java/<edot-version>"
     //
-    //logger_provider:
-    //  processors:
-    //    # or 'simple' for simple log processor
-    //    - batch:
-    //        exporter:
-    //          otlp_http:
-    //            endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/logs
-    //            headers:
-    //              # with 'elastic-otlp-grpc-java' prefix for grpc
-    //              user-agent: "elastic-otlp-http-java/<edot-version>"
+    // logger_provider:
+    //   processors:
+    //     # or 'simple' for simple log processor
+    //     - batch:
+    //         exporter:
+    //           otlp_http:
+    //             endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/logs
+    //             headers:
+    //               # with 'elastic-otlp-grpc-java' prefix for grpc
+    //               user-agent: "elastic-otlp-http-java/<edot-version>"
 
     // traces
     Optional.ofNullable(model.getTracerProvider())
         .map(TracerProviderModel::getProcessors)
         .orElse(Collections.emptyList())
-        .forEach(processor -> {
-          Optional.ofNullable(processor.getBatch())
-              .map(BatchSpanProcessorModel::getExporter)
-              .ifPresent(this::addUserAgent);
-          Optional.ofNullable(processor.getSimple())
-              .map(SimpleSpanProcessorModel::getExporter)
-              .ifPresent(this::addUserAgent);
-        });
+        .forEach(
+            processor -> {
+              Optional.ofNullable(processor.getBatch())
+                  .map(BatchSpanProcessorModel::getExporter)
+                  .ifPresent(this::addUserAgent);
+              Optional.ofNullable(processor.getSimple())
+                  .map(SimpleSpanProcessorModel::getExporter)
+                  .ifPresent(this::addUserAgent);
+            });
 
     // metrics
     Optional.ofNullable(model.getMeterProvider())
@@ -173,20 +174,19 @@ public class ElasticDeclarativeConfigurationCustomizer
     Optional.ofNullable(model.getLoggerProvider())
         .map(LoggerProviderModel::getProcessors)
         .orElse(Collections.emptyList())
-        .forEach( processor ->{
-          Optional.ofNullable(processor.getBatch())
-              .map(BatchLogRecordProcessorModel::getExporter)
-              .ifPresent(this::addUserAgent);
-          Optional.ofNullable(processor.getSimple())
-              .map(SimpleLogRecordProcessorModel::getExporter)
-              .ifPresent(this::addUserAgent);
-        });
-
-
+        .forEach(
+            processor -> {
+              Optional.ofNullable(processor.getBatch())
+                  .map(BatchLogRecordProcessorModel::getExporter)
+                  .ifPresent(this::addUserAgent);
+              Optional.ofNullable(processor.getSimple())
+                  .map(SimpleLogRecordProcessorModel::getExporter)
+                  .ifPresent(this::addUserAgent);
+            });
   }
 
   private void addUserAgent(@Nullable LogRecordExporterModel logExporterModel) {
-    if(logExporterModel == null) {
+    if (logExporterModel == null) {
       return;
     }
     addUserAgent(logExporterModel.getOtlpGrpc(), logExporterModel.getOtlpHttp());
@@ -209,7 +209,6 @@ public class ElasticDeclarativeConfigurationCustomizer
       List<NameStringValuePairModel> headers = otlpHttp.getHeaders();
       otlpHttp.withHeaders(addUserAgent(headersList, headers, OTLP_HTTP));
     }
-
   }
 
   private void addUserAgent(@Nullable SpanExporterModel spanExporterModel) {
@@ -223,19 +222,18 @@ public class ElasticDeclarativeConfigurationCustomizer
     if (otlpGrpc != null) {
       String headersList = otlpGrpc.getHeadersList();
       List<NameStringValuePairModel> headers = otlpGrpc.getHeaders();
-      otlpGrpc.withHeaders(
-          addUserAgent(headersList, headers, OTLP_GRPC));
+      otlpGrpc.withHeaders(addUserAgent(headersList, headers, OTLP_GRPC));
     }
     if (otlpHttp != null) {
       String headersList = otlpHttp.getHeadersList();
       List<NameStringValuePairModel> headers = otlpHttp.getHeaders();
-      otlpHttp.withHeaders(
-          addUserAgent(headersList, headers, OTLP_HTTP));
+      otlpHttp.withHeaders(addUserAgent(headersList, headers, OTLP_HTTP));
     }
   }
 
-  private static List<NameStringValuePairModel> addUserAgent(@Nullable String headersList, List<NameStringValuePairModel> headers,
-      String value) {
+  // package protected for testing
+  static List<NameStringValuePairModel> addUserAgent(
+      @Nullable String headersList, List<NameStringValuePairModel> headers, String value) {
     // skip if user-agent is already present in headers list (string)
     if (headersList != null) {
       for (String part : headersList.split(",")) {
@@ -258,10 +256,7 @@ public class ElasticDeclarativeConfigurationCustomizer
     if (headers != null) {
       result.addAll(headers);
     }
-    result.add(new NameStringValuePairModel()
-        .withName(USER_AGENT)
-        .withValue(value));
+    result.add(new NameStringValuePairModel().withName(USER_AGENT).withValue(value));
     return result;
   }
-
 }

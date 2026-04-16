@@ -27,10 +27,22 @@ import io.opentelemetry.javaagent.tooling.AgentVersion;
 import io.opentelemetry.javaagent.tooling.resources.ResourceCustomizerProvider;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfigurationCustomizer;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfigurationCustomizerProvider;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.BatchLogRecordProcessorModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.BatchSpanProcessorModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.LogRecordExporterModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.LogRecordProcessorModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.LoggerProviderModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.MeterProviderModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.MetricReaderModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.NameStringValuePairModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.OpenTelemetryConfigurationModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.OtlpGrpcExporterModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.OtlpGrpcMetricExporterModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.OtlpHttpExporterModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.OtlpHttpMetricExporterModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.PeriodicMetricReaderModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.PushMetricExporterModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.SimpleLogRecordProcessorModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.SimpleSpanProcessorModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.SpanExporterModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.SpanProcessorModel;
@@ -39,6 +51,7 @@ import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -57,8 +70,7 @@ class ElasticDeclarativeConfigurationCustomizerTest {
     model = applyConfigCustomize(model, new ElasticDeclarativeConfigurationCustomizer());
 
     // ensures that we add our resource detector even if the model does not provide any
-    assertThatJson(json(model.getResource()))
-        .inPath("attributes").isArray().isEmpty();
+    assertThatJson(json(model.getResource())).inPath("attributes").isArray().isEmpty();
     assertThatJson(json(model.getResource()))
         .inPath("detection/development.detectors")
         .isArray()
@@ -105,46 +117,127 @@ class ElasticDeclarativeConfigurationCustomizerTest {
     OpenTelemetryConfigurationModel model = new OpenTelemetryConfigurationModel();
 
     SpanExporterModel spanExporter = new SpanExporterModel();
+    PushMetricExporterModel metricExporter = new PushMetricExporterModel();
+    LogRecordExporterModel logExporter = new LogRecordExporterModel();
+
     switch (protocol) {
       case "grpc":
         spanExporter.withOtlpGrpc(new OtlpGrpcExporterModel());
+        metricExporter.withOtlpGrpc(new OtlpGrpcMetricExporterModel());
+        logExporter.withOtlpGrpc(new OtlpGrpcExporterModel());
         break;
       case "http":
         spanExporter.withOtlpHttp(new OtlpHttpExporterModel());
+        metricExporter.withOtlpHttp(new OtlpHttpMetricExporterModel());
+        logExporter.withOtlpHttp(new OtlpHttpExporterModel());
         break;
       default:
         throw new IllegalArgumentException("Unsupported protocol: " + protocol);
     }
 
-    SpanProcessorModel simpleProcessor = new SpanProcessorModel()
-        .withSimple(new SimpleSpanProcessorModel()
-            .withExporter(spanExporter));
-    SpanProcessorModel batchProcessor = new SpanProcessorModel()
-        .withBatch(new BatchSpanProcessorModel()
-            .withExporter(spanExporter));
+    // tracer provider
+    SpanProcessorModel spanSimpleProcessor =
+        new SpanProcessorModel()
+            .withSimple(new SimpleSpanProcessorModel().withExporter(spanExporter));
+    SpanProcessorModel spanBatchProcessor =
+        new SpanProcessorModel()
+            .withBatch(new BatchSpanProcessorModel().withExporter(spanExporter));
+    model.withTracerProvider(
+        new TracerProviderModel()
+            .withProcessors(Arrays.asList(spanSimpleProcessor, spanBatchProcessor)));
 
-    model.withTracerProvider(new TracerProviderModel().withProcessors(Arrays.asList(
-        simpleProcessor, batchProcessor)));
+    // meter provider
+    model.withMeterProvider(
+        new MeterProviderModel()
+            .withReaders(
+                Collections.singletonList(
+                    new MetricReaderModel()
+                        .withPeriodic(
+                            new PeriodicMetricReaderModel().withExporter(metricExporter)))));
+
+    // logger provider
+    LogRecordProcessorModel logSimpleProcessor =
+        new LogRecordProcessorModel()
+            .withSimple(new SimpleLogRecordProcessorModel().withExporter(logExporter));
+    LogRecordProcessorModel logBatchProcessor =
+        new LogRecordProcessorModel()
+            .withBatch(new BatchLogRecordProcessorModel().withExporter(logExporter));
+    model.withLoggerProvider(
+        new LoggerProviderModel()
+            .withProcessors(Arrays.asList(logSimpleProcessor, logBatchProcessor)));
 
     model = applyConfigCustomize(model, new ElasticDeclarativeConfigurationCustomizer());
 
+    // tracer provider
     assertThat(model.getTracerProvider()).isNotNull();
-    assertThatJson(model.getTracerProvider()).inPath("processors")
-        .isArray().hasSize(2);
+    assertThatJson(model.getTracerProvider()).inPath("processors").isArray().hasSize(2);
     for (int i = 0; i < 2; i++) {
       String pathPrefix = i == 0 ? "simple" : "batch";
-      assertThatJson(json(model.getTracerProvider().getProcessors().get(i)))
+      assertThatJson(model.getTracerProvider().getProcessors().get(i))
           .inPath(pathPrefix + ".exporter.otlp_" + protocol + ".headers")
           .isArray()
-          .contains(
-              json(userAgentAsMap("elastic-otlp-" + protocol + "-java/" + AgentVersion.VERSION)));
+          .contains(userAgentHeader("elastic-otlp-" + protocol + "-java/" + AgentVersion.VERSION));
     }
 
+    // meter provider
+    assertThat(model.getMeterProvider()).isNotNull();
+    assertThatJson(model.getMeterProvider()).inPath("readers").isArray().hasSize(1);
+    assertThatJson(model.getMeterProvider().getReaders().get(0))
+        .inPath("periodic.exporter.otlp_" + protocol + ".headers")
+        .isArray()
+        .contains(userAgentHeader("elastic-otlp-" + protocol + "-java/" + AgentVersion.VERSION));
+
+    // logger provider
+    assertThat(model.getLoggerProvider()).isNotNull();
+    assertThatJson(model.getLoggerProvider()).inPath("processors").isArray().hasSize(2);
+    for (int i = 0; i < 2; i++) {
+      String pathPrefix = i == 0 ? "simple" : "batch";
+      assertThatJson(model.getLoggerProvider().getProcessors().get(i))
+          .inPath(pathPrefix + ".exporter.otlp_" + protocol + ".headers")
+          .isArray()
+          .contains(userAgentHeader("elastic-otlp-" + protocol + "-java/" + AgentVersion.VERSION));
+    }
+  }
+
+  @Test
+  void addUserAgentPriority() {
+    assertThat(ElasticDeclarativeConfigurationCustomizer.addUserAgent(null, null, "my-user-agent"))
+        .describedAs("add user agent when none is present in headers list or headers")
+        .hasSize(1)
+        .flatExtracting("name", "value")
+        .contains("user-agent", "my-user-agent");
+
+    assertThat(
+            ElasticDeclarativeConfigurationCustomizer.addUserAgent(
+                null, Collections.emptyList(), "my-user-agent"))
+        .describedAs("add user agent when none is present in headers list or headers")
+        .hasSize(1)
+        .flatExtracting("name", "value")
+        .contains("user-agent", "my-user-agent");
+
+    assertThat(
+            ElasticDeclarativeConfigurationCustomizer.addUserAgent(
+                "User-Agent=custom-user-agent", null, "my-user-agent"))
+        .describedAs("configured user-agent is preserved")
+        .isNull();
+
+    assertThat(
+            ElasticDeclarativeConfigurationCustomizer.addUserAgent(
+                null,
+                Collections.singletonList(
+                    new NameStringValuePairModel()
+                        .withName("User-Agent")
+                        .withValue("custom-user-Agent")),
+                "my-user-agent"))
+        .describedAs("configured user-agent is preserved")
+        .hasSize(1)
+        .flatExtracting("name", "value")
+        .contains("User-Agent", "custom-user-Agent");
   }
 
   @NotNull
-  private static Map<String, String> userAgentAsMap(String value) {
-    Map<String,String> header = new HashMap<>();
+  private static Map<String, String> userAgentHeader(String value) {
+    Map<String, String> header = new HashMap<>();
     header.put("name", "user-agent");
     header.put("value", value);
     return header;
