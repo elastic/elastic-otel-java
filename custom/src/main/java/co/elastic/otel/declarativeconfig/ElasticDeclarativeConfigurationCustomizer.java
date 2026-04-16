@@ -18,11 +18,13 @@
  */
 package co.elastic.otel.declarativeconfig;
 
+import static co.elastic.otel.ElasticUserAgentHeader.OTLP_GRPC;
+import static co.elastic.otel.ElasticUserAgentHeader.OTLP_HTTP;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
+import static jdk.internal.net.http.HttpRequestImpl.USER_AGENT;
 
 import com.google.auto.service.AutoService;
-import io.opentelemetry.javaagent.tooling.AgentVersion;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfigurationCustomizer;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.BatchLogRecordProcessorModel;
@@ -55,10 +57,6 @@ import javax.annotation.Nullable;
 @AutoService(DeclarativeConfigurationCustomizerProvider.class)
 public class ElasticDeclarativeConfigurationCustomizer
     implements DeclarativeConfigurationCustomizerProvider {
-
-  private static final String USER_AGENT = "User-Agent";
-  private static final String OTLP_GRPC = "elastic-otlp-grpc-java/" + AgentVersion.VERSION;
-  private static final String OTLP_HTTP = "elastic-otlp-http-java/" + AgentVersion.VERSION;
 
   @Override
   public void customize(DeclarativeConfigurationCustomizer customizer) {

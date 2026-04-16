@@ -32,17 +32,17 @@ import io.opentelemetry.sdk.trace.export.SpanExporter;
 /** set User-Agent for automatic configuration */
 public class ElasticUserAgentHeader {
 
-  private static final String HEADER_NAME = "User-Agent";
-  private static final String GRPC_VALUE = "elastic-otlp-grpc-java/" + AgentVersion.VERSION;
-  private static final String HTTP_VALUE = "elastic-otlp-http-java/" + AgentVersion.VERSION;
+  public static final String HEADER_NAME = "User-Agent";
+  public static final String OTLP_GRPC = "elastic-otlp-grpc-java/" + AgentVersion.VERSION;
+  public static final String OTLP_HTTP = "elastic-otlp-http-java/" + AgentVersion.VERSION;
 
   public static SpanExporter configureIfPossible(SpanExporter spanExporter) {
     if (spanExporter instanceof OtlpGrpcSpanExporter) {
       return ((OtlpGrpcSpanExporter) spanExporter)
-          .toBuilder().addHeader(HEADER_NAME, GRPC_VALUE).build();
+          .toBuilder().addHeader(HEADER_NAME, OTLP_GRPC).build();
     } else if (spanExporter instanceof OtlpHttpSpanExporter) {
       return ((OtlpHttpSpanExporter) spanExporter)
-          .toBuilder().addHeader(HEADER_NAME, HTTP_VALUE).build();
+          .toBuilder().addHeader(HEADER_NAME, OTLP_HTTP).build();
     }
     return spanExporter;
   }
@@ -50,10 +50,10 @@ public class ElasticUserAgentHeader {
   public static MetricExporter configureIfPossible(MetricExporter metricExporter) {
     if (metricExporter instanceof OtlpGrpcMetricExporter) {
       return ((OtlpGrpcMetricExporter) metricExporter)
-          .toBuilder().addHeader(HEADER_NAME, GRPC_VALUE).build();
+          .toBuilder().addHeader(HEADER_NAME, OTLP_GRPC).build();
     } else if (metricExporter instanceof OtlpHttpMetricExporter) {
       return ((OtlpHttpMetricExporter) metricExporter)
-          .toBuilder().addHeader(HEADER_NAME, HTTP_VALUE).build();
+          .toBuilder().addHeader(HEADER_NAME, OTLP_HTTP).build();
     }
     return metricExporter;
   }
@@ -61,10 +61,10 @@ public class ElasticUserAgentHeader {
   public static LogRecordExporter configureIfPossible(LogRecordExporter logExporter) {
     if (logExporter instanceof OtlpGrpcLogRecordExporter) {
       return ((OtlpGrpcLogRecordExporter) logExporter)
-          .toBuilder().addHeader(HEADER_NAME, GRPC_VALUE).build();
+          .toBuilder().addHeader(HEADER_NAME, OTLP_GRPC).build();
     } else if (logExporter instanceof OtlpHttpLogRecordExporter) {
       return ((OtlpHttpLogRecordExporter) logExporter)
-          .toBuilder().addHeader(HEADER_NAME, HTTP_VALUE).build();
+          .toBuilder().addHeader(HEADER_NAME, OTLP_HTTP).build();
     }
     return logExporter;
   }
