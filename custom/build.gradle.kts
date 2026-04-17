@@ -23,8 +23,10 @@ dependencies {
   }
 
   compileOnly("io.opentelemetry:opentelemetry-sdk")
+  compileOnly("io.opentelemetry:opentelemetry-api-incubator")
   compileOnly("io.opentelemetry:opentelemetry-exporter-otlp")
   compileOnly("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
+  compileOnly("io.opentelemetry:opentelemetry-sdk-extension-incubator")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-extension-api")
   compileOnly("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling")
   compileOnly(libs.bundles.semconv)
@@ -54,8 +56,10 @@ dependencies {
   // test dependencies
   testImplementation(project(":testing-common"))
   testImplementation("io.opentelemetry:opentelemetry-sdk")
+  testImplementation("io.opentelemetry:opentelemetry-api-incubator")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
+  testImplementation("io.opentelemetry:opentelemetry-sdk-extension-incubator")
   testImplementation("io.opentelemetry:opentelemetry-exporter-otlp")
   testImplementation("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling") {
     //The following dependency isn't actually needed, but breaks the classpath when testing with Java 8
@@ -67,6 +71,7 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation(libs.freemarker)
   testImplementation(libs.wiremockjre8)
+  testImplementation(libs.jsonunitassertj)
 }
 
 tasks {

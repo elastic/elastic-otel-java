@@ -18,20 +18,31 @@
  */
 package co.elastic.otel;
 
-import com.google.auto.service.AutoService;
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
-import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.javaagent.tooling.AgentVersion;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.semconv.incubating.TelemetryIncubatingAttributes;
 
-/**
- * Provides {@code telemetry.distro.name} and {@code telemetry.distro.version} resource attributes
- * for automatic configuration
- */
-@AutoService(ResourceProvider.class)
-public class ElasticDistroResourceProvider implements ResourceProvider {
+public class ElasticDistroResource {
 
-  @Override
-  public Resource createResource(ConfigProperties configProperties) {
-    return ElasticDistroResource.get();
+  private ElasticDistroResource() {}
+
+  public static Resource get() {
+    if (AgentVersion.VERSION == null) {
+      return Resource.empty();
+    }
+    try {
+      Class.forName("co.elastic.otel.agent.ElasticAgent");
+    } catch (ClassNotFoundException e) {
+      // this means that we are running as an extension of the vanilla agent
+      // and not as distro.
+      return Resource.empty();
+    }
+    return Resource.create(
+        Attributes.of(
+            TelemetryIncubatingAttributes.TELEMETRY_DISTRO_NAME,
+            "elastic",
+            TelemetryIncubatingAttributes.TELEMETRY_DISTRO_VERSION,
+            AgentVersion.VERSION));
   }
 }

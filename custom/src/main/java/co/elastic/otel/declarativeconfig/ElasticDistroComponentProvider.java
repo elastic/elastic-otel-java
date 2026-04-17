@@ -16,22 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel;
+package co.elastic.otel.declarativeconfig;
 
+import co.elastic.otel.ElasticDistroResource;
 import com.google.auto.service.AutoService;
-import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
-import io.opentelemetry.sdk.autoconfigure.spi.ResourceProvider;
+import io.opentelemetry.api.incubator.config.DeclarativeConfigProperties;
+import io.opentelemetry.sdk.autoconfigure.spi.internal.ComponentProvider;
 import io.opentelemetry.sdk.resources.Resource;
 
 /**
  * Provides {@code telemetry.distro.name} and {@code telemetry.distro.version} resource attributes
- * for automatic configuration
+ * for declarative configuration
  */
-@AutoService(ResourceProvider.class)
-public class ElasticDistroResourceProvider implements ResourceProvider {
+@AutoService(ComponentProvider.class)
+public class ElasticDistroComponentProvider implements ComponentProvider {
+
+  static final String NAME = "elastic_distribution";
 
   @Override
-  public Resource createResource(ConfigProperties configProperties) {
+  public Class<?> getType() {
+    return Resource.class;
+  }
+
+  @Override
+  public String getName() {
+    return NAME;
+  }
+
+  @Override
+  public Object create(DeclarativeConfigProperties config) {
     return ElasticDistroResource.get();
   }
 }
