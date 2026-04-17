@@ -74,6 +74,9 @@ jobs:
         with:
           github-token: ${{ steps.get_token.outputs.token }}
 
+      - name: Docs builder setup
+        uses: elastic/docs-actions/docs-builder/setup@v1
+
       - name: Create the release tag (post phase)
         if: inputs.phase == 'post'
         run: |
@@ -95,14 +98,11 @@ jobs:
         with:
           command: ./gradlew -q setNextVersion
 
-      - name: Generate documentation changelog (post release)
+      - name: Generate documentation changelog bundle (post release)
         if: inputs.phase == 'post'
         run: |
-          echo '<!--DEPENDENCIES-NOTES-START-->' >> CHANGELOG.next-release.md
-          echo -e "This release is based on the following upstream versions:\n\n" >> CHANGELOG.next-release.md
-          ./gradlew -q printUpstreamDependenciesMarkdown >> CHANGELOG.next-release.md
-          echo '<!--DEPENDENCIES-NOTES-END-->' >> CHANGELOG.next-release.md
-          java .ci/ReleaseChangelog.java CHANGELOG.next-release.md docs/release-notes ${{ env.RELEASE_VERSION }}
+          docs-builder changelog bundle edot-java-release ${{ env.RELEASE_VERSION }}
+          docs-builder changelog remove edot-java-release
   
       - name: Push the ${{ inputs.phase }} release branch
         run: |

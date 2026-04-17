@@ -221,16 +221,19 @@ jobs:
         uses: ./.github/workflows/gradle-goal
         with:
           command: ""
+      - name: Docs builder setup
+        uses: elastic/docs-actions/docs-builder/setup@v1
       - name: Print Release Notes
         id: print_release_notes
-        # note: release notes here will be copied as-is from 'CHANGELOG.next-release.md'
-        # the 'pre-post-release' workflow executed after this will reset contents of 'CHANGELOG.next-release.md'
+        # FIXME using temporary workaround from https://github.com/elastic/docs-builder/issues/3057
         run: |
           echo 'notes<<RELNOTESEOF' >> $GITHUB_OUTPUT
-          cat CHANGELOG.next-release.md >> $GITHUB_OUTPUT
-          printf '\nThis release is based on the following upstream versions:\n\n' >> $GITHUB_OUTPUT
-          ./gradlew -q printUpstreamDependenciesMarkdown >> $GITHUB_OUTPUT
-          echo 'RELNOTESEOF' >> $GITHUB_OUTPUT  
+          tmp="$(mktemp -d)"
+          docs-builder changelog render --input "${tmp}/${{ env.RELEASE_VERSION }}" --output "${tmp}"
+          cat "${tmp}/${{ env.RELEASE_VERSION }}/index.md" \
+            | sed -e "/## ${{ env.RELEASE_VERSION }} \[elastic-release-notes-${{ env.RELEASE_VERSION }}/d" \
+            | sed -e "/###/s/ \[elastic-${{ env.RELEASE_VERSION }}.*$//g" >> $GITHUB_OUTPUT
+          echo 'RELNOTESEOF' >> $GITHUB_OUTPUT
     
 
   post-release:
