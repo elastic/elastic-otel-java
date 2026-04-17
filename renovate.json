@@ -29,6 +29,16 @@
         "org.apache.activemq:artemis-jms-server"
       ],
       "enabled": false
+    },
+    {
+      "description": "json-unit-assertj 5+ requires Java 11+, keep major version to preserve java8 compatibility",
+      "matchPackageNames": [
+        "net.javacrumbs.json-unit:json-unit-assertj"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
     }
   ],
   "ignorePaths": [
