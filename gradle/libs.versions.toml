@@ -76,7 +76,7 @@ licenseReportPlugin = "com.github.jk1.dependency-license-report:com.github.jk1.d
 muzzleCheckPlugin = { group = "io.opentelemetry.instrumentation.muzzle-check", name = "io.opentelemetry.instrumentation.muzzle-check.gradle.plugin", version.ref = "opentelemetryJavaagentAlpha" }
 muzzleGenerationPlugin = { group = "io.opentelemetry.instrumentation.muzzle-generation", name = "io.opentelemetry.instrumentation.muzzle-generation.gradle.plugin", version.ref = "opentelemetryJavaagentAlpha" }
 # Ant should be kept in sync with the version used in the shadow plugin
-ant = "org.apache.ant:ant:1.10.16"
+ant = "org.apache.ant:ant:1.10.17"
 # ASM is currently only used during compile-time, so it is okay to diverge from the version used in ByteBuddy
 asm = "org.ow2.asm:asm:9.9.1"
 
