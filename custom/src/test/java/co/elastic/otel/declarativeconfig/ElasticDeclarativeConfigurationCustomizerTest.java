@@ -50,6 +50,7 @@ import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.Tracer
 import io.opentelemetry.sdk.logs.export.LogRecordExporter;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,9 +58,13 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class ElasticDeclarativeConfigurationCustomizerTest {
@@ -242,6 +247,69 @@ class ElasticDeclarativeConfigurationCustomizerTest {
     header.put("name", "User-Agent");
     header.put("value", value);
     return header;
+  }
+
+  @ParameterizedTest
+  @MethodSource("metricExporterTemporalityValues")
+  void metricExporterTemporality(String protocol, @Nullable String userSetTemporality) {
+
+    OpenTelemetryConfigurationModel model = new OpenTelemetryConfigurationModel();
+    PushMetricExporterModel metricExporterModel = new PushMetricExporterModel();
+
+    switch (protocol) {
+      case "grpc":
+        OtlpHttpMetricExporterModel.ExporterTemporalityPreference grpcUserPreference = null;
+        if (userSetTemporality != null) {
+          grpcUserPreference =
+              OtlpHttpMetricExporterModel.ExporterTemporalityPreference.fromValue(
+                  userSetTemporality);
+        }
+        metricExporterModel.withOtlpGrpc(
+            new OtlpGrpcMetricExporterModel().withTemporalityPreference(grpcUserPreference));
+        break;
+      case "http":
+        OtlpHttpMetricExporterModel.ExporterTemporalityPreference httpUserPreference = null;
+        if (userSetTemporality != null) {
+          httpUserPreference =
+              OtlpHttpMetricExporterModel.ExporterTemporalityPreference.fromValue(
+                  userSetTemporality);
+        }
+        metricExporterModel.withOtlpHttp(
+            new OtlpHttpMetricExporterModel().withTemporalityPreference(httpUserPreference));
+        break;
+      default:
+        throw new IllegalArgumentException("Unsupported protocol: " + protocol);
+    }
+
+    model.withMeterProvider(
+        new MeterProviderModel()
+            .withReaders(
+                Collections.singletonList(
+                    new MetricReaderModel()
+                        .withPeriodic(
+                            new PeriodicMetricReaderModel().withExporter(metricExporterModel)))));
+
+    applyConfigCustomize(model, new ElasticDeclarativeConfigurationCustomizer());
+
+    assertThat(model.getMeterProvider()).isNotNull();
+    assertThat(model.getMeterProvider().getReaders()).hasSize(1);
+    assertThatJson(json(model.getMeterProvider().getReaders().get(0)))
+        .inPath("periodic.exporter.otlp_" + protocol + ".temporality_preference")
+        .isEqualTo(userSetTemporality != null ? userSetTemporality : "delta");
+  }
+
+  public static Stream<Arguments> metricExporterTemporalityValues() {
+    ArrayList<Arguments> args = new ArrayList<>();
+    for (String protocol : Arrays.asList("grpc", "http")) {
+      for (OtlpHttpMetricExporterModel.ExporterTemporalityPreference temporality :
+          OtlpHttpMetricExporterModel.ExporterTemporalityPreference.values()) {
+        String userValue = temporality.name().toLowerCase();
+        args.add(Arguments.of(protocol, userValue));
+      }
+      // test for default value when user does not set any value
+      args.add(Arguments.of(protocol, null));
+    }
+    return args.stream();
   }
 
   private OpenTelemetryConfigurationModel applyConfigCustomize(

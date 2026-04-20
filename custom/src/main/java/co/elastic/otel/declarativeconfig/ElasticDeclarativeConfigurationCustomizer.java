@@ -64,6 +64,7 @@ public class ElasticDeclarativeConfigurationCustomizer
         model -> {
           customizeResources(model);
           customizeUserAgent(model);
+          customizeMetricsTemporality(model);
           return model;
         });
   }
@@ -256,5 +257,41 @@ public class ElasticDeclarativeConfigurationCustomizer
     }
     result.add(new NameStringValuePairModel().withName(HEADER_NAME).withValue(value));
     return result;
+  }
+
+  private void customizeMetricsTemporality(OpenTelemetryConfigurationModel model) {
+    // configure otlp metric exporters temporality preference if not explicitly set.
+    // for users, setting it explicitly to 'cumulative' restores default SDK behavior.
+    //
+    // meter_provider:
+    //   readers:
+    //     - periodic:
+    //         exporter:
+    //           # or 'otlp_grpc' for grpc
+    //           otlp_http:
+    //             endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/metrics
+    //             temporality_preference: delta
+
+    Optional.ofNullable(model.getMeterProvider())
+        .map(MeterProviderModel::getReaders)
+        .orElse(Collections.emptyList())
+        .forEach(
+            reader -> {
+              Optional.ofNullable(reader.getPeriodic())
+                  .map(PeriodicMetricReaderModel::getExporter)
+                  .ifPresent(
+                      metricExporterModel -> {
+                        OtlpGrpcMetricExporterModel otlpGrpc = metricExporterModel.getOtlpGrpc();
+                        if (otlpGrpc != null && otlpGrpc.getTemporalityPreference() == null) {
+                          otlpGrpc.withTemporalityPreference(
+                              OtlpHttpMetricExporterModel.ExporterTemporalityPreference.DELTA);
+                        }
+                        OtlpHttpMetricExporterModel otlpHttp = metricExporterModel.getOtlpHttp();
+                        if (otlpHttp != null && otlpHttp.getTemporalityPreference() == null) {
+                          otlpHttp.withTemporalityPreference(
+                              OtlpHttpMetricExporterModel.ExporterTemporalityPreference.DELTA);
+                        }
+                      });
+            });
   }
 }
