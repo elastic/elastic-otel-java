@@ -1,0 +1,61 @@
+file_format: "1.0"
+resource:
+  attributes:
+  #     use this to set custom resource attributes
+  #    - name: custom.attribute
+  #      value: custom.attribute.value
+
+  # get attributes from OTEL_RESOURCE_ATTRIBUTES environment variable if set
+  attributes_list: ${OTEL_RESOURCE_ATTRIBUTES:-}
+
+  detection/development:
+    detectors:
+      # Enable cloud provider resource attributes detectors by default for easier onboarding.
+      # Those may slow down application startup, thus only the relevant ones should be enabled in production
+      - aws:
+      - azure:
+      - gcp:
+      # Provides 'process.*' attributes, including 'process.pid'
+      - process:
+      # Provides 'host.id'
+      - host:
+      # Provides 'container.id'
+      - container:
+      # Provides 'service.name' and 'service.instance.id'
+      - service:
+
+tracer_provider:
+  processors:
+    - batch:
+        exporter:
+          otlp_http:
+            # get endpoint from OTEL_EXPORTER_OTLP_ENDPOINT environment variable if set, otherwise fallback to local collector
+            endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/traces
+            # get endpoint headers (like authentication) from OTEL_EXPORTER_OTLP_HEADERS environment variable if set
+            headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
+
+meter_provider:
+  readers:
+    - periodic:
+        exporter:
+          otlp_http:
+            # get endpoint from OTEL_EXPORTER_OTLP_ENDPOINT environment variable if set, otherwise fallback to local collector
+            endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/metrics
+            # get endpoint headers (like authentication) from OTEL_EXPORTER_OTLP_HEADERS environment variable if set
+            headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
+
+logger_provider:
+  processors:
+    - batch:
+        exporter:
+          otlp_http:
+            # get endpoint from OTEL_EXPORTER_OTLP_ENDPOINT environment variable if set, otherwise fallback to local collector
+            endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/logs
+            # get endpoint headers (like authentication) from OTEL_EXPORTER_OTLP_HEADERS environment variable if set
+            headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
+
+instrumentation/development:
+  java:
+    runtime_telemetry:
+      # emit not-yet stable runtime telemetry metrics which are currently part of semconv for java runtime
+      emit_experimental_metrics/development: true
