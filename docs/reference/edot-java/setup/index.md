@@ -94,9 +94,31 @@ java \
 -jar myapp.jar
 ```
 
-When modifying the JVM command line arguments is not possible, use the `JAVA_TOOL_OPTIONS` environment variable to provide the `-javaagent:` argument or JVM system properties. When `JAVA_TOOL_OPTIONS` is set, all JVMs automatically use it, so make sure to limit the scope to the relevant JVMs.
+When modifying the JVM command line arguments is not possible, use the `JAVA_TOOL_OPTIONS` environment variable to provide the `-javaagent:` argument or JVM system properties:
 
-Some application servers require manual steps or modification of their configuration files. Refer to [dedicated instructions](https://opentelemetry.io/docs/zero-code/java/agent/server-config/) for more details.
+```sh
+export JAVA_TOOL_OPTIONS="-javaagent:/path/to/agent.jar"
+```
+
+:::{note}
+`JAVA_TOOL_OPTIONS` is applied to every JVM process that starts in the same environment, including helper processes, build tools, or other services sharing a host or container. In application server deployments or Kubernetes pods that run multiple JVM processes, this can result in unintended instrumentation of JVMs you did not mean to instrument.
+
+To avoid this, prefer setting `-javaagent` directly in the server-specific startup script (refer to [Application servers](#application-servers)) rather than using `JAVA_TOOL_OPTIONS` at a system or pod level.
+:::
+
+### Application servers
+
+Many application servers require adding the `-javaagent` argument to a server-specific configuration file rather than the process command line. The following table summarizes where to add the argument for common servers. For full details, refer to the [contrib OpenTelemetry instructions](https://opentelemetry.io/docs/zero-code/java/agent/server-config/).
+
+| Server | Where to add `-javaagent` |
+|---|---|
+| **Tomcat / TomEE** | `bin/setenv.sh` (Linux) or `bin/setenv.bat` (Windows) — create the file if it doesn't exist |
+| **JBoss EAP / WildFly** | `bin/standalone.conf` (Linux) or `bin/standalone.conf.bat` (Windows) — add to `JAVA_OPTS` |
+| **Jetty** | `bin/jetty.sh` (`JAVA_OPTIONS`), `start.ini`, or pass directly to `java -jar start.jar` |
+| **WebLogic** | `bin/startWebLogic.sh` (Linux) or `bin/startWebLogic.cmd` (Windows) — add to `JAVA_OPTIONS` |
+| **Glassfish / Payara** | `asadmin create-jvm-options` command, or Admin Console → JVM Settings |
+| **WebSphere Liberty** | `jvm.options` file (server-specific or global) |
+| **WebSphere Traditional** | Admin Console → Servers → Application Servers → *server* → Java and Process Management → Process Definition → Java Virtual Machine → Generic JVM arguments |
 
 For applications deployed with Kubernetes, use the [OpenTelemetry Operator](/reference/edot-java/setup/k8s.md).
 
