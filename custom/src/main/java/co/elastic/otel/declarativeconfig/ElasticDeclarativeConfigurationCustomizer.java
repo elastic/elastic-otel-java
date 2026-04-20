@@ -29,6 +29,9 @@ import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfigurat
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.BatchLogRecordProcessorModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.BatchSpanProcessorModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.ExperimentalInstrumentationModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.ExperimentalLanguageSpecificInstrumentationModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.ExperimentalLanguageSpecificInstrumentationPropertyModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.ExperimentalResourceDetectionModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.ExperimentalResourceDetectorModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.LogRecordExporterModel;
@@ -58,15 +61,48 @@ import javax.annotation.Nullable;
 public class ElasticDeclarativeConfigurationCustomizer
     implements DeclarativeConfigurationCustomizerProvider {
 
+  private static final String RUNTIME_TELEMETRY = "runtime_telemetry";
+  private static final String EMIT_EXPERIMENTAL_METRICS_DEVELOPMENT =
+      "emit_experimental_metrics/development";
+
   @Override
   public void customize(DeclarativeConfigurationCustomizer customizer) {
     customizer.addModelCustomizer(
         model -> {
           customizeResources(model);
           customizeUserAgent(model);
+          customizeExperimentalRuntimeTelemetryMetrics(model);
           customizeMetricsTemporality(model);
           return model;
         });
+  }
+
+  private static void customizeExperimentalRuntimeTelemetryMetrics(
+      OpenTelemetryConfigurationModel model) {
+
+    ExperimentalInstrumentationModel instrumentationDevelopment =
+        model.getInstrumentationDevelopment();
+    if (instrumentationDevelopment == null) {
+      instrumentationDevelopment = new ExperimentalInstrumentationModel();
+      model.withInstrumentationDevelopment(instrumentationDevelopment);
+    }
+
+    ExperimentalLanguageSpecificInstrumentationModel java = instrumentationDevelopment.getJava();
+    if (java == null) {
+      java = new ExperimentalLanguageSpecificInstrumentationModel();
+      instrumentationDevelopment.withJava(java);
+    }
+
+    ExperimentalLanguageSpecificInstrumentationPropertyModel runtimeTelemetry =
+        java.getAdditionalProperties().get(RUNTIME_TELEMETRY);
+    if (runtimeTelemetry == null) {
+      runtimeTelemetry = new ExperimentalLanguageSpecificInstrumentationPropertyModel();
+      java.withAdditionalProperty(RUNTIME_TELEMETRY, runtimeTelemetry);
+    }
+    if (runtimeTelemetry.getAdditionalProperties().get(EMIT_EXPERIMENTAL_METRICS_DEVELOPMENT)
+        == null) {
+      runtimeTelemetry.withAdditionalProperty(EMIT_EXPERIMENTAL_METRICS_DEVELOPMENT, true);
+    }
   }
 
   private static void customizeResources(OpenTelemetryConfigurationModel model) {

@@ -29,6 +29,9 @@ import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfigurat
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.BatchLogRecordProcessorModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.BatchSpanProcessorModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.ExperimentalInstrumentationModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.ExperimentalLanguageSpecificInstrumentationModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.ExperimentalLanguageSpecificInstrumentationPropertyModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.LogRecordExporterModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.LogRecordProcessorModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.LoggerProviderModel;
@@ -85,6 +88,12 @@ class ElasticDeclarativeConfigurationCustomizerTest {
     assertThat(model.getTracerProvider()).isNull();
     assertThat(model.getMeterProvider()).isNull();
     assertThat(model.getLoggerProvider()).isNull();
+
+    // java experimental runtime metrics enabled by default
+    assertThatJson(json(model.getInstrumentationDevelopment()))
+        .inPath("java.runtime_telemetry.emit_experimental_metrics/development")
+        .isBoolean()
+        .isTrue();
   }
 
   @ParameterizedTest
@@ -239,6 +248,28 @@ class ElasticDeclarativeConfigurationCustomizerTest {
         .hasSize(1)
         .flatExtracting("name", "value")
         .contains("user-agent", "custom-user-Agent");
+  }
+
+  @Test
+  void optOutExperimentalRuntimeMetrics() {
+    OpenTelemetryConfigurationModel model =
+        new OpenTelemetryConfigurationModel()
+            .withInstrumentationDevelopment(
+                new ExperimentalInstrumentationModel()
+                    .withJava(
+                        new ExperimentalLanguageSpecificInstrumentationModel()
+                            .withAdditionalProperty(
+                                "runtime_telemetry",
+                                new ExperimentalLanguageSpecificInstrumentationPropertyModel()
+                                    .withAdditionalProperty(
+                                        "emit_experimental_metrics/development", false))));
+
+    model = applyConfigCustomize(model, new ElasticDeclarativeConfigurationCustomizer());
+
+    assertThatJson(json(model.getInstrumentationDevelopment()))
+        .inPath("java.runtime_telemetry.emit_experimental_metrics/development")
+        .isBoolean()
+        .isFalse();
   }
 
   @NotNull
