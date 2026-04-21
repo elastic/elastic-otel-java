@@ -18,6 +18,17 @@
  */
 package com.example.javaagent.smoketest;
 
+import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_INSTANCE_ID;
+import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
+import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_ID;
+import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_ARCH;
+import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_NAME;
+import static io.opentelemetry.semconv.incubating.OsIncubatingAttributes.OS_TYPE;
+import static io.opentelemetry.semconv.incubating.OsIncubatingAttributes.OS_VERSION;
+import static io.opentelemetry.semconv.incubating.ProcessIncubatingAttributes.PROCESS_COMMAND_ARGS;
+import static io.opentelemetry.semconv.incubating.ProcessIncubatingAttributes.PROCESS_PID;
+import static io.opentelemetry.semconv.incubating.TelemetryIncubatingAttributes.TELEMETRY_DISTRO_NAME;
+import static io.opentelemetry.semconv.incubating.TelemetryIncubatingAttributes.TELEMETRY_DISTRO_VERSION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
@@ -82,13 +93,18 @@ public class DeclarativeConfigSmokeTest extends TestAppSmokeTest {
             container
                 .withCopyFileToContainer(MountableFile.forHostPath(configFile), "/config.yaml")
                 .withEnv("OTEL_CONFIG_FILE", "/config.yaml")
-                .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", BACKEND_ENDPOINT),
+                .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", BACKEND_ENDPOINT)
+                .withEnv("OTEL_SERVICE_NAME", "my-service-name"),
         false);
   }
 
   @Test
-  void healthcheck() {
+  void resourceAttributes() {
     doRequest(getUrl("/health"), okResponseBody("Alive!"));
+
+    // This does not test that cloud resource providers are included in the config
+    // but at least we know that if they are added in the config their names are valid as otherwise
+    // the agent does not start with any missing component in config.
 
     List<ExportTraceServiceRequest> traces = waitForTraces();
     List<Span> spans = getSpans(traces).toList();
@@ -96,6 +112,22 @@ public class DeclarativeConfigSmokeTest extends TestAppSmokeTest {
         .hasSize(1)
         .extracting("name", "kind")
         .containsOnly(tuple("GET /health", Span.SpanKind.SPAN_KIND_SERVER));
+
+    assertThat(getResourceAttributes(traces))
+        .containsKey(HOST_NAME.getKey())
+        .containsKey(HOST_ARCH.getKey())
+        .containsKey(OS_TYPE.getKey())
+        .containsKey(OS_VERSION.getKey())
+        .containsKey(PROCESS_PID.getKey())
+        .containsKey(PROCESS_COMMAND_ARGS.getKey())
+        .containsKey(CONTAINER_ID.getKey())
+        // service name should be provided by the 'service' resource attribute detector which
+        // reads environment variables (here it's not env variable injected in declarative config).
+        .containsEntry(SERVICE_NAME.getKey(), attributeValue("my-service-name"))
+        .containsKey(SERVICE_INSTANCE_ID.getKey())
+        // ensures that we override the default distro resource attributes
+        .containsEntry(TELEMETRY_DISTRO_NAME.getKey(), attributeValue("elastic"))
+        .containsKey(TELEMETRY_DISTRO_VERSION.getKey());
   }
 
   @AfterAll

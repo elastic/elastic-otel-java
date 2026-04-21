@@ -384,6 +384,13 @@ abstract class SmokeTest {
         .flatMap(it -> it.getSpansList().stream());
   }
 
+  protected Map<String, AnyValue> getResourceAttributes(List<ExportTraceServiceRequest> traces) {
+    return traces.stream()
+        .flatMap(it -> it.getResourceSpansList().stream())
+        .flatMap(it -> it.getResource().getAttributesList().stream())
+        .collect(Collectors.toMap(KeyValue::getKey, KeyValue::getValue));
+  }
+
   protected static String bytesToHex(byte[] bytes) {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < bytes.length; i++) {
