@@ -62,7 +62,7 @@ public class ElasticDeclarativeConfigurationCustomizer
   public void customize(DeclarativeConfigurationCustomizer customizer) {
     customizer.addModelCustomizer(
         model -> {
-          if(model == null){
+          if (model == null) {
             model = new OpenTelemetryConfigurationModel();
           }
 

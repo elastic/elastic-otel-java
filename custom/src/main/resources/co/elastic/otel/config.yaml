@@ -28,31 +28,43 @@ tracer_provider:
   processors:
     - batch:
         exporter:
+          # get endpoint from OTEL_EXPORTER_OTLP_ENDPOINT environment variable if set, otherwise fallback to local collector
+          # get endpoint headers (like authentication) from OTEL_EXPORTER_OTLP_HEADERS environment variable if set
           otlp_http:
-            # get endpoint from OTEL_EXPORTER_OTLP_ENDPOINT environment variable if set, otherwise fallback to local collector
             endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/traces
-            # get endpoint headers (like authentication) from OTEL_EXPORTER_OTLP_HEADERS environment variable if set
             headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
+          # use the following for grpc
+          # otlp_grpc:
+          #  endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+          #  headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
 
 meter_provider:
   readers:
     - periodic:
         exporter:
-          otlp_http:
-            # get endpoint from OTEL_EXPORTER_OTLP_ENDPOINT environment variable if set, otherwise fallback to local collector
+          # get endpoint from OTEL_EXPORTER_OTLP_ENDPOINT environment variable if set, otherwise fallback to local collector
+          # get endpoint headers (like authentication) from OTEL_EXPORTER_OTLP_HEADERS environment variable if set
+          otlp_grpc:
             endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/metrics
-            # get endpoint headers (like authentication) from OTEL_EXPORTER_OTLP_HEADERS environment variable if set
             headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
+          # use the following for grpc
+          # otlp_grpc:
+          #  endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+          #  headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
 
 logger_provider:
   processors:
     - batch:
         exporter:
-          otlp_http:
-            # get endpoint from OTEL_EXPORTER_OTLP_ENDPOINT environment variable if set, otherwise fallback to local collector
+          # get endpoint from OTEL_EXPORTER_OTLP_ENDPOINT environment variable if set, otherwise fallback to local collector
+          # get endpoint headers (like authentication) from OTEL_EXPORTER_OTLP_HEADERS environment variable if set
+          otlp_grpc:
             endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/logs
-            # get endpoint headers (like authentication) from OTEL_EXPORTER_OTLP_HEADERS environment variable if set
             headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
+          # use the following for grpc
+          # otlp_grpc:
+          #  endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+          #  headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
 
 instrumentation/development:
   java:
