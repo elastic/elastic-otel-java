@@ -67,21 +67,21 @@ public class DefaultDeclarativeConfigTest {
               json("{\"host\":{}}"));
 
           assertThat(config.getTracerProvider()).isNotNull();
-          assertThat(assertThat(config.getTracerProvider().getProcessors()).hasSize(1));
+          assertThat(config.getTracerProvider().getProcessors()).hasSize(1);
           assertThatJson(json((config.getTracerProvider().getProcessors().get(0))))
               .inPath("batch.exporter.otlp_http")
               .isObject()
               .containsEntry("endpoint", "http://localhost:4318/v1/traces");
 
           assertThat(config.getMeterProvider()).isNotNull();
-          assertThat(assertThat(config.getMeterProvider().getReaders()).hasSize(1));
+          assertThat(config.getMeterProvider().getReaders()).hasSize(1);
           assertThatJson(json(config.getMeterProvider().getReaders().get(0)))
               .inPath("periodic.exporter.otlp_http")
               .isObject()
               .containsEntry("endpoint", "http://localhost:4318/v1/metrics");
 
           assertThat(config.getLoggerProvider()).isNotNull();
-          assertThat(assertThat(config.getLoggerProvider().getProcessors()).hasSize(1));
+          assertThat(config.getLoggerProvider().getProcessors()).hasSize(1);
           assertThatJson(json((config.getLoggerProvider().getProcessors().get(0))))
               .inPath("batch.exporter.otlp_http")
               .isObject()
