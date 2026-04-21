@@ -61,10 +61,10 @@ public class DefaultDeclarativeConfigTest {
               json("{\"gcp\":null}"),
               json("{\"azure\":null}"),
               // TODO: maybe investigate why those are including empty objects
-              json("{\"process\":{}}}"),
-              json("{\"container\":{}}}"),
-              json("{\"service\":{}}}"),
-              json("{\"host\":{}}}"));
+              json("{\"process\":{}}"),
+              json("{\"container\":{}}"),
+              json("{\"service\":{}}"),
+              json("{\"host\":{}}"));
 
           assertThat(config.getTracerProvider()).isNotNull();
           assertThat(assertThat(config.getTracerProvider().getProcessors()).hasSize(1));
