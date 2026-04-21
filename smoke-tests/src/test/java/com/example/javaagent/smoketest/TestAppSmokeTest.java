@@ -37,17 +37,15 @@ public class TestAppSmokeTest extends SmokeTest {
   public static void startTestApp(
       Consumer<GenericContainer<?>> customizeContainer, boolean defaultEnv) {
     target =
-        startTarget(
-            TEST_APP_IMAGE,
-            customizeContainer.andThen(
-                container -> {
-                  if (defaultEnv) {
-                    setBaseEnvironmentVariables(container);
-                  }
-                  container
-                      .withExposedPorts(PORT)
-                      .waitingFor(Wait.forHttp("/health").forPort(PORT));
-                }));
+        testTarget(TEST_APP_IMAGE)
+            .withBaseEnvironmentVariables(defaultEnv)
+            .customize(
+                customizeContainer.andThen(
+                    container ->
+                        container
+                            .withExposedPorts(PORT)
+                            .waitingFor(Wait.forHttp("/health").forPort(PORT))))
+            .start();
   }
 
   protected static String getContainerId() {
