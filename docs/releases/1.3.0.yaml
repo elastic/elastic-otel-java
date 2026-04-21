@@ -4,6 +4,14 @@ products:
   lifecycle: ga
   repo: elastic-otel-java
   owner: elastic
+release-date: '2025-03-10'
+description: |-
+  This release is based on the following upstream versions:
+
+  * opentelemetry-javaagent: [2.13.3](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.13.3).
+  * opentelemetry-sdk: [1.47.0](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.47.0).
+  * opentelemetry-semconv: [1.30.0-rc.1](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.30.0-rc.1).
+  * opentelemetry-java-contrib: [1.44.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.44.0).
 entries:
 - file:
     name: 564.yaml

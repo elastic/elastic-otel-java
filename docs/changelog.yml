@@ -38,6 +38,7 @@ bundle:
   resolve: true
   repo: elastic-otel-java
   owner: elastic
+  release_dates: true
 
   profiles:
     edot-java-release:
