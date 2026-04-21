@@ -385,17 +385,18 @@ abstract class SmokeTest {
   }
 
   protected Map<String, AnyValue> getResourceAttributes(List<ExportTraceServiceRequest> traces) {
-    Map<String,AnyValue>  attributes = new HashMap<>();
+    Map<String, AnyValue> attributes = new HashMap<>();
     traces.stream()
         .flatMap(it -> it.getResourceSpansList().stream())
         .flatMap(it -> it.getResource().getAttributesList().stream())
-        .forEach(kv -> {
-          AnyValue existingEntry = attributes.putIfAbsent(kv.getKey(), kv.getValue());
-          if (existingEntry != null && !existingEntry.equals(kv.getValue())) {
-            throw new IllegalStateException(
-                "duplicate resource attribute key with distinct values" + kv.getKey());
-          }
-        });
+        .forEach(
+            kv -> {
+              AnyValue existingEntry = attributes.putIfAbsent(kv.getKey(), kv.getValue());
+              if (existingEntry != null && !existingEntry.equals(kv.getValue())) {
+                throw new IllegalStateException(
+                    "duplicate resource attribute key with distinct values" + kv.getKey());
+              }
+            });
     return attributes;
   }
 
