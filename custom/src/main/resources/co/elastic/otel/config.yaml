@@ -44,7 +44,7 @@ meter_provider:
         exporter:
           # get endpoint from OTEL_EXPORTER_OTLP_ENDPOINT environment variable if set, otherwise fallback to local collector
           # get endpoint headers (like authentication) from OTEL_EXPORTER_OTLP_HEADERS environment variable if set
-          otlp_grpc:
+          otlp_http:
             endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/metrics
             headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
           # use the following for grpc
@@ -58,7 +58,7 @@ logger_provider:
         exporter:
           # get endpoint from OTEL_EXPORTER_OTLP_ENDPOINT environment variable if set, otherwise fallback to local collector
           # get endpoint headers (like authentication) from OTEL_EXPORTER_OTLP_HEADERS environment variable if set
-          otlp_grpc:
+          otlp_http:
             endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/logs
             headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
           # use the following for grpc

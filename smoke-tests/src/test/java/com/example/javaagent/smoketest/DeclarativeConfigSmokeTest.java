@@ -55,6 +55,9 @@ public class DeclarativeConfigSmokeTest extends TestAppSmokeTest {
               .redirectOutput(targetPath.toFile())
               .start();
       boolean processExit = process.waitFor(5, TimeUnit.SECONDS);
+      if (!processExit) {
+        process.destroyForcibly();
+      }
       if (!processExit || process.exitValue() != 0) {
         throw new IllegalStateException("failed to get default declarative config");
       }

@@ -81,6 +81,9 @@ public class JavaExecutable {
                   JavaExecutable.getBinaryPath(), jvmDebugArgument("localhost", port), "-version")
               .start();
       boolean processExit = process.waitFor(5, TimeUnit.SECONDS);
+      if (!processExit) {
+        process.destroyForcibly();
+      }
       return processExit && process.exitValue() == 0;
     } catch (InterruptedException | IOException e) {
       return false;
