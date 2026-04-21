@@ -78,7 +78,8 @@ public class DefaultDeclarativeConfigTest {
           assertThatJson(json(config.getMeterProvider().getReaders().get(0)))
               .inPath("periodic.exporter.otlp_http")
               .isObject()
-              .containsEntry("endpoint", "http://localhost:4318/v1/metrics");
+              .containsEntry("endpoint", "http://localhost:4318/v1/metrics")
+              .containsEntry("temporality_preference", "delta");
 
           assertThat(config.getLoggerProvider()).isNotNull();
           assertThat(config.getLoggerProvider().getProcessors()).hasSize(1);

@@ -47,10 +47,12 @@ meter_provider:
           otlp_http:
             endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/metrics
             headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
+            temporality_preference: delta
           # use the following for grpc
           # otlp_grpc:
           #  endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
           #  headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
+          #  temporality_preference: delta
 
 logger_provider:
   processors:
