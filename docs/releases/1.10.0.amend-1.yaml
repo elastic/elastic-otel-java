@@ -1,0 +1,11 @@
+﻿entries:
+- file:
+    name: 1017.yaml
+    checksum: 97e10106382f21b7a8ea86be2013362e1b9bcaba
+  type: security
+  title: The 1.10.0 release contains fixes for potential security vulnerabilities
+  products:
+  - product: edot-java
+  description: Refer to our [security advisory](https://discuss.elastic.co/t/elastic-otel-java-1-10-0-security-update-esa-2026-22-ghsa-xw7x-h9fj-p2c7/385700) for more details.
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/1017
