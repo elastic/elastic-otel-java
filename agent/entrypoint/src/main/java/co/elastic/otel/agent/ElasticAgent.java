@@ -19,7 +19,10 @@
 package co.elastic.otel.agent;
 
 import io.opentelemetry.javaagent.OpenTelemetryAgent;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
+import java.util.Objects;
 
 /** Elastic agent entry point, delegates to OpenTelemetry agent */
 public class ElasticAgent {
@@ -56,7 +59,36 @@ public class ElasticAgent {
    * @param args arguments
    */
   public static void main(String[] args) {
-    OpenTelemetryAgent.main(args);
+    boolean upstreamDefault = true;
+    for (String arg : args) {
+      switch (arg) {
+        case "--default-config-yaml":
+          printDefaultConfigYaml();
+          upstreamDefault = false;
+          break;
+      }
+    }
+
+    if (upstreamDefault) {
+      OpenTelemetryAgent.main(args);
+    }
+  }
+
+  private static void printDefaultConfigYaml() {
+    try (InputStream input =
+        ElasticAgent.class
+            .getClassLoader()
+            .getResourceAsStream("inst/co/elastic/otel/config.yaml")) {
+      Objects.requireNonNull(input, "Default config yaml resource is missing");
+
+      byte[] buffer = new byte[8192];
+      int read;
+      while ((read = input.read(buffer)) != -1) {
+        System.out.write(buffer, 0, read);
+      }
+    } catch (IOException e) {
+      throw new IllegalStateException("Failed to print default config yaml", e);
+    }
   }
 
   private static void initLogging() {

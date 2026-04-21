@@ -72,6 +72,7 @@ abstract class SmokeTest {
   protected static final String MOCK_SERVER_HOST = "mock-server";
   // map to HTTPS port for kubernetes, mock server will handle both http and https on the same port
   protected static final int MOCK_SERVER_PORT = 443;
+  protected static final String BACKEND_ENDPOINT = "http://backend:8080";
 
   protected static OkHttpClient client = OkHttpUtils.client();
 
@@ -115,16 +116,7 @@ abstract class SmokeTest {
         new GenericContainer<>(image)
             .withNetwork(network)
             .withLogConsumer(new Slf4jLogConsumer(logger))
-            .withCopyFileToContainer(MountableFile.forHostPath(AGENT_PATH), JAVAAGENT_JAR_PATH)
-
-            // batch span processor: very small batch size for testing
-            .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
-            // batch span processor: very short delay for testing
-            .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
-            // use grpc endpoint as default is now http/protobuf with agent 2.x
-            .withEnv("OTEL_EXPORTER_OTLP_PROTOCOL", "grpc")
-            .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
-            .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://backend:8080");
+            .withCopyFileToContainer(MountableFile.forHostPath(AGENT_PATH), JAVAAGENT_JAR_PATH);
 
     StringBuilder jvmArgs = new StringBuilder();
 
@@ -153,6 +145,18 @@ abstract class SmokeTest {
     startedContainers.add(target);
 
     return target;
+  }
+
+  protected static void setBaseEnvironmentVariables(GenericContainer<?> target) {
+    target
+        // batch span processor: very small batch size for testing
+        .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
+        // batch span processor: very short delay for testing
+        .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
+        // use grpc endpoint as default is now http/protobuf with agent 2.x
+        .withEnv("OTEL_EXPORTER_OTLP_PROTOCOL", "grpc")
+        .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
+        .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", BACKEND_ENDPOINT);
   }
 
   private static GenericContainer<?> addDockerDebugHost(GenericContainer<?> target) {
@@ -378,6 +382,22 @@ abstract class SmokeTest {
         .flatMap(it -> it.getResourceSpansList().stream())
         .flatMap(it -> it.getScopeSpansList().stream())
         .flatMap(it -> it.getSpansList().stream());
+  }
+
+  protected Map<String, AnyValue> getResourceAttributes(List<ExportTraceServiceRequest> traces) {
+    Map<String, AnyValue> attributes = new HashMap<>();
+    traces.stream()
+        .flatMap(it -> it.getResourceSpansList().stream())
+        .flatMap(it -> it.getResource().getAttributesList().stream())
+        .forEach(
+            kv -> {
+              AnyValue existingEntry = attributes.putIfAbsent(kv.getKey(), kv.getValue());
+              if (existingEntry != null && !existingEntry.equals(kv.getValue())) {
+                throw new IllegalStateException(
+                    "duplicate resource attribute key with distinct values" + kv.getKey());
+              }
+            });
+    return attributes;
   }
 
   protected static String bytesToHex(byte[] bytes) {

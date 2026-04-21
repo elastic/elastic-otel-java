@@ -31,14 +31,23 @@ public class TestAppSmokeTest extends SmokeTest {
   private static GenericContainer<?> target;
 
   public static void startTestApp(Consumer<GenericContainer<?>> customizeContainer) {
+    startTestApp(customizeContainer, true);
+  }
+
+  public static void startTestApp(
+      Consumer<GenericContainer<?>> customizeContainer, boolean defaultEnv) {
     target =
         startTarget(
             TEST_APP_IMAGE,
             customizeContainer.andThen(
-                container ->
-                    container
-                        .withExposedPorts(PORT)
-                        .waitingFor(Wait.forHttp("/health").forPort(PORT))));
+                container -> {
+                  if (defaultEnv) {
+                    setBaseEnvironmentVariables(container);
+                  }
+                  container
+                      .withExposedPorts(PORT)
+                      .waitingFor(Wait.forHttp("/health").forPort(PORT));
+                }));
   }
 
   protected static String getContainerId() {
