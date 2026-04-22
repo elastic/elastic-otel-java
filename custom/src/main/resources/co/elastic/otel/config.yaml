@@ -72,4 +72,4 @@ instrumentation/development:
   java:
     runtime_telemetry:
       # emit not-yet stable runtime telemetry metrics which are currently part of semconv for java runtime
-      emit_experimental_metrics/development: true
+      emit_experimental_metrics/development: ${OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE:-true}
