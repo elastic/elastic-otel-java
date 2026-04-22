@@ -47,10 +47,12 @@ meter_provider:
           otlp_http:
             endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/metrics
             headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
+            temporality_preference: ${OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE:-delta}
           # use the following for grpc
           # otlp_grpc:
           #  endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
           #  headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
+          #  temporality_preference: ${OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE:-delta}
 
 logger_provider:
   processors:
@@ -70,4 +72,4 @@ instrumentation/development:
   java:
     runtime_telemetry:
       # emit not-yet stable runtime telemetry metrics which are currently part of semconv for java runtime
-      emit_experimental_metrics/development: true
+      emit_experimental_metrics/development: ${OTEL_INSTRUMENTATION_RUNTIME_TELEMETRY_EMIT_EXPERIMENTAL_METRICS:-true}

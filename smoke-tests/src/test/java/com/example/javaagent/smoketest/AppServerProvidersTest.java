@@ -60,15 +60,17 @@ public class AppServerProvidersTest extends SmokeTest {
   @Test
   void tomcat() {
     target =
-        startTarget(
-            "tomcat:latest",
-            container ->
-                container
-                    .withExposedPorts(PORT)
-                    .waitingFor(Wait.forListeningPorts(PORT))
-                    .withCopyFileToContainer(
-                        MountableFile.forHostPath(testAppWar),
-                        "/usr/local/tomcat/webapps/app.war"));
+        testTarget("tomcat:latest")
+            .withBaseEnvironmentVariables(true)
+            .customize(
+                container ->
+                    container
+                        .withExposedPorts(PORT)
+                        .waitingFor(Wait.forListeningPorts(PORT))
+                        .withCopyFileToContainer(
+                            MountableFile.forHostPath(testAppWar),
+                            "/usr/local/tomcat/webapps/app.war"))
+            .start();
 
     await()
         .atMost(Duration.ofSeconds(30))

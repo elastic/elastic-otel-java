@@ -108,55 +108,79 @@ abstract class SmokeTest {
     backend.start();
   }
 
-  protected static GenericContainer<?> startTarget(
-      String image, Consumer<GenericContainer<?>> customizeContainer) {
-
-    @SuppressWarnings("resource")
-    GenericContainer<?> target =
-        new GenericContainer<>(image)
-            .withNetwork(network)
-            .withLogConsumer(new Slf4jLogConsumer(logger))
-            .withCopyFileToContainer(MountableFile.forHostPath(AGENT_PATH), JAVAAGENT_JAR_PATH);
-
-    StringBuilder jvmArgs = new StringBuilder();
-
-    if (JavaExecutable.isDebugging()) {
-      // when debugging, automatically use verbose debug logging
-      target.withEnv("OTEL_JAVAAGENT_DEBUG", "true");
-
-      if (JavaExecutable.isListeningDebuggerStarted(TARGET_DEBUG_PORT, "target")) {
-        target = addDockerDebugHost(target);
-        jvmArgs
-            .append(JavaExecutable.jvmDebugArgument("remote-localhost", TARGET_DEBUG_PORT))
-            .append(" ");
-      }
-      // Use very long startup delay when debugging as the remote JVM is likely stopped before the
-      // app has started
-      target.waitingFor(Wait.defaultWaitStrategy().withStartupTimeout(Duration.ofMinutes(10)));
-    }
-
-    jvmArgs.append(JavaExecutable.jvmAgentArgument(JAVAAGENT_JAR_PATH));
-    target.withEnv("JAVA_TOOL_OPTIONS", jvmArgs.toString());
-
-    customizeContainer.accept(target);
-
-    Objects.requireNonNull(target).start();
-
-    startedContainers.add(target);
-
-    return target;
+  public static TestTarget testTarget(String image) {
+    return new TestTarget(image);
   }
 
-  protected static void setBaseEnvironmentVariables(GenericContainer<?> target) {
-    target
-        // batch span processor: very small batch size for testing
-        .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
-        // batch span processor: very short delay for testing
-        .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
-        // use grpc endpoint as default is now http/protobuf with agent 2.x
-        .withEnv("OTEL_EXPORTER_OTLP_PROTOCOL", "grpc")
-        .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
-        .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", BACKEND_ENDPOINT);
+  public static class TestTarget {
+    private final String image;
+    private Consumer<GenericContainer<?>> customizeContainer;
+    private boolean baseEnvVariables;
+
+    public TestTarget(String image) {
+      this.image = image;
+    }
+
+    public TestTarget customize(Consumer<GenericContainer<?>> customizeContainer) {
+      this.customizeContainer = customizeContainer;
+      return this;
+    }
+
+    public TestTarget withBaseEnvironmentVariables(boolean value) {
+      this.baseEnvVariables = value;
+      return this;
+    }
+
+    public GenericContainer<?> start() {
+      @SuppressWarnings("resource")
+      GenericContainer<?> target =
+          new GenericContainer<>(image)
+              .withNetwork(network)
+              .withLogConsumer(new Slf4jLogConsumer(logger))
+              .withCopyFileToContainer(MountableFile.forHostPath(AGENT_PATH), JAVAAGENT_JAR_PATH);
+
+      StringBuilder jvmArgs = new StringBuilder();
+
+      if (JavaExecutable.isDebugging()) {
+        // when debugging, automatically use verbose debug logging
+        target.withEnv("OTEL_JAVAAGENT_DEBUG", "true");
+
+        if (JavaExecutable.isListeningDebuggerStarted(TARGET_DEBUG_PORT, "target")) {
+          target = addDockerDebugHost(target);
+          jvmArgs
+              .append(JavaExecutable.jvmDebugArgument("remote-localhost", TARGET_DEBUG_PORT))
+              .append(" ");
+        }
+        // Use very long startup delay when debugging as the remote JVM is likely stopped before the
+        // app has started
+        target.waitingFor(Wait.defaultWaitStrategy().withStartupTimeout(Duration.ofMinutes(10)));
+      }
+
+      jvmArgs.append(JavaExecutable.jvmAgentArgument(JAVAAGENT_JAR_PATH));
+      target.withEnv("JAVA_TOOL_OPTIONS", jvmArgs.toString());
+
+      if (baseEnvVariables) {
+        target
+            // batch span processor: very small batch size for testing
+            .withEnv("OTEL_BSP_MAX_EXPORT_BATCH", "1")
+            // batch span processor: very short delay for testing
+            .withEnv("OTEL_BSP_SCHEDULE_DELAY", "10")
+            // use grpc endpoint as default is now http/protobuf with agent 2.x
+            .withEnv("OTEL_EXPORTER_OTLP_PROTOCOL", "grpc")
+            .withEnv("OTEL_PROPAGATORS", "tracecontext,baggage")
+            .withEnv("OTEL_EXPORTER_OTLP_ENDPOINT", BACKEND_ENDPOINT);
+      }
+
+      if (customizeContainer != null) {
+        customizeContainer.accept(target);
+      }
+
+      Objects.requireNonNull(target).start();
+
+      startedContainers.add(target);
+
+      return target;
+    }
   }
 
   private static GenericContainer<?> addDockerDebugHost(GenericContainer<?> target) {
