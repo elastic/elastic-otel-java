@@ -112,7 +112,7 @@ Many application servers require adding the `-javaagent` argument to a server-sp
 
 | Server | Where to add `-javaagent` |
 |---|---|
-| **Tomcat / TomEE** | `bin/setenv.sh` (Linux) or `bin/setenv.bat` (Windows) — create the file if it doesn't exist |
+| **Tomcat / TomEE** | set `CATALINA_OPTS` in `bin/setenv.sh` (Linux) or `bin/setenv.bat` (Windows) — create the file if it doesn't exist |
 | **JBoss EAP / WildFly** | `bin/standalone.conf` (Linux) or `bin/standalone.conf.bat` (Windows) — add to `JAVA_OPTS` |
 | **Jetty** | `bin/jetty.sh` (`JAVA_OPTIONS`), `start.ini`, or pass directly to `java -jar start.jar` |
 | **WebLogic** | `bin/startWebLogic.sh` (Linux) or `bin/startWebLogic.cmd` (Windows) — add to `JAVA_OPTIONS` |
