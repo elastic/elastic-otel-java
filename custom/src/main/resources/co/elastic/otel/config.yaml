@@ -52,7 +52,7 @@ meter_provider:
           # otlp_grpc:
           #  endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
           #  headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
-          #  temporality_preference: delta
+          #  temporality_preference: ${OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE:-delta}
 
 logger_provider:
   processors:
