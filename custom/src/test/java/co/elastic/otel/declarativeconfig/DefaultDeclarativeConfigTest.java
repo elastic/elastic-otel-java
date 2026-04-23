@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.javaagent.tooling.resources.ResourceCustomizerProvider;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfiguration;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.ExperimentalLanguageSpecificInstrumentationModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.OpenTelemetryConfigurationModel;
 import java.io.InputStream;
 import java.util.function.Consumer;
@@ -66,15 +67,12 @@ public class DefaultDeclarativeConfigTest {
               json("{\"service\":{}}"),
               json("{\"host\":{}}"));
 
-          assertThat(config.getPropagator())
-              .describedAs("missing propagator")
-              .isNotNull();
-          assertThatJson(json(config.getPropagator())).inPath("composite")
+          assertThat(config.getPropagator()).describedAs("missing propagator").isNotNull();
+          assertThatJson(json(config.getPropagator()))
+              .inPath("composite")
               .isArray()
               .describedAs("propagators should contain tracecontext and baggage by default")
-              .containsExactlyInAnyOrder(
-                  json("{\"tracecontext\":{}}"),
-                  json("{\"baggage\":{}}"));
+              .containsExactlyInAnyOrder(json("{\"tracecontext\":{}}"), json("{\"baggage\":{}}"));
 
           assertThat(config.getTracerProvider()).isNotNull();
           assertThat(config.getTracerProvider().getProcessors()).hasSize(1);
@@ -98,9 +96,18 @@ public class DefaultDeclarativeConfigTest {
               .isObject()
               .containsEntry("endpoint", "http://localhost:4318/v1/logs");
 
-          assertThatJson(json(config.getInstrumentationDevelopment()))
+          assertThat(config.getInstrumentationDevelopment()).isNotNull();
+          ExperimentalLanguageSpecificInstrumentationModel java =
+              config.getInstrumentationDevelopment().getJava();
+          assertThat(java).isNotNull();
+          assertThatJson(json(java))
               .describedAs("experimental jvm runtime telemetry metrics enabled by default")
-              .inPath("java.runtime_telemetry.emit_experimental_metrics/development")
+              .inPath("runtime_telemetry.emit_experimental_metrics/development")
+              .isBoolean()
+              .isTrue();
+          assertThatJson(json(java))
+              .describedAs("experimental indy is enabled by default")
+              .inPath("agent.experimental.indy")
               .isBoolean()
               .isTrue();
         });
