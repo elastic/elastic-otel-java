@@ -75,11 +75,16 @@ public class DefaultDeclarativeConfigTest {
               .containsExactlyInAnyOrder(json("{\"tracecontext\":{}}"), json("{\"baggage\":{}}"));
 
           assertThat(config.getTracerProvider()).isNotNull();
-          assertThat(config.getTracerProvider().getProcessors()).hasSize(1);
+          assertThat(config.getTracerProvider().getProcessors()).hasSize(2);
           assertThatJson(json((config.getTracerProvider().getProcessors().get(0))))
               .inPath("batch.exporter.otlp_http")
               .isObject()
               .containsEntry("endpoint", "http://localhost:4318/v1/traces");
+
+          assertThatJson(json((config.getTracerProvider().getProcessors().get(1))))
+              .inPath("stacktrace/development")
+              .isObject()
+              .containsEntry("filter", "co.elastic.otel.SpanStackTraceFilter");
 
           assertThat(config.getMeterProvider()).isNotNull();
           assertThat(config.getMeterProvider().getReaders()).hasSize(1);
