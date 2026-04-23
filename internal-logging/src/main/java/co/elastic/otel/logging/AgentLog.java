@@ -63,9 +63,9 @@ public class AgentLog {
    * @param usePlainTextLog {@literal true} to use plain text logging, `{@literal false} to use JSON
    * @param initialLevel initial log level to configure
    */
-  public static void init(boolean usePlainTextLog, Level initialLevel) {
+  public static void init(boolean usePlainTextLog, String initialLevel) {
     internalInit();
-    setLevel(initialLevel);
+    setLevel(Level.getLevel(initialLevel));
     logPlainText = usePlainTextLog;
   }
 

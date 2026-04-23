@@ -30,6 +30,8 @@ public class Slf4jInternalLogger implements InternalLogger {
   private static volatile boolean initializationComplete = false;
 
   static void setInitializationComplete() {
+    // trigger loading the slf4j provider from the agent CL, this should load log4j implementation
+    LoggerFactory.getILoggerFactory();
     initializationComplete = true;
   }
 
