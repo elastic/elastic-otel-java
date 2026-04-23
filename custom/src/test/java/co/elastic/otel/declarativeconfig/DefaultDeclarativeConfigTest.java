@@ -27,6 +27,7 @@ import io.opentelemetry.javaagent.tooling.resources.ResourceCustomizerProvider;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfiguration;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.ExperimentalLanguageSpecificInstrumentationModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.OpenTelemetryConfigurationModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.SamplerModel;
 import java.io.InputStream;
 import java.util.function.Consumer;
 import net.javacrumbs.jsonunit.assertj.JsonListAssert;
@@ -100,6 +101,26 @@ public class DefaultDeclarativeConfigTest {
               .inPath("batch.exporter.otlp_http")
               .isObject()
               .containsEntry("endpoint", "http://localhost:4318/v1/logs");
+
+          SamplerModel sampler = config.getTracerProvider().getSampler();
+          assertThat(sampler).isNotNull();
+
+          assertThatJson(json(sampler))
+              .inPath("parent_based.root.probability/development.ratio")
+              .isNumber()
+              .isEqualByComparingTo("1.0");
+          assertThatJson(json(sampler))
+              .inPath("parent_based.remote_parent_sampled.always_on")
+              .isObject();
+          assertThatJson(json(sampler))
+              .inPath("parent_based.remote_parent_not_sampled.always_off")
+              .isObject();
+          assertThatJson(json(sampler))
+              .inPath("parent_based.local_parent_sampled.always_on")
+              .isObject();
+          assertThatJson(json(sampler))
+              .inPath("parent_based.local_parent_not_sampled.always_off")
+              .isObject();
 
           assertThat(config.getInstrumentationDevelopment()).isNotNull();
           ExperimentalLanguageSpecificInstrumentationModel java =
