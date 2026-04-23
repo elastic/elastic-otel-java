@@ -66,6 +66,16 @@ public class DefaultDeclarativeConfigTest {
               json("{\"service\":{}}"),
               json("{\"host\":{}}"));
 
+          assertThat(config.getPropagator())
+              .describedAs("missing propagator")
+              .isNotNull();
+          assertThatJson(json(config.getPropagator())).inPath("composite")
+              .isArray()
+              .describedAs("propagators should contain tracecontext and baggage by default")
+              .containsExactlyInAnyOrder(
+                  json("{\"tracecontext\":{}}"),
+                  json("{\"baggage\":{}}"));
+
           assertThat(config.getTracerProvider()).isNotNull();
           assertThat(config.getTracerProvider().getProcessors()).hasSize(1);
           assertThatJson(json((config.getTracerProvider().getProcessors().get(0))))

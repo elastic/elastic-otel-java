@@ -24,6 +24,12 @@ resource:
       # Provides 'service.name' and 'service.instance.id'
       - service:
 
+# default propagators
+propagator:
+  composite:
+    - tracecontext:
+    - baggage:
+
 tracer_provider:
   processors:
     - batch:
