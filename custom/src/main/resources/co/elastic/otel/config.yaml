@@ -73,3 +73,7 @@ instrumentation/development:
     runtime_telemetry:
       # emit not-yet stable runtime telemetry metrics which are currently part of semconv for java runtime
       emit_experimental_metrics/development: ${OTEL_INSTRUMENTATION_RUNTIME_TELEMETRY_EMIT_EXPERIMENTAL_METRICS:-true}
+    agent:
+      experimental:
+        # enable experimental indy instrumentation
+        indy: true
