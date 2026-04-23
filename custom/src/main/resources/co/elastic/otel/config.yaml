@@ -24,7 +24,6 @@ resource:
       # Provides 'service.name' and 'service.instance.id'
       - service:
 
-# default propagators
 propagator:
   composite:
     - tracecontext:
@@ -44,7 +43,7 @@ tracer_provider:
           #  endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
           #  headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
     - stacktrace/development:
-        min_duration: 5 # minimal duration in ms, default is 5, MUST be an integer
+        min_duration: 5 # minimal duration in ms, default is 5
         filter: co.elastic.otel.SpanStackTraceFilter
 
 meter_provider:
