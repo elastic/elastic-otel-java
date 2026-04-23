@@ -100,8 +100,11 @@ jobs:
 
       - name: Generate documentation changelog bundle (post release)
         if: inputs.phase == 'post'
+        # we should use the 'edot-java-release' profile to generate the bundle:
+        #   docs-builder changelog bundle edot-java-release ${{ env.RELEASE_VERSION }}
+        # this does not yet allow to provide the generated content for description, so we have to use the explicit arguments.
         run: |
-          docs-builder changelog bundle edot-java-release ${{ env.RELEASE_VERSION }}
+          docs-builder changelog bundle --input-products 'edot-java * *' --output-products 'edot-java ${{ env.RELEASE_VERSION }} ga' --output docs/releases/${{ env.RELEASE_VERSION }}.yaml --description "$(.ci/changelog-bundle-description.sh)"
           docs-builder changelog remove edot-java-release
   
       - name: Push the ${{ inputs.phase }} release branch
