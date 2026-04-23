@@ -30,6 +30,7 @@ import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -65,7 +66,12 @@ public class AgentLog {
    */
   public static void init(boolean usePlainTextLog, String initialLevel) {
     internalInit();
-    setLevel(Level.getLevel(initialLevel));
+    initialLevel = initialLevel.toUpperCase(Locale.ROOT);
+    Level level = Level.getLevel(initialLevel);
+    if (level == null) {
+      level = Level.INFO;
+    }
+    setLevel(level);
     logPlainText = usePlainTextLog;
   }
 
