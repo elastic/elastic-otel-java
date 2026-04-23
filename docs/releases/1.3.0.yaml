@@ -10,7 +10,7 @@ description: |-
 
   * opentelemetry-java-instrumentation: [2.13.3](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.13.3).
   * opentelemetry-java: [1.47.0](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.47.0).
-  * opentelemetry-java-semconv: [1.30.0-rc.1](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.30.0-rc.1).
+  * semantic-conventions-java: [1.30.0-rc.1](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.30.0-rc.1).
   * opentelemetry-java-contrib: [1.44.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.44.0).
 entries:
 - file:
