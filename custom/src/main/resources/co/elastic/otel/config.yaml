@@ -24,6 +24,11 @@ resource:
       # Provides 'service.name' and 'service.instance.id'
       - service:
 
+propagator:
+  composite:
+    - tracecontext:
+    - baggage:
+
 tracer_provider:
   processors:
     - batch:
@@ -37,6 +42,24 @@ tracer_provider:
           # otlp_grpc:
           #  endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
           #  headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
+    - stacktrace/development:
+        min_duration: 5 # minimal duration in ms, default is 5
+        filter: co.elastic.otel.SpanStackTraceFilter
+  # sampler, parent-based with 100% sampling rate by default
+  sampler:
+    parent_based:
+      root:
+        # using the consistent sampler implementation
+        probability/development:
+          ratio: 1.0
+      remote_parent_sampled:
+        always_on:
+      remote_parent_not_sampled:
+        always_off:
+      local_parent_sampled:
+        always_on:
+      local_parent_not_sampled:
+        always_off:
 
 meter_provider:
   readers:
@@ -73,3 +96,7 @@ instrumentation/development:
     runtime_telemetry:
       # emit not-yet stable runtime telemetry metrics which are currently part of semconv for java runtime
       emit_experimental_metrics/development: ${OTEL_INSTRUMENTATION_RUNTIME_TELEMETRY_EMIT_EXPERIMENTAL_METRICS:-true}
+    agent:
+      experimental:
+        # enable experimental indy instrumentation
+        indy: true

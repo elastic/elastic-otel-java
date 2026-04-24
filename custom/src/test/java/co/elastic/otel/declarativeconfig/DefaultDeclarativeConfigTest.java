@@ -25,7 +25,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.javaagent.tooling.resources.ResourceCustomizerProvider;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfiguration;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.ExperimentalLanguageSpecificInstrumentationModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.OpenTelemetryConfigurationModel;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.SamplerModel;
 import java.io.InputStream;
 import java.util.function.Consumer;
 import net.javacrumbs.jsonunit.assertj.JsonListAssert;
@@ -66,12 +68,24 @@ public class DefaultDeclarativeConfigTest {
               json("{\"service\":{}}"),
               json("{\"host\":{}}"));
 
+          assertThat(config.getPropagator()).describedAs("missing propagator").isNotNull();
+          assertThatJson(json(config.getPropagator()))
+              .inPath("composite")
+              .isArray()
+              .describedAs("propagators should contain tracecontext and baggage by default")
+              .containsExactlyInAnyOrder(json("{\"tracecontext\":{}}"), json("{\"baggage\":{}}"));
+
           assertThat(config.getTracerProvider()).isNotNull();
-          assertThat(config.getTracerProvider().getProcessors()).hasSize(1);
+          assertThat(config.getTracerProvider().getProcessors()).hasSize(2);
           assertThatJson(json((config.getTracerProvider().getProcessors().get(0))))
               .inPath("batch.exporter.otlp_http")
               .isObject()
               .containsEntry("endpoint", "http://localhost:4318/v1/traces");
+
+          assertThatJson(json((config.getTracerProvider().getProcessors().get(1))))
+              .inPath("stacktrace/development")
+              .isObject()
+              .containsEntry("filter", "co.elastic.otel.SpanStackTraceFilter");
 
           assertThat(config.getMeterProvider()).isNotNull();
           assertThat(config.getMeterProvider().getReaders()).hasSize(1);
@@ -88,9 +102,38 @@ public class DefaultDeclarativeConfigTest {
               .isObject()
               .containsEntry("endpoint", "http://localhost:4318/v1/logs");
 
-          assertThatJson(json(config.getInstrumentationDevelopment()))
+          SamplerModel sampler = config.getTracerProvider().getSampler();
+          assertThat(sampler).isNotNull();
+
+          assertThatJson(json(sampler))
+              .inPath("parent_based.root.probability/development.ratio")
+              .isNumber()
+              .isEqualByComparingTo("1.0");
+          assertThatJson(json(sampler))
+              .inPath("parent_based.remote_parent_sampled.always_on")
+              .isObject();
+          assertThatJson(json(sampler))
+              .inPath("parent_based.remote_parent_not_sampled.always_off")
+              .isObject();
+          assertThatJson(json(sampler))
+              .inPath("parent_based.local_parent_sampled.always_on")
+              .isObject();
+          assertThatJson(json(sampler))
+              .inPath("parent_based.local_parent_not_sampled.always_off")
+              .isObject();
+
+          assertThat(config.getInstrumentationDevelopment()).isNotNull();
+          ExperimentalLanguageSpecificInstrumentationModel java =
+              config.getInstrumentationDevelopment().getJava();
+          assertThat(java).isNotNull();
+          assertThatJson(json(java))
               .describedAs("experimental jvm runtime telemetry metrics enabled by default")
-              .inPath("java.runtime_telemetry.emit_experimental_metrics/development")
+              .inPath("runtime_telemetry.emit_experimental_metrics/development")
+              .isBoolean()
+              .isTrue();
+          assertThatJson(json(java))
+              .describedAs("experimental indy is enabled by default")
+              .inPath("agent.experimental.indy")
               .isBoolean()
               .isTrue();
         });
