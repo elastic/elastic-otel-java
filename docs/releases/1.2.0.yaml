@@ -8,9 +8,9 @@ release-date: '2025-01-20'
 description: |-
   This release is based on the following upstream versions:
 
-  * opentelemetry-javaagent: [2.12.0](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.12.0).
-  * opentelemetry-sdk: [1.46.0](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.46.0)
-  * opentelemetry-semconv: [1.29.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.29.0).
+  * opentelemetry-java-instrumentation: [2.12.0](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.12.0).
+  * opentelemetry-java: [1.46.0](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.46.0)
+  * semantic-conventions-java: [1.29.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.29.0).
   * opentelemetry-java-contrib: [1.42.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.42.0).
 entries:
 - file:
@@ -66,6 +66,5 @@ entries:
   - product: edot-java
     target: 1.2.0
     lifecycle: ga
-  description: '- javaagent:[2.12.0](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.12.0) sdk:[1.46.0](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.46.0) semconv:[1.29.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.29.0) contrib:[1.42.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.42.0)'
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/500

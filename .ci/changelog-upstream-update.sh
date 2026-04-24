@@ -6,14 +6,12 @@ set -euo pipefail
 #   PR_URL: pull-request URL (used in the changelog entry to link to the PR)
 #   PR_NUMBER: pull-request number (used to name the changelog entry file)
 
-description="- $("./gradlew" -q changelogUpstreamDependenciesOneLiner)"
 docs-builder changelog add \
   --concise \
   --title "${PR_TITLE}" \
   --type enhancement \
   --prs "${PR_URL}" \
   --products "edot-java" \
-  --description "${description}"
 
 # will overwrite any prior update, if there is any
 mv -v "./docs/changelog/${PR_NUMBER}.yaml" "./docs/changelog/upstream-update.yaml"

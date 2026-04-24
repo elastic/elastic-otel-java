@@ -4,4 +4,3 @@ type: enhancement
 products:
 - product: edot-java
 title: Update upstream OpenTelemetry agent dependencies to 2.27.0
-description: '- javaagent:[2.27.0](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.27.0) sdk:[1.61.0](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.61.0) semconv:[1.40.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.40.0) contrib:[1.55.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.55.0)'
