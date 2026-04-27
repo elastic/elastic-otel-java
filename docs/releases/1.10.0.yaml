@@ -4,7 +4,7 @@ products:
   lifecycle: ga
   repo: elastic-otel-java
   owner: elastic
-release-date: '2026-03-24'
+release-date: 2026-03-24
 description: |-
   This release is based on the following upstream versions:
 
