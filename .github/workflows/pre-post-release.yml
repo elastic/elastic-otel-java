@@ -121,7 +121,13 @@ jobs:
           PHASE: ${{ inputs.phase }}
 
       - name: Create the ${{ inputs.phase }} release PR
-        run: gh pr create --title="${PR_TITLE}" --base main --head ${{ env.BRANCH_NAME }} -b "${PR_BODY}"
+        run: |
+          gh pr create \
+            --title "${PR_TITLE}" \
+            --base main \
+            --head ${{ env.BRANCH_NAME }} \
+            --label 'changelog:skip' \
+            --body "${PR_BODY}"
         env:
           GH_TOKEN: ${{ steps.get_token.outputs.token }}
           PR_TITLE: ${{ inputs.pr_title }}
