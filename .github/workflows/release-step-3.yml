@@ -230,7 +230,7 @@ jobs:
         run: |
           echo 'notes<<RELNOTESEOF' >> $GITHUB_OUTPUT
           tmp="$(mktemp -d)"
-          docs-builder changelog render
+          docs-builder changelog render \
             --input "docs/releases/${{ env.RELEASE_VERSION }}.yaml" \
             --output "${tmp}" \
             1>/dev/null
