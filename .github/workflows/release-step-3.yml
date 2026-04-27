@@ -71,6 +71,7 @@ jobs:
     if: ${{ ! inputs.skip_maven_deploy }}
     needs:
       - validate-tag
+      - generate-release-notes
     permissions:
       artifact-metadata: write
       attestations: write
