@@ -4,7 +4,7 @@ products:
   lifecycle: ga
   repo: elastic-otel-java
   owner: elastic
-release-date: '2024-11-21'
+release-date: 2024-11-21
 description: |-
   This release is based on the following upstream versions:
 
@@ -20,8 +20,6 @@ entries:
   title: update upstream 2.10.0
   products:
   - product: edot-java
-    target: 1.1.0
-    lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/455
 - file:
@@ -31,7 +29,5 @@ entries:
   title: Fix missing transitive dependencies when using universal profiling integration
   products:
   - product: edot-java
-    target: 1.1.0
-    lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/423

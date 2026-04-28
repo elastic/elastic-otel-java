@@ -4,7 +4,7 @@ products:
   lifecycle: ga
   repo: elastic-otel-java
   owner: elastic
-release-date: '2025-04-15'
+release-date: 2025-04-15
 description: |-
   This release is based on the following upstream versions:
 
@@ -20,8 +20,6 @@ entries:
   title: Change default metric temporality to delta
   products:
   - product: edot-java
-    target: 1.4.0
-    lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/583
   issues:
@@ -33,8 +31,6 @@ entries:
   title: Add support for openAI client 1.1+, drop support for older versions
   products:
   - product: edot-java
-    target: 1.4.0
-    lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/607
 - file:
@@ -44,8 +40,6 @@ entries:
   title: Override user agent header for otlp exporters
   products:
   - product: edot-java
-    target: 1.4.0
-    lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/593
   issues:
@@ -57,8 +51,6 @@ entries:
   title: enable azure provider by default when available
   products:
   - product: edot-java
-    target: 1.4.0
-    lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/596
 - file:
@@ -68,7 +60,5 @@ entries:
   title: Update upstream OpenTelemetry agent dependencies to 2.15.0
   products:
   - product: edot-java
-    target: 1.4.0
-    lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/603

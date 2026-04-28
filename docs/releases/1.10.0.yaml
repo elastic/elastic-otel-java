@@ -4,7 +4,7 @@ products:
   lifecycle: ga
   repo: elastic-otel-java
   owner: elastic
-release-date: '2026-03-24'
+release-date: 2026-03-24
 description: |-
   This release is based on the following upstream versions:
 
@@ -20,7 +20,5 @@ entries:
   title: Update upstream OpenTelemetry agent dependencies to 2.26.1
   products:
   - product: edot-java
-    target: 1.10.0
-    lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/1017

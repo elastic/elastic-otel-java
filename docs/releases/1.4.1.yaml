@@ -4,7 +4,7 @@ products:
   lifecycle: ga
   repo: elastic-otel-java
   owner: elastic
-release-date: '2025-04-16'
+release-date: 2025-04-16
 description: |-
   This release is based on the following upstream versions:
 
@@ -20,7 +20,5 @@ entries:
   title: Workaround for temporality configuration not being possible
   products:
   - product: edot-java
-    target: 1.4.1
-    lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/610
