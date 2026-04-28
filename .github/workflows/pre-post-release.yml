@@ -58,7 +58,7 @@ jobs:
         id: get_token
         uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ secrets.OBS_AUTOMATION_APP_ID }}
+          client-id: ${{ secrets.OBS_AUTOMATION_APP_ID }}
           private-key: ${{ secrets.OBS_AUTOMATION_APP_PEM }}
           permission-contents: write
           permission-pull-requests: write
@@ -98,8 +98,8 @@ jobs:
         with:
           command: ./gradlew -q setNextVersion
 
-      - name: Generate documentation changelog bundle (post release)
-        if: inputs.phase == 'post'
+      - name: Generate documentation changelog bundle (pre release)
+        if: inputs.phase == 'pre'
         # we should use the 'edot-java-release' profile to generate the bundle:
         #   docs-builder changelog bundle edot-java-release ${{ env.RELEASE_VERSION }}
         # this does not yet allow to provide the generated content for description, so we have to use the explicit arguments.
@@ -110,7 +110,7 @@ jobs:
             --output-products 'edot-java ${{ env.RELEASE_VERSION }} ga' \
             --output docs/releases/${{ env.RELEASE_VERSION }}.yaml \
             --description "${description}"
-          docs-builder changelog remove edot-java-release
+          docs-builder changelog remove edot-java-release ${{ env.RELEASE_VERSION }}
   
       - name: Push the ${{ inputs.phase }} release branch
         run: |
@@ -121,7 +121,13 @@ jobs:
           PHASE: ${{ inputs.phase }}
 
       - name: Create the ${{ inputs.phase }} release PR
-        run: gh pr create --title="${PR_TITLE}" --base main --head ${{ env.BRANCH_NAME }} -b "${PR_BODY}"
+        run: |
+          gh pr create \
+            --title "${PR_TITLE}" \
+            --base main \
+            --head ${{ env.BRANCH_NAME }} \
+            --label 'changelog:skip' \
+            --body "${PR_BODY}"
         env:
           GH_TOKEN: ${{ steps.get_token.outputs.token }}
           PR_TITLE: ${{ inputs.pr_title }}
