@@ -31,6 +31,7 @@ propagator:
 
 tracer_provider:
   processors:
+
     - batch:
         exporter:
           # get endpoint from OTEL_EXPORTER_OTLP_ENDPOINT environment variable if set, otherwise fallback to local collector
@@ -42,9 +43,21 @@ tracer_provider:
           # otlp_grpc:
           #  endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
           #  headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
+
+    # requires the span-stacktrace extension (included in EDOT)
+    # https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/span-stacktrace
     - stacktrace/development:
         min_duration: 5 # minimal duration in ms, default is 5
         filter: co.elastic.otel.SpanStackTraceFilter
+
+    # requires the inferred-spans extension (included in EDOT)
+    # https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/inferred-spans
+    - inferred_spans/development:
+        # disabled by default, opt-in
+        enabled: ${OTEL_INFERRED_SPANS_ENABLED:-false}
+        # avoid log messages about missing JVM symbols by default
+        logging_enabled: ${OTEL_INFERRED_SPANS_LOGGING_ENABLED:-false}
+
   # sampler, parent-based with 100% sampling rate by default
   sampler:
     parent_based:
