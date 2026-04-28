@@ -20,8 +20,6 @@ entries:
   title: Add experimental instrumentation for OpenAI client
   products:
   - product: edot-java
-    target: 1.2.0
-    lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/497
 - file:
@@ -31,8 +29,6 @@ entries:
   title: add stop-sending option
   products:
   - product: edot-java
-    target: 1.2.0
-    lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/474
 - file:
@@ -42,8 +38,6 @@ entries:
   title: add disable all instrumentations option
   products:
   - product: edot-java
-    target: 1.2.0
-    lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/471
 - file:
@@ -53,8 +47,6 @@ entries:
   title: add dynamically disabled instrumentation capability
   products:
   - product: edot-java
-    target: 1.2.0
-    lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/422
 - file:
@@ -64,7 +56,5 @@ entries:
   title: Update upstream OpenTelemetry agent dependencies to 2.12.0
   products:
   - product: edot-java
-    target: 1.2.0
-    lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/500

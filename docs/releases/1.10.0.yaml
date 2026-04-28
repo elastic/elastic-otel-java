@@ -20,7 +20,5 @@ entries:
   title: Update upstream OpenTelemetry agent dependencies to 2.26.1
   products:
   - product: edot-java
-    target: 1.10.0
-    lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/1017

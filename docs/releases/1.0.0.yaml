@@ -13,5 +13,3 @@ entries:
   title: first GA release
   products:
   - product: edot-java
-    target: 1.0.0
-    lifecycle: ga

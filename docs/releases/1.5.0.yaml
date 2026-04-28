@@ -20,8 +20,6 @@ entries:
   title: tech preview release of central configuration support for dynamically changing instrumentation and sending, using OpAMP protocol
   products:
   - product: edot-java
-    target: 1.5.0
-    lifecycle: ga
 - file:
     name: 726.yaml
     checksum: 79e5d8d4d78f2a1c030441ed0c306d6c7758fbc8
@@ -29,8 +27,6 @@ entries:
   title: add option to bypass certificate validation
   products:
   - product: edot-java
-    target: 1.5.0
-    lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/726
   issues:
@@ -42,7 +38,5 @@ entries:
   title: Update upstream OpenTelemetry agent dependencies to 2.17.1
   products:
   - product: edot-java
-    target: 1.5.0
-    lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/729

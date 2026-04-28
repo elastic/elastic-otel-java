@@ -13,8 +13,6 @@ entries:
   title: enable indy by default
   products:
   - product: edot-java
-    target: 1.8.0
-    lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/899
 - file:
@@ -24,7 +22,5 @@ entries:
   title: Update upstream OpenTelemetry agent dependencies to 2.22.0
   products:
   - product: edot-java
-    target: 1.8.0
-    lifecycle: ga
   prs:
   - https://github.com/elastic/elastic-otel-java/pull/898
