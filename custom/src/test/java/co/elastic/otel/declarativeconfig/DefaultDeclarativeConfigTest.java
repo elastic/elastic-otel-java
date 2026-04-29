@@ -68,6 +68,7 @@ public class DefaultDeclarativeConfigTest {
               json("{\"service\":{}}"),
               json("{\"host\":{}}"));
 
+          // propagators
           assertThat(config.getPropagator()).describedAs("missing propagator").isNotNull();
           assertThatJson(json(config.getPropagator()))
               .inPath("composite")
@@ -75,18 +76,32 @@ public class DefaultDeclarativeConfigTest {
               .describedAs("propagators should contain tracecontext and baggage by default")
               .containsExactlyInAnyOrder(json("{\"tracecontext\":{}}"), json("{\"baggage\":{}}"));
 
+          // spans
           assertThat(config.getTracerProvider()).isNotNull();
-          assertThat(config.getTracerProvider().getProcessors()).hasSize(2);
+          assertThat(config.getTracerProvider().getProcessors()).hasSize(4);
+
+          // we don't check baggage configuration, just its presence by default
           assertThatJson(json((config.getTracerProvider().getProcessors().get(0))))
-              .inPath("batch.exporter.otlp_http")
-              .isObject()
-              .containsEntry("endpoint", "http://localhost:4318/v1/traces");
+              .inPath("baggage")
+              .isObject();
 
           assertThatJson(json((config.getTracerProvider().getProcessors().get(1))))
               .inPath("stacktrace/development")
               .isObject()
               .containsEntry("filter", "co.elastic.otel.SpanStackTraceFilter");
 
+          assertThatJson(json((config.getTracerProvider().getProcessors().get(2))))
+              .inPath("inferred_spans/development")
+              .isObject()
+              .containsEntry("enabled", false) // opt-in, disabled by default
+              .containsEntry("logging_enabled", false); // silent by default
+
+          assertThatJson(json((config.getTracerProvider().getProcessors().get(3))))
+              .inPath("batch.exporter.otlp_http")
+              .isObject()
+              .containsEntry("endpoint", "http://localhost:4318/v1/traces");
+
+          // metrics
           assertThat(config.getMeterProvider()).isNotNull();
           assertThat(config.getMeterProvider().getReaders()).hasSize(1);
           assertThatJson(json(config.getMeterProvider().getReaders().get(0)))
@@ -95,9 +110,16 @@ public class DefaultDeclarativeConfigTest {
               .containsEntry("endpoint", "http://localhost:4318/v1/metrics")
               .containsEntry("temporality_preference", "delta");
 
+          // logs
           assertThat(config.getLoggerProvider()).isNotNull();
-          assertThat(config.getLoggerProvider().getProcessors()).hasSize(1);
+          assertThat(config.getLoggerProvider().getProcessors()).hasSize(2);
+
+          // we don't check baggage configuration, just its presence by default
           assertThatJson(json((config.getLoggerProvider().getProcessors().get(0))))
+              .inPath("baggage")
+              .isObject();
+
+          assertThatJson(json((config.getLoggerProvider().getProcessors().get(1))))
               .inPath("batch.exporter.otlp_http")
               .isObject()
               .containsEntry("endpoint", "http://localhost:4318/v1/logs");
