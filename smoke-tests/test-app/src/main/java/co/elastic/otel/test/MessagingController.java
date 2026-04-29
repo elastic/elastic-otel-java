@@ -42,7 +42,7 @@ public class MessagingController {
 
   @RequestMapping("/send/{destination}")
   public String send(
-      @PathVariable(name = "destination") String destination,
+      @PathVariable String destination,
       @RequestParam(name = "headerName", required = false) String headerName,
       @RequestParam(name = "headerValue", required = false) String headerValue) {
     jmsTemplate.send(
@@ -58,8 +58,7 @@ public class MessagingController {
   }
 
   @RequestMapping("/receive/{destination}")
-  public String receive(@PathVariable(name = "destination") String destination)
-      throws JMSException {
+  public String receive(@PathVariable String destination) throws JMSException {
     Message received = jmsTemplate.receive(destination);
     if (received instanceof TextMessage) {
       TextMessage textMessage = (TextMessage) received;
