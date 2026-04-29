@@ -32,20 +32,15 @@ propagator:
 tracer_provider:
   processors:
 
-    - batch:
-        exporter:
-          # get endpoint from OTEL_EXPORTER_OTLP_ENDPOINT environment variable if set, otherwise fallback to local collector
-          # get endpoint headers (like authentication) from OTEL_EXPORTER_OTLP_HEADERS environment variable if set
-          otlp_http:
-            endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/traces
-            headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
-          # use the following for grpc
-          # otlp_grpc:
-          #  endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
-          #  headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
+    # add some baggage entries as span attributes, wildcards are supported
+    # while both include/exclude can be used, we recommend using 'include' to opt-in only for relevant baggage entries.
+    - baggage:
+      - include: [ 'example-baggage-key-*' ]
 
     # requires the span-stacktrace extension (included in EDOT)
     # https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/span-stacktrace
+    # adding it before inferred spans processor allows to avoid having to filter inferred spans that
+    # do not have a stack trace because they are created from sampling data.
     - stacktrace/development:
         min_duration: 5 # minimal duration in ms, default is 5
         filter: co.elastic.otel.SpanStackTraceFilter
@@ -57,6 +52,19 @@ tracer_provider:
         enabled: ${OTEL_INFERRED_SPANS_ENABLED:-false}
         # avoid log messages about missing JVM symbols by default
         logging_enabled: ${OTEL_INFERRED_SPANS_LOGGING_ENABLED:-false}
+
+    # batch span exporter, must come last
+    - batch:
+        exporter:
+          # get endpoint from OTEL_EXPORTER_OTLP_ENDPOINT environment variable if set, otherwise fallback to local collector
+          # get endpoint headers (like authentication) from OTEL_EXPORTER_OTLP_HEADERS environment variable if set
+          otlp_http:
+            endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318}/v1/traces
+            headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
+          # use the following for grpc
+          # otlp_grpc:
+          #  endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+          #  headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
 
   # sampler, parent-based with 100% sampling rate by default
   sampler:
@@ -92,6 +100,13 @@ meter_provider:
 
 logger_provider:
   processors:
+
+    # add some baggage entries as log attributes, wildcards are supported
+    # while both include/exclude can be used, we recommend using 'include' to opt-in only for relevant baggage entries.
+    - baggage:
+        - include: [ 'example-baggage-key-*' ]
+
+    # batch log exporter, must come last
     - batch:
         exporter:
           # get endpoint from OTEL_EXPORTER_OTLP_ENDPOINT environment variable if set, otherwise fallback to local collector
