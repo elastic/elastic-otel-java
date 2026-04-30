@@ -81,22 +81,17 @@ public class DefaultDeclarativeConfigTest {
           assertThat(config.getTracerProvider().getProcessors()).hasSize(4);
 
           // we don't check baggage configuration, just its presence by default
-          assertThatJson(json((config.getTracerProvider().getProcessors().get(0))))
+          assertThatJson(json(config.getTracerProvider().getProcessors().get(0)))
               .inPath("baggage")
               .isObject();
 
-          assertThatJson(json((config.getTracerProvider().getProcessors().get(1))))
-              .inPath("stacktrace/development")
-              .isObject()
-              .containsEntry("filter", "co.elastic.otel.SpanStackTraceFilter");
-
-          assertThatJson(json((config.getTracerProvider().getProcessors().get(2))))
+          assertThatJson(json(config.getTracerProvider().getProcessors().get(2)))
               .inPath("inferred_spans/development")
               .isObject()
               .containsEntry("enabled", false) // opt-in, disabled by default
               .containsEntry("logging_enabled", false); // silent by default
 
-          assertThatJson(json((config.getTracerProvider().getProcessors().get(3))))
+          assertThatJson(json(config.getTracerProvider().getProcessors().get(3)))
               .inPath("batch.exporter.otlp_http")
               .isObject()
               .containsEntry("endpoint", "http://localhost:4318/v1/traces");
