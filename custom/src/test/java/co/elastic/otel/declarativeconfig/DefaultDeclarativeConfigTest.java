@@ -25,10 +25,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.javaagent.tooling.resources.ResourceCustomizerProvider;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfiguration;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.ExperimentalComposableRuleBasedSamplerRuleModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.ExperimentalLanguageSpecificInstrumentationModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.OpenTelemetryConfigurationModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.SamplerModel;
 import java.io.InputStream;
+import java.util.List;
 import java.util.function.Consumer;
 import net.javacrumbs.jsonunit.assertj.JsonListAssert;
 import org.junit.jupiter.api.Test;
@@ -122,22 +124,15 @@ public class DefaultDeclarativeConfigTest {
           SamplerModel sampler = config.getTracerProvider().getSampler();
           assertThat(sampler).isNotNull();
 
-          assertThatJson(json(sampler))
-              .inPath("parent_based.root.probability/development.ratio")
+          // we only check that we are using the rule-based sampler and that the default (last)
+          // is the one we expect with 100% sampling
+          assertThatJson(json(sampler)).inPath("composite/development.rule_based.rules").isArray();
+          List<ExperimentalComposableRuleBasedSamplerRuleModel> rules =
+              sampler.getCompositeDevelopment().getRuleBased().getRules();
+          assertThatJson(json(rules.get(rules.size() - 1)))
+              .inPath("sampler.parent_threshold.root.probability/development.ratio")
               .isNumber()
               .isEqualByComparingTo("1.0");
-          assertThatJson(json(sampler))
-              .inPath("parent_based.remote_parent_sampled.always_on")
-              .isObject();
-          assertThatJson(json(sampler))
-              .inPath("parent_based.remote_parent_not_sampled.always_off")
-              .isObject();
-          assertThatJson(json(sampler))
-              .inPath("parent_based.local_parent_sampled.always_on")
-              .isObject();
-          assertThatJson(json(sampler))
-              .inPath("parent_based.local_parent_not_sampled.always_off")
-              .isObject();
 
           assertThat(config.getInstrumentationDevelopment()).isNotNull();
           ExperimentalLanguageSpecificInstrumentationModel java =

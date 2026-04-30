@@ -66,19 +66,34 @@ tracer_provider:
 
   # Sampler, parent-based with 100% sampling rate by default
   sampler:
-    parent_based:
-      root:
-        # using the consistent sampler implementation
-        probability/development:
-          ratio: 1.0
-      remote_parent_sampled:
-        always_on:
-      remote_parent_not_sampled:
-        always_off:
-      local_parent_sampled:
-        always_on:
-      local_parent_not_sampled:
-        always_off:
+    composite/development:
+      rule_based:
+        rules:
+          # filter-out noisy spans from span attributes provided on span start
+          # example 1: filter on user-agent header
+          - attribute_patterns:
+              key: user_agent.original
+              included: [ 'example-noisy-user-agent/*']
+            sampler:
+              always_off:
+          # example 2: filter on HTTP request path
+          - attribute_patterns:
+              key: url.path
+              included: [ '/health*']
+            sampler:
+              always_off:
+          # example 3: filter on messaging destination
+          - attribute_patterns:
+              key: messaging.destination.name
+              included: [ 'example-noisy-destination/*']
+            sampler:
+                always_off:
+          # default sampler after rules filtering: parent-based with 100% sampling rate
+          - sampler:
+              parent_threshold:
+                root:
+                  probability/development:
+                    ratio: 1.0
 
 meter_provider:
   readers:
