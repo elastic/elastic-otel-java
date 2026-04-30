@@ -92,7 +92,7 @@ tracer_provider:
           - sampler:
               parent_threshold:
                 root:
-                  probability/development:
+                  probability:
                     ratio: 1.0
 
 meter_provider:

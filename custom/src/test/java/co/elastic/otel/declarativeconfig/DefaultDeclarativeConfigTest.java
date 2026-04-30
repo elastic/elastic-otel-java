@@ -130,7 +130,7 @@ public class DefaultDeclarativeConfigTest {
           List<ExperimentalComposableRuleBasedSamplerRuleModel> rules =
               sampler.getCompositeDevelopment().getRuleBased().getRules();
           assertThatJson(json(rules.get(rules.size() - 1)))
-              .inPath("sampler.parent_threshold.root.probability/development.ratio")
+              .inPath("sampler.parent_threshold.root.probability.ratio")
               .isNumber()
               .isEqualByComparingTo("1.0");
 
