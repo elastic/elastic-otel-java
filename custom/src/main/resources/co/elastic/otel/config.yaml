@@ -43,7 +43,6 @@ tracer_provider:
     # do not have a stack trace because they are created from sampling data.
     - stacktrace/development:
         min_duration: 5 # minimal duration in ms, default is 5
-        filter: co.elastic.otel.SpanStackTraceFilter
 
     # Requires the inferred-spans extension (included in EDOT)
     # https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/inferred-spans
