@@ -1,0 +1,11 @@
+prs:
+- "1089"
+issues:
+- https://github.com/elastic/elastic-otel-java/issues/1054
+- https://github.com/elastic/elastic-otel-java/issues/826
+- https://github.com/elastic/elastic-otel-java/issues/909
+type: enhancement
+products:
+- product: edot-java
+  lifecycle: ga
+title: provide experimental base declarative config support
