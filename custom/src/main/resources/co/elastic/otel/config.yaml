@@ -69,25 +69,28 @@ tracer_provider:
     composite/development:
       rule_based:
         rules:
-          # filter-out noisy spans from span attributes provided on span start
-          # example 1: filter on user-agent header
-          - attribute_patterns:
-              key: user_agent.original
-              included: [ 'example-noisy-user-agent/*']
-            sampler:
-              always_off:
-          # example 2: filter on HTTP request path
-          - attribute_patterns:
-              key: url.path
-              included: [ '/health*']
-            sampler:
-              always_off:
-          # example 3: filter on messaging destination
-          - attribute_patterns:
-              key: messaging.destination.name
-              included: [ 'example-noisy-destination/*']
-            sampler:
-                always_off:
+#          # filter-out noisy spans from span attributes provided on span start
+#          # example 1: filter on user-agent header
+#          - attribute_patterns:
+#              key: user_agent.original
+#              included: [ 'example-noisy-user-agent/*']
+#              excluded: [ 'dummy-work-around']
+#            sampler:
+#              always_off:
+#          # example 2: filter on HTTP request path
+#          - attribute_patterns:
+#              key: url.path
+#              included: [ '/health*']
+#              excluded: [ 'dummy-work-around']
+#            sampler:
+#              always_off:
+#          # example 3: filter on messaging destination
+#          - attribute_patterns:
+#              key: messaging.destination.name
+#              included: [ 'example-noisy-destination/*']
+#              excluded: [ 'dummy-work-around']
+#            sampler:
+#                always_off:
           # default sampler after rules filtering: parent-based with 100% sampling rate
           - sampler:
               parent_threshold:
