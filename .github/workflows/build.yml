@@ -57,7 +57,7 @@ jobs:
           path: |
             ./agentextension/build/libs/elastic-otel-agentextension-*.jar
 
-  test:
+  jdk-test:
     runs-on: ubuntu-latest
     needs:
       - build
@@ -80,11 +80,15 @@ jobs:
             vm: 'hotspot'
           - version: 25
             vm: 'hotspot'
+          - version: 26
+            vm: 'hotspot'
           - version: 11
             vm: 'openj9'
           - version: 21
             vm: 'openj9'
           - version: 25
+            vm: 'openj9'
+          - version: 26
             vm: 'openj9'
     steps:
       # We use the cached working directory so that we don't have to recompile everything
