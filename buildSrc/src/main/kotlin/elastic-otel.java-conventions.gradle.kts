@@ -19,6 +19,18 @@ repositories {
 
 //https://github.com/gradle/gradle/issues/15383
 val catalog = extensions.getByType<VersionCatalogsExtension>().named("catalog")
+
+configurations.all {
+  resolutionStrategy {
+    // Force the semconv version to be the one we explicitly set into version catalog and override
+    // the upstream version, hence allowing to use a different version than upstream.
+    force(
+      "io.opentelemetry.semconv:opentelemetry-semconv:${catalog.findVersion("opentelemetrySemconv").get()}",
+      "io.opentelemetry.semconv:opentelemetry-semconv-incubating:${catalog.findVersion("opentelemetrySemconvAlpha").get()}"
+    )
+  }
+}
+
 dependencies {
 
   implementation(platform(catalog.findLibrary("opentelemetryInstrumentationAlphaBom").get()))
