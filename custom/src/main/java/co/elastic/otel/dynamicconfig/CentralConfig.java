@@ -25,6 +25,7 @@ import co.elastic.otel.logging.AgentLog;
 import io.opentelemetry.contrib.inferredspans.InferredSpans;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
+import io.opentelemetry.semconv.DeploymentAttributes;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.time.Duration;
@@ -37,6 +38,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+
+import static io.opentelemetry.semconv.DeploymentAttributes.DEPLOYMENT_ENVIRONMENT_NAME;
 
 public class CentralConfig {
   private static final Logger logger = Logger.getLogger(CentralConfig.class.getName());
@@ -138,7 +141,7 @@ public class CentralConfig {
   @Nullable
   static String getServiceEnvironment(ConfigProperties properties) {
     Map<String, String> resourceMap = properties.getMap("otel.resource.attributes");
-    String environment = resourceMap.get("deployment.environment.name"); // semconv
+    String environment = resourceMap.get(DEPLOYMENT_ENVIRONMENT_NAME.getKey());
     if (environment != null) {
       return environment;
     }

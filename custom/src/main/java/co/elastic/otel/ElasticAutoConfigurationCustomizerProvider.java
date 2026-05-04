@@ -30,11 +30,14 @@ import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.semconv.DeploymentAttributes;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
+
+import static io.opentelemetry.semconv.DeploymentAttributes.DEPLOYMENT_ENVIRONMENT_NAME;
 
 @AutoService(AutoConfigurationCustomizerProvider.class)
 public class ElasticAutoConfigurationCustomizerProvider
@@ -59,8 +62,6 @@ public class ElasticAutoConfigurationCustomizerProvider
 
   private static final AttributeKey<String> DEPLOYMENT_LEGACY =
       AttributeKey.stringKey("deployment.environment");
-  private static final AttributeKey<String> DEPLOYMENT =
-      AttributeKey.stringKey("deployment.environment.name");
   private static final String OTEL_JAVAAGENT_EXPERIMENTAL_INDY = "otel.javaagent.experimental.indy";
 
   @Override
@@ -118,8 +119,8 @@ public class ElasticAutoConfigurationCustomizerProvider
 
       // duplicate deprecated deployment.environment to deployment.environment.name as a convenience
       String deploymentLegacy = resource.getAttribute(DEPLOYMENT_LEGACY);
-      if (deploymentLegacy != null && resource.getAttribute(DEPLOYMENT) == null) {
-        resource = resource.toBuilder().put(DEPLOYMENT, deploymentLegacy).build();
+      if (deploymentLegacy != null && resource.getAttribute(DEPLOYMENT_ENVIRONMENT_NAME) == null) {
+        resource = resource.toBuilder().put(DEPLOYMENT_ENVIRONMENT_NAME, deploymentLegacy).build();
       }
 
       return resource;

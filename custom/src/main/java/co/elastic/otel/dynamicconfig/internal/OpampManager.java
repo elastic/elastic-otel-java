@@ -47,6 +47,8 @@ import opamp.proto.RemoteConfigStatus;
 import opamp.proto.RemoteConfigStatuses;
 import opamp.proto.ServerErrorResponse;
 
+import static io.opentelemetry.semconv.DeploymentAttributes.DEPLOYMENT_ENVIRONMENT_NAME;
+
 public final class OpampManager implements Closeable {
   private final Configuration configuration;
   private volatile OpampClient client;
@@ -85,7 +87,7 @@ public final class OpampManager implements Closeable {
       builder.putIdentifyingAttribute("service.name", configuration.serviceName);
     }
     if (configuration.environment != null) {
-      builder.putIdentifyingAttribute("deployment.environment.name", configuration.environment);
+      builder.putIdentifyingAttribute(DEPLOYMENT_ENVIRONMENT_NAME.getKey(), configuration.environment);
     }
     PeriodicDelay retryDelay = RetryPeriodicDelay.create(configuration.pollingInterval);
     builder.setRequestService(HttpRequestService.create(httpSender, pollingDelay, retryDelay));
