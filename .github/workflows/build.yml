@@ -57,7 +57,7 @@ jobs:
           path: |
             ./agentextension/build/libs/elastic-otel-agentextension-*.jar
 
-  test:
+  jdk-matrix:
     runs-on: ubuntu-latest
     needs:
       - build
@@ -80,11 +80,15 @@ jobs:
             vm: 'hotspot'
           - version: 25
             vm: 'hotspot'
+          - version: 26
+            vm: 'hotspot'
           - version: 11
             vm: 'openj9'
           - version: 21
             vm: 'openj9'
           - version: 25
+            vm: 'openj9'
+          - version: 26
             vm: 'openj9'
     steps:
       # We use the cached working directory so that we don't have to recompile everything
@@ -118,6 +122,18 @@ jobs:
         with:
           name: test-results-${{ matrix.version }}-${{ matrix.vm }}
           path: '**/build/test-results/test/TEST-*.xml'
+
+  jdk-test:
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - jdk-matrix
+    steps:
+      - name: Check jdk-matrix result
+        run: |
+          result="${{ needs.jdk-matrix.result }}"
+          echo "jdk-matrix result: $result"
+          [[ "$result" == "success" ]] || exit 1
 
   muzzle-check:
     runs-on: ubuntu-latest
