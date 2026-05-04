@@ -1,0 +1,7 @@
+prs:
+- "1093"
+type: enhancement
+products:
+- product: edot-java
+  lifecycle: ga
+title: semconv 1.41.0 update
