@@ -18,6 +18,8 @@
  */
 package co.elastic.otel.dynamicconfig;
 
+import static io.opentelemetry.semconv.DeploymentAttributes.DEPLOYMENT_ENVIRONMENT_NAME;
+
 import co.elastic.otel.compositesampling.DynamicCompositeParentBasedTraceIdRatioBasedSampler;
 import co.elastic.otel.config.ConfigLoggingAgentListener;
 import co.elastic.otel.dynamicconfig.internal.OpampManager;
@@ -25,7 +27,6 @@ import co.elastic.otel.logging.AgentLog;
 import io.opentelemetry.contrib.inferredspans.InferredSpans;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
-import io.opentelemetry.semconv.DeploymentAttributes;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.time.Duration;
@@ -38,8 +39,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-
-import static io.opentelemetry.semconv.DeploymentAttributes.DEPLOYMENT_ENVIRONMENT_NAME;
 
 public class CentralConfig {
   private static final Logger logger = Logger.getLogger(CentralConfig.class.getName());

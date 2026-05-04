@@ -18,6 +18,8 @@
  */
 package co.elastic.otel.dynamicconfig.internal;
 
+import static io.opentelemetry.semconv.DeploymentAttributes.DEPLOYMENT_ENVIRONMENT_NAME;
+
 import com.dslplatform.json.DslJson;
 import com.dslplatform.json.JsonReader;
 import com.dslplatform.json.MapConverter;
@@ -46,8 +48,6 @@ import opamp.proto.AgentRemoteConfig;
 import opamp.proto.RemoteConfigStatus;
 import opamp.proto.RemoteConfigStatuses;
 import opamp.proto.ServerErrorResponse;
-
-import static io.opentelemetry.semconv.DeploymentAttributes.DEPLOYMENT_ENVIRONMENT_NAME;
 
 public final class OpampManager implements Closeable {
   private final Configuration configuration;
@@ -87,7 +87,8 @@ public final class OpampManager implements Closeable {
       builder.putIdentifyingAttribute("service.name", configuration.serviceName);
     }
     if (configuration.environment != null) {
-      builder.putIdentifyingAttribute(DEPLOYMENT_ENVIRONMENT_NAME.getKey(), configuration.environment);
+      builder.putIdentifyingAttribute(
+          DEPLOYMENT_ENVIRONMENT_NAME.getKey(), configuration.environment);
     }
     PeriodicDelay retryDelay = RetryPeriodicDelay.create(configuration.pollingInterval);
     builder.setRequestService(HttpRequestService.create(httpSender, pollingDelay, retryDelay));
