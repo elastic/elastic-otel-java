@@ -125,10 +125,15 @@ jobs:
 
   jdk-test:
     runs-on: ubuntu-latest
+    if: always()
     needs:
       - jdk-matrix
     steps:
-      - run: echo "no test to run, this job depends on the results of jdk-matrix"
+      - name: Check jdk-matrix result
+        run: |
+          result="${{ needs.jdk-matrix.result }}"
+          echo "jdk-matrix result: $result"
+          [[ "$result" == "success" ]] || exit 1
 
   muzzle-check:
     runs-on: ubuntu-latest
