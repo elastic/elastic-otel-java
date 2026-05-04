@@ -57,7 +57,7 @@ jobs:
           path: |
             ./agentextension/build/libs/elastic-otel-agentextension-*.jar
 
-  jdk-test:
+  jdk-test-matrix:
     runs-on: ubuntu-latest
     needs:
       - build
@@ -122,6 +122,13 @@ jobs:
         with:
           name: test-results-${{ matrix.version }}-${{ matrix.vm }}
           path: '**/build/test-results/test/TEST-*.xml'
+
+  jdk-test:
+    runs-on: ubuntu-latest
+    needs:
+      - jdk-test-matrix
+    steps:
+      - run: echo "no test to run, this job depends on the results of jdk-test-matrix"
 
   muzzle-check:
     runs-on: ubuntu-latest
