@@ -22,7 +22,7 @@ import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.instrumentation.testing.junit.AgentInstrumentationExtension;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.incubating.TelemetryIncubatingAttributes;
+import io.opentelemetry.semconv.TelemetryAttributes;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -43,16 +43,16 @@ public class DistroResourceAttributesTest {
 
     if (isRunningDistro) {
       assertThat(resource.getAttributes())
-          .containsEntry(TelemetryIncubatingAttributes.TELEMETRY_DISTRO_NAME, "elastic");
+          .containsEntry(TelemetryAttributes.TELEMETRY_DISTRO_NAME, "elastic");
       assertThat(resource.getAttributes())
-          .containsKey(TelemetryIncubatingAttributes.TELEMETRY_DISTRO_VERSION);
+          .containsKey(TelemetryAttributes.TELEMETRY_DISTRO_VERSION);
     } else {
       // we are running with the vanilla agent as extension: we should not be setting the distro
       // name
       assertThat(resource.getAttributes())
-          .doesNotContainKey(TelemetryIncubatingAttributes.TELEMETRY_DISTRO_NAME);
+          .doesNotContainKey(TelemetryAttributes.TELEMETRY_DISTRO_NAME);
       assertThat(resource.getAttributes())
-          .doesNotContainKey(TelemetryIncubatingAttributes.TELEMETRY_DISTRO_VERSION);
+          .doesNotContainKey(TelemetryAttributes.TELEMETRY_DISTRO_VERSION);
     }
   }
 }

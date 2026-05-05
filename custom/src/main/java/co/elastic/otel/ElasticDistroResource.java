@@ -21,7 +21,7 @@ package co.elastic.otel;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.javaagent.tooling.AgentVersion;
 import io.opentelemetry.sdk.resources.Resource;
-import io.opentelemetry.semconv.incubating.TelemetryIncubatingAttributes;
+import io.opentelemetry.semconv.TelemetryAttributes;
 
 public class ElasticDistroResource {
 
@@ -40,9 +40,9 @@ public class ElasticDistroResource {
     }
     return Resource.create(
         Attributes.of(
-            TelemetryIncubatingAttributes.TELEMETRY_DISTRO_NAME,
+            TelemetryAttributes.TELEMETRY_DISTRO_NAME,
             "elastic",
-            TelemetryIncubatingAttributes.TELEMETRY_DISTRO_VERSION,
+            TelemetryAttributes.TELEMETRY_DISTRO_VERSION,
             AgentVersion.VERSION));
   }
 }
