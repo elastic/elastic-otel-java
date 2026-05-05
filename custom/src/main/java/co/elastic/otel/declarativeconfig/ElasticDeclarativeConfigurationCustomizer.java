@@ -67,9 +67,6 @@ public class ElasticDeclarativeConfigurationCustomizer
           }
 
           customizeResources(model);
-
-          // disabled for now in declarative configuration
-          // customizeUserAgent(model);
           return model;
         });
   }
