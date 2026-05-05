@@ -20,6 +20,8 @@ package com.example.javaagent.smoketest;
 
 import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_INSTANCE_ID;
 import static io.opentelemetry.semconv.ServiceAttributes.SERVICE_NAME;
+import static io.opentelemetry.semconv.TelemetryAttributes.TELEMETRY_DISTRO_NAME;
+import static io.opentelemetry.semconv.TelemetryAttributes.TELEMETRY_DISTRO_VERSION;
 import static io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes.CONTAINER_ID;
 import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_ARCH;
 import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_NAME;
@@ -27,8 +29,6 @@ import static io.opentelemetry.semconv.incubating.OsIncubatingAttributes.OS_TYPE
 import static io.opentelemetry.semconv.incubating.OsIncubatingAttributes.OS_VERSION;
 import static io.opentelemetry.semconv.incubating.ProcessIncubatingAttributes.PROCESS_COMMAND_ARGS;
 import static io.opentelemetry.semconv.incubating.ProcessIncubatingAttributes.PROCESS_PID;
-import static io.opentelemetry.semconv.incubating.TelemetryIncubatingAttributes.TELEMETRY_DISTRO_NAME;
-import static io.opentelemetry.semconv.incubating.TelemetryIncubatingAttributes.TELEMETRY_DISTRO_VERSION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 

@@ -18,6 +18,8 @@
  */
 package co.elastic.otel.dynamicconfig;
 
+import static io.opentelemetry.semconv.DeploymentAttributes.DEPLOYMENT_ENVIRONMENT_NAME;
+
 import co.elastic.otel.compositesampling.DynamicCompositeParentBasedTraceIdRatioBasedSampler;
 import co.elastic.otel.config.ConfigLoggingAgentListener;
 import co.elastic.otel.dynamicconfig.internal.OpampManager;
@@ -138,7 +140,7 @@ public class CentralConfig {
   @Nullable
   static String getServiceEnvironment(ConfigProperties properties) {
     Map<String, String> resourceMap = properties.getMap("otel.resource.attributes");
-    String environment = resourceMap.get("deployment.environment.name"); // semconv
+    String environment = resourceMap.get(DEPLOYMENT_ENVIRONMENT_NAME.getKey());
     if (environment != null) {
       return environment;
     }
