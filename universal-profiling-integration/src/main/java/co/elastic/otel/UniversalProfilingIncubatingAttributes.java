@@ -26,7 +26,5 @@ public class UniversalProfilingIncubatingAttributes {
 
   // not yet part of stable semantic conventions, inlined here to prevent dependency issues
 
-  public static final AttributeKey<String> SERVICE_NAMESPACE =
-      AttributeKey.stringKey("service.namespace");
   public static final AttributeKey<String> HOST_ID = AttributeKey.stringKey("host.id");
 }
