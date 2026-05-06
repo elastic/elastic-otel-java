@@ -30,7 +30,7 @@ import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.contrib.stacktrace.StackTraceSpanProcessor;
 import io.opentelemetry.sdk.trace.data.SpanData;
-import io.opentelemetry.semconv.incubating.CodeIncubatingAttributes;
+import io.opentelemetry.semconv.CodeAttributes;
 import java.util.List;
 import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.junit.jupiter.api.AfterEach;
@@ -127,10 +127,10 @@ public class SpanStackTraceTest {
       assertThat(span)
           .hasAttribute(
               satisfies(
-                  CodeIncubatingAttributes.CODE_STACKTRACE,
+                  CodeAttributes.CODE_STACKTRACE,
                   AbstractCharSequenceAssert::isNotBlank));
     } else {
-      assertThat(span.getAttributes().get(CodeIncubatingAttributes.CODE_STACKTRACE)).isNull();
+      assertThat(span.getAttributes().get(CodeAttributes.CODE_STACKTRACE)).isNull();
     }
   }
 
