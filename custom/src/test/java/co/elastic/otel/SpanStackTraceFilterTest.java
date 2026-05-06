@@ -33,21 +33,29 @@ class SpanStackTraceFilterTest {
   void filtering() {
     Tracer tracer =
         OpenTelemetrySdk.builder().build().getTracerProvider().tracerBuilder("test").build();
+
     SpanStackTraceFilter filter = new SpanStackTraceFilter();
 
     ReadableSpan simpleSpan = (ReadableSpan) tracer.spanBuilder("span").startSpan();
     assertThat(filter.test(simpleSpan)).isTrue();
 
-    SpanBuilder spanNotInferred =
-        tracer.spanBuilder("span").setAttribute(ElasticAttributes.IS_INFERRED, Boolean.FALSE);
-    assertThat(filter.test((ReadableSpan) spanNotInferred.startSpan())).isTrue();
+    ReadableSpan spanNotInferred = (ReadableSpan)
+        tracer.spanBuilder("span").setAttribute(ElasticAttributes.IS_INFERRED, Boolean.FALSE).startSpan();
+    assertThat(filter.test(spanNotInferred)).isTrue();
 
-    ReadableSpan inferredSpan =
-        (ReadableSpan)
-            tracer
+    ReadableSpan inferredSpanWinInferredAttribute = (ReadableSpan) tracer
                 .spanBuilder("span")
-                .setAttribute(ElasticAttributes.IS_INFERRED, Boolean.TRUE)
+                .setAttribute("is_inferred", true)
                 .startSpan();
-    assertThat(filter.test(inferredSpan)).describedAs("inferred spans must be filtered").isFalse();
+    assertThat(filter.test(inferredSpanWinInferredAttribute)).describedAs("spans with is_inferred attribute must be filtered").isFalse();
+
+    Tracer inferredSpanTracer =
+        OpenTelemetrySdk.builder().build().getTracerProvider().tracerBuilder("inferred-spans").build();
+
+    ReadableSpan inferredSpanTracerSpan = (ReadableSpan) inferredSpanTracer
+        .spanBuilder("span")
+        .startSpan();
+    assertThat(filter.test(inferredSpanTracerSpan)).describedAs("spans from inferred-spans tracer must be filtered").isFalse();
+
   }
 }

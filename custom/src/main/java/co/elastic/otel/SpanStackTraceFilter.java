@@ -22,11 +22,17 @@ import co.elastic.otel.common.ElasticAttributes;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import java.util.function.Predicate;
 
+/**
+ * Span predicate that returns {@literal true} when span is not an inferred span, {@literal false} otherwise
+ */
 public class SpanStackTraceFilter implements Predicate<ReadableSpan> {
 
   @Override
   public boolean test(ReadableSpan readableSpan) {
     Boolean inferred = readableSpan.getAttribute(ElasticAttributes.IS_INFERRED);
-    return !Boolean.TRUE.equals(inferred);
+    if( null != inferred ) {
+      return !inferred;
+    }
+    return !readableSpan.getInstrumentationScopeInfo().getName().equals("inferred-spans");
   }
 }
