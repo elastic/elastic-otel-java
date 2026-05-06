@@ -49,7 +49,6 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import io.opentelemetry.semconv.ServiceAttributes;
 import io.opentelemetry.semconv.incubating.HostIncubatingAttributes;
-import io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -254,7 +253,7 @@ public class UniversalProfilingProcessorTest {
       Resource withNamespace =
           Resource.builder()
               .put(ServiceAttributes.SERVICE_NAME, "service Ä 1")
-              .put(ServiceIncubatingAttributes.SERVICE_NAMESPACE, "my nameßspace")
+              .put(ServiceAttributes.SERVICE_NAMESPACE, "my nameßspace")
               .build();
       try (OpenTelemetrySdk sdk = initSdk(withNamespace, b -> {}, Sampler.alwaysOn())) {
         checkProcessStorage("service Ä 1", "my nameßspace");
