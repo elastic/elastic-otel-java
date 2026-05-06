@@ -25,10 +25,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.javaagent.tooling.resources.ResourceCustomizerProvider;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.DeclarativeConfiguration;
+import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.ExperimentalComposableRuleBasedSamplerRuleModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.ExperimentalLanguageSpecificInstrumentationModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.OpenTelemetryConfigurationModel;
 import io.opentelemetry.sdk.extension.incubator.fileconfig.internal.model.SamplerModel;
 import java.io.InputStream;
+import java.util.List;
 import java.util.function.Consumer;
 import net.javacrumbs.jsonunit.assertj.JsonListAssert;
 import org.junit.jupiter.api.Test;
@@ -68,6 +70,7 @@ public class DefaultDeclarativeConfigTest {
               json("{\"service\":{}}"),
               json("{\"host\":{}}"));
 
+          // propagators
           assertThat(config.getPropagator()).describedAs("missing propagator").isNotNull();
           assertThatJson(json(config.getPropagator()))
               .inPath("composite")
@@ -75,18 +78,27 @@ public class DefaultDeclarativeConfigTest {
               .describedAs("propagators should contain tracecontext and baggage by default")
               .containsExactlyInAnyOrder(json("{\"tracecontext\":{}}"), json("{\"baggage\":{}}"));
 
+          // spans
           assertThat(config.getTracerProvider()).isNotNull();
-          assertThat(config.getTracerProvider().getProcessors()).hasSize(2);
-          assertThatJson(json((config.getTracerProvider().getProcessors().get(0))))
+          assertThat(config.getTracerProvider().getProcessors()).hasSize(4);
+
+          // we don't check baggage configuration, just its presence by default
+          assertThatJson(json(config.getTracerProvider().getProcessors().get(0)))
+              .inPath("baggage")
+              .isObject();
+
+          assertThatJson(json(config.getTracerProvider().getProcessors().get(2)))
+              .inPath("inferred_spans/development")
+              .isObject()
+              .containsEntry("enabled", false) // opt-in, disabled by default
+              .containsEntry("logging_enabled", false); // silent by default
+
+          assertThatJson(json(config.getTracerProvider().getProcessors().get(3)))
               .inPath("batch.exporter.otlp_http")
               .isObject()
               .containsEntry("endpoint", "http://localhost:4318/v1/traces");
 
-          assertThatJson(json((config.getTracerProvider().getProcessors().get(1))))
-              .inPath("stacktrace/development")
-              .isObject()
-              .containsEntry("filter", "co.elastic.otel.SpanStackTraceFilter");
-
+          // metrics
           assertThat(config.getMeterProvider()).isNotNull();
           assertThat(config.getMeterProvider().getReaders()).hasSize(1);
           assertThatJson(json(config.getMeterProvider().getReaders().get(0)))
@@ -95,9 +107,16 @@ public class DefaultDeclarativeConfigTest {
               .containsEntry("endpoint", "http://localhost:4318/v1/metrics")
               .containsEntry("temporality_preference", "delta");
 
+          // logs
           assertThat(config.getLoggerProvider()).isNotNull();
-          assertThat(config.getLoggerProvider().getProcessors()).hasSize(1);
+          assertThat(config.getLoggerProvider().getProcessors()).hasSize(2);
+
+          // we don't check baggage configuration, just its presence by default
           assertThatJson(json((config.getLoggerProvider().getProcessors().get(0))))
+              .inPath("baggage")
+              .isObject();
+
+          assertThatJson(json((config.getLoggerProvider().getProcessors().get(1))))
               .inPath("batch.exporter.otlp_http")
               .isObject()
               .containsEntry("endpoint", "http://localhost:4318/v1/logs");
@@ -105,22 +124,15 @@ public class DefaultDeclarativeConfigTest {
           SamplerModel sampler = config.getTracerProvider().getSampler();
           assertThat(sampler).isNotNull();
 
-          assertThatJson(json(sampler))
-              .inPath("parent_based.root.probability/development.ratio")
+          // we only check that we are using the rule-based sampler and that the default (last)
+          // is the one we expect with 100% sampling
+          assertThatJson(json(sampler)).inPath("composite/development.rule_based.rules").isArray();
+          List<ExperimentalComposableRuleBasedSamplerRuleModel> rules =
+              sampler.getCompositeDevelopment().getRuleBased().getRules();
+          assertThatJson(json(rules.get(rules.size() - 1)))
+              .inPath("sampler.parent_threshold.root.probability.ratio")
               .isNumber()
               .isEqualByComparingTo("1.0");
-          assertThatJson(json(sampler))
-              .inPath("parent_based.remote_parent_sampled.always_on")
-              .isObject();
-          assertThatJson(json(sampler))
-              .inPath("parent_based.remote_parent_not_sampled.always_off")
-              .isObject();
-          assertThatJson(json(sampler))
-              .inPath("parent_based.local_parent_sampled.always_on")
-              .isObject();
-          assertThatJson(json(sampler))
-              .inPath("parent_based.local_parent_not_sampled.always_off")
-              .isObject();
 
           assertThat(config.getInstrumentationDevelopment()).isNotNull();
           ExperimentalLanguageSpecificInstrumentationModel java =

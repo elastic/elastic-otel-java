@@ -31,6 +31,27 @@ propagator:
 
 tracer_provider:
   processors:
+
+    # Add some baggage entries as span attributes, wildcards are supported.
+    # While both included/excluded can be used, we recommend using 'included' to opt-in only for relevant baggage entries.
+    - baggage:
+        included: [ 'example-baggage-key-*' ]
+
+    # Requires the span-stacktrace extension (included in EDOT)
+    # https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/span-stacktrace
+    - stacktrace/development:
+        # TODO: remove filtering once https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2803 is merged and released
+        filter: co.elastic.otel.SpanStackTraceFilter
+
+    # Requires the inferred-spans extension (included in EDOT)
+    # https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/inferred-spans
+    - inferred_spans/development:
+        # disabled by default, opt-in
+        enabled: ${OTEL_INFERRED_SPANS_ENABLED:-false}
+        # avoid log messages about missing JVM symbols by default
+        logging_enabled: ${OTEL_INFERRED_SPANS_LOGGING_ENABLED:-false}
+
+    # Batch span exporter, must come last
     - batch:
         exporter:
           # get endpoint from OTEL_EXPORTER_OTLP_ENDPOINT environment variable if set, otherwise fallback to local collector
@@ -42,24 +63,43 @@ tracer_provider:
           # otlp_grpc:
           #  endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
           #  headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
-    - stacktrace/development:
-        min_duration: 5 # minimal duration in ms, default is 5
-        filter: co.elastic.otel.SpanStackTraceFilter
-  # sampler, parent-based with 100% sampling rate by default
+
+  # Sampler, parent-based with 100% sampling rate by default
   sampler:
-    parent_based:
-      root:
-        # using the consistent sampler implementation
-        probability/development:
-          ratio: 1.0
-      remote_parent_sampled:
-        always_on:
-      remote_parent_not_sampled:
-        always_off:
-      local_parent_sampled:
-        always_on:
-      local_parent_not_sampled:
-        always_off:
+    composite/development:
+      rule_based:
+        rules:
+          # FIXME those examples have an extra 'dummy-work-around' exclusion to avoid issue fixed in
+          # https://github.com/open-telemetry/opentelemetry-java/pull/8356
+          #
+          # filter-out noisy spans from span attributes provided on span start
+          # example 1: filter on user-agent header
+          - attribute_patterns:
+              key: user_agent.original
+              included: [ 'example-noisy-user-agent/*']
+              excluded: [ 'dummy-work-around']
+            sampler:
+              always_off:
+          # example 2: filter on HTTP request path
+          - attribute_patterns:
+              key: url.path
+              included: [ '/healthcheck-to-ignore-*']
+              excluded: [ 'dummy-work-around']
+            sampler:
+              always_off:
+          # example 3: filter on messaging destination
+          - attribute_patterns:
+              key: messaging.destination.name
+              included: [ 'example-noisy-destination/*']
+              excluded: [ 'dummy-work-around']
+            sampler:
+                always_off:
+          # default sampler after rules filtering: parent-based with 100% sampling rate
+          - sampler:
+              parent_threshold:
+                root:
+                  probability:
+                    ratio: 1.0
 
 meter_provider:
   readers:
@@ -79,6 +119,13 @@ meter_provider:
 
 logger_provider:
   processors:
+
+    # Add some baggage entries as log attributes, wildcards are supported
+    # While both included/excluded can be used, we recommend using 'include' to opt-in only for relevant baggage entries.
+    - baggage:
+        included: [ 'example-baggage-key-*' ]
+
+    # Batch log exporter, must come last
     - batch:
         exporter:
           # get endpoint from OTEL_EXPORTER_OTLP_ENDPOINT environment variable if set, otherwise fallback to local collector

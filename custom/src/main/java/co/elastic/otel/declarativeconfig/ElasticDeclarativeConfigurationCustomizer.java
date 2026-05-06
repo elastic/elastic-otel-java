@@ -67,7 +67,6 @@ public class ElasticDeclarativeConfigurationCustomizer
           }
 
           customizeResources(model);
-          customizeUserAgent(model);
           return model;
         });
   }
