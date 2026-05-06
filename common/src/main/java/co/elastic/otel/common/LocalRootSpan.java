@@ -68,8 +68,7 @@ public class LocalRootSpan {
     if (!parentSpanCtx.isValid()) {
       localRoot.set(startedSpan, LOCAL_ROOT_MARKER);
     } else if (parentSpanCtx.isRemote()) {
-      Boolean isInferred = startedSpan.getAttribute(ElasticAttributes.IS_INFERRED);
-      if (isInferred != null && isInferred) {
+      if (InferredSpanDetector.isInferredSpan(startedSpan)) {
         localRoot.set(startedSpan, INFERRED_SPAN_UNKNOWN_ROOT_MARKER);
       } else {
         localRoot.set(startedSpan, LOCAL_ROOT_MARKER);

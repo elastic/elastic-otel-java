@@ -20,9 +20,8 @@ package co.elastic.otel;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import co.elastic.otel.common.ElasticAttributes;
-import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.contrib.inferredspans.InferredSpansProcessor;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import org.junit.jupiter.api.Test;
@@ -39,23 +38,24 @@ class SpanStackTraceFilterTest {
     ReadableSpan simpleSpan = (ReadableSpan) tracer.spanBuilder("span").startSpan();
     assertThat(filter.test(simpleSpan)).isTrue();
 
-    ReadableSpan spanNotInferred = (ReadableSpan)
-        tracer.spanBuilder("span").setAttribute(ElasticAttributes.IS_INFERRED, Boolean.FALSE).startSpan();
+    ReadableSpan spanNotInferred =
+        (ReadableSpan)
+            tracer
+                .spanBuilder("span")
+                .startSpan();
     assertThat(filter.test(spanNotInferred)).isTrue();
 
-    ReadableSpan inferredSpanWinInferredAttribute = (ReadableSpan) tracer
-                .spanBuilder("span")
-                .setAttribute("is_inferred", true)
-                .startSpan();
-    assertThat(filter.test(inferredSpanWinInferredAttribute)).describedAs("spans with is_inferred attribute must be filtered").isFalse();
-
     Tracer inferredSpanTracer =
-        OpenTelemetrySdk.builder().build().getTracerProvider().tracerBuilder("inferred-spans").build();
+        OpenTelemetrySdk.builder()
+            .build()
+            .getTracerProvider()
+            .tracerBuilder(InferredSpansProcessor.TRACER_NAME)
+            .build();
 
-    ReadableSpan inferredSpanTracerSpan = (ReadableSpan) inferredSpanTracer
-        .spanBuilder("span")
-        .startSpan();
-    assertThat(filter.test(inferredSpanTracerSpan)).describedAs("spans from inferred-spans tracer must be filtered").isFalse();
-
+    ReadableSpan inferredSpanTracerSpan =
+        (ReadableSpan) inferredSpanTracer.spanBuilder("span").startSpan();
+    assertThat(filter.test(inferredSpanTracerSpan))
+        .describedAs("spans from inferred-spans tracer must be filtered")
+        .isFalse();
   }
 }
