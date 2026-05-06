@@ -22,17 +22,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.semconv.incubating.HostIncubatingAttributes;
-import io.opentelemetry.semconv.incubating.ServiceIncubatingAttributes;
 import org.junit.jupiter.api.Test;
 
 public class UniversalProfilingIncubatingAttributesTest {
-
-  @Test
-  void serviceNamespace() {
-    check(
-        UniversalProfilingIncubatingAttributes.SERVICE_NAMESPACE,
-        ServiceIncubatingAttributes.SERVICE_NAMESPACE);
-  }
 
   @Test
   void hostId() {

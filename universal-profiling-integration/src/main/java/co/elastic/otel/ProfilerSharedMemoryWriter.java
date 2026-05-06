@@ -52,8 +52,7 @@ public class ProfilerSharedMemoryWriter {
     if (serviceName == null) {
       throw new IllegalStateException("A service name must be configured!");
     }
-    String environment =
-        serviceResource.getAttribute(UniversalProfilingIncubatingAttributes.SERVICE_NAMESPACE);
+    String environment = serviceResource.getAttribute(ServiceAttributes.SERVICE_NAMESPACE);
 
     ByteBuffer buffer = ByteBuffer.allocateDirect(4096);
     buffer.order(ByteOrder.nativeOrder());
