@@ -126,9 +126,7 @@ public class SpanStackTraceTest {
     if (stackTraceExpected) {
       assertThat(span)
           .hasAttribute(
-              satisfies(
-                  CodeAttributes.CODE_STACKTRACE,
-                  AbstractCharSequenceAssert::isNotBlank));
+              satisfies(CodeAttributes.CODE_STACKTRACE, AbstractCharSequenceAssert::isNotBlank));
     } else {
       assertThat(span.getAttributes().get(CodeAttributes.CODE_STACKTRACE)).isNull();
     }
