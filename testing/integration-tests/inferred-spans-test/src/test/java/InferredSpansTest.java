@@ -19,8 +19,6 @@
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-import co.elastic.otel.common.ElasticAttributes;
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.opentelemetry.instrumentation.testing.junit.AgentInstrumentationExtension;
 import io.opentelemetry.sdk.common.InstrumentationScopeInfo;
@@ -46,9 +44,10 @@ public class InferredSpansTest {
   static final AgentInstrumentationExtension testing = AgentInstrumentationExtension.create();
 
   // get the inferred spans scope from dependencies for testing
-  private static final InstrumentationScopeInfo inferredSpansScope = InstrumentationScopeInfo.builder("inferred-spans")
-      .setVersion(System.getProperty("test.contrib-inferred-spans.version"))
-      .build();
+  private static final InstrumentationScopeInfo inferredSpansScope =
+      InstrumentationScopeInfo.builder("inferred-spans")
+          .setVersion(System.getProperty("test.contrib-inferred-spans.version"))
+          .build();
 
   @Test
   public void checkInferredSpansFunctional() {

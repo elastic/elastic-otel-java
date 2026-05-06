@@ -21,7 +21,6 @@ package co.elastic.otel;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.satisfies;
 
-import co.elastic.otel.common.ElasticAttributes;
 import co.elastic.otel.testing.AutoConfigTestProperties;
 import co.elastic.otel.testing.AutoConfiguredDataCapture;
 import co.elastic.otel.testing.OtelReflectionUtils;
@@ -143,10 +142,7 @@ public class SpanStackTraceTest {
 
       Tracer tracer = otel.getTracer(InferredSpansProcessor.TRACER_NAME);
 
-      tracer
-          .spanBuilder("my-span")
-          .startSpan()
-          .end();
+      tracer.spanBuilder("my-span").startSpan().end();
 
       checkSpanStackTrace(false);
     }

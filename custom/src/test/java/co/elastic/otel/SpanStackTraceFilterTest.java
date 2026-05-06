@@ -38,11 +38,7 @@ class SpanStackTraceFilterTest {
     ReadableSpan simpleSpan = (ReadableSpan) tracer.spanBuilder("span").startSpan();
     assertThat(filter.test(simpleSpan)).isTrue();
 
-    ReadableSpan spanNotInferred =
-        (ReadableSpan)
-            tracer
-                .spanBuilder("span")
-                .startSpan();
+    ReadableSpan spanNotInferred = (ReadableSpan) tracer.spanBuilder("span").startSpan();
     assertThat(filter.test(spanNotInferred)).isTrue();
 
     Tracer inferredSpanTracer =
