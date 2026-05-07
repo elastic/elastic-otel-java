@@ -27,6 +27,7 @@ import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.ContextPropagators;
+import io.opentelemetry.contrib.inferredspans.InferredSpansProcessor;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
@@ -43,6 +44,7 @@ public class LocalRootSpanTest {
 
   private static OpenTelemetrySdk sdk;
   private static Tracer tracer;
+  private static Tracer inferredTracer;
 
   @BeforeAll
   static void init() {
@@ -74,6 +76,7 @@ public class LocalRootSpanTest {
             .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
             .build();
     tracer = sdk.getTracer("test-tracer");
+    inferredTracer = sdk.getTracer(InferredSpansProcessor.TRACER_NAME);
   }
 
   @AfterAll
@@ -120,10 +123,9 @@ public class LocalRootSpanTest {
 
     ReadWriteSpan delayedInferred =
         (ReadWriteSpan)
-            tracer
+            inferredTracer
                 .spanBuilder("inferred span with remote parent")
                 .setParent(remoteParent)
-                .setAttribute(ElasticAttributes.IS_INFERRED, true)
                 .startSpan();
 
     Assertions.assertThat(delayedInferred.toSpanData().getParentSpanContext().isRemote()).isTrue();
@@ -131,10 +133,9 @@ public class LocalRootSpanTest {
 
     Span root = tracer.spanBuilder("span1").startSpan();
     Span syncInferred =
-        tracer
+        inferredTracer
             .spanBuilder("inferred span with known parent")
             .setParent(Context.root().with(root))
-            .setAttribute(ElasticAttributes.IS_INFERRED, true)
             .startSpan();
 
     assertThat(LocalRootSpan.getFor(syncInferred)).isSameAs(root);

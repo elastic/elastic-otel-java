@@ -21,13 +21,13 @@ package co.elastic.otel;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.satisfies;
 
-import co.elastic.otel.common.ElasticAttributes;
 import co.elastic.otel.testing.AutoConfigTestProperties;
 import co.elastic.otel.testing.AutoConfiguredDataCapture;
 import co.elastic.otel.testing.OtelReflectionUtils;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.contrib.inferredspans.InferredSpansProcessor;
 import io.opentelemetry.contrib.stacktrace.StackTraceSpanProcessor;
 import io.opentelemetry.sdk.trace.data.SpanData;
 import io.opentelemetry.semconv.CodeAttributes;
@@ -138,13 +138,9 @@ public class SpanStackTraceTest {
         new AutoConfigTestProperties().put(OTEL_MIN_DURATION, "0")) {
       OpenTelemetry otel = GlobalOpenTelemetry.get();
 
-      Tracer tracer = otel.getTracer("test-tracer");
+      Tracer tracer = otel.getTracer(InferredSpansProcessor.TRACER_NAME);
 
-      tracer
-          .spanBuilder("my-span")
-          .setAttribute(ElasticAttributes.IS_INFERRED, true)
-          .startSpan()
-          .end();
+      tracer.spanBuilder("my-span").startSpan().end();
 
       checkSpanStackTrace(false);
     }

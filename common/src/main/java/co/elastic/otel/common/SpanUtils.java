@@ -16,20 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel;
+package co.elastic.otel.common;
 
-import co.elastic.otel.common.SpanUtils;
 import io.opentelemetry.sdk.trace.ReadableSpan;
-import java.util.function.Predicate;
 
-/**
- * Span predicate that returns {@literal true} when span is not an inferred span, {@literal false}
- * otherwise
- */
-public class SpanStackTraceFilter implements Predicate<ReadableSpan> {
+public class SpanUtils {
 
-  @Override
-  public boolean test(ReadableSpan readableSpan) {
-    return !SpanUtils.isInferredSpan(readableSpan);
+  private SpanUtils() {}
+
+  public static boolean isInferredSpan(ReadableSpan span) {
+    return span.getInstrumentationScopeInfo().getName().equals("inferred-spans");
   }
 }

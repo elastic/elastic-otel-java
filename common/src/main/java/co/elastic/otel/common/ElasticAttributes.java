@@ -23,12 +23,6 @@ import java.util.List;
 
 public interface ElasticAttributes {
 
-  /**
-   * Marker attribute for inferred spans. Does not have the elastic-prefix anymore because it has
-   * been contributed upstream
-   */
-  AttributeKey<Boolean> IS_INFERRED = AttributeKey.booleanKey("is_inferred");
-
   AttributeKey<List<String>> PROFILER_STACK_TRACE_IDS =
       AttributeKey.stringArrayKey("elastic.profiler_stack_trace_ids");
 }

@@ -16,42 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package co.elastic.otel;
+package co.elastic.otel.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.contrib.inferredspans.InferredSpansProcessor;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import org.junit.jupiter.api.Test;
 
-class SpanStackTraceFilterTest {
+public class SpanUtilsTest {
 
   @Test
-  void filtering() {
+  public void inferredSpanTracerDetection() {
+    test(InferredSpansProcessor.TRACER_NAME, true);
+    test("test", false);
+  }
+
+  private void test(String tracerName, boolean expectedInferred) {
     Tracer tracer =
-        OpenTelemetrySdk.builder().build().getTracerProvider().tracerBuilder("test").build();
-
-    SpanStackTraceFilter filter = new SpanStackTraceFilter();
-
-    ReadableSpan simpleSpan = (ReadableSpan) tracer.spanBuilder("span").startSpan();
-    assertThat(filter.test(simpleSpan)).isTrue();
-
-    ReadableSpan spanNotInferred = (ReadableSpan) tracer.spanBuilder("span").startSpan();
-    assertThat(filter.test(spanNotInferred)).isTrue();
-
-    Tracer inferredSpanTracer =
-        OpenTelemetrySdk.builder()
-            .build()
-            .getTracerProvider()
-            .tracerBuilder(InferredSpansProcessor.TRACER_NAME)
-            .build();
-
-    ReadableSpan inferredSpanTracerSpan =
-        (ReadableSpan) inferredSpanTracer.spanBuilder("span").startSpan();
-    assertThat(filter.test(inferredSpanTracerSpan))
-        .describedAs("spans from inferred-spans tracer must be filtered")
-        .isFalse();
+        OpenTelemetrySdk.builder().build().getTracerProvider().tracerBuilder(tracerName).build();
+    Span span = tracer.spanBuilder("span").startSpan();
+    assertThat(SpanUtils.isInferredSpan((ReadableSpan) span)).isEqualTo(expectedInferred);
   }
 }

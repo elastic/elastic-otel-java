@@ -19,6 +19,7 @@ tasks.withType<Test>() {
     "-Dotel.inferred.spans.enabled=true",
     "-Dotel.inferred.spans.duration=2000ms",
     "-Dotel.inferred.spans.interval=2000ms",
-    "-Dotel.inferred.spans.sampling.interval=5ms"
+    "-Dotel.inferred.spans.sampling.interval=5ms",
+    "-Dtest.contrib-inferred-spans.version=${libs.versions.opentelemetryContribAlpha.get()}"
   )
 }
