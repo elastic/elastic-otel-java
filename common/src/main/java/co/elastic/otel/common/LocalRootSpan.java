@@ -68,7 +68,7 @@ public class LocalRootSpan {
     if (!parentSpanCtx.isValid()) {
       localRoot.set(startedSpan, LOCAL_ROOT_MARKER);
     } else if (parentSpanCtx.isRemote()) {
-      if (InferredSpanDetector.isInferredSpan(startedSpan)) {
+      if (SpanUtils.isInferredSpan(startedSpan)) {
         localRoot.set(startedSpan, INFERRED_SPAN_UNKNOWN_ROOT_MARKER);
       } else {
         localRoot.set(startedSpan, LOCAL_ROOT_MARKER);

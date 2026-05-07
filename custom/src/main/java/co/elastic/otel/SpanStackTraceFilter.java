@@ -18,7 +18,7 @@
  */
 package co.elastic.otel;
 
-import co.elastic.otel.common.InferredSpanDetector;
+import co.elastic.otel.common.SpanUtils;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import java.util.function.Predicate;
 
@@ -30,6 +30,6 @@ public class SpanStackTraceFilter implements Predicate<ReadableSpan> {
 
   @Override
   public boolean test(ReadableSpan readableSpan) {
-    return !InferredSpanDetector.isInferredSpan(readableSpan);
+    return !SpanUtils.isInferredSpan(readableSpan);
   }
 }

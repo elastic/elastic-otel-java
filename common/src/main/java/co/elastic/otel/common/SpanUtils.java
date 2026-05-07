@@ -20,9 +20,9 @@ package co.elastic.otel.common;
 
 import io.opentelemetry.sdk.trace.ReadableSpan;
 
-public class InferredSpanDetector {
+public class SpanUtils {
 
-  private InferredSpanDetector() {}
+  private SpanUtils() {}
 
   public static boolean isInferredSpan(ReadableSpan span) {
     return span.getInstrumentationScopeInfo().getName().equals("inferred-spans");

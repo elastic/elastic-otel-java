@@ -27,7 +27,7 @@ import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.ReadableSpan;
 import org.junit.jupiter.api.Test;
 
-public class InferredSpanDetectorTest {
+public class SpanUtilsTest {
 
   @Test
   public void inferredSpanTracerDetection() {
@@ -39,7 +39,6 @@ public class InferredSpanDetectorTest {
     Tracer tracer =
         OpenTelemetrySdk.builder().build().getTracerProvider().tracerBuilder(tracerName).build();
     Span span = tracer.spanBuilder("span").startSpan();
-    assertThat(InferredSpanDetector.isInferredSpan((ReadableSpan) span))
-        .isEqualTo(expectedInferred);
+    assertThat(SpanUtils.isInferredSpan((ReadableSpan) span)).isEqualTo(expectedInferred);
   }
 }
