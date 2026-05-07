@@ -31,6 +31,7 @@ import io.opentelemetry.sdk.metrics.InstrumentType;
 import io.opentelemetry.sdk.metrics.data.AggregationTemporality;
 import io.opentelemetry.sdk.metrics.export.MetricExporter;
 import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.semconv.DeploymentAttributes;
 import io.opentelemetry.semconv.incubating.DeploymentIncubatingAttributes;
 import java.util.HashMap;
 import java.util.List;
@@ -148,7 +149,7 @@ class ElasticAutoConfigurationCustomizerProviderTest {
         .hasSize(3)
         .describedAs("when legacy attribute set agent should send both")
         .containsEntry(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT, "test")
-        .containsEntry(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT_NAME, "test")
+        .containsEntry(DeploymentAttributes.DEPLOYMENT_ENVIRONMENT_NAME, "test")
         .containsEntry("other", "other");
   }
 
@@ -157,7 +158,7 @@ class ElasticAutoConfigurationCustomizerProviderTest {
     Resource input =
         Resource.builder()
             .put(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT, "legacy")
-            .put(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT_NAME, "new")
+            .put(DeploymentAttributes.DEPLOYMENT_ENVIRONMENT_NAME, "new")
             .put("other", "other")
             .build();
     Resource resource = resourceProviders().apply(input, null);
@@ -165,7 +166,7 @@ class ElasticAutoConfigurationCustomizerProviderTest {
         .hasSize(3)
         .describedAs("when both attributes are set, agent should send them as-is")
         .containsEntry(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT, "legacy")
-        .containsEntry(DeploymentIncubatingAttributes.DEPLOYMENT_ENVIRONMENT_NAME, "new")
+        .containsEntry(DeploymentAttributes.DEPLOYMENT_ENVIRONMENT_NAME, "new")
         .containsEntry("other", "other");
   }
 }
