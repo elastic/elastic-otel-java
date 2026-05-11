@@ -207,6 +207,10 @@ The Elastic {{product.apm}} Java agent provided an `application_packages` settin
 
 The `OTEL_JAVA_EXPERIMENTAL_SPAN_STACKTRACE_MIN_DURATION` setting controls when stack traces are captured, but it does not provide package-based filtering.
 
+### `transaction_ignore_urls` and `ignore_message_queues`
+
+With EDOT Java, [declarative configuration](./configuration.md#declarative-configuration) is supported and provides the ability to filter spans based on attributes.
+
 ## Metrics
 
 Metrics in this section are described as they are reported to the backend by EDOT or Elastic APM agent.
