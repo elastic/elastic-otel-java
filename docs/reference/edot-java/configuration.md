@@ -193,7 +193,7 @@ Configuration options are applied with the following priorities:
 - [environment variables](#system-properties) take precedence over [system properties](#system-properties) and [properties configuration file](#properties-configuration-file).
 - [system properties](#system-properties) take precedence on [properties configuration file](#properties-configuration-file).
 
-In addition, you can use [Declarative configuration](#declarative-configuration).
+Also, you can use [Declarative configuration](#declarative-configuration).
 
 ### Environment variables
 
@@ -246,7 +246,7 @@ Limitations:
 - ability to skip server certificate is not supported
 - dynamic configuration is not supported
 - universal profiling integration is not supported
-- while the declarative configuration is GA, the actual configuration may still contain options that are in-development or experimental.
+- while the declarative configuration is GA, the actual configuration can still contain options that are in-development or experimental. However, the features configured in provided configuration are tested and supported.
 
 A [declarative configuration example file](https://github.com/elastic/elastic-otel-java/blob/main/custom/src/main/resources/co/elastic/otel/config.yaml) can be extracted from the agent jar using the following command: `java -jar /path/to/agent.jar --default-config-yaml`
 
