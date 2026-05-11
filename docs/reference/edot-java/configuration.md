@@ -193,9 +193,7 @@ Configuration options are applied with the following priorities:
 - [environment variables](#system-properties) take precedence over [system properties](#system-properties) and [properties configuration file](#properties-configuration-file).
 - [system properties](#system-properties) take precedence on [properties configuration file](#properties-configuration-file).
 
-:::{important}
-[Declarative configuration](https://opentelemetry.io/docs/specs/otel/configuration/#declarative-configuration) is not supported.
-:::
+In addition, you can use [Declarative configuration](#declarative-configuration).
 
 ### Environment variables
 
@@ -235,6 +233,22 @@ Before starting the JVM, create and populate the configuration file and specify 
 echo otel.service.name=my-service > my.properties
 java -Dotel.javaagent.configuration-file=my.properties ...
 ```
+
+### Declarative configuration
+
+The [declarative configuration](https://opentelemetry.io/docs/specs/otel/configuration/#declarative-configuration) provides a way to explicitly configure
+the agent and SDK with a structured configuration in YAML.
+
+In addition to providing a structured configuration format, this also allows to configure the vendor-neutral OpenTelemetry Java agent
+with the same configuration as EDOT, hence replicating its features in a vendor-neutral way.
+
+Limitations:
+- ability to skip server certificate is not supported
+- dynamic configuration is not supported
+- universal profiling integration is not supported
+- while the declarative configuration is GA, the actual configuration may still contain options that are in-development or experimental.
+
+A [declarative configuration example file](https://github.com/elastic/elastic-otel-java/blob/main/custom/src/main/resources/co/elastic/otel/config.yaml) can be extracted from the agent jar using the following command: `java -jar /path/to/agent.jar --default-config-yaml`
 
 ## Agent logging
 
