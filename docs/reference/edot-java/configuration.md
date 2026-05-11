@@ -19,7 +19,7 @@ The [minimal configuration](#minimal-configuration) section provides a recommend
 
 See [configuration options](#configuration-options) for details on the supported configuration options and [configuration methods](#configuration-methods) for how to provide them.
 
-[Declarative configuration](#declarative-configuration) is supported, with a few limitations compared to other configuration options.
+If you use [Declarative configuration](#declarative-configuration), there are some features that are yet to be supported, see the limitations section
 
 ## Minimal configuration
 
@@ -191,7 +191,7 @@ Configuration options are applied with the following priorities:
 - [environment variables](#system-properties) take precedence over [system properties](#system-properties) and [properties configuration file](#properties-configuration-file).
 - [system properties](#system-properties) take precedence on [properties configuration file](#properties-configuration-file).
 
-Also, you can use [Declarative configuration](#declarative-configuration).
+Alternatively, you can use [Declarative configuration](#declarative-configuration).
 
 ### Environment variables
 
@@ -237,16 +237,16 @@ java -Dotel.javaagent.configuration-file=my.properties ...
 The [declarative configuration](https://opentelemetry.io/docs/specs/otel/configuration/#declarative-configuration) provides a way to explicitly configure
 the agent and SDK with a structured configuration in YAML.
 
-In addition to providing a structured configuration format, this also allows to configure the vendor-neutral OpenTelemetry Java agent
+In addition to providing a structured configuration format, this also allows you to configure the vendor-neutral OpenTelemetry Java agent
 with the same configuration as EDOT, hence replicating its features in a vendor-neutral way.
 
 Limitations:
 - ability to skip server certificate is not supported
 - dynamic configuration is not supported
 - universal profiling integration is not supported
-- while the declarative configuration is GA, the actual configuration can still contain options that are in-development or experimental. However, the features configured in provided configuration are tested and supported.
+- while the declarative configuration is GA, the actual configuration can still contain options that are in-development or experimental. However, the features configured in the provided configuration are tested and supported.
 
-A [declarative configuration example file](https://github.com/elastic/elastic-otel-java/blob/main/custom/src/main/resources/co/elastic/otel/config.yaml) can be extracted from the agent jar using the following command: `java -jar /path/to/agent.jar --default-config-yaml`
+A [declarative configuration example file](https://github.com/elastic/elastic-otel-java/blob/main/custom/src/main/resources/co/elastic/otel/config.yaml) specific to that version of the agent can be extracted from the agent jar using the following command: `java -jar /path/to/agent.jar --default-config-yaml`
 
 ## Agent logging
 

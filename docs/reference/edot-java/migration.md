@@ -209,7 +209,7 @@ The `OTEL_JAVA_EXPERIMENTAL_SPAN_STACKTRACE_MIN_DURATION` setting controls when 
 
 ### `transaction_ignore_urls` and `ignore_message_queues`
 
-With EDOT Java, [declarative configuration](./configuration.md#declarative-configuration) is supported and provides the ability to filter spans based on attributes.
+To filter spans based on attributes with EDOT Java, you'll need to use [declarative configuration](./configuration.md#declarative-configuration).
 
 ## Metrics
 
