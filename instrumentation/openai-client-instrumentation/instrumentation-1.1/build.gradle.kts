@@ -14,7 +14,7 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.3")
   testImplementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.21.3")
-  testImplementation("org.slf4j:slf4j-simple:2.0.17")
+  testImplementation("org.slf4j:slf4j-simple:2.0.18")
   testImplementation(catalog.wiremockjre8)
 }
 
