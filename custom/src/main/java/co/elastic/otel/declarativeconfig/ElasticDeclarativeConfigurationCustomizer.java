@@ -21,7 +21,6 @@ package co.elastic.otel.declarativeconfig;
 import static co.elastic.otel.ElasticUserAgentHeader.HEADER_NAME;
 import static co.elastic.otel.ElasticUserAgentHeader.OTLP_GRPC;
 import static co.elastic.otel.ElasticUserAgentHeader.OTLP_HTTP;
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
 
 import com.google.auto.service.AutoService;
@@ -90,18 +89,23 @@ public class ElasticDeclarativeConfigurationCustomizer
       detectionDevelopment = new ExperimentalResourceDetectionModel();
       resource.withDetectionDevelopment(detectionDevelopment);
     }
-    List<ExperimentalResourceDetectorModel> detectors =
-        requireNonNull(detectionDevelopment.getDetectors());
-
-    Set<String> names =
-        detectors.stream()
-            .flatMap(detector -> detector.getAdditionalProperties().keySet().stream())
-            .collect(toSet());
+    List<ExperimentalResourceDetectorModel> detectors = detectionDevelopment.getDetectors();
+    Set<String> names = Collections.emptySet();
+    if (detectors != null) {
+      names =
+          detectors.stream()
+              .flatMap(detector -> detector.getAdditionalProperties().keySet().stream())
+              .collect(toSet());
+    }
 
     // add at the end to make it have priority over upstream distro provider (which is added 1st)
     if (!names.contains(ElasticDistroComponentProvider.NAME)) {
       ExperimentalResourceDetectorModel detector = new ExperimentalResourceDetectorModel();
       detector.getAdditionalProperties().put(ElasticDistroComponentProvider.NAME, null);
+      if (detectors == null) {
+        detectors = new ArrayList<>();
+        detectionDevelopment.withDetectors(detectors);
+      }
       detectors.add(detector);
     }
   }

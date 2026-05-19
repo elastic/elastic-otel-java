@@ -45,7 +45,7 @@ class ElasticDeclarativeConfigurationCustomizerTest {
     model = applyConfigCustomize(model, new ElasticDeclarativeConfigurationCustomizer());
 
     // ensures that we add our resource detector even if the model does not provide any
-    assertThatJson(json(model.getResource())).inPath("attributes").isArray().isEmpty();
+    assertThatJson(json(model.getResource())).inPath("attributes").isAbsent();
     assertThatJson(json(model.getResource()))
         .inPath("detection/development.detectors")
         .isArray()
