@@ -1,0 +1,6 @@
+prs:
+- https://github.com/elastic/elastic-otel-java/pull/1110
+type: enhancement
+products:
+- product: edot-java
+title: Update upstream OpenTelemetry agent dependencies to 2.28.1
