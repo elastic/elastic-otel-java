@@ -173,8 +173,6 @@ public class ElasticAutoConfigurationCustomizerProvider
       }
       config.put(STACKTRACE_OTEL_DURATION, value);
     }
-
-    config.put(STACKTRACE_OTEL_FILTER, SpanStackTraceFilter.class.getName());
   }
 
   private static void indyInstrumentation(
