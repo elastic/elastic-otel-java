@@ -40,8 +40,6 @@ tracer_provider:
     # Requires the span-stacktrace extension (included in EDOT)
     # https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/span-stacktrace
     - stacktrace/development:
-        # TODO: remove filtering once https://github.com/open-telemetry/opentelemetry-java-contrib/pull/2803 is merged and released
-        filter: co.elastic.otel.SpanStackTraceFilter
 
     # Requires the inferred-spans extension (included in EDOT)
     # https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/inferred-spans

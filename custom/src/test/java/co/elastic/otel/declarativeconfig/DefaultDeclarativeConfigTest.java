@@ -87,6 +87,19 @@ public class DefaultDeclarativeConfigTest {
               .inPath("baggage")
               .isObject();
 
+          // stacktrace processor does not have any configuration by default, thus we have to test
+          // for additional
+          // property presence without using json serialization.
+          assertThat(
+                  config
+                      .getTracerProvider()
+                      .getProcessors()
+                      .get(1)
+                      .getAdditionalProperties()
+                      .containsKey("stacktrace/development"))
+              .describedAs("stacktrace processor should be present by default")
+              .isTrue();
+
           assertThatJson(json(config.getTracerProvider().getProcessors().get(2)))
               .inPath("inferred_spans/development")
               .isObject()
