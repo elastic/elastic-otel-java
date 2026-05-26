@@ -6,12 +6,13 @@ on:
     types:
       - completed
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   submit:
     permissions:
-      contents: write
-      pull-requests: write
+      contents: write       # commit the generated changelog file to the PR branch
+      pull-requests: write  # post the changelog comment on the PR
+      id-token: write       # OIDC token for the org-membership check on fork PRs
+      packages: read        # pull the docs-builder edge image from GHCR
     uses: elastic/docs-actions/.github/workflows/changelog-submit.yml@v1
