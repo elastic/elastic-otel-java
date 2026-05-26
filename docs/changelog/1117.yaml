@@ -1,0 +1,9 @@
+﻿prs:
+- https://github.com/elastic/elastic-otel-java/pull/1117
+issues:
+- https://github.com/elastic/elastic-otel-java/issues/1083
+type: enhancement
+products:
+- product: edot-java
+  lifecycle: ga
+title: remove explicit filter to simplify span stacktrace declarative config
