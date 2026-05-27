@@ -1,7 +1,7 @@
 [versions]
 shadow = "9.4.1"
 jib = "3.5.3"
-spotless = "8.5.1"
+spotless = "8.6.0"
 junit = "5.14.4"
 autoservice = "1.1.1"
 log4j2 = "2.26.0"
