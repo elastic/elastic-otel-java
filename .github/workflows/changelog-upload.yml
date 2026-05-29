@@ -1,0 +1,15 @@
+name: changelog-upload
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  upload:
+    permissions:
+      contents: read        # checkout the pushed commit
+      id-token: write       # OIDC token for AWS authentication
+      pull-requests: read   # look up merged PRs for the pushed commit so fork-PR entries can be regenerated
+    uses: elastic/docs-actions/.github/workflows/changelog-upload.yml@v1

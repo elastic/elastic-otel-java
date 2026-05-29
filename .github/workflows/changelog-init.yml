@@ -10,8 +10,7 @@ on:
       - labeled
       - unlabeled
 
-permissions:
-  contents: read
+permissions: {}
 
 concurrency:
   group: changelog-init-${{ github.event.pull_request.number }}
@@ -54,4 +53,6 @@ jobs:
     if: ${{ always() }}
     # needs to execute after init-upstream-update
     needs: [ upstream-update ]
+    permissions:
+      contents: read  # reusable workflow checks out the repo to read docs/changelog.yml
     uses: elastic/docs-actions/.github/workflows/changelog-validate.yml@v1
