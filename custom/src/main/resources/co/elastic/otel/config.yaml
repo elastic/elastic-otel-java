@@ -21,6 +21,12 @@ resource:
       - host:
       # Provides 'container.id'
       - container:
+      # Provides 'service.name' from application server deployed application (if available)
+      # When multiple applications are deployed, it might be relevant to provide an explicit 'service.name'
+      # to get a deterministic behavior on the effective 'service.name'
+      # Requires the resource-providers extension
+      # https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/resource-providers
+      - app_server:
       # Provides 'service.name' and 'service.instance.id'
       - service:
 
