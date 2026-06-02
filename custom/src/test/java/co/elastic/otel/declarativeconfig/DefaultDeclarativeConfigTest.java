@@ -51,7 +51,7 @@ public class DefaultDeclarativeConfigTest {
               assertThatJson(json(config.getResource()))
                   .inPath("detection/development.detectors")
                   .isArray()
-                  .hasSize(9);
+                  .hasSize(10);
 
           // those are the providers magically added by upstream and elastic distributions
           detectorsAssert
@@ -64,6 +64,7 @@ public class DefaultDeclarativeConfigTest {
               json("{\"aws\":null}"),
               json("{\"gcp\":null}"),
               json("{\"azure\":null}"),
+              json("{\"app_server\":null}"),
               // TODO: maybe investigate why those are including empty objects
               json("{\"process\":{}}"),
               json("{\"container\":{}}"),

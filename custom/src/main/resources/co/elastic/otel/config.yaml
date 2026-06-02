@@ -21,6 +21,10 @@ resource:
       - host:
       # Provides 'container.id'
       - container:
+      # Provides 'service.name' from application server (if available)
+      # Requires the resource-providers extension
+      # https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/resource-providers
+      - app_server:
       # Provides 'service.name' and 'service.instance.id'
       - service:
 
