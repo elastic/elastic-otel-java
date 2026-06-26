@@ -19,4 +19,5 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 :::{changelog} /releases/
 :type: all
+:release-dates:
 :::
