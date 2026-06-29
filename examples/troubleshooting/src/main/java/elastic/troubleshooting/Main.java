@@ -2,6 +2,7 @@ package elastic.troubleshooting;
 
 import io.opentelemetry.api.logs.Logger;
 import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.LongUpDownCounter;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
@@ -112,14 +113,19 @@ public class Main {
         .build();
 
     Meter meter = openTelemetry.getMeter("TestOtelSdktrace");
-    LongCounter counter = meter.counterBuilder("jvm.thread.count").build();
+    LongUpDownCounter counter = meter.upDownCounterBuilder("test.count").build();
     for (int i = 0; i < 100; i++) {
       counter.add(3);
-      Thread.sleep(1000L);
+      Thread.sleep(200L);
     }
     for (int i = 0; i < 100; i++) {
       counter.add(0);
-      Thread.sleep(1000L);
+      Thread.sleep(200L);
+    }
+
+    for (int i = 0; i < 100; i++) {
+      counter.add(-3);
+      Thread.sleep(200L);
     }
 
     openTelemetry.shutdown()
