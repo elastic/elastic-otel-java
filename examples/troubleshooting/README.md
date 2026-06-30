@@ -34,7 +34,7 @@ In the APM UI, you should see something similar to this screenshot:
 
 ## Metrics
 
-With the `metrics` signal, a metric `jvm.thread.count` is sent over a few minutes for the service `<service-name>`.
+With the `metrics` signal, a metric `test.count` is sent over a few minutes for the service `<service-name>`.
 
 In the APM UI, you should see something similar to this screenshot:
 ![](images/test-metrics.png)
