@@ -136,12 +136,13 @@ logger_provider:
           #  endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
           #  headers_list: ${OTEL_EXPORTER_OTLP_HEADERS}
 
+distribution:
+  javaagent:
+    # enable experimental indy instrumentation
+    indy/development: true
+
 instrumentation/development:
   java:
     runtime_telemetry:
       # emit not-yet stable runtime telemetry metrics which are currently part of semconv for java runtime
       emit_experimental_metrics/development: ${OTEL_INSTRUMENTATION_RUNTIME_TELEMETRY_EMIT_EXPERIMENTAL_METRICS:-true}
-    agent:
-      experimental:
-        # enable experimental indy instrumentation
-        indy: true
