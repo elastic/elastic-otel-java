@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.javaagent.tooling.resources.ResourceCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfiguration;
+import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.DistributionModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.ExperimentalComposableRuleBasedSamplerRuleModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.ExperimentalLanguageSpecificInstrumentationModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.OpenTelemetryConfigurationModel;
@@ -157,9 +158,12 @@ public class DefaultDeclarativeConfigTest {
               .inPath("runtime_telemetry.emit_experimental_metrics/development")
               .isBoolean()
               .isTrue();
-          assertThatJson(json(java))
+
+          DistributionModel distribution = config.getDistribution();
+          assertThat(distribution).isNotNull();
+          assertThatJson(json(distribution))
               .describedAs("experimental indy is enabled by default")
-              .inPath("agent.experimental.indy")
+              .inPath("javaagent.indy/development")
               .isBoolean()
               .isTrue();
         });
