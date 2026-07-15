@@ -98,6 +98,10 @@ jobs:
         with:
           command: ./gradlew -q setNextVersion
 
+      - name: Update Cloud Foundry version index (post release)
+        if: inputs.phase == 'post'
+        run: bash ./.ci/release/post-release.sh
+
       - name: Generate documentation changelog bundle (pre release)
         if: inputs.phase == 'pre'
         # we should use the 'edot-java-release' profile to generate the bundle:
