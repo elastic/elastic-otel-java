@@ -54,7 +54,7 @@ Set `OTEL_INSTRUMENTATION_RUNTIME_TELEMETRY_EMIT_EXPERIMENTAL_TELEMETRY` to `fal
 
 ## Metric temporality
 
-{{es}} and {{kib}} work best with metrics provided in delta-temporality. Therefore, the EDOT Java changes the default value of `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE` to `DELTA`. You can override this default if needed, though some provided {{kib}} dashboards will not work correctly if you do it.
+For APM versions earlier than 9.5, {{es}} and {{kib}} work best with metrics provided in delta-temporality. Therefore, the EDOT Java changes the default value of `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE` to `DELTA`. You can override this default if needed, though some provided {{kib}} dashboards will not work correctly if you do it.
 
 ## Central configuration
 
