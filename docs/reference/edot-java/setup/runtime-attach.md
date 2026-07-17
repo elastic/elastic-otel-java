@@ -1,6 +1,6 @@
 ---
 navigation_title: Runtime attach Setup
-description: Guide on instrumenting Java applications using EDOT Java runtime attach.
+description: Guide on instrumenting Java applications using Elastic OTel Java runtime attach.
 applies_to:
   stack:
   serverless:
@@ -13,9 +13,9 @@ products:
   - id: edot-sdk
 ---
 
-# Instrumenting Java applications using the EDOT Java runtime attach
+# Instrumenting Java applications using the Elastic OTel Java runtime attach [instrumenting-java-applications-using-the-edot-java-runtime-attach]
 
-Runtime attach includes the EDOT instrumentation agent in the application binary. This allows deploying the agent when access to JVM arguments or configuration is not possible, for example, with some managed services. The application development team can control the agent deployment and update cycle without having to modify the execution environment. Runtime attach only requires a minor modification of the application main entry point and one additional dependency.
+Runtime attach includes the Elastic OTel Java instrumentation agent in the application binary. This allows deploying the agent when access to JVM arguments or configuration is not possible, for example, with some managed services. The application development team can control the agent deployment and update cycle without having to modify the execution environment. Runtime attach only requires a minor modification of the application main entry point and one additional dependency.
 
 ## Limitations
 

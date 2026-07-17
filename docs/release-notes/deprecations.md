@@ -1,6 +1,6 @@
 ---
 navigation_title: Deprecations 
-description: Deprecations for Elastic Distribution of OpenTelemetry Java.
+description: Deprecations for Elastic OTel Java.
 applies_to:
   stack:
   serverless:
@@ -11,11 +11,11 @@ products:
   - id: edot-sdk
 ---
 
-# Elastic Distribution of OpenTelemetry Java deprecations [edot-java-deprecations]
+# Elastic OTel Java deprecations [edot-java-deprecations]
 
 Over time, certain Elastic functionality becomes outdated and is replaced or removed. To help with the transition, Elastic deprecates functionality for a period before removal, giving you time to update your applications.
 
-Review the deprecated functionality for Elastic Distribution of OpenTelemetry Java. While deprecations have no immediate impact, we strongly encourage you update your implementation after you upgrade. To learn how to upgrade, check out [Upgrade](docs-content://deploy-manage/upgrade.md).
+Review the deprecated functionality for Elastic OTel Java. While deprecations have no immediate impact, we strongly encourage you update your implementation after you upgrade. To learn how to upgrade, check out [Upgrade](docs-content://deploy-manage/upgrade.md).
 
 :::{changelog} /releases/
 :type: deprecation

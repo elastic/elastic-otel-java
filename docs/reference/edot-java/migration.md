@@ -1,6 +1,6 @@
 ---
 navigation_title: Migration
-description: Migrate from the Elastic APM Java agent to the Elastic Distribution of OpenTelemetry Java (EDOT Java).
+description: Migrate from the Elastic APM Java agent to Elastic OTel Java.
 applies_to:
   stack:
   serverless:
@@ -14,24 +14,24 @@ products:
   - id: apm-agent
 ---
 
-# Migrate to EDOT Java from the Elastic {{product.apm}} Java agent
+# Migrate to Elastic OTel Java from the Elastic {{product.apm}} Java agent [migrate-to-edot-java-from-the-elastic-apm-java-agent]
 
 Compared to the Elastic {{product.apm}} Java agent, the {{edot}} Java presents a number of advantages:
 
 - Fully automatic instrumentation with zero code changes. No need to modify application code.
 - Capture, send, transform, and store data in an OpenTelemetry native way. This includes for example the ability to use all features of the OpenTelemetry SDK for manual tracing, data following semantic conventions, or ability to use intermediate collectors and processors.
 - OpenTelemetry Java Instrumentation provides a [broad coverage of libraries, frameworks, and applications](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/supported-libraries.md).
-- EDOT Java is built on top of OpenTelemetry SDK and conventions, ensuring compatibility with community tools, vendor-neutral backends, and so on.
+- Elastic OTel Java is built on top of OpenTelemetry SDK and conventions, ensuring compatibility with community tools, vendor-neutral backends, and so on.
 
 ## Migration steps
 
 :::{agent-skill}
 :url: https://github.com/elastic/agent-skills/tree/main/skills/observability/edot-java-migrate
 
-Use this skill to migrate from the Elastic APM Java agent to EDOT Java.
+Use this skill to migrate from the Elastic APM Java agent to Elastic OTel Java.
 :::
 
-Follow these steps to migrate from the legacy Elastic {{product.apm}} Java agent to the {{edot}} Java.
+Follow these steps to migrate from the legacy Elastic {{product.apm}} Java agent to Elastic OTel Java.
 
 ::::::{stepper}
 
@@ -43,7 +43,7 @@ Migrate usages of the [Elastic {{product.apm-agent}} API](apm-agent-java://refer
 - For [Transaction API](apm-agent-java://reference/public-api.md#api-transaction), refer to [OpenTelemetry API](https://opentelemetry.io/docs/zero-code/java/agent/api/).
 
 :::{note}
-Migration of application code using these APIs and annotations is not strictly required when deploying the EDOT agent. If not migrated, spans, transactions, and metrics that were previously created with those custom API calls and annotations will no longer be generated. OpenTelemetry instrumentation coverage might replace the need for some or all of these custom code changes.
+Migration of application code using these APIs and annotations is not strictly required when deploying the Elastic OTel Java agent. If not migrated, spans, transactions, and metrics that were previously created with those custom API calls and annotations will no longer be generated. OpenTelemetry instrumentation coverage might replace the need for some or all of these custom code changes.
 :::
 ::::
 
@@ -53,20 +53,20 @@ Refer to the [Configuration mapping](#configuration-mapping). Refer to [Configur
 
 ::::{step} Replace the agent binary
 
-Remove the `-javaagent:` argument that contains the Elastic {{product.apm}} Java agent from the JVM arguments. Then add the `-javaagent:` argument to the JVM arguments to use EDOT Java, and restart the application or follow [Kubernetes instructions](/reference/edot-java/setup/k8s.md) or [Runtime attach instructions](/reference/edot-java/setup/runtime-attach.md) if applicable. Refer to [Setup](/reference/edot-java/setup/index.md).
+Remove the `-javaagent:` argument that contains the Elastic {{product.apm}} Java agent from the JVM arguments. Then add the `-javaagent:` argument to the JVM arguments to use Elastic OTel Java, and restart the application or follow [Kubernetes instructions](/reference/edot-java/setup/k8s.md) or [Runtime attach instructions](/reference/edot-java/setup/runtime-attach.md) if applicable. Refer to [Setup](/reference/edot-java/setup/index.md).
 ::::
 
 ::::::
 
 ## Configuration mapping
 
-The following describes how Elastic {{product.apm}} Java agent configuration maps to EDOT Java. It includes how resource attributes are handled when using the EDOT Collector, followed by each agent setting and its EDOT equivalent.
+The following describes how Elastic {{product.apm}} Java agent configuration maps to Elastic OTel Java. It includes how resource attributes are handled when using {{agent}}, followed by each agent setting and its Elastic OTel Java equivalent.
 
-### Resource attributes when using the EDOT Collector
+### Resource attributes when using {{agent}} [resource-attributes-when-using-the-edot-collector]
 
-Ingesting OpenTelemetry data directly through {{product.apm-server}} is [no longer supported](opentelemetry://reference/architecture/index.md#limitations). Historically, when ingesting OpenTelemetry data through the Elastic {{product.apm-server}}, unmapped resource attributes were added under `labels.*`. This behavior does not apply when using the EDOT Collector and is not recommended for new deployments. Use the EDOT Collector or Managed OTLP for supported ingestion.
+Ingesting OpenTelemetry data directly through {{product.apm-server}} is [no longer supported](opentelemetry://reference/architecture/index.md#limitations). Historically, when ingesting OpenTelemetry data through the Elastic {{product.apm-server}}, unmapped resource attributes were added under `labels.*`. This behavior does not apply when using {{agent}} and is not recommended for new deployments. Use {{agent}} or Managed OTLP for supported ingestion.
 
-If you rely on specific attribute mappings for querying or filtering in {{product.observability}}, configure explicit attribute processors in the EDOT Collector pipeline.
+If you rely on specific attribute mappings for querying or filtering in {{product.observability}}, configure explicit attribute processors in the {{agent}} pipeline.
 
 ### `server_url`
 
@@ -127,7 +127,7 @@ The Elastic [`trace_methods`](https://www.elastic.co/docs/reference/apm/agents/j
 ### `capture_jmx_metrics`
 
 The Elastic [`capture_jmx_metrics`](apm-agent-java://reference/config-jmx.md#config-capture-jmx-metrics) option can be replaced by 
-[OpenTelemetry JMX Insight](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation/jmx-metrics/javaagent/) feature which is included in EDOT Java.
+[OpenTelemetry JMX Insight](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/instrumentation/jmx-metrics/javaagent/) feature which is included in Elastic OTel Java.
 
 The JMX Insight feature provides the following benefits:
 
@@ -179,7 +179,7 @@ For example: `OTEL_RESOURCE_ATTRIBUTES=service.instance.id=myserviceinstance001`
 
 The Elastic [`cloud_provider`](apm-agent-java://reference/config-core.md#config-cloud-provider) option corresponds to the per-provider `otel.resource.providers.{provider}.enabled` configuration options.
 
-By default, with EDOT `otel.resource.providers.{provider}.enabled` is set to `true`, this is equivalent to the `cloud_provider` default value which is `auto`, or automatically detect cloud providers. Notice that this behavior differs from the contrib OpenTelemetry distribution.
+By default, with Elastic OTel Java `otel.resource.providers.{provider}.enabled` is set to `true`, this is equivalent to the `cloud_provider` default value which is `auto`, or automatically detect cloud providers. Notice that this behavior differs from the contrib OpenTelemetry distribution.
 
 When the cloud provider is known, or there is none, turning off the non-relevant providers with `otel.resource.providers.{provider}.enabled = false` allows to [minimize the application startup overhead](/reference/edot-java/overhead.md#optimizing-application-startup).
 
@@ -188,7 +188,7 @@ When the cloud provider is known, or there is none, turning off the non-relevant
 The Elastic [`log_sending`](apm-agent-java://reference/config-logging.md#config-log-sending) option allows capturing and
 sending application logs directly to {{product.apm-server}} without storing them on disk and ingesting them with a separate tool.
 
-With EDOT, application logs are automatically captured and sent by default.
+With Elastic OTel Java, application logs are automatically captured and sent by default.
 
 This feature is controlled by `otel.logs.exporter`, which is set to `otlp` by default. You can turn it off by setting `otel.logs.exporter` to `none`.
 
@@ -196,29 +196,29 @@ This feature is controlled by `otel.logs.exporter`, which is set to `otlp` by de
 
 The Elastic [`verify_server_cert`](apm-agent-java://reference/config-reporter.md#config-verify-server-cert) option allows you to turn off server certificate validation.
 
-With EDOT, the equivalent configuration option is `ELASTIC_OTEL_VERIFY_SERVER_CERT` (default `true`), see [configuration](./configuration.md#exporter-certificate-verification) for details.
+With Elastic OTel Java, the equivalent configuration option is `ELASTIC_OTEL_VERIFY_SERVER_CERT` (default `true`), see [configuration](./configuration.md#exporter-certificate-verification) for details.
 
 ### No equivalent for `application_packages`
 
-The Elastic {{product.apm}} Java agent provided an `application_packages` setting with multiple purposes, including startup optimization and stack trace filtering. EDOT Java doesn't provide an equivalent configuration for the following reasons:
+The Elastic {{product.apm}} Java agent provided an `application_packages` setting with multiple purposes, including startup optimization and stack trace filtering. Elastic OTel Java doesn't provide an equivalent configuration for the following reasons:
 
-- EDOT Java does not support package-based scoping to reduce instrumentation overhead at startup. To reduce startup overhead, turn off unneeded instrumentations instead.
-- Package-based stack trace filtering (as provided by `application_packages`) is not currently supported in {{kib}} for EDOT data because EDOT stack traces are captured as flat strings rather than structured frames.
+- Elastic OTel Java does not support package-based scoping to reduce instrumentation overhead at startup. To reduce startup overhead, turn off unneeded instrumentations instead.
+- Package-based stack trace filtering (as provided by `application_packages`) is not currently supported in {{kib}} for Elastic OTel Java data because Elastic OTel Java stack traces are captured as flat strings rather than structured frames.
 
 The `OTEL_JAVA_EXPERIMENTAL_SPAN_STACKTRACE_MIN_DURATION` setting controls when stack traces are captured, but it does not provide package-based filtering.
 
 ### `transaction_ignore_urls` and `ignore_message_queues`
 
-To filter spans based on attributes with EDOT Java, you'll need to use [declarative configuration](./configuration.md#declarative-configuration).
+To filter spans based on attributes with Elastic OTel Java, you'll need to use [declarative configuration](./configuration.md#declarative-configuration).
 
 ## Metrics
 
-Metrics in this section are described as they are reported to the backend by EDOT or Elastic APM agent.
+Metrics in this section are described as they are reported to the backend by Elastic OTel Java or Elastic APM agent.
 Unless an ECS-mapping is being used, the otel-native storage means that the metric names and attributes will be preserved.
 
 ### JVM runtime metrics
 
-With EDOT Java, the JVM runtime metrics are provided by the upstream OpenTelemetry Java instrumentation
+With Elastic OTel Java, the JVM runtime metrics are provided by the upstream OpenTelemetry Java instrumentation
 and adhere to the [JVM runtime semantic conventions](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/).
 
 - `jvm.fd.used` is replaced by [`jvm.file_descriptor.count`](https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/#metric-jvmfile_descriptorcount)
@@ -273,7 +273,7 @@ and adhere to the [JVM runtime semantic conventions](https://opentelemetry.io/do
 
 ### System metrics
 
-With EDOT Java, the system-wide metrics are not captured through the JVM
+With Elastic OTel Java, the system-wide metrics are not captured through the JVM
 but can be captured by using the collector with `hostmetricsreceiver` or by using custom JMX metrics.
 
 - `system.cpu.total.norm.pct` does not have a direct equivalent
@@ -288,7 +288,7 @@ but can be captured by using the collector with `hostmetricsreceiver` or by usin
 
 ### Agent health and overhead metrics
 
-Health metrics are not supported with EDOT Java and do not have a direct equivalent:
+Health metrics are not supported with Elastic OTel Java and do not have a direct equivalent:
 - `agent.events.total`
 - `agent.events.total`
 - `agent.events.dropped`
@@ -297,7 +297,7 @@ Health metrics are not supported with EDOT Java and do not have a direct equival
 - `agent.events.requests.count`
 - `agent.events.requests.bytes`
 
-Overhead metrics are not supported with EDOT Java and do not have a direct equivalent:
+Overhead metrics are not supported with Elastic OTel Java and do not have a direct equivalent:
 - `agent.background.cpu.overhead.pct`
 - `agent.background.cpu.total.pct`
 - `agent.background.memory.allocation.bytes`
@@ -305,7 +305,7 @@ Overhead metrics are not supported with EDOT Java and do not have a direct equiv
 
 ### CGroup metrics
 
-CGroup metrics are not supported with EDOT Java and do not have a direct equivalent:
+CGroup metrics are not supported with Elastic OTel Java and do not have a direct equivalent:
 - `system.process.cgroup.memory.mem.usage.bytes`
 - `system.process.cgroup.memory.mem.limit.bytes`
 
@@ -320,42 +320,42 @@ As an alternative, you can use:
 ### OpenTelemetry metrics (bridge)
 
 With Elastic APM Java agent, metrics that are captured through the OpenTelemetry Java API are ["bridged"](https://www.elastic.co/docs/reference/apm/agents/java/opentelemetry-bridge)
-and sent as metrics. With EDOT Java, those metrics are captured and sent in an OpenTelemetry native way.
+and sent as metrics. With Elastic OTel Java, those metrics are captured and sent in an OpenTelemetry native way.
 
-With EDOT Java, the metric scope is stored in `scope.name` attribute. With the Elastic APM Java agent, the metric scope is stored in `otel_instrumentation_scope_name` attribute.
+With Elastic OTel Java, the metric scope is stored in `scope.name` attribute. With the Elastic APM Java agent, the metric scope is stored in `otel_instrumentation_scope_name` attribute.
 
-With EDOT Java, the metric name and attributes are preserved and sent as-is.
+With Elastic OTel Java, the metric name and attributes are preserved and sent as-is.
 With the Elastic APM Java agent, the metric name is preserved but the attributes names have dots `.` replaced by underscores `_` and are prefixed with `labels.` or `numeric_labels`.
 
 ## Limitations
 
-The following limitations apply to EDOT Java.
+The following limitations apply to Elastic OTel Java.
 
 ### Supported Java versions
 
-EDOT Java agent and OpenTelemetry Java instrumentation are only compatible with Java 8 and later.
+Elastic OTel Java agent and OpenTelemetry Java instrumentation are only compatible with Java 8 and later.
 
 ### Missing instrumentations
 
-Support for LDAP client instrumentation is not currently available in EDOT Java.
+Support for LDAP client instrumentation is not currently available in Elastic OTel Java.
 
 ### Central and dynamic configuration
 
-You can manage EDOT Java configurations through the [central configuration feature](docs-content://solutions/observability/apm/apm-agent-central-configuration.md) in the Applications UI.
+You can manage Elastic OTel Java configurations through the [central configuration feature](docs-content://solutions/observability/apm/apm-agent-central-configuration.md) in the Applications UI.
 
 Refer to [Central configuration](opentelemetry://reference/central-configuration.md) for more information.
 
 ### Span compression
 
-EDOT Java does not implement [span compression](docs-content://solutions/observability/apm/spans.md#apm-spans-span-compression).
+Elastic OTel Java does not implement [span compression](docs-content://solutions/observability/apm/spans.md#apm-spans-span-compression).
 
 ### Breakdown metrics
 
-EDOT Java is not sending metrics that power the [Breakdown metrics](docs-content://solutions/observability/apm/metrics.md#_breakdown_metrics).
+Elastic OTel Java is not sending metrics that power the [Breakdown metrics](docs-content://solutions/observability/apm/metrics.md#_breakdown_metrics).
 
 ### No remote attach
 
-There is currently no EDOT Java equivalent for starting the agent with the [remote attach](apm-agent-java://reference/setup-attach-cli.md) capability. The `-javaagent:` option is the preferred startup mechanism. 
+There is currently no Elastic OTel Java equivalent for starting the agent with the [remote attach](apm-agent-java://reference/setup-attach-cli.md) capability. The `-javaagent:` option is the preferred startup mechanism. 
 
 A migration path is available for starting the agent with [self attach](apm-agent-java://reference/setup-attach-api.md), which is to use [runtime attachment](/reference/edot-java/setup/runtime-attach.md). Some [limitations](/reference/edot-java/setup/runtime-attach.md#limitations)
 apply, and the agent must be started early during application startup.
@@ -366,4 +366,4 @@ By default, Micrometer instrumentation is inactive and doesn't capture metrics. 
 
 ## Troubleshooting
 
-If you're encountering issues during migration, refer to the [EDOT Java troubleshooting guide](docs-content://troubleshoot/ingest/opentelemetry/edot-sdks/java/index.md).
+If you're encountering issues during migration, refer to the [Elastic OTel Java troubleshooting guide](docs-content://troubleshoot/ingest/opentelemetry/edot-sdks/java/index.md).

@@ -1,6 +1,6 @@
 ---
 navigation_title: Setup
-description: Instructions for setting up the Elastic Distribution of OpenTelemetry (EDOT) Java in various environments, including Kubernetes and others.
+description: Instructions for setting up Elastic OTel Java in various environments, including Kubernetes and others.
 applies_to:
   stack:
   serverless:
@@ -13,9 +13,9 @@ products:
   - id: edot-sdk
 ---
 
-# Set up the EDOT Java Agent
+# Set up the Elastic OTel Java Agent [set-up-the-edot-java-agent]
 
-Learn how to set up the {{edot}} (EDOT) Java in various environments, including Kubernetes and others.
+Learn how to set up Elastic OTel Java in various environments, including Kubernetes and others.
 
 :::{warning}
 Avoid using the Java SDK alongside any other APM agent, including Elastic APM agents. Running multiple agents in the same application process may lead to conflicting instrumentation, duplicate telemetry, or other unexpected behavior.
@@ -27,7 +27,7 @@ For Kubernetes, use the OTel Kubernetes Operator. The Operator also manages the 
 
 ## Runtime attach
 
-For environments where modifying the JVM arguments or configuration is impossible, or when including the EDOT Java in the application binary is necessary or preferred, use the [runtime attach](/reference/edot-java/setup/runtime-attach.md) setup option.
+For environments where modifying the JVM arguments or configuration is impossible, or when including Elastic OTel Java in the application binary is necessary or preferred, use the [runtime attach](/reference/edot-java/setup/runtime-attach.md) setup option.
 
 ## All other environments
 
@@ -36,12 +36,12 @@ Follow the following Java setup guide for all other environments.
 :::{agent-skill}
 :url: https://github.com/elastic/agent-skills/tree/main/skills/observability/edot-java-instrument
 
-Use this skill to instrument Java services with EDOT for tracing, metrics, and logs.
+Use this skill to instrument Java services with Elastic OTel Java for tracing, metrics, and logs.
 :::
 
 ## Download the agent
 
-You can download the latest release version of the EDOT Java agent from [![Maven Central](https://img.shields.io/maven-central/v/co.elastic.otel/elastic-otel-javaagent?label=elastic-otel-javaagent&style=for-the-badge)](https://mvnrepository.com/artifact/co.elastic.otel/elastic-otel-javaagent/latest)
+You can download the latest release version of the Elastic OTel Java agent from [![Maven Central](https://img.shields.io/maven-central/v/co.elastic.otel/elastic-otel-javaagent?label=elastic-otel-javaagent&style=for-the-badge)](https://mvnrepository.com/artifact/co.elastic.otel/elastic-otel-javaagent/latest)
 
 ## Prerequisites
 
@@ -65,13 +65,13 @@ For more advanced configuration, refer to [Configuration](/reference/edot-java/c
 
 Configuration of those environment values depends on the deployment model.
 
-### Local EDOT Collector
+### Local {{agent}} [local-edot-collector]
 
-When deployed locally, the EDOT Collector is accessible with `http://localhost:4318` without authentication, no further configuration is required. The `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS` environment variables do not have to be set.
+When deployed locally, {{agent}} is accessible with `http://localhost:4318` without authentication, no further configuration is required. The `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS` environment variables do not have to be set.
 
-### Self-managed EDOT Collector
+### Self-managed {{agent}} [self-managed-edot-collector]
 
-When using a self-managed EDOT Collector, set the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable to the OTLP endpoint of your self-managed EDOT Collector. If EDOT Collector requires authentication, set `OTEL_EXPORTER_OTLP_HEADERS`  to include `Authorization=ApiKey <ELASTIC_API_KEY>`.
+When using a self-managed {{agent}}, set the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable to the OTLP endpoint of your self-managed {{agent}}. If {{agent}} requires authentication, set `OTEL_EXPORTER_OTLP_HEADERS`  to include `Authorization=ApiKey <ELASTIC_API_KEY>`.
 
 ### Elastic Managed OTLP endpoint
 
@@ -82,7 +82,7 @@ Follow the [Serverless quickstart guides](docs-content://solutions/observability
 
 ### Kubernetes
 
-Connection to the EDOT Collector is managed by the OTel Kubernetes Operator. [Follow the Quickstart Guides](docs-content://solutions/observability/get-started/opentelemetry/quickstart/index.md) for Kubernetes.
+Connection to {{agent}} is managed by the OTel Kubernetes Operator. [Follow the Quickstart Guides](docs-content://solutions/observability/get-started/opentelemetry/quickstart/index.md) for Kubernetes.
 
 ## Run the Java agent
 
@@ -124,4 +124,4 @@ For applications deployed with Kubernetes, use the [OpenTelemetry Operator](/ref
 
 ## Troubleshooting
 
-For help with common setup issues, refer to the [EDOT Java troubleshooting guide](docs-content://troubleshoot/ingest/opentelemetry/edot-sdks/java/index.md).
+For help with common setup issues, refer to the [Elastic OTel Java troubleshooting guide](docs-content://troubleshoot/ingest/opentelemetry/edot-sdks/java/index.md).

@@ -1,6 +1,6 @@
 ---
 navigation_title: Configuration
-description: Learn how to configure the Elastic Distribution of OpenTelemetry (EDOT) Java Agent, including minimal setup, configuration options, and methods like environment variables and system properties.
+description: Learn how to configure the Elastic OTel Java agent, including minimal setup, configuration options, and methods like environment variables and system properties.
 applies_to:
   stack:
   serverless:
@@ -13,9 +13,9 @@ products:
   - id: edot-sdk
 ---
 
-# Configure the EDOT Java agent
+# Configure the Elastic OTel Java agent [configure-the-edot-java-agent]
 
-The [minimal configuration](#minimal-configuration) section provides a recommended starting point for EDOT Java configuration.
+The [minimal configuration](#minimal-configuration) section provides a recommended starting point for Elastic OTel Java configuration.
 
 See [configuration options](#configuration-options) for details on the supported configuration options and [configuration methods](#configuration-methods) for how to provide them.
 
@@ -46,14 +46,14 @@ OTEL_EXPORTER_OTLP_HEADERS='Authorization=Bearer mySecretToken'
 
 ## Configuration options
 
-EDOT Java instrumentation agent is based on OpenTelemetry Java [SDK](https://github.com/open-telemetry/opentelemetry-java) and [Instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation), and thus supports the following
+Elastic OTel Java instrumentation agent is based on OpenTelemetry Java [SDK](https://github.com/open-telemetry/opentelemetry-java) and [Instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation), and thus supports the following
 configuration options:
 - [OpenTelemetry Java instrumentation configuration options](https://opentelemetry.io/docs/zero-code/java/agent/configuration/)
 - [OpenTelemetry Java SDK configuration options](https://opentelemetry.io/docs/languages/java/configuration/)
 
-EDOT Java uses different defaults than the OpenTelemetry Java instrumentation for the following configuration options:
+Elastic OTel Java uses different defaults than the OpenTelemetry Java instrumentation for the following configuration options:
 
-| Option                                                               | EDOT Java default | OpenTelemetry Java agent default                                                                                                             | EDOT Java version |
+| Option                                                               | Elastic OTel Java default | OpenTelemetry Java agent default                                                                                                             | Elastic OTel Java version |
 |----------------------------------------------------------------------|-------------------|----------------------------------------------------------------------------------------------------------------------------------------------|-------------------|
 | `OTEL_RESOURCE_PROVIDERS_AWS_ENABLED`                                | `true`            | `false` ([docs](https://opentelemetry.io/docs/zero-code/java/agent/configuration/#enable-resource-providers-that-are-disabled-by-default))   | 1.0.0+            |
 | `OTEL_RESOURCE_PROVIDERS_GCP_ENABLED`                                | `true`            | `false` ([docs](https://opentelemetry.io/docs/zero-code/java/agent/configuration/#enable-resource-providers-that-are-disabled-by-default))   | 1.0.0+            |
@@ -63,10 +63,10 @@ EDOT Java uses different defaults than the OpenTelemetry Java instrumentation fo
 
 (*) default value set to `delta` only if not already explicitly set.
 
-The EDOT Java instrumentation agent also provides configuration options for each of the [supported features](/reference/edot-java/features.md).
+The Elastic OTel Java instrumentation agent also provides configuration options for each of the [supported features](/reference/edot-java/features.md).
 This table only contains minimal configuration, see each respective feature for exhaustive configuration options documentation.
 
-| Option                                                 | Default | Feature                                                                                                             | EDOT Java version |
+| Option                                                 | Default | Feature                                                                                                             | Elastic OTel Java version |
 |--------------------------------------------------------|---------|---------------------------------------------------------------------------------------------------------------------|-------------------|
 | `OTEL_INFERRED_SPANS_ENABLED`                          | `false` | [Inferred spans](/reference/edot-java/features.md#inferred-spans)                                                   | 1.0.0+            |
 | `OTEL_JAVA_EXPERIMENTAL_SPAN_STACKTRACE_MIN_DURATION`  | `5ms`   | [Span stacktrace](/reference/edot-java/features.md#span-stacktrace)                                                 | 1.0.0+            |
@@ -93,7 +93,7 @@ You might need this configuration if you notice that `span.db.statement` is miss
 
 * {{es}} Java API client 8.x or 9.x
 
-* EDOT Java SDK or another OpenTelemetry Java SDK
+* Elastic OTel Java SDK or another OpenTelemetry Java SDK
 
 * The {{product.apm-agent-java}}
 
@@ -115,7 +115,7 @@ OTEL_INSTRUMENTATION_ELASTICSEARCH_CAPTURE_SEARCH_QUERY=true
 
 The flag `otel.instrumentation.elasticsearch.enabled` is turned on by default, so you typically only need to activate `capture-search-query`.
 
-When activated, the {{es}} client includes the search request body in the generated spans, and EDOT or OTel exports this value as `span.db.statement`.
+When activated, the {{es}} client includes the search request body in the generated spans, and Elastic OTel Java or OTel exports this value as `span.db.statement`.
 
 
 ## Central configuration
@@ -127,7 +127,7 @@ product:
   edot_java: preview 1.5.0
 ```
 
-APM Agent Central Configuration lets you configure EDOT Java instances remotely, see [Central configuration docs](opentelemetry://reference/central-configuration.md) for more details.
+APM Agent Central Configuration lets you configure Elastic OTel Java instances remotely, see [Central configuration docs](opentelemetry://reference/central-configuration.md) for more details.
 
 ### Turn on central configuration
 
@@ -162,7 +162,7 @@ export ELASTIC_OTEL_OPAMP_CLIENT_CERTIFICATE=/path/to/client-cert.pem
 
 ### Central configuration settings
 
-You can modify the following settings for EDOT Java through APM Agent Central Configuration:
+You can modify the following settings for Elastic OTel Java through APM Agent Central Configuration:
 
 | Setting | Central configuration name | Type |
 |---------|--------------------------|------|
@@ -195,7 +195,7 @@ Alternatively, you can use [Declarative configuration](#declarative-configuratio
 
 ### Environment variables
 
-Environment variables provide a cross-platform way to configure EDOT Java and is especially useful in containerized environments.
+Environment variables provide a cross-platform way to configure Elastic OTel Java and is especially useful in containerized environments.
 
 Define environment variables before starting the JVM:
 
@@ -223,7 +223,7 @@ export JAVA_TOOL_OPTIONS='-Dotel.service.name=my-service'
 
 ### Properties configuration file
 
-EDOT Java can be configured using a java properties configuration file.
+Elastic OTel Java can be configured using a java properties configuration file.
 
 Before starting the JVM, create and populate the configuration file and specify where to find it:
 
@@ -238,7 +238,7 @@ The [declarative configuration](https://opentelemetry.io/docs/specs/otel/configu
 the agent and SDK with a structured configuration in YAML.
 
 In addition to providing a structured configuration format, this also allows you to configure the vendor-neutral OpenTelemetry Java agent
-with the same configuration as EDOT, hence replicating its features in a vendor-neutral way.
+with the same configuration as Elastic OTel Java, hence replicating its features in a vendor-neutral way.
 
 Limitations:
 - ability to skip server certificate is not supported
@@ -250,7 +250,7 @@ A [declarative configuration example file](https://github.com/elastic/elastic-ot
 
 ## Agent logging
 
-The EDOT Java agent provides the ability to control the agent log verbosity by setting the log level with the `ELASTIC_OTEL_JAVAAGENT_LOG_LEVEL` configuration option (`INFO` by default).
+The Elastic OTel Java agent provides the ability to control the agent log verbosity by setting the log level with the `ELASTIC_OTEL_JAVAAGENT_LOG_LEVEL` configuration option (`INFO` by default).
 
 The following log levels are supported: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL` and `OFF`.
 
@@ -260,13 +260,13 @@ This feature relies on the `OTEL_JAVAAGENT_LOGGING` configuration option to be s
 
 Setting `OTEL_JAVAAGENT_LOGGING=none` or `ELASTIC_OTEL_JAVAAGENT_LOG_LEVEL=OFF` disables agent logging feature.
 
-Setting `OTEL_JAVAAGENT_LOGGING=application` will disable EDOT agent logging feature and attempt to use the application logger.
+Setting `OTEL_JAVAAGENT_LOGGING=application` will disable Elastic OTel agent logging feature and attempt to use the application logger.
 As [documented here in the contrib documentation](https://opentelemetry.io/docs/zero-code/java/agent/configuration/#java-agent-logging-output),
 support for this depends on the application and logging libraries used.
 
 ## Exporter certificate verification
 
-The EDOT Java agent provides the ability to toggle the exporter endpoint certificate verification with the `ELASTIC_OTEL_VERIFY_SERVER_CERT` configuration option (`true` by default).
+The Elastic OTel Java agent provides the ability to toggle the exporter endpoint certificate verification with the `ELASTIC_OTEL_VERIFY_SERVER_CERT` configuration option (`true` by default).
 
 When the endpoint certificate is not trusted by the JVM where the agent runs, the common symptom is security-related exceptions with the following message: `unable to find valid certification path to requested target`.
 

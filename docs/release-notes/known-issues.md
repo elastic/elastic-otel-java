@@ -1,6 +1,6 @@
 ---
 navigation_title: Known issues 
-description: Known issues for Elastic Distribution of OpenTelemetry Java.
+description: Known issues for Elastic OTel Java.
 applies_to:
   stack:
   serverless:
@@ -11,7 +11,7 @@ products:
   - id: edot-sdk
 ---
 
-# Elastic Distribution of OpenTelemetry Java known issues
+# Elastic OTel Java known issues [elastic-distribution-of-opentelemetry-java-known-issues]
 
 :::{changelog} /releases/
 :type: known-issue

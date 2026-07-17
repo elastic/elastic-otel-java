@@ -1,6 +1,6 @@
 ---
 navigation_title: Performance overhead
-description: This page details the expected performance impact when instrumenting Java applications with the Elastic Distribution of OpenTelemetry SDK, including benchmarks and optimization tips.
+description: This page details the expected performance impact when instrumenting Java applications with the Elastic OTel Java SDK, including benchmarks and optimization tips.
 applies_to:
   stack:
   serverless:
@@ -13,11 +13,11 @@ products:
   - id: edot-sdk
 ---
 
-# Performance overhead of the Elastic Distribution of OpenTelemetry Java
+# Performance overhead of Elastic OTel Java [performance-overhead-of-the-elastic-distribution-of-opentelemetry-java]
 
-This page details the expected performance impact when instrumenting Java applications with the Elastic Distribution of OpenTelemetry SDK, including benchmarks and optimization tips.
+This page details the expected performance impact when instrumenting Java applications with the Elastic OTel Java SDK, including benchmarks and optimization tips.
 
-While designed to have minimal performance overhead, the EDOT Java agent, like any instrumentation agent, executes within the application process and thus has a small influence on the application performance. 
+While designed to have minimal performance overhead, the Elastic OTel Java agent, like any instrumentation agent, executes within the application process and thus has a small influence on the application performance. 
 
 This performance overhead depends on the application's technical architecture, its configuration and environment, and the load. These factors are not easy to reproduce on their own, and all applications are different, so it is not possible to provide a simple answer.
 
@@ -35,9 +35,9 @@ While Elastic can't provide generically applicable, accurate numbers about the i
 
 For example, the application startup overhead going from 5s to 6s (+1s, +20%) does not mean an application having a startup time of 15s will now start in 18s but that you can expect to have about at least one extra second of startup time and the overall impact remains limited.
 
-The following table compares the classic Elastic APM Java Agent with the EDOT Java Agent and the same benchmark without an agent.
+The following table compares the classic Elastic APM Java Agent with the Elastic OTel Java Agent and the same benchmark without an agent.
 
-|                              | No agent  | EDOT Java instrumentation | Elastic APM Java agent |
+|                              | No agent  | Elastic OTel Java instrumentation | Elastic APM Java agent |
 |------------------------------|-----------|---------------------------|------------------------|
 | Startup time                 | 5.55 s    | 6.82 s                    | 6.87 s                 |
 | Request latency (p95)        | 1.96 ms   | 2.06 ms                   | 2.08 ms                |
@@ -46,13 +46,13 @@ The following table compares the classic Elastic APM Java Agent with the EDOT Ja
 | Total GC pauses              | 106 ms    | 123 ms                    | 120 ms                 |
 | Max heap used                | 436.71 mb | 478.46 mb                 | 573.92 mb              |
 
-The main difference between the two agents is that, unlike EDOT, Elastic APM Java agent recycles in-memory data structures which allows to reduce the overall allocated memory and thus reduces a bit the overhead on the garbage collector.
+The main difference between the two agents is that, unlike Elastic OTel Java, Elastic APM Java agent recycles in-memory data structures which allows to reduce the overall allocated memory and thus reduces a bit the overhead on the garbage collector.
 
-This difference is also the reason why we observe a difference in the maximum heap usage as more data structures are kept in-memory when possible and not recycled by the garbage collector. This however does not mean that Elastic APM Java agent requires about 100mb more of memory compared to EDOT, but that when there is no limitation on heap memory usage the agent will use available memory to minimize memory allocation.
+This difference is also the reason why we observe a difference in the maximum heap usage as more data structures are kept in-memory when possible and not recycled by the garbage collector. This however does not mean that Elastic APM Java agent requires about 100mb more of memory compared to Elastic OTel Java, but that when there is no limitation on heap memory usage the agent will use available memory to minimize memory allocation.
 
 ## Optimizing application startup
 
-With EDOT Java, the following resource attribute providers are enabled by default:
+With Elastic OTel Java, the following resource attribute providers are enabled by default:
 
 - AWS: [`OTEL_RESOURCE_PROVIDERS_AWS_ENABLED`](/reference/edot-java/configuration.md#configuration-options) = `true`
 - GCP: [`OTEL_RESOURCE_PROVIDERS_GCP_ENABLED`](/reference/edot-java/configuration.md#configuration-options) = `true`
