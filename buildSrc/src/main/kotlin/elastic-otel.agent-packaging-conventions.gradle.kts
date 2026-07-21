@@ -102,13 +102,13 @@ tasks {
 
     // exclude known bootstrap dependencies - they can't appear in the inst/ directory
     dependencies {
-      exclude("io.opentelemetry:opentelemetry-api")
-      exclude("io.opentelemetry:opentelemetry-api-incubator")
-      exclude("io.opentelemetry:opentelemetry-context")
-      exclude("io.opentelemetry.semconv:opentelemetry-semconv")
-      exclude("io.opentelemetry.semconv:opentelemetry-semconv-incubating")
+      exclude(dependency("io.opentelemetry:opentelemetry-api"))
+      exclude(dependency("io.opentelemetry:opentelemetry-api-incubator"))
+      exclude(dependency("io.opentelemetry:opentelemetry-context"))
+      exclude(dependency("io.opentelemetry.semconv:opentelemetry-semconv"))
+      exclude(dependency("io.opentelemetry.semconv:opentelemetry-semconv-incubating"))
       // metrics advice API
-      exclude("io.opentelemetry:opentelemetry-extension-incubator")
+      exclude(dependency("io.opentelemetry:opentelemetry-extension-incubator"))
     }
   }
 
