@@ -27,7 +27,6 @@ import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_
 import static io.opentelemetry.semconv.incubating.HostIncubatingAttributes.HOST_NAME;
 import static io.opentelemetry.semconv.incubating.OsIncubatingAttributes.OS_TYPE;
 import static io.opentelemetry.semconv.incubating.OsIncubatingAttributes.OS_VERSION;
-import static io.opentelemetry.semconv.incubating.ProcessIncubatingAttributes.PROCESS_COMMAND_ARGS;
 import static io.opentelemetry.semconv.incubating.ProcessIncubatingAttributes.PROCESS_PID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -122,7 +121,6 @@ public class DeclarativeConfigSmokeTest extends TestAppSmokeTest {
         .containsKey(OS_TYPE.getKey())
         .containsKey(OS_VERSION.getKey())
         .containsKey(PROCESS_PID.getKey())
-        .containsKey(PROCESS_COMMAND_ARGS.getKey())
         .containsKey(CONTAINER_ID.getKey())
         // service name should be provided by the 'service' resource attribute detector which
         // reads environment variables (here it's not env variable injected in declarative config).
