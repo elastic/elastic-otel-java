@@ -28,8 +28,6 @@ import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfigura
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.DeclarativeConfigurationCustomizerProvider;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.BatchLogRecordProcessorModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.BatchSpanProcessorModel;
-import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.ExperimentalResourceDetectionModel;
-import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.ExperimentalResourceDetectorModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.LogRecordExporterModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.LoggerProviderModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.MeterProviderModel;
@@ -46,6 +44,8 @@ import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.SimpleLogRecor
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.SimpleSpanProcessorModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.SpanExporterModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.TracerProviderModel;
+import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.internal.ExperimentalResourceDetectionModel;
+import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.internal.ExperimentalResourceDetectorModel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
