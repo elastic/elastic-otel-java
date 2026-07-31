@@ -1,0 +1,63 @@
+products:
+- product: edot-java
+  target: 1.12.0
+  lifecycle: ga
+  repo: elastic-otel-java
+  owner: elastic
+description: >-
+  This release is based on the following upstream versions:
+
+  * opentelemetry-java-instrumentation: [2.30.0](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/tag/v2.30.0)
+
+  * opentelemetry-java: [1.64.0](https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.64.0)
+
+  * semantic-conventions-java: [1.43.0](https://github.com/open-telemetry/semantic-conventions-java/releases/tag/v1.43.0)
+
+  * opentelemetry-java-contrib: [1.58.0](https://github.com/open-telemetry/opentelemetry-java-contrib/releases/tag/v1.58.0)
+release-date: 2026-07-31
+entries:
+- file:
+    name: 1089.yaml
+    checksum: 4ee708aa2e928c1fcb004731049917650fe51db7
+  type: enhancement
+  title: provide experimental base declarative config support
+  products:
+  - product: edot-java
+    lifecycle: ga
+  prs:
+  - "1089"
+  issues:
+  - https://github.com/elastic/elastic-otel-java/issues/1054
+  - https://github.com/elastic/elastic-otel-java/issues/826
+  - https://github.com/elastic/elastic-otel-java/issues/909
+- file:
+    name: 1093.yaml
+    checksum: 1d1f8ea5e822a2e0ea9a75b897fcfb96ac9c28fd
+  type: enhancement
+  title: semconv 1.41.0 update
+  products:
+  - product: edot-java
+    lifecycle: ga
+  prs:
+  - "1093"
+- file:
+    name: 1117.yaml
+    checksum: d66ea95527b8992e8d006a2ec63476024f07691b
+  type: enhancement
+  title: remove explicit filter to simplify span stacktrace declarative config
+  products:
+  - product: edot-java
+    lifecycle: ga
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/1117
+  issues:
+  - https://github.com/elastic/elastic-otel-java/issues/1083
+- file:
+    name: upstream-update.yaml
+    checksum: 32124ffd147b09dca4f2fac2e0493b02f92aea5b
+  type: enhancement
+  title: Update upstream OpenTelemetry agent dependencies to 2.30.0
+  products:
+  - product: edot-java
+  prs:
+  - https://github.com/elastic/elastic-otel-java/pull/1180
