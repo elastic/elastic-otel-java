@@ -35,7 +35,6 @@ rules:
 bundle:
   directory: docs/changelog
   output_directory: docs/releases
-  resolve: true
   repo: elastic-otel-java
   owner: elastic
   release_dates: true
