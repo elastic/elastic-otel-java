@@ -24,8 +24,6 @@ public class ExampleAutoConfigurationCustomizerProvider implements
 
   private SdkTracerProviderBuilder configureSdkTracerProvider(
       SdkTracerProviderBuilder tracerProvider, ConfigProperties config) {
-
     return tracerProvider.addSpanProcessor(new ExampleSpanProcessor());
-
   }
 }

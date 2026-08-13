@@ -4,6 +4,7 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.sdk.trace.ReadWriteSpan;
 import io.opentelemetry.sdk.trace.ReadableSpan;
+import io.opentelemetry.sdk.trace.SpanProcessor;
 import io.opentelemetry.sdk.trace.internal.ExtendedSpanProcessor;
 
 public class ExampleSpanProcessor implements ExtendedSpanProcessor {
@@ -26,7 +27,6 @@ public class ExampleSpanProcessor implements ExtendedSpanProcessor {
     if (span.getKind() == SpanKind.CLIENT && span.getName().matches("^0x[0-9a-fA-F]+")) {
       span.updateName("0x??");
     }
-
   }
 
   @Override

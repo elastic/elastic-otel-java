@@ -27,9 +27,6 @@ dependencies {
   compileOnly("com.google.auto.service:auto-service:1.1.1")
   annotationProcessor("com.google.auto.service:auto-service:1.1.1")
 
-  // Add any external dependencies with 'implementation' scope
-  // implementation("org.apache.commons:commons-lang3:3.19.0")
-
   implementation("io.opentelemetry.semconv:opentelemetry-semconv:1.43.0")
 }
 
