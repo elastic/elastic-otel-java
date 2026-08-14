@@ -79,3 +79,13 @@ This feature requires minimal code changes for creating and accessing the baggag
 - `OTEL_JAVA_EXPERIMENTAL_LOG_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE`
 
 Refer to [baggage-processor](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/baggage-processor) and the [baggage example](https://github.com/elastic/elastic-otel-java/tree/main/examples/baggage) for more details.
+
+This feature is inherited from [OpenTelemetry Java Instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation).
+
+## Extensions
+
+The EDOT Java agent includes support for extensions which is inherited from [OpenTelemetry Java Instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation).
+
+This allows to extend or modify the agent behavior and features without having to maintain a complete fork.
+
+Refer to [OpenTelemetry Java Instrumentation extensions](https://opentelemetry.io/docs/zero-code/java/agent/extensions/) for more details.
