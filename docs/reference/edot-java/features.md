@@ -87,5 +87,6 @@ This feature is inherited from [OpenTelemetry Java Instrumentation](https://gith
 The EDOT Java agent includes support for extensions which is inherited from [OpenTelemetry Java Instrumentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation).
 
 This allows to extend or modify the agent behavior and features without having to maintain a complete fork.
+A few examples are provided [here](https://github.com/elastic/elastic-otel-java/tree/main/examples/extensions).
 
 Refer to [OpenTelemetry Java Instrumentation extensions](https://opentelemetry.io/docs/zero-code/java/agent/extensions/) for more details.
