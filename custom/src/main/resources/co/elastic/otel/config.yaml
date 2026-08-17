@@ -14,6 +14,7 @@ resource:
       # Those may slow down application startup, thus only the relevant ones should be enabled in production
       - aws:
       - azure:
+      - cloud_foundry:
       - gcp:
       # Provides 'process.*' attributes, including 'process.pid'
       - process:
