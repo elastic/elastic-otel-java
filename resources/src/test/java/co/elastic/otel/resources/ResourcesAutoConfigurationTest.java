@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 class ResourcesAutoConfigurationTest {
 
   private static final List<String> LIST =
-      Arrays.asList(config("gcp"), config("aws"), config("azure"));
+      Arrays.asList(config("gcp"), config("aws"), config("azure"), config("cloudfoundry"));
 
   private static String config(String provider) {
     return String.format("otel.resource.providers.%s.enabled", provider);
