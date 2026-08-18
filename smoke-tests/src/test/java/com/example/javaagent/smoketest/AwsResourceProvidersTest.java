@@ -18,11 +18,11 @@
  */
 package com.example.javaagent.smoketest;
 
+import io.opentelemetry.semconv.ContainerAttributes;
+import io.opentelemetry.semconv.K8sAttributes;
 import io.opentelemetry.semconv.ServiceAttributes;
 import io.opentelemetry.semconv.incubating.CloudIncubatingAttributes;
-import io.opentelemetry.semconv.incubating.ContainerIncubatingAttributes;
 import io.opentelemetry.semconv.incubating.FaasIncubatingAttributes;
-import io.opentelemetry.semconv.incubating.K8sIncubatingAttributes;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -96,8 +96,7 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
         attributes ->
             attributes
                 .containsEntry(
-                    ContainerIncubatingAttributes.CONTAINER_ID.getKey(),
-                    attributeValue(getContainerId()))
+                    ContainerAttributes.CONTAINER_ID.getKey(), attributeValue(getContainerId()))
                 .containsEntry(
                     CloudIncubatingAttributes.CLOUD_PLATFORM.getKey(),
                     attributeValue(CloudIncubatingAttributes.CloudPlatformIncubatingValues.AWS_EC2))
@@ -169,8 +168,7 @@ public class AwsResourceProvidersTest extends TestAppSmokeTest {
                       CloudIncubatingAttributes.CLOUD_PLATFORM.getKey(),
                       attributeValue(
                           CloudIncubatingAttributes.CloudPlatformIncubatingValues.AWS_EKS))
-                  .containsEntry(
-                      K8sIncubatingAttributes.K8S_CLUSTER_NAME.getKey(), attributeValue("2")));
+                  .containsEntry(K8sAttributes.K8S_CLUSTER_NAME.getKey(), attributeValue("2")));
 
     } finally {
       Files.delete(tokenFile);

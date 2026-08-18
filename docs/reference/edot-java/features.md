@@ -31,6 +31,7 @@ The EDOT Java agent includes the following resource attributes providers from [o
 - AWS: [aws-resources](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/aws-resources). Turned on by default.
 - GCP: [gcp-resources](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/gcp-resources). Turned on by default.
 - Azure: [azure-resources](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/azure-resources). Turned on by default.
+- CloudFoundry: [cloudfoundry-resources](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/cloudfoundry-resources). Turned on by default.
 - Application server service name detection: [resource-providers](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/resource-providers).
 
 ## Inferred spans
