@@ -73,6 +73,8 @@ public class ConfigLoggingAgentListenerTest {
     List<String> command = new ArrayList<>();
     command.add("java");
     command.add("-Xmx32m");
+    // Source-file mode is detected as a JDK tool, so explicitly enable the agent for this test.
+    command.add("-Dotel.javaagent.enabled=true");
     command.add("-javaagent:" + agentJarFile);
     // Only on false, ie test the 'true' default with no option
     if (!logConfig) {
