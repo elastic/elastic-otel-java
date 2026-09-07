@@ -34,7 +34,7 @@ For environments where modifying the JVM arguments or configuration is impossibl
 Follow the following Java setup guide for all other environments.
 
 :::{agent-skill}
-:url: https://github.com/elastic/agent-skills@observability-onboarding
+:url: https://github.com/elastic/agent-skills/tree/main/skills/observability/onboarding
 
 Use this skill to instrument Java services with EDOT for tracing, metrics, and logs.
 :::
