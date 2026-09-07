@@ -26,7 +26,7 @@ Compared to the Elastic {{product.apm}} Java agent, the {{edot}} Java presents a
 ## Migration steps
 
 :::{agent-skill}
-:url: https://github.com/elastic/agent-skills/tree/main/skills/observability/edot-java-migrate
+:url: https://github.com/elastic/agent-skills/tree/main/skills/observability/onboarding
 
 Use this skill to migrate from the Elastic APM Java agent to EDOT Java.
 :::
