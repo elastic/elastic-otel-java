@@ -43,5 +43,4 @@ bundle:
   profiles:
     edot-java-release:
       products: "edot-java * *"
-      output: "{version}.yaml"
       output_products: "edot-java {version} ga"
