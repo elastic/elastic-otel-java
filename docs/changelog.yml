@@ -38,6 +38,7 @@ bundle:
   repo: elastic-otel-java
   owner: elastic
   release_dates: true
+  use_local_changelogs: true
 
   profiles:
     edot-java-release:
