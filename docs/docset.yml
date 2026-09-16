@@ -1,4 +1,6 @@
 project: 'EDOT Java release notes'
+release_notes:
+  - product: edot-java
 cross_links:
   - docs-content
   - opentelemetry

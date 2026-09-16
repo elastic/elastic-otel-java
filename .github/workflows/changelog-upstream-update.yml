@@ -1,0 +1,44 @@
+name: changelog-upstream-update
+
+# Automatically generates and commits a changelog entry for PRs that bring in
+# upstream OpenTelemetry dependency updates. Triggered when the
+# `changelog:upstream-update` label is added to a non-fork PR; the generated
+# entry lands on the PR branch before release-notes validate runs.
+
+on:
+  pull_request:
+    types: [labeled]
+
+permissions: {}
+
+concurrency:
+  group: changelog-upstream-update-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  upstream-update:
+    permissions:
+      contents: write
+      pull-requests: write
+    if: >
+      contains(github.event.pull_request.labels.*.name, 'changelog:upstream-update')
+      && github.event.pull_request.head.repo.fork == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Git setup
+        uses: elastic/oblt-actions/git/setup@v1
+
+      - name: Docs builder setup
+        uses: elastic/docs-actions/docs-builder/setup@v1
+
+      - name: Generate changelog entry
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: .ci/changelog-upstream-update.sh
