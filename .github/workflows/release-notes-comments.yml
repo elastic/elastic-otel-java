@@ -4,9 +4,7 @@ on:
     # Must match the `name:` field of the release-notes workflow in this repo.
     workflows: ["release-notes"]
     types: [completed]
-permissions:
-  pull-requests: write
-  actions: read
+permissions: {}
 # The PR number is stable; do not cancel — two upstreams can complete close
 # together and cancelling mid-upsert risks leaving the wrong comment body.
 concurrency:
@@ -16,3 +14,6 @@ jobs:
   comment:
     if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion != 'cancelled'
     uses: elastic/docs-actions/.github/workflows/release-notes-comments.yml@v1
+    permissions:
+      pull-requests: write
+      actions: read
