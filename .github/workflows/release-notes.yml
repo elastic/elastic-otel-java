@@ -4,16 +4,11 @@ on:
     types: [opened, synchronize, reopened, edited, labeled, unlabeled]
   push:
     branches: [main]
-  release:
-    types: [published]
 permissions: {}
 jobs:
   release-notes:
     permissions:
       contents: read
-      id-token: write
       pull-requests: read
       packages: read
     uses: elastic/docs-actions/.github/workflows/release-notes.yml@v1
-    with:
-      bundle-on-release: true
