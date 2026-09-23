@@ -74,9 +74,6 @@ jobs:
         with:
           github-token: ${{ steps.get_token.outputs.token }}
 
-      - name: Docs builder setup
-        uses: elastic/docs-actions/docs-builder/setup@v1
-
       - name: Create the release tag (post phase)
         if: inputs.phase == 'post'
         run: |
@@ -102,20 +99,6 @@ jobs:
         if: inputs.phase == 'post'
         run: bash ./.ci/release/post-release.sh
 
-      - name: Generate documentation changelog bundle (pre release)
-        if: inputs.phase == 'pre'
-        # we should use the 'edot-java-release' profile to generate the bundle:
-        #   docs-builder changelog bundle edot-java-release ${{ env.RELEASE_VERSION }}
-        # this does not yet allow to provide the generated content for description, so we have to use the explicit arguments.
-        run: |
-          description="$(.ci/changelog-bundle-description.sh)"
-          docs-builder changelog bundle \
-            --input-products 'edot-java * *' \
-            --output-products 'edot-java ${{ env.RELEASE_VERSION }} ga' \
-            --output docs/releases/${{ env.RELEASE_VERSION }}.yaml \
-            --description "${description}"
-          docs-builder changelog remove edot-java-release ${{ env.RELEASE_VERSION }}
-  
       - name: Push the ${{ inputs.phase }} release branch
         run: |
           git add --all
