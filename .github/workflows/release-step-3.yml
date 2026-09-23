@@ -278,11 +278,15 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
           persist-credentials: false
+      - name: Generate bundle description
+        id: description
+        run: echo "text=$(.ci/changelog-bundle-description.sh)" >> "$GITHUB_OUTPUT"
       - name: Create bundle
         id: create
         uses: elastic/docs-actions/changelog/bundle-create-version@v1
         with:
           version: ${{ env.RELEASE_VERSION_TAG }}
+          description: ${{ steps.description.outputs.text }}
           github-token: ${{ github.token }}
 
   bundle-publish:
