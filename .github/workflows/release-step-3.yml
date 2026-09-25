@@ -262,3 +262,47 @@ jobs:
             --verify-tag \
             --title="Release ${{ env.RELEASE_VERSION }}" \
             --notes='${{needs.generate-release-notes.outputs.notes}}'
+
+  bundle:
+    name: "Generate changelog bundle"
+    needs: create-github-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      pull-requests: read
+    outputs:
+      bundle-path: ${{ steps.create.outputs.bundle-path }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+      - name: Generate bundle description
+        id: description
+        run: echo "text=$(.ci/changelog-bundle-description.sh)" >> "$GITHUB_OUTPUT"
+      - name: Create bundle
+        id: create
+        uses: elastic/docs-actions/changelog/bundle-create-version@v1
+        with:
+          version: ${{ env.RELEASE_VERSION_TAG }}
+          description: ${{ steps.description.outputs.text }}
+          github-token: ${{ github.token }}
+
+  bundle-publish:
+    name: "Publish changelog bundle to S3"
+    needs: bundle
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      packages: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+      - name: Publish bundle to S3
+        uses: elastic/docs-actions/changelog/bundle-publish@v1
+        with:
+          bundle-path: ${{ needs.bundle.outputs.bundle-path }}

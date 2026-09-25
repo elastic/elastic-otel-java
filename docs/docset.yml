@@ -9,6 +9,8 @@ cross_links:
 toc:
   - toc: release-notes
   - toc: reference/edot-java
+release_notes:
+  - product: edot-java
 subs:
   motlp: Elastic Cloud Managed OTLP Endpoint
   edot: Elastic Distribution of OpenTelemetry
