@@ -280,7 +280,8 @@ jobs:
           persist-credentials: false
       - name: Generate bundle description
         id: description
-        run: echo "text=$(.ci/changelog-bundle-description.sh)" >> "$GITHUB_OUTPUT"
+        run: |
+          { echo 'text<<EOF'; .ci/changelog-bundle-description.sh; echo 'EOF'; } >> "$GITHUB_OUTPUT"
       - name: Create bundle
         id: create
         uses: elastic/docs-actions/changelog/bundle-create-version@v1
