@@ -13,6 +13,6 @@ products:
 
 # Elastic Distribution of OpenTelemetry Java known issues
 
-:::{changelog} /releases/
+:::{changelog} edot-java
 :type: known-issue
 :::

@@ -17,7 +17,7 @@ Review the changes, fixes, and more in each version of Elastic Distribution of O
 
 To check for security updates, go to [Security announcements for the Elastic stack](https://discuss.elastic.co/c/announcements/security-announcements/31).
 
-:::{changelog} /releases/
+:::{changelog} edot-java
 :type: all
 :release-dates:
 :::

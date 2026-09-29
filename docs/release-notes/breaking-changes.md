@@ -15,6 +15,6 @@ products:
 
 Breaking changes can impact your applications, potentially disrupting normal operations and their monitoring. Before you upgrade, carefully review the Elastic Distribution of OpenTelemetry Java breaking changes and take the necessary steps to mitigate any issues.
 
-:::{changelog} /releases/
+:::{changelog} edot-java
 :type: breaking-change
 :::
