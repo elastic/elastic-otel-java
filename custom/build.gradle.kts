@@ -61,6 +61,7 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi")
   testImplementation("io.opentelemetry:opentelemetry-sdk-extension-declarative-config")
   testImplementation("io.opentelemetry:opentelemetry-exporter-otlp")
+  testImplementation("io.opentelemetry.javaagent:opentelemetry-javaagent-extension-api")
   testImplementation("io.opentelemetry.javaagent:opentelemetry-javaagent-tooling") {
     //The following dependency isn't actually needed, but breaks the classpath when testing with Java 8
     exclude(group = "io.opentelemetry.javaagent", module = "opentelemetry-javaagent-tooling-java9")
