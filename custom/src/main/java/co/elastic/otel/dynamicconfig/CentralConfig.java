@@ -20,7 +20,6 @@ package co.elastic.otel.dynamicconfig;
 
 import static io.opentelemetry.semconv.DeploymentAttributes.DEPLOYMENT_ENVIRONMENT_NAME;
 
-import co.elastic.otel.compositesampling.DynamicCompositeParentBasedTraceIdRatioBasedSampler;
 import co.elastic.otel.config.ConfigLoggingAgentListener;
 import co.elastic.otel.dynamicconfig.internal.OpampManager;
 import co.elastic.otel.logging.AgentLog;
@@ -341,12 +340,7 @@ public class CentralConfig {
     @Override
     void update(String configurationValue, OpampManager opampManager)
         throws IllegalArgumentException {
-      if (!ConfigLoggingAgentListener.getEnableDynamicSamplingRate()) {
-        logger.warning("ignoring \"sampling_rate\" because non-default sampler in use");
-        return;
-      }
-      DynamicCompositeParentBasedTraceIdRatioBasedSampler.setRatio(
-          Double.parseDouble(configurationValue));
+      ConfigLoggingAgentListener.updateSamplingRate(Double.parseDouble(configurationValue));
     }
   }
 
