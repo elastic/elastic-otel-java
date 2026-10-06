@@ -51,6 +51,9 @@ public class ConfigLoggingAgentListener implements AgentListener {
    */
   public static synchronized void updateSamplingRate(double ratio) {
     if (sampler == null) {
+      if (ratio < 0 || ratio > 1) {
+        throw new IllegalArgumentException("The ratio is not in the range [0,1]");
+      }
       logger.info("deferring \"sampling_rate\" until the tracer sampler is initialized");
       pendingSamplingRate = ratio;
       return;
