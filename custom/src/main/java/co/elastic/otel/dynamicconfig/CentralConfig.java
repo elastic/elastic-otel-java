@@ -239,13 +239,12 @@ public class CentralConfig {
     public void updateOrLog(String value, OpampManager opampManager) {
       try {
         update(value, opampManager);
-      } catch (IllegalArgumentException e) {
+      } catch (RuntimeException e) {
         logger.warning(e.getMessage());
       }
     }
 
-    abstract void update(String value, OpampManager opampManager)
-        throws IllegalArgumentException;
+    abstract void update(String value, OpampManager opampManager);
 
     public void updateToDefault(OpampManager opampManager) {
       update(defaultValue, opampManager);
@@ -262,8 +261,7 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue, OpampManager opampManager)
-        throws IllegalArgumentException {
+    void update(String configurationValue, OpampManager opampManager) {
       config().setSendingLogs(getBoolean(configurationValue));
     }
   }
@@ -274,8 +272,7 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue, OpampManager opampManager)
-        throws IllegalArgumentException {
+    void update(String configurationValue, OpampManager opampManager) {
       config().setSendingMetrics(getBoolean(configurationValue));
     }
   }
@@ -286,8 +283,7 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue, OpampManager opampManager)
-        throws IllegalArgumentException {
+    void update(String configurationValue, OpampManager opampManager) {
       config().setSendingSpans(getBoolean(configurationValue));
     }
   }
@@ -298,8 +294,7 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue, OpampManager opampManager)
-        throws IllegalArgumentException {
+    void update(String configurationValue, OpampManager opampManager) {
       if (getBoolean(configurationValue)) {
         config().deactivateAllInstrumentations();
       } else {
@@ -314,8 +309,7 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue, OpampManager opampManager)
-        throws IllegalArgumentException {
+    void update(String configurationValue, OpampManager opampManager) {
       config().deactivateInstrumentations(configurationValue);
     }
   }
@@ -326,8 +320,7 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue, OpampManager opampManager)
-        throws IllegalArgumentException {
+    void update(String configurationValue, OpampManager opampManager) {
       AgentLog.setLevel(configurationValue);
     }
   }
@@ -338,8 +331,7 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue, OpampManager opampManager)
-        throws IllegalArgumentException {
+    void update(String configurationValue, OpampManager opampManager) {
       ConfigLoggingAgentListener.updateSamplingRate(Double.parseDouble(configurationValue));
     }
   }
@@ -350,8 +342,7 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue, OpampManager opampManager)
-        throws IllegalArgumentException {
+    void update(String configurationValue, OpampManager opampManager) {
       // TODO when setProfilerInterval() returns the old value, use that for 'true'
       InferredSpans.setProfilerInterval(
           configurationValue.equals("true")
@@ -366,8 +357,7 @@ public class CentralConfig {
     }
 
     @Override
-    void update(String configurationValue, OpampManager opampManager)
-        throws IllegalArgumentException {
+    void update(String configurationValue, OpampManager opampManager) {
       try {
         Duration duration = Duration.parse("PT" + configurationValue);
         opampManager.setPollingDelay(duration);
