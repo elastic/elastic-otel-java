@@ -2,7 +2,6 @@ plugins {
   id("elastic-otel.agent-packaging-conventions")
   id("elastic-otel.sign-and-publish-conventions")
   id("elastic-otel.license-report-conventions")
-  alias(catalog.plugins.taskinfo)
 }
 
 description = "Elastic Distribution of OpenTelemetry Java Agent"

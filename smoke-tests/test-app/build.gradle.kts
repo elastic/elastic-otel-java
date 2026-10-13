@@ -2,7 +2,6 @@ plugins {
   id("com.gradleup.shadow")
   id("elastic-otel.java-conventions")
   alias(catalog.plugins.jib)
-  alias(catalog.plugins.taskinfo)
 }
 
 val mainClass = "co.elastic.otel.test.AppMain"

@@ -1,7 +1,6 @@
 // TODO : convert to kotlin for consistency
 plugins {
   id("elastic-otel.java-conventions")
-  alias catalog.plugins.taskinfo
 }
 
 configurations {
