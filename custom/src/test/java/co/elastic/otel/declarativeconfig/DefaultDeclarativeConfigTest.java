@@ -30,6 +30,8 @@ import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.OpenTelemetryC
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.SamplerModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.internal.ExperimentalComposableRuleBasedSamplerRuleModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.internal.ExperimentalLanguageSpecificInstrumentationModel;
+import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.internal.OpenTelemetryConfigurationModelAccessor;
+import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.internal.SamplerModelAccessor;
 import java.io.InputStream;
 import java.util.List;
 import java.util.function.Consumer;
@@ -98,7 +100,7 @@ public class DefaultDeclarativeConfigTest {
                       .getTracerProvider()
                       .getProcessors()
                       .get(1)
-                      .getAdditionalProperties()
+                      .getExtensionProperties()
                       .containsKey("stacktrace/development"))
               .describedAs("stacktrace processor should be present by default")
               .isTrue();
@@ -144,15 +146,16 @@ public class DefaultDeclarativeConfigTest {
           // is the one we expect with 100% sampling
           assertThatJson(json(sampler)).inPath("composite/development.rule_based.rules").isArray();
           List<ExperimentalComposableRuleBasedSamplerRuleModel> rules =
-              sampler.getCompositeDevelopment().getRuleBased().getRules();
+              SamplerModelAccessor.getComposite(sampler).getRuleBased().getRules();
           assertThatJson(json(rules.get(rules.size() - 1)))
               .inPath("sampler.parent_threshold.root.probability.ratio")
               .isNumber()
               .isEqualByComparingTo("1.0");
 
-          assertThat(config.getInstrumentationDevelopment()).isNotNull();
+          assertThat(OpenTelemetryConfigurationModelAccessor.getInstrumentation(config))
+              .isNotNull();
           ExperimentalLanguageSpecificInstrumentationModel java =
-              config.getInstrumentationDevelopment().getJava();
+              OpenTelemetryConfigurationModelAccessor.getInstrumentation(config).getJava();
           assertThat(java).isNotNull();
           assertThatJson(json(java))
               .describedAs("experimental jvm runtime telemetry metrics enabled by default")

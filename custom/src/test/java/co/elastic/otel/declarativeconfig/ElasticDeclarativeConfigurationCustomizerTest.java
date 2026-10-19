@@ -69,8 +69,8 @@ class ElasticDeclarativeConfigurationCustomizerTest {
       first = new ElasticDeclarativeConfigurationCustomizer();
       second = new ResourceCustomizerProvider();
     } else {
-      first = new ElasticDeclarativeConfigurationCustomizer();
-      second = new ResourceCustomizerProvider();
+      first = new ResourceCustomizerProvider();
+      second = new ElasticDeclarativeConfigurationCustomizer();
     }
 
     model = applyConfigCustomize(model, first);
