@@ -46,6 +46,7 @@ import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.SpanExporterMo
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.TracerProviderModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.internal.ExperimentalResourceDetectionModel;
 import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.internal.ExperimentalResourceDetectorModel;
+import io.opentelemetry.sdk.autoconfigure.declarativeconfig.model.internal.ResourceModelAccessor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -81,13 +82,13 @@ public class ElasticDeclarativeConfigurationCustomizer
     ResourceModel resource = model.getResource();
     if (resource == null) {
       resource = new ResourceModel();
-      model.withResource(resource);
+      model.setResource(resource);
     }
 
-    ExperimentalResourceDetectionModel detectionDevelopment = resource.getDetectionDevelopment();
+    ExperimentalResourceDetectionModel detectionDevelopment =
+        ResourceModelAccessor.getDetection(resource);
     if (detectionDevelopment == null) {
       detectionDevelopment = new ExperimentalResourceDetectionModel();
-      resource.withDetectionDevelopment(detectionDevelopment);
     }
     List<ExperimentalResourceDetectorModel> detectors = detectionDevelopment.getDetectors();
     Set<String> names = Collections.emptySet();
@@ -104,10 +105,11 @@ public class ElasticDeclarativeConfigurationCustomizer
       detector.getAdditionalProperties().put(ElasticDistroComponentProvider.NAME, null);
       if (detectors == null) {
         detectors = new ArrayList<>();
-        detectionDevelopment.withDetectors(detectors);
+        detectionDevelopment.setDetectors(detectors);
       }
       detectors.add(detector);
     }
+    ResourceModelAccessor.setDetection(resource, detectionDevelopment);
   }
 
   private void customizeUserAgent(OpenTelemetryConfigurationModel model) {
@@ -206,13 +208,13 @@ public class ElasticDeclarativeConfigurationCustomizer
     if (otlpGrpc != null) {
       String headersList = otlpGrpc.getHeadersList();
       List<NameStringValuePairModel> headers = otlpGrpc.getHeaders();
-      otlpGrpc.withHeaders(addUserAgent(headersList, headers, OTLP_GRPC));
+      otlpGrpc.setHeaders(addUserAgent(headersList, headers, OTLP_GRPC));
     }
     OtlpHttpMetricExporterModel otlpHttp = metricExporterModel.getOtlpHttp();
     if (otlpHttp != null) {
       String headersList = otlpHttp.getHeadersList();
       List<NameStringValuePairModel> headers = otlpHttp.getHeaders();
-      otlpHttp.withHeaders(addUserAgent(headersList, headers, OTLP_HTTP));
+      otlpHttp.setHeaders(addUserAgent(headersList, headers, OTLP_HTTP));
     }
   }
 
@@ -227,12 +229,12 @@ public class ElasticDeclarativeConfigurationCustomizer
     if (otlpGrpc != null) {
       String headersList = otlpGrpc.getHeadersList();
       List<NameStringValuePairModel> headers = otlpGrpc.getHeaders();
-      otlpGrpc.withHeaders(addUserAgent(headersList, headers, OTLP_GRPC));
+      otlpGrpc.setHeaders(addUserAgent(headersList, headers, OTLP_GRPC));
     }
     if (otlpHttp != null) {
       String headersList = otlpHttp.getHeadersList();
       List<NameStringValuePairModel> headers = otlpHttp.getHeaders();
-      otlpHttp.withHeaders(addUserAgent(headersList, headers, OTLP_HTTP));
+      otlpHttp.setHeaders(addUserAgent(headersList, headers, OTLP_HTTP));
     }
   }
 
@@ -261,7 +263,7 @@ public class ElasticDeclarativeConfigurationCustomizer
     if (headers != null) {
       result.addAll(headers);
     }
-    result.add(new NameStringValuePairModel().withName(HEADER_NAME).withValue(value));
+    result.add(new NameStringValuePairModel().setName(HEADER_NAME).setValue(value));
     return result;
   }
 }
