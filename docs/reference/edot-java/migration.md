@@ -122,7 +122,51 @@ For example: `OTEL_RESOURCE_ATTRIBUTES=alice=first,bob=second`
 
 ### `trace_methods`
 
-The Elastic [`trace_methods`](https://www.elastic.co/docs/reference/apm/agents/java/config-core#config-trace-methods) option can be replaced by the [`OTEL_INSTRUMENTATION_METHODS_INCLUDE`](https://opentelemetry.io/docs/zero-code/java/agent/annotations/#creating-spans-around-methods-with-otelinstrumentationmethodsinclude) OpenTelemetry option, however the syntax is different and the ability to use wildcards is more limited.
+The Elastic [`trace_methods`](apm-agent-java://reference/config-core.md#config-trace-methods) option corresponds to the OpenTelemetry [`OTEL_INSTRUMENTATION_METHODS_INCLUDE`](https://opentelemetry.io/docs/zero-code/java/agent/annotations/#creating-spans-around-methods-with-otelinstrumentationmethodsinclude) option, which takes a list of classes and their methods.
+
+For example: `OTEL_INSTRUMENTATION_METHODS_INCLUDE=com.example.MyService[process,validate];com.example.OtherService[run]`.
+
+You can also list the classes and methods with [declarative configuration](./configuration.md#declarative-configuration), using exact `class` and method `name` values.
+
+The OpenTelemetry option matches methods differently from `trace_methods`:
+
+- Wildcards are not supported. Class and method names must be exact.
+- If any entry contains unsupported characters, such as `*`, the agent logs a warning and ignores the whole option.
+- Each class must list at least one method. A class without a method list is ignored.
+- Methods are matched by name only. You can't filter by modifier or by argument types, and all overloads of a listed method are traced.
+- A listed class also matches its subclasses, and a listed interface also matches its implementations. Listing a shared interface or base class is the closest equivalent to a pattern.
+
+Other differences:
+
+- The `trace_methods` option is dynamically adjustable, while `OTEL_INSTRUMENTATION_METHODS_INCLUDE` is read only at startup.
+- The Elastic [`trace_methods_duration_threshold`](apm-agent-java://reference/config-core.md#config-trace-methods-duration-threshold) option has no equivalent.
+
+#### No configuration-only equivalent for package and annotation patterns
+
+The `trace_methods` option can also select methods by modifier, by package with wildcards that include sub-packages, by method name wildcards, by argument types, and by class annotations or meta-annotations. For example:
+
+```properties
+elastic.apm.trace_methods=public @org.springframework.stereotype.Service com.example.*
+```
+
+EDOT Java has no configuration-only equivalent for these patterns. Consider these alternatives:
+
+- List the classes and methods explicitly in `OTEL_INSTRUMENTATION_METHODS_INCLUDE` or in declarative configuration. For large code bases, you can generate the list at build time.
+- Turn on [inferred spans](/reference/edot-java/features.md#inferred-spans) with `OTEL_INFERRED_SPANS_ENABLED=true`, and restrict them to your code with `OTEL_INFERRED_SPANS_INCLUDED_CLASSES`, for example `com.example.*`. This requires no code changes, but inferred spans are built from sampled profiling data, so their timing is approximate and short method calls might not appear. Inferred spans rely on [async-profiler](https://github.com/async-profiler/async-profiler) and are only available on the platforms it supports.
+- Add the [`@WithSpan`](https://opentelemetry.io/docs/zero-code/java/agent/annotations/) annotation to the methods you want to trace. This requires code changes.
+
+### `classes_excluded_from_instrumentation`
+
+The Elastic [`classes_excluded_from_instrumentation`](apm-agent-java://reference/config-core.md#config-classes-excluded-from-instrumentation) option corresponds to the OpenTelemetry [`OTEL_JAVAAGENT_EXCLUDE_CLASSES`](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/advanced-configuration-options.md#excluding-specific-classes-from-being-instrumented) option.
+
+For example: `OTEL_JAVAAGENT_EXCLUDE_CLASSES=com.example.MyClass,com.example.internal.*`.
+
+The matching rules differ:
+
+- The Elastic option supports the `*` wildcard anywhere in a pattern, and matching is case-insensitive by default.
+- The OpenTelemetry option only supports a trailing `*`. Each value, with or without the trailing `*`, is matched as a case-sensitive prefix of the fully qualified class name.
+
+As a result, `com.example.MyClass` also excludes `com.example.MyClassHelper`, and patterns with a `*` elsewhere, such as `com.*.internal.*` or `*Proxy*`, don't match any class. When migrating, rewrite each pattern as one or more class name or package prefixes with the exact case. To exclude a package without also excluding packages that start with the same name, end the value with `.*`, for example `com.example.internal.*`.
 
 ### `capture_jmx_metrics`
 
