@@ -24,20 +24,30 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.contrib.inferredspans.InferredSpansProcessor;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.ReadableSpan;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import org.junit.jupiter.api.Test;
 
 public class SpanUtilsTest {
 
   @Test
   public void inferredSpanTracerDetection() {
-    test(InferredSpansProcessor.TRACER_NAME, true);
-    test("test", false);
+    try (OpenTelemetrySdk sdk =
+        OpenTelemetrySdk.builder()
+            .setTracerProvider(
+                SdkTracerProvider.builder()
+                    .addSpanProcessor(SimpleSpanProcessor.create(InMemorySpanExporter.create()))
+                    .build())
+            .build()) {
+      test(sdk, InferredSpansProcessor.TRACER_NAME, true);
+      test(sdk, "test", false);
+    }
   }
 
-  private void test(String tracerName, boolean expectedInferred) {
-    Tracer tracer =
-        OpenTelemetrySdk.builder().build().getTracerProvider().tracerBuilder(tracerName).build();
+  private void test(OpenTelemetrySdk sdk, String tracerName, boolean expectedInferred) {
+    Tracer tracer = sdk.getTracerProvider().tracerBuilder(tracerName).build();
     Span span = tracer.spanBuilder("span").startSpan();
     assertThat(SpanUtils.isInferredSpan((ReadableSpan) span)).isEqualTo(expectedInferred);
   }

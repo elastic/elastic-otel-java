@@ -19,7 +19,7 @@
 package co.elastic.otel.openai.v1_1.wrappers;
 
 import com.openai.client.OpenAIClient;
-import io.opentelemetry.api.internal.ConfigUtil;
+import io.opentelemetry.common.impl.ConfigUtil;
 import java.lang.reflect.Method;
 import java.net.URI;
 
