@@ -9,5 +9,8 @@ jobs:
   changelog-file:
     uses: elastic/docs-actions/.github/workflows/release-notes-changelog-file.yml@v1
     permissions:
+      actions: write
+      contents: write
+      id-token: write
+      packages: read
       pull-requests: write
-      actions: read
