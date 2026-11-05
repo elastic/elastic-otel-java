@@ -120,6 +120,18 @@ The Elastic [`global_labels`](apm-agent-java://reference/config-core.md#config-g
 
 For example: `OTEL_RESOURCE_ATTRIBUTES=alice=first,bob=second`
 
+### `use_path_as_transaction_name`
+
+The Elastic [`use_path_as_transaction_name`](apm-agent-java://reference/config-http.md#config-use-path-as-transaction-name) option corresponds to the EDOT Java `ELASTIC_OTEL_USE_PATH_AS_SPAN_NAME` option, see [span naming](./configuration.md#use-path-as-span-name) for details.
+
+The central configuration equivalent is `use_path_as_span_name`.
+
+### `transaction_name_groups`
+
+The Elastic [`transaction_name_groups`](apm-agent-java://reference/config-core.md#config-transaction-name-groups) option corresponds to the EDOT Java `ELASTIC_OTEL_SPAN_NAME_GROUPS` option, see [span naming](./configuration.md#span-name-groups) for details.
+
+The central configuration equivalent is `span_name_groups`.
+
 ### `trace_methods`
 
 The Elastic [`trace_methods`](apm-agent-java://reference/config-core.md#config-trace-methods) option corresponds to the OpenTelemetry [`OTEL_INSTRUMENTATION_METHODS_INCLUDE`](https://opentelemetry.io/docs/zero-code/java/agent/annotations/#creating-spans-around-methods-with-otelinstrumentationmethodsinclude) option, which takes a list of classes and their methods.
