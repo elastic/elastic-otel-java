@@ -1,9 +1,10 @@
 toc:
   - file: index.md
-  - file: setup/index.md
+  - folder: setup
     children:
-      - file: setup/k8s.md
-      - file: setup/runtime-attach.md
+      - file: index.md
+      - file: k8s.md
+      - file: runtime-attach.md
   - file: configuration.md
   - file: features.md
   - file: supported-technologies.md
