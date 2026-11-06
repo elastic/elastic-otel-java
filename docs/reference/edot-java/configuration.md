@@ -271,7 +271,7 @@ support for this depends on the application and logging libraries used.
 
 ## Span naming
 
-EDOT Java can rename spans, for example to when instrumentation cannot determine a URL route.
+EDOT Java can rename spans, for example when instrumentation cannot determine a URL route.
 
 ### Use path as span name
 

@@ -101,7 +101,9 @@ public final class SpanNamingSpanExporter implements SpanExporter {
     }
     String name = span.getName();
     // instrumentation populates either method or HTTP when route isn't known.
-    if (!name.equals(method) && !name.equals(UNKNOWN_METHOD_SPAN_NAME)) {
+    boolean hasGenericHttpName =
+        name.equals(method) || name.equals(UNKNOWN_METHOD_SPAN_NAME);
+    if (!hasGenericHttpName) {
       return null;
     }
     return name + " " + path;
