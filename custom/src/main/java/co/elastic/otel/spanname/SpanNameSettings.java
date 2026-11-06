@@ -29,9 +29,6 @@ public final class SpanNameSettings {
   public static final String USE_PATH_AS_SPAN_NAME = "elastic.otel.use.path.as.span.name";
   public static final String SPAN_NAME_GROUPS = "elastic.otel.span.name.groups";
 
-  private static final String CASE_SENSITIVE_PREFIX = "(?-i)";
-  private static final String CASE_INSENSITIVE_PREFIX = "(?i)";
-
   private static final SpanNameSettings INSTANCE = new SpanNameSettings();
 
   private volatile boolean usePath;
@@ -84,18 +81,8 @@ public final class SpanNameSettings {
     final String name;
 
     NameGroup(String pattern) {
-      this.matcher = WildcardMatcher.valueOf(pattern);
-      this.name = stripCasePrefix(pattern);
-    }
-
-    private static String stripCasePrefix(String pattern) {
-      if (pattern.startsWith(CASE_SENSITIVE_PREFIX)) {
-        return pattern.substring(CASE_SENSITIVE_PREFIX.length());
-      }
-      if (pattern.startsWith(CASE_INSENSITIVE_PREFIX)) {
-        return pattern.substring(CASE_INSENSITIVE_PREFIX.length());
-      }
-      return pattern;
+      this.matcher = WildcardMatcher.caseSensitiveMatcher(pattern);
+      this.name = pattern;
     }
   }
 }

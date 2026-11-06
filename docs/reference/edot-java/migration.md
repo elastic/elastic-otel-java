@@ -128,7 +128,7 @@ The central configuration equivalent is `use_path_as_span_name`.
 
 ### `transaction_name_groups`
 
-The Elastic [`transaction_name_groups`](apm-agent-java://reference/config-core.md#config-transaction-name-groups) option corresponds to the EDOT Java `ELASTIC_OTEL_SPAN_NAME_GROUPS` option, see [span naming](./configuration.md#span-name-groups) for details.
+The Elastic [`transaction_name_groups`](apm-agent-java://reference/config-core.md#config-transaction-name-groups) option corresponds to the EDOT Java `ELASTIC_OTEL_SPAN_NAME_GROUPS` option, see [span naming](./configuration.md#span-name-groups) for details. Unlike the Elastic option, matching is always case-sensitive and the `(?-i)` and `(?i)` prefixes are not supported.
 
 The central configuration equivalent is `span_name_groups`.
 

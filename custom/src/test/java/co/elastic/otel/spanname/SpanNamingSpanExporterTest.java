@@ -23,6 +23,7 @@ import static io.opentelemetry.semconv.UrlAttributes.URL_PATH;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
@@ -66,7 +67,7 @@ class SpanNamingSpanExporterTest {
   void disabledByDefault() {
     init(new HashMap<>());
 
-    httpSpan("GET", "/users/42/cart");
+    serverSpan("GET", "/users/42/cart");
 
     assertThat(exportedNames()).containsExactly("GET");
   }
@@ -75,8 +76,8 @@ class SpanNamingSpanExporterTest {
   void usePathAsSpanName() {
     init(usePath());
 
-    httpSpan("GET", "/users/42/cart");
-    httpSpan("HTTP", "/users/42/cart");
+    serverSpan("GET", "/users/42/cart");
+    serverSpan("HTTP", "/users/42/cart");
 
     assertThat(exportedNames()).containsExactly("GET /users/42/cart", "HTTP /users/42/cart");
   }
@@ -87,6 +88,7 @@ class SpanNamingSpanExporterTest {
 
     tracer
         .spanBuilder("GET /users/{id}/cart")
+        .setSpanKind(SpanKind.SERVER)
         .setAttribute(HTTP_REQUEST_METHOD, "GET")
         .setAttribute(URL_PATH, "/users/42/cart")
         .startSpan()
@@ -99,9 +101,31 @@ class SpanNamingSpanExporterTest {
   void usePathAsSpanName_withoutPath() {
     init(usePath());
 
-    tracer.spanBuilder("GET").setAttribute(HTTP_REQUEST_METHOD, "GET").startSpan().end();
+    tracer
+        .spanBuilder("GET")
+        .setSpanKind(SpanKind.SERVER)
+        .setAttribute(HTTP_REQUEST_METHOD, "GET")
+        .startSpan()
+        .end();
 
     assertThat(exportedNames()).containsExactly("GET");
+  }
+
+  @Test
+  void usePathAsSpanName_onlyServerSpans() {
+    init(usePath());
+
+    for (SpanKind kind : new SpanKind[] {SpanKind.CLIENT, SpanKind.INTERNAL}) {
+      tracer
+          .spanBuilder("GET")
+          .setSpanKind(kind)
+          .setAttribute(HTTP_REQUEST_METHOD, "GET")
+          .setAttribute(URL_PATH, "/users/42/cart")
+          .startSpan()
+          .end();
+    }
+
+    assertThat(exportedNames()).containsExactly("GET", "GET");
   }
 
   @Test
@@ -110,11 +134,11 @@ class SpanNamingSpanExporterTest {
     config.put(SpanNameSettings.SPAN_NAME_GROUPS, "GET /users/*/cart, GET /orders/*");
     init(config);
 
-    httpSpan("GET", "/users/42/cart");
-    httpSpan("GET", "/users/73/cart");
-    httpSpan("GET", "/orders/1");
-    httpSpan("GET", "/users/42");
-    httpSpan("POST", "/users/42/cart");
+    serverSpan("GET", "/users/42/cart");
+    serverSpan("GET", "/users/73/cart");
+    serverSpan("GET", "/orders/1");
+    serverSpan("GET", "/users/42");
+    serverSpan("POST", "/users/42/cart");
 
     assertThat(exportedNames())
         .containsExactly(
@@ -128,11 +152,11 @@ class SpanNamingSpanExporterTest {
   @Test
   void spanNameGroups_caseSensitivity() {
     Map<String, String> config = usePath();
-    config.put(SpanNameSettings.SPAN_NAME_GROUPS, "(?-i)GET /Users/*");
+    config.put(SpanNameSettings.SPAN_NAME_GROUPS, "GET /Users/*");
     init(config);
 
-    httpSpan("GET", "/Users/42");
-    httpSpan("GET", "/users/42");
+    serverSpan("GET", "/Users/42");
+    serverSpan("GET", "/users/42");
 
     assertThat(exportedNames()).containsExactly("GET /Users/*", "GET /users/42");
   }
@@ -146,7 +170,7 @@ class SpanNamingSpanExporterTest {
     tracer.spanBuilder("GET /users/{id}").startSpan().end();
     tracer.spanBuilder("process orders-123").startSpan().end();
     // path is not used to build the name, so the group does not apply
-    httpSpan("GET", "/users/42");
+    serverSpan("GET", "/users/42");
 
     assertThat(exportedNames()).containsExactly("GET /users/*", "process orders-*", "GET");
   }
@@ -175,13 +199,13 @@ class SpanNamingSpanExporterTest {
 
     settings.setUsePathAsSpanName(false);
     settings.setSpanNameGroups("GET /orders/*");
-    httpSpan("GET", "/users/42");
+    serverSpan("GET", "/users/42");
     tracer.spanBuilder("GET /orders/{id}").startSpan().end();
     assertExportedNames("GET", "GET /orders/*");
 
     settings.setUsePathAsSpanName(true);
     settings.setSpanNameGroups("");
-    httpSpan("GET", "/users/42");
+    serverSpan("GET", "/users/42");
     assertExportedNames("GET /users/42");
   }
 
@@ -195,9 +219,10 @@ class SpanNamingSpanExporterTest {
     return config;
   }
 
-  private void httpSpan(String name, String path) {
+  private void serverSpan(String name, String path) {
     tracer
         .spanBuilder(name)
+        .setSpanKind(SpanKind.SERVER)
         .setAttribute(HTTP_REQUEST_METHOD, "HTTP".equals(name) ? "_OTHER" : name)
         .setAttribute(URL_PATH, path)
         .startSpan()

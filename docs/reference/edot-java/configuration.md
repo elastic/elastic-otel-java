@@ -275,7 +275,7 @@ EDOT Java can rename spans, for example to when instrumentation cannot determine
 
 ### Use path as span name
 
-HTTP spans are named `{method} {route}` when the instrumented framework provides a route. When it does not, for example with plain servlets or unsupported frameworks, the span name is only the HTTP method, such as `GET`.
+HTTP server spans are named `{method} {route}` when the instrumented framework provides a route. When it does not, for example with plain servlets or unsupported frameworks, the span name is only the HTTP method, such as `GET`.
 
 Set `ELASTIC_OTEL_USE_PATH_AS_SPAN_NAME` to `true` to name those spans `{method} {path}` instead, using the `url.path` attribute, for example `GET /users/42/cart`. Spans that already have a route in their name are not modified.
 
@@ -287,7 +287,7 @@ Set `ELASTIC_OTEL_SPAN_NAME_GROUPS` to a comma-separated list of wildcard patter
 
 For example, `ELASTIC_OTEL_SPAN_NAME_GROUPS="GET /users/*/cart"` renames both `GET /users/42/cart` and `GET /users/73/cart` to `GET /users/*/cart`.
 
-Patterns support the `*` wildcard, which matches zero or more characters, including `/`. Matching is case-insensitive by default; prefix a pattern with `(?-i)` to make it case-sensitive.
+Patterns support the `*` wildcard, which matches zero or more characters, including `/`. Matching is case-sensitive.
 
 Both options can be changed at runtime through [central configuration](#central-configuration-settings). These options are not available with [declarative configuration](#declarative-configuration).
 

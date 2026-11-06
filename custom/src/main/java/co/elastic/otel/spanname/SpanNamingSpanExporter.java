@@ -21,6 +21,7 @@ package co.elastic.otel.spanname;
 import static io.opentelemetry.semconv.HttpAttributes.HTTP_REQUEST_METHOD;
 import static io.opentelemetry.semconv.UrlAttributes.URL_PATH;
 
+import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.sdk.common.CompletableResultCode;
 import io.opentelemetry.sdk.trace.data.DelegatingSpanData;
 import io.opentelemetry.sdk.trace.data.SpanData;
@@ -90,6 +91,9 @@ public final class SpanNamingSpanExporter implements SpanExporter {
 
   @Nullable
   private static String nameWithPath(SpanData span) {
+    if (span.getKind() != SpanKind.SERVER) {
+      return null;
+    }
     String method = span.getAttributes().get(HTTP_REQUEST_METHOD);
     String path = span.getAttributes().get(URL_PATH);
     if (method == null || path == null) {
