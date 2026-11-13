@@ -23,6 +23,7 @@ import static io.opentelemetry.semconv.DeploymentAttributes.DEPLOYMENT_ENVIRONME
 import co.elastic.otel.config.ConfigLoggingAgentListener;
 import co.elastic.otel.dynamicconfig.internal.OpampManager;
 import co.elastic.otel.logging.AgentLog;
+import co.elastic.otel.spanname.SpanNameSettings;
 import io.opentelemetry.contrib.inferredspans.InferredSpans;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
@@ -161,7 +162,9 @@ public class CentralConfig {
                   new LoggingLevel(),
                   new SamplingRate(),
                   new InferSpans(),
-                  new PollingInterval())
+                  new PollingInterval(),
+                  new UsePathAsSpanName(),
+                  new SpanNameGroups())
               .collect(Collectors.toMap(ConfigOption::getConfigName, option -> option));
     }
 
@@ -365,6 +368,28 @@ public class CentralConfig {
         logger.warning(
             "Failed to update the polling interval, value passed was invalid: " + e.getMessage());
       }
+    }
+  }
+
+  public static final class UsePathAsSpanName extends ConfigOption {
+    UsePathAsSpanName() {
+      super("use_path_as_span_name", "false");
+    }
+
+    @Override
+    void update(String configurationValue, OpampManager opampManager) {
+      SpanNameSettings.getInstance().setUsePathAsSpanName(getBoolean(configurationValue));
+    }
+  }
+
+  public static final class SpanNameGroups extends ConfigOption {
+    SpanNameGroups() {
+      super("span_name_groups", "");
+    }
+
+    @Override
+    void update(String configurationValue, OpampManager opampManager) {
+      SpanNameSettings.getInstance().setSpanNameGroups(configurationValue);
     }
   }
 }

@@ -26,6 +26,8 @@ import co.elastic.otel.dynamicconfig.BlockableMetricExporter;
 import co.elastic.otel.dynamicconfig.BlockableSpanExporter;
 import co.elastic.otel.dynamicconfig.CentralConfig;
 import co.elastic.otel.logging.AgentLog;
+import co.elastic.otel.spanname.SpanNameSettings;
+import co.elastic.otel.spanname.SpanNamingSpanExporter;
 import com.google.auto.service.AutoService;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.sdk.autoconfigure.spi.AutoConfigurationCustomizer;
@@ -71,6 +73,9 @@ public class ElasticAutoConfigurationCustomizerProvider
         (exporter, config) -> {
           exporter = ElasticUserAgentHeader.configureIfPossible(exporter);
           exporter = ElasticVerifyServerCert.configureIfPossible(exporter, config);
+          SpanNameSettings spanNameSettings = SpanNameSettings.getInstance();
+          spanNameSettings.init(config);
+          exporter = new SpanNamingSpanExporter(exporter, spanNameSettings);
           return BlockableSpanExporter.createCustomInstance(exporter);
         });
     autoConfiguration.addMetricExporterCustomizer(

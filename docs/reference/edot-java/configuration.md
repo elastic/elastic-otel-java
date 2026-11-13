@@ -74,6 +74,8 @@ This table only contains minimal configuration, see each respective feature for 
 | `ELASTIC_OTEL_UNIVERSAL_PROFILING_INTEGRATION_ENABLED` | `false` | [Elastic Universal profiling integration](/reference/edot-java/features.md#elastic-universal-profiling-integration) | 1.0.0+            |
 | `ELASTIC_OTEL_JAVAAGENT_LOG_LEVEL`                     | `INFO`  | [Agent logging](#agent-logging)                                                                                     | 1.5.0+            |
 | `ELASTIC_OTEL_VERIFY_SERVER_CERT`                      | `true`  | [Exporter certificate verification](#exporter-certificate-verification)                                             | 1.5.0+            |
+| `ELASTIC_OTEL_USE_PATH_AS_SPAN_NAME`                   | `false` | [Span naming](#span-naming)                                                                                         | 1.15.0+           |
+| `ELASTIC_OTEL_SPAN_NAME_GROUPS`                        | (empty) | [Span naming](#span-naming)                                                                                         | 1.15.0+           |
 
 
 ## Elasticsearch Java client: Capturing search request bodies
@@ -176,6 +178,8 @@ You can modify the following settings for EDOT Java through APM Agent Central Co
 | OpAMP polling interval | `opamp_polling_interval` | Dynamic {applies_to}`edot_java: preview 1.6.0`|
 | Sampling rate | `sampling_rate` | Dynamic {applies_to}`edot_java: preview 1.6.0`|
 | Turn on/off inferred spans | `infer_spans` | Dynamic {applies_to}`edot_java: preview 1.7.0`|
+| Use path as span name | `use_path_as_span_name` | Dynamic {applies_to}`edot_java: preview 1.15.0`|
+| Span name groups | `span_name_groups` | Dynamic {applies_to}`edot_java: preview 1.15.0`|
 
 Dynamic settings can be changed without having to restart the application.
 
@@ -264,6 +268,28 @@ Setting `OTEL_JAVAAGENT_LOGGING=none` or `ELASTIC_OTEL_JAVAAGENT_LOG_LEVEL=OFF` 
 Setting `OTEL_JAVAAGENT_LOGGING=application` will disable EDOT agent logging feature and attempt to use the application logger.
 As [documented here in the contrib documentation](https://opentelemetry.io/docs/zero-code/java/agent/configuration/#java-agent-logging-output),
 support for this depends on the application and logging libraries used.
+
+## Span naming
+
+EDOT Java can rename spans, for example when instrumentation cannot determine a URL route.
+
+### Use path as span name
+
+HTTP server spans are named `{method} {route}` when the instrumented framework provides a route. When it does not, for example with plain servlets or unsupported frameworks, the span name is only the HTTP method, such as `GET`.
+
+Set `ELASTIC_OTEL_USE_PATH_AS_SPAN_NAME` to `true` to name those spans `{method} {path}` instead, using the `url.path` attribute, for example `GET /users/42/cart`. Spans that already have a route in their name are not modified.
+
+Because paths often contain identifiers, this can create many distinct span names. Use [span name groups](#span-name-groups) to consolidate them.
+
+### Span name groups
+
+Set `ELASTIC_OTEL_SPAN_NAME_GROUPS` to a comma-separated list of wildcard patterns. A span whose name matches a pattern is renamed to that pattern, and the first matching pattern wins.
+
+For example, `ELASTIC_OTEL_SPAN_NAME_GROUPS="GET /users/*/cart"` renames both `GET /users/42/cart` and `GET /users/73/cart` to `GET /users/*/cart`.
+
+Patterns support the `*` wildcard, which matches zero or more characters, including `/`. Matching is case-sensitive.
+
+Both options can be changed at runtime through [central configuration](#central-configuration-settings). These options are not available with [declarative configuration](#declarative-configuration).
 
 ## Exporter certificate verification
 
