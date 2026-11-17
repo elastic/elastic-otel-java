@@ -21,6 +21,7 @@ package co.elastic.otel.dynamicconfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import co.elastic.otel.spanname.SpanNameSettings;
 import io.opentelemetry.sdk.autoconfigure.spi.ConfigProperties;
 import io.opentelemetry.sdk.autoconfigure.spi.internal.DefaultConfigProperties;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -132,5 +133,26 @@ class CentralConfigTest {
                     SdkTracerProvider.builder(), DefaultConfigProperties.createFromMap(map)))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("https endpoints");
+  }
+
+  @Test
+  void spanNameOptions() {
+    SpanNameSettings settings = SpanNameSettings.getInstance();
+    try {
+      CentralConfig.Configs.applyConfigurations(
+          Collections.singletonMap("use_path_as_span_name", "true"), null);
+      assertThat(settings.usePathAsSpanName()).isTrue();
+
+      CentralConfig.Configs.applyConfiguration("use_path_as_span_name", "invalid", null);
+      assertThat(settings.usePathAsSpanName()).isTrue();
+
+      settings.init(
+          DefaultConfigProperties.createFromMap(
+              Collections.singletonMap(SpanNameSettings.USE_PATH_AS_SPAN_NAME, "true")));
+      CentralConfig.Configs.applyConfigurations(Collections.emptyMap(), null);
+      assertThat(settings.usePathAsSpanName()).isFalse();
+    } finally {
+      settings.init(DefaultConfigProperties.createFromMap(Collections.emptyMap()));
+    }
   }
 }
