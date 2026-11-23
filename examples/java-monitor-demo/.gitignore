@@ -1,0 +1,3 @@
+target/
+*.class
+elastic-otel-javaagent*.jar
