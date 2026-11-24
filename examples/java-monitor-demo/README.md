@@ -7,10 +7,10 @@ This example is the companion app for the [Monitor a Java application](https://w
 ## Build
 
 ```bash
-mvn package
+./gradlew bootJar
 ```
 
-This produces `target/java-monitor-demo-1.0.0.jar`.
+This produces `build/libs/java-monitor-demo-1.0.0.jar`.
 
 ## Install the EDOT Java agent
 
@@ -24,7 +24,7 @@ curl -L -O https://repo1.maven.org/maven2/co/elastic/otel/elastic-otel-javaagent
 
 ```bash
 OTEL_SERVICE_NAME=java-monitor-demo \
-  java -javaagent:./elastic-otel-javaagent-<version>.jar -jar target/java-monitor-demo-1.0.0.jar
+  java -javaagent:./elastic-otel-javaagent-<version>.jar -jar build/libs/java-monitor-demo-1.0.0.jar
 ```
 
 If an OTLP collector is already listening on `localhost:4317`/`localhost:4318` (for example, an Elastic Agent configured as an OTel Collector, or a local OpenTelemetry Collector), the agent finds it with no further configuration. Otherwise, set `OTEL_EXPORTER_OTLP_ENDPOINT` to point at your collector or Elastic endpoint.
@@ -44,7 +44,7 @@ Items available: `mug`, `t-shirt`, `sticker-pack`.
 ```bash
 OTEL_SERVICE_NAME=java-monitor-demo \
 PRICING_SERVICE_ENABLED=true \
-  java -javaagent:./elastic-otel-javaagent-<version>.jar -jar target/java-monitor-demo-1.0.0.jar
+  java -javaagent:./elastic-otel-javaagent-<version>.jar -jar build/libs/java-monitor-demo-1.0.0.jar
 ```
 
 `/error` now returns `200` with a price. In a real app this would be a code or config fix; here it's a single environment variable so the scenario stays simple and repeatable.
@@ -67,4 +67,4 @@ docker run -p 8080:8080 \
   java-monitor-demo
 ```
 
-The Dockerfile expects `target/java-monitor-demo-1.0.0.jar` to already exist, so run `mvn package` first. It doesn't bundle the EDOT Java agent. Add it with a `-javaagent` flag in a custom image, or attach it via your container platform's Java agent injection if available.
+The Dockerfile expects `build/libs/java-monitor-demo-1.0.0.jar` to already exist, so run `./gradlew bootJar` first. It doesn't bundle the EDOT Java agent. Add it with a `-javaagent` flag in a custom image, or attach it via your container platform's Java agent injection if available.
