@@ -55,7 +55,7 @@ public class ProfilerHostIdApplyingSpanExporterTest {
       assertThat(exporter.getFinishedSpanItems())
           .hasSize(1)
           .first()
-          .satisfies(data -> assertThat(data.getResource()).isSameAs(originalResource));
+          .satisfies(data -> assertThat(data.getResource()).isEqualTo(originalResource));
 
       ProfilerProvidedHostId.set("hooray");
 
@@ -78,7 +78,7 @@ public class ProfilerHostIdApplyingSpanExporterTest {
       assertThat(exporter.getFinishedSpanItems())
           .hasSize(1)
           .first()
-          .satisfies(data -> assertThat(data.getResource()).isSameAs(updated));
+          .satisfies(data -> assertThat(data.getResource()).isEqualTo(updated));
 
       // ensure a second update works
       ProfilerProvidedHostId.set("changed!");
@@ -100,7 +100,7 @@ public class ProfilerHostIdApplyingSpanExporterTest {
       assertThat(exporter.getFinishedSpanItems())
           .hasSize(1)
           .first()
-          .satisfies(data -> assertThat(data.getResource()).isSameAs(originalResource));
+          .satisfies(data -> assertThat(data.getResource()).isEqualTo(originalResource));
     }
   }
 
@@ -127,7 +127,7 @@ public class ProfilerHostIdApplyingSpanExporterTest {
       assertThat(exporter.getFinishedSpanItems())
           .hasSize(1)
           .first()
-          .satisfies(data -> assertThat(data.getResource()).isSameAs(originalResource));
+          .satisfies(data -> assertThat(data.getResource()).isEqualTo(originalResource));
     }
   }
 }
