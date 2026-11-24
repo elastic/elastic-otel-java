@@ -78,7 +78,7 @@ public class ProfilerHostIdApplyingSpanExporterTest {
       assertThat(exporter.getFinishedSpanItems())
           .hasSize(1)
           .first()
-          .satisfies(data -> assertThat(data.getResource()).isEqualTo(updated));
+          .satisfies(data -> assertThat(data.getResource()).isSameAs(updated));
 
       // ensure a second update works
       ProfilerProvidedHostId.set("changed!");
