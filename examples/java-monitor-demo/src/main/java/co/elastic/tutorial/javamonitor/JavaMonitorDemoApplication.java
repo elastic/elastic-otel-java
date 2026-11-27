@@ -1,0 +1,14 @@
+package co.elastic.tutorial.javamonitor;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
+@SpringBootApplication
+@EnableScheduling
+public class JavaMonitorDemoApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(JavaMonitorDemoApplication.class, args);
+    }
+}
